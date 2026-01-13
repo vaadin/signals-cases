@@ -8,7 +8,8 @@ The Vaadin Signal API introduces reactive state management to Vaadin Flow applic
 
 ## Contents
 
-- **`signal-use-cases.md`**: Main document containing 14 detailed use cases organized by category
+- **`signal-use-cases.md`**: Main document containing **17 detailed use cases** organized by category
+- **`GAPS.md`**: Analysis of API features from the proposal and coverage status
 
 ## Use Case Categories
 
@@ -37,10 +38,14 @@ The Vaadin Signal API introduces reactive state management to Vaadin Flow applic
    - Shopping cart with real-time calculations
    - Master-detail patterns
 
-6. **Complex Forms** (Use Case 14)
+6. **Complex Forms** (Use Cases 14-15)
    - Multi-step wizards
    - Cross-field validation
-   - State machines
+   - Binder integration with signal-based validation
+
+7. **Advanced Features** (Use Cases 16-17)
+   - ComponentToggle for view switching
+   - Reactive provider APIs for Grid/Select components
 
 ## How to Use These Use Cases
 
@@ -69,24 +74,30 @@ The Vaadin Signal API introduces reactive state management to Vaadin Flow applic
 ### API Features by Usage Frequency
 
 **Essential (70%+ usage):**
-- `Signal.create()` - Creating signals
-- `signal.map()` - Transforming signal values
-- `bindVisible()` - Conditional visibility
-- `bindValue()` - Two-way data binding
-- `bindText()` - Dynamic text content
-- `Signal.compute()` - Computed/derived signals
+- `Signal.create()` - Creating signals (100%)
+- `signal.map()` - Transforming signal values (94%)
+- `bindValue()` - Two-way data binding (76%)
+- `bindText()` - Dynamic text content (76%)
+- `Signal.compute()` - Computed/derived signals (76%)
+- `bindVisible()` - Conditional visibility (65%)
 
-**Common (40-70% usage):**
-- `bindEnabled()` - Dynamic enabled state
-- `bindThemeName()` - Dynamic styling
-- `bindItems()` - List data binding
+**Common (25-65% usage):**
+- `bindEnabled()` - Dynamic enabled state (41%)
+- `bindItems()` - List data binding (41%)
+- `bindThemeName()` - Dynamic styling (29%)
+- `bindComponentChildren()` - Dynamic component trees (29%)
+- `signal.addListener()` - Side effects (24%)
 
-**Specialized (20-40% usage):**
-- `bindComponentChildren()` - Dynamic component trees
-- `signal.addListener()` - Side effects
-- `bindHelperText()` - Field feedback
-- `bindClassName()` - CSS class management
-- `bindAttribute()` - HTML attribute binding
+**Specialized (<25% usage):**
+- `bindClassName()` - CSS class management (18%)
+- `bindHelperText()` - Field feedback (12%)
+- `bindAttribute()` - HTML attribute binding (6%)
+- `bindRequired()` - Dynamic required fields (6%)
+
+**Advanced Features (single use case demonstrations):**
+- **Binder Integration** - `getValidationStatus()`, `Binding::value()`
+- **ComponentToggle** - `addExclusive()`, `addFallback()`
+- **Reactive Providers** - `setCellEditableProvider()`, `setItemSelectableProvider()`, `setDropFilter()`, `setDynamicContentHandler()`
 
 ## Validation Checklist
 
@@ -184,6 +195,17 @@ For questions or feedback about these use cases:
 
 ---
 
-**Version**: 1.0
+## Recent Updates
+
+**Version 2.0** - Added 3 new use cases covering previously missing features:
+- **Use Case 15**: Binder integration with `getValidationStatus()` and `Binding::value()`
+- **Use Case 16**: ComponentToggle with `addExclusive()` and `addFallback()`
+- **Use Case 17**: Reactive provider APIs (`setCellEditableProvider()`, `setItemSelectableProvider()`, `setDropFilter()`, `setDynamicContentHandler()`)
+
+This brings total coverage to **17 use cases** addressing all major signal API features mentioned in the proposal.
+
+---
+
+**Version**: 2.0
 **Last Updated**: 2026-01-13
-**Status**: Ready for review and validation
+**Status**: Complete coverage - ready for implementation validation

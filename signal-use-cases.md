@@ -2283,53 +2283,789 @@ public class RegistrationWizardView extends VerticalLayout {
 
 ---
 
+### Use Case 15: Form with Binder Integration and Signal Validation
+
+**Business Scenario**
+
+A user registration form that uses Vaadin's Binder API with signal-based validation. The form has cross-field validation (password confirmation, age restrictions based on account type), and the save button should be enabled only when all validation passes. The validation status should be reactive and displayed to the user.
+
+**UI Description**
+
+- Email field with async validation (check if email exists)
+- Password field
+- Confirm password field (must match password)
+- Date of birth field
+- Account type dropdown (Personal, Business)
+- For Business accounts: Company name field becomes required
+- Save button (enabled only when form is valid)
+- Validation status indicator showing which fields have errors
+
+**Signal Patterns**
+
+- **Binder signal integration**: Validation status as signal
+- **Cross-field validation**: Using `Binding::value()` to access other field values
+- **Reactive required fields**: `bindRequired()` based on other field values
+- **Async validation**: Combining signals with async operations
+
+**Code Example**
+
+```java
+public class UserRegistrationFormView extends VerticalLayout {
+
+    enum AccountType { PERSONAL, BUSINESS }
+
+    record User(
+        String email,
+        String password,
+        LocalDate dateOfBirth,
+        AccountType accountType,
+        String companyName
+    ) {}
+
+    public UserRegistrationFormView() {
+        Binder<User> binder = new Binder<>(User.class);
+
+        // Account type signal for conditional logic
+        WritableSignal<AccountType> accountTypeSignal =
+            Signal.create(AccountType.PERSONAL);
+
+        // Create form fields
+        EmailField emailField = new EmailField("Email");
+        PasswordField passwordField = new PasswordField("Password");
+        PasswordField confirmPasswordField = new PasswordField("Confirm Password");
+        DatePicker dobField = new DatePicker("Date of Birth");
+
+        Select<AccountType> accountTypeSelect =
+            new Select<>("Account Type", AccountType.values());
+        accountTypeSelect.bindValue(accountTypeSignal);
+
+        TextField companyNameField = new TextField("Company Name");
+
+        // Dynamic required field based on account type
+        Signal<Boolean> isBusinessAccountSignal =
+            accountTypeSignal.map(type -> type == AccountType.BUSINESS);
+        companyNameField.bindRequired(isBusinessAccountSignal);
+        companyNameField.bindVisible(isBusinessAccountSignal);
+
+        // Bind fields with validation
+        binder.forField(emailField)
+            .asRequired("Email is required")
+            .withValidator(email -> email.contains("@"),
+                "Must be a valid email")
+            .withValidator(this::validateEmailNotExists,
+                "Email already registered",
+                ValidationLevel.ERROR)
+            .bind(User::email, (user, email) -> {});
+
+        Binding<User, String> passwordBinding = binder.forField(passwordField)
+            .asRequired("Password is required")
+            .withValidator(pwd -> pwd.length() >= 8,
+                "Password must be at least 8 characters")
+            .bind(User::password, (user, pwd) -> {});
+
+        // Cross-field validation using Binding::value()
+        binder.forField(confirmPasswordField)
+            .asRequired("Please confirm password")
+            .withValidator(confirm ->
+                confirm.equals(passwordBinding.value()),
+                "Passwords must match"
+            )
+            .bind(user -> user.password(), (user, pwd) -> {});
+
+        // Age validation with conditional logic
+        binder.forField(dobField)
+            .asRequired("Date of birth is required")
+            .withValidator(dob -> {
+                int age = Period.between(dob, LocalDate.now()).getYears();
+                AccountType accountType = accountTypeSignal.getValue();
+                return accountType == AccountType.BUSINESS
+                    ? age >= 18
+                    : age >= 13;
+            }, "Must be 18+ for business accounts, 13+ for personal")
+            .bind(User::dateOfBirth, (user, dob) -> {});
+
+        binder.forField(companyNameField)
+            .withValidator(name -> {
+                // Only required if business account
+                if (accountTypeSignal.getValue() == AccountType.BUSINESS) {
+                    return !name.trim().isEmpty();
+                }
+                return true;
+            }, "Company name is required for business accounts")
+            .bind(User::companyName, (user, name) -> {});
+
+        // Get validation status as signal
+        Signal<BinderValidationStatus<User>> validationStatusSignal =
+            binder.getValidationStatus();
+
+        // Computed: Is form valid
+        Signal<Boolean> isFormValidSignal = validationStatusSignal.map(
+            status -> status.isOk()
+        );
+
+        // Computed: Validation error messages
+        Signal<List<String>> errorMessagesSignal = validationStatusSignal.map(
+            status -> status.getFieldValidationErrors().stream()
+                .map(error -> error.getMessage().orElse("Validation error"))
+                .collect(Collectors.toList())
+        );
+
+        // Validation status display
+        VerticalLayout validationStatus = new VerticalLayout();
+        validationStatus.bindVisible(errorMessagesSignal.map(
+            errors -> !errors.isEmpty()
+        ));
+
+        H4 validationHeader = new H4("Please fix the following errors:");
+        validationStatus.add(validationHeader);
+
+        // Dynamically render error messages
+        VerticalLayout errorsList = new VerticalLayout();
+        errorsList.bindComponentChildren(errorMessagesSignal, errorMsg -> {
+            Span errorSpan = new Span("• " + errorMsg);
+            errorSpan.getStyle().set("color", "var(--lumo-error-text-color)");
+            return errorSpan;
+        });
+        validationStatus.add(errorsList);
+
+        // Save button enabled only when valid
+        Button saveButton = new Button("Create Account");
+        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        saveButton.bindEnabled(isFormValidSignal);
+
+        saveButton.addClickListener(e -> {
+            if (binder.validate().isOk()) {
+                User user = new User(
+                    emailField.getValue(),
+                    passwordField.getValue(),
+                    dobField.getValue(),
+                    accountTypeSignal.getValue(),
+                    companyNameField.getValue()
+                );
+                saveUser(user);
+                Notification.show("Account created successfully!");
+            }
+        });
+
+        // Real-time validation indicator
+        Span validationIndicator = new Span();
+        validationIndicator.bindText(isFormValidSignal.map(valid ->
+            valid ? "✓ Form is valid" : "⚠ Please complete all required fields"
+        ));
+        validationIndicator.bindClassName("success-text", isFormValidSignal);
+        validationIndicator.bindClassName("error-text",
+            isFormValidSignal.map(valid -> !valid));
+
+        add(
+            new H2("Create Account"),
+            emailField,
+            passwordField,
+            confirmPasswordField,
+            dobField,
+            accountTypeSelect,
+            companyNameField,
+            validationStatus,
+            validationIndicator,
+            saveButton
+        );
+
+        // Trigger initial validation
+        binder.setBean(new User("", "", null, AccountType.PERSONAL, ""));
+    }
+
+    private boolean validateEmailNotExists(String email) {
+        // Simulate async email check
+        // In real app, this would be async with CompletableFuture
+        return !email.equals("taken@example.com");
+    }
+
+    private void saveUser(User user) {
+        // Save user logic
+    }
+}
+```
+
+**API Validation Points**
+
+- ✓ **`Binder::getValidationStatus()`** returning `Signal<BinderValidationStatus<T>>`
+- ✓ **`Binding::value()`** for cross-field validation (password confirmation)
+- ✓ **`bindRequired()`** for dynamic required fields based on signals
+- ✓ Integration between Binder API and signal-based reactive UI
+- ✓ Validation status signal driving multiple UI elements
+- ✓ `bindComponentChildren()` for dynamic error message list
+- ✓ Conditional validation logic based on signal values
+
+---
+
+### Use Case 16: Responsive Dashboard with ComponentToggle
+
+**Business Scenario**
+
+A business dashboard that displays data in different view modes (Table, Cards, Chart). Users can switch between views, and the application should only instantiate the currently selected view (lazy loading). On mobile devices, the default view should be Cards, while desktop shows Table by default. The ComponentToggle utility manages the mutually exclusive rendering.
+
+**UI Description**
+
+- View selector buttons (Table, Cards, Chart)
+- Content area that shows exactly one view at a time
+- Each view is lazily instantiated when first selected
+- Fallback view if no data is available
+- Responsive: mobile shows Cards by default, desktop shows Table
+
+**Signal Patterns**
+
+- **ComponentToggle**: Mutually exclusive component rendering
+- **Lazy instantiation**: Components created only when needed
+- **Fallback rendering**: Default component when conditions not met
+- **Responsive signals**: View selection based on viewport size
+
+**Code Example**
+
+```java
+public class DashboardView extends VerticalLayout {
+
+    enum ViewMode { TABLE, CARDS, CHART }
+
+    record DashboardData(List<SalesRecord> records, LocalDate dateRange) {
+        boolean isEmpty() {
+            return records == null || records.isEmpty();
+        }
+    }
+
+    record SalesRecord(String product, BigDecimal amount, LocalDate date) {}
+
+    public DashboardView() {
+        // Data signal
+        WritableSignal<DashboardData> dataSignal = Signal.create(
+            loadDashboardData()
+        );
+
+        // Viewport width signal (from browser)
+        WritableSignal<Integer> viewportWidthSignal = Signal.create(1200);
+
+        // View mode signal with responsive default
+        WritableSignal<ViewMode> viewModeSignal = Signal.compute(() -> {
+            int width = viewportWidthSignal.getValue();
+            // Default to cards on mobile, table on desktop
+            return width < 768 ? ViewMode.CARDS : ViewMode.TABLE;
+        });
+
+        // View selector buttons
+        HorizontalLayout viewSelector = new HorizontalLayout();
+
+        for (ViewMode mode : ViewMode.values()) {
+            Button modeButton = new Button(mode.name());
+
+            // Highlight active mode
+            modeButton.bindThemeName(viewModeSignal.map(currentMode ->
+                currentMode == mode ? "primary" : ""
+            ));
+
+            modeButton.addClickListener(e ->
+                viewModeSignal.setValue(mode)
+            );
+
+            viewSelector.add(modeButton);
+        }
+
+        // ComponentToggle for mutually exclusive views
+        ComponentToggle<ViewMode> viewToggle = new ComponentToggle<>(viewModeSignal);
+
+        // Add exclusive views with lazy instantiation
+        viewToggle.addExclusive(ViewMode.TABLE, () -> {
+            System.out.println("Instantiating Table View");
+            return createTableView(dataSignal);
+        });
+
+        viewToggle.addExclusive(ViewMode.CARDS, () -> {
+            System.out.println("Instantiating Cards View");
+            return createCardsView(dataSignal);
+        });
+
+        viewToggle.addExclusive(ViewMode.CHART, () -> {
+            System.out.println("Instantiating Chart View");
+            return createChartView(dataSignal);
+        });
+
+        // Fallback when no data available
+        viewToggle.addFallback(() -> {
+            VerticalLayout emptyState = new VerticalLayout();
+            emptyState.add(new H3("No Data Available"));
+            emptyState.add(new Span("Please load data to view dashboard"));
+            Button loadButton = new Button("Load Data");
+            loadButton.addClickListener(e ->
+                dataSignal.setValue(loadDashboardData())
+            );
+            emptyState.add(loadButton);
+            emptyState.setAlignItems(Alignment.CENTER);
+            return emptyState;
+        }, dataSignal.map(DashboardData::isEmpty));
+
+        // Data controls
+        Button refreshButton = new Button("Refresh Data");
+        refreshButton.addClickListener(e ->
+            dataSignal.setValue(loadDashboardData())
+        );
+
+        Button clearButton = new Button("Clear Data");
+        clearButton.addClickListener(e ->
+            dataSignal.setValue(new DashboardData(List.of(), LocalDate.now()))
+        );
+
+        HorizontalLayout controls = new HorizontalLayout(
+            refreshButton, clearButton
+        );
+
+        // Current view indicator
+        Span viewIndicator = new Span();
+        viewIndicator.bindText(viewModeSignal.map(mode ->
+            "Current View: " + mode.name()
+        ));
+
+        add(
+            new H2("Sales Dashboard"),
+            controls,
+            viewSelector,
+            viewIndicator,
+            viewToggle
+        );
+
+        // Simulate viewport resize listener
+        // In real app: getElement().executeJs("return window.innerWidth")
+        // For demo, we can manually trigger:
+        Button simulateMobile = new Button("Simulate Mobile");
+        simulateMobile.addClickListener(e ->
+            viewportWidthSignal.setValue(400)
+        );
+
+        Button simulateDesktop = new Button("Simulate Desktop");
+        simulateDesktop.addClickListener(e ->
+            viewportWidthSignal.setValue(1200)
+        );
+
+        add(new HorizontalLayout(simulateMobile, simulateDesktop));
+    }
+
+    private Component createTableView(Signal<DashboardData> dataSignal) {
+        VerticalLayout layout = new VerticalLayout();
+        layout.add(new H3("Table View"));
+
+        Grid<SalesRecord> grid = new Grid<>(SalesRecord.class, false);
+        grid.addColumn(SalesRecord::product).setHeader("Product");
+        grid.addColumn(SalesRecord::amount).setHeader("Amount");
+        grid.addColumn(SalesRecord::date).setHeader("Date");
+
+        grid.bindItems(dataSignal.map(DashboardData::records));
+
+        layout.add(grid);
+        return layout;
+    }
+
+    private Component createCardsView(Signal<DashboardData> dataSignal) {
+        VerticalLayout layout = new VerticalLayout();
+        layout.add(new H3("Cards View"));
+
+        VerticalLayout cardsContainer = new VerticalLayout();
+        cardsContainer.bindComponentChildren(
+            dataSignal.map(DashboardData::records),
+            record -> {
+                Div card = new Div();
+                card.addClassName("dashboard-card");
+                card.add(new H4(record.product()));
+                card.add(new Span("$" + record.amount()));
+                card.add(new Span(record.date().toString()));
+                return card;
+            }
+        );
+
+        layout.add(cardsContainer);
+        return layout;
+    }
+
+    private Component createChartView(Signal<DashboardData> dataSignal) {
+        VerticalLayout layout = new VerticalLayout();
+        layout.add(new H3("Chart View"));
+
+        // Placeholder for actual chart component
+        Div chartPlaceholder = new Div();
+        chartPlaceholder.setText("Chart rendering would go here");
+        chartPlaceholder.setHeight("400px");
+        chartPlaceholder.getStyle()
+            .set("border", "2px dashed var(--lumo-contrast-20pct)")
+            .set("display", "flex")
+            .set("align-items", "center")
+            .set("justify-content", "center");
+
+        Span recordCount = new Span();
+        recordCount.bindText(dataSignal.map(data ->
+            "Showing " + data.records().size() + " records"
+        ));
+
+        layout.add(chartPlaceholder, recordCount);
+        return layout;
+    }
+
+    private DashboardData loadDashboardData() {
+        return new DashboardData(
+            List.of(
+                new SalesRecord("Laptop", new BigDecimal("999.99"),
+                    LocalDate.now().minusDays(1)),
+                new SalesRecord("Mouse", new BigDecimal("29.99"),
+                    LocalDate.now().minusDays(2)),
+                new SalesRecord("Keyboard", new BigDecimal("79.99"),
+                    LocalDate.now())
+            ),
+            LocalDate.now()
+        );
+    }
+}
+```
+
+**API Validation Points**
+
+- ✓ **`ComponentToggle<T>`** for mutually exclusive view rendering
+- ✓ **`addExclusive()`** with lazy component factory functions
+- ✓ **`addFallback()`** with conditional rendering (empty state)
+- ✓ Lazy instantiation: components created only when first displayed
+- ✓ Memory efficiency: only one view exists in DOM at a time
+- ✓ Integration with responsive design (viewport-based defaults)
+- ✓ Alternative to multiple `bindVisible()` calls for cleaner code
+
+---
+
+### Use Case 17: Employee Management Grid with Dynamic Editability
+
+**Business Scenario**
+
+An employee management grid where cells can be edited based on user permissions and the current edit mode. The grid supports drag-and-drop reordering (only when enabled), context menus with dynamic content based on row data, and selective row selection based on employee status. All these behaviors are controlled by signals.
+
+**UI Description**
+
+- Employee data grid with columns: Name, Department, Salary, Status
+- Toggle: "Edit Mode" (enables cell editing)
+- Salary column: only editable in edit mode AND for employees with "Active" status
+- Department column: editable in edit mode for all employees
+- Row selection: only "Active" and "On Leave" employees can be selected
+- Drag-and-drop: enabled only in edit mode
+- Context menu: different options based on employee status
+- Permission indicator showing current user role
+
+**Signal Patterns**
+
+- **Reactive provider APIs**: Cell editability, item selectability based on signals
+- **Dynamic context menus**: Content changes based on row data
+- **Conditional drag-and-drop**: Enabled/disabled based on mode
+- **Permission-based editing**: Multiple signal-based constraints
+
+**Code Example**
+
+```java
+public class EmployeeManagementView extends VerticalLayout {
+
+    enum EmployeeStatus { ACTIVE, ON_LEAVE, TERMINATED }
+    enum UserRole { ADMIN, MANAGER, EMPLOYEE }
+
+    record Employee(
+        String id,
+        String name,
+        String department,
+        BigDecimal salary,
+        EmployeeStatus status
+    ) {}
+
+    public EmployeeManagementView() {
+        // State signals
+        WritableSignal<Boolean> editModeSignal = Signal.create(false);
+        WritableSignal<UserRole> userRoleSignal = Signal.create(UserRole.MANAGER);
+        WritableSignal<List<Employee>> employeesSignal = Signal.create(
+            loadEmployees()
+        );
+
+        // Permission signals
+        Signal<Boolean> canEditSalariesSignal = userRoleSignal.map(
+            role -> role == UserRole.ADMIN || role == UserRole.MANAGER
+        );
+
+        Signal<Boolean> canReorderSignal = Signal.compute(() ->
+            editModeSignal.getValue() && userRoleSignal.getValue() == UserRole.ADMIN
+        );
+
+        // Grid setup
+        Grid<Employee> grid = new Grid<>(Employee.class, false);
+
+        // Name column (read-only)
+        grid.addColumn(Employee::name).setHeader("Name");
+
+        // Department column (editable in edit mode)
+        Grid.Column<Employee> deptColumn = grid.addColumn(Employee::department)
+            .setHeader("Department");
+
+        if (grid instanceof GridPro) {
+            GridPro<Employee> gridPro = (GridPro<Employee>) grid;
+            GridPro.EditColumn<Employee> deptEditCol =
+                gridPro.addEditColumn(Employee::department)
+                    .text((employee, newDept) -> {
+                        // Update employee
+                        updateEmployeeDepartment(employee.id(), newDept);
+                    });
+
+            // Editable when in edit mode
+            deptEditCol.setCellEditableProvider(employee ->
+                editModeSignal.value()
+            );
+        }
+
+        // Salary column (editable in edit mode, only for active employees, only with permission)
+        Grid.Column<Employee> salaryColumn = grid.addColumn(
+            emp -> "$" + emp.salary()
+        ).setHeader("Salary");
+
+        if (grid instanceof GridPro) {
+            GridPro<Employee> gridPro = (GridPro<Employee>) grid;
+            GridPro.EditColumn<Employee> salaryEditCol =
+                gridPro.addEditColumn(emp -> emp.salary().toString())
+                    .text((employee, newSalary) -> {
+                        updateEmployeeSalary(employee.id(),
+                            new BigDecimal(newSalary));
+                    });
+
+            // Complex editability rules
+            salaryEditCol.setCellEditableProvider(employee ->
+                editModeSignal.value() &&
+                employee.status() == EmployeeStatus.ACTIVE &&
+                canEditSalariesSignal.value()
+            );
+        }
+
+        // Status column with badge
+        grid.addComponentColumn(employee -> {
+            Span statusBadge = new Span(employee.status().name());
+            String theme = switch(employee.status()) {
+                case ACTIVE -> "badge success";
+                case ON_LEAVE -> "badge";
+                case TERMINATED -> "badge error";
+            };
+            statusBadge.getElement().setAttribute("theme", theme);
+            return statusBadge;
+        }).setHeader("Status");
+
+        // Bind grid items to signal
+        grid.bindItems(employeesSignal);
+
+        // Row selection: only active and on-leave employees
+        grid.setSelectionMode(Grid.SelectionMode.MULTI);
+        grid.setItemSelectableProvider(employee ->
+            employee.status() == EmployeeStatus.ACTIVE ||
+            employee.status() == EmployeeStatus.ON_LEAVE
+        );
+
+        // Drag and drop reordering
+        grid.setRowsDraggable(canReorderSignal.value());
+
+        // Update drag state when signal changes
+        canReorderSignal.addListener((oldVal, newVal) ->
+            grid.setRowsDraggable(newVal)
+        );
+
+        grid.setDropFilter(employee ->
+            canReorderSignal.value()
+        );
+
+        grid.addDropListener(event -> {
+            Employee draggedEmployee = event.getDragData().orElse(null);
+            Employee targetEmployee = event.getDropTargetItem().orElse(null);
+            if (draggedEmployee != null && targetEmployee != null) {
+                reorderEmployees(draggedEmployee, targetEmployee);
+            }
+        });
+
+        // Dynamic context menu
+        GridContextMenu<Employee> contextMenu = grid.addContextMenu();
+
+        contextMenu.setDynamicContentHandler(employee -> {
+            contextMenu.removeAll();
+
+            if (employee == null) return false;
+
+            // Different options based on status
+            if (employee.status() == EmployeeStatus.ACTIVE) {
+                contextMenu.addItem("Edit Details", e ->
+                    openEditDialog(employee));
+                contextMenu.addItem("Set On Leave", e ->
+                    updateEmployeeStatus(employee, EmployeeStatus.ON_LEAVE));
+
+                // Admin-only option
+                if (userRoleSignal.getValue() == UserRole.ADMIN) {
+                    contextMenu.addItem("Terminate", e ->
+                        updateEmployeeStatus(employee, EmployeeStatus.TERMINATED));
+                }
+            } else if (employee.status() == EmployeeStatus.ON_LEAVE) {
+                contextMenu.addItem("Reactivate", e ->
+                    updateEmployeeStatus(employee, EmployeeStatus.ACTIVE));
+            } else if (employee.status() == EmployeeStatus.TERMINATED) {
+                contextMenu.addItem("View Details (Read-Only)", e ->
+                    viewEmployeeDetails(employee));
+            }
+
+            return true;
+        });
+
+        // Controls
+        Checkbox editModeCheckbox = new Checkbox("Edit Mode");
+        editModeCheckbox.bindValue(editModeSignal);
+
+        Select<UserRole> roleSelector = new Select<>("User Role",
+            UserRole.values());
+        roleSelector.bindValue(userRoleSignal);
+
+        // Status indicators
+        Span editModeIndicator = new Span();
+        editModeIndicator.bindText(editModeSignal.map(enabled ->
+            enabled ? "✏️ Editing enabled" : "🔒 Read-only mode"
+        ));
+
+        Span permissionIndicator = new Span();
+        permissionIndicator.bindText(userRoleSignal.map(role ->
+            "Role: " + role.name()
+        ));
+
+        Span dragIndicator = new Span();
+        dragIndicator.bindText(canReorderSignal.map(enabled ->
+            enabled ? "Drag-and-drop: ON" : "Drag-and-drop: OFF"
+        ));
+        dragIndicator.bindVisible(editModeSignal);
+
+        HorizontalLayout controls = new HorizontalLayout(
+            editModeCheckbox,
+            roleSelector,
+            editModeIndicator,
+            permissionIndicator,
+            dragIndicator
+        );
+
+        // Selection summary
+        Span selectionSummary = new Span();
+        grid.addSelectionListener(e ->
+            selectionSummary.setText(
+                e.getAllSelectedItems().size() + " employees selected"
+            )
+        );
+
+        add(
+            new H2("Employee Management"),
+            controls,
+            grid,
+            selectionSummary
+        );
+    }
+
+    private List<Employee> loadEmployees() {
+        return List.of(
+            new Employee("1", "Alice Johnson", "Engineering",
+                new BigDecimal("95000"), EmployeeStatus.ACTIVE),
+            new Employee("2", "Bob Smith", "Sales",
+                new BigDecimal("75000"), EmployeeStatus.ACTIVE),
+            new Employee("3", "Carol White", "HR",
+                new BigDecimal("70000"), EmployeeStatus.ON_LEAVE),
+            new Employee("4", "David Brown", "Engineering",
+                new BigDecimal("85000"), EmployeeStatus.TERMINATED)
+        );
+    }
+
+    private void updateEmployeeDepartment(String id, String department) {
+        System.out.println("Update employee " + id + " department to " + department);
+    }
+
+    private void updateEmployeeSalary(String id, BigDecimal salary) {
+        System.out.println("Update employee " + id + " salary to " + salary);
+    }
+
+    private void updateEmployeeStatus(Employee employee, EmployeeStatus newStatus) {
+        System.out.println("Update " + employee.name() + " status to " + newStatus);
+    }
+
+    private void reorderEmployees(Employee dragged, Employee target) {
+        System.out.println("Reorder: " + dragged.name() + " → " + target.name());
+    }
+
+    private void openEditDialog(Employee employee) {
+        System.out.println("Edit dialog for " + employee.name());
+    }
+
+    private void viewEmployeeDetails(Employee employee) {
+        System.out.println("View details for " + employee.name());
+    }
+}
+```
+
+**API Validation Points**
+
+- ✓ **`setCellEditableProvider()`** with signal-based conditions
+- ✓ **`setItemSelectableProvider()`** for conditional row selection
+- ✓ **`setDropFilter()`** for dynamic drag-and-drop enabling
+- ✓ **`setDynamicContentHandler()`** for context menu content
+- ✓ Complex conditional logic combining multiple signals
+- ✓ Integration with GridPro for inline editing
+- ✓ Permission-based UI with role signals
+- ✓ Real-world business rules (status-based editing, role-based access)
+
+---
+
 ## Summary: API Feature Coverage Matrix
 
 This matrix shows which signal API features are exercised by each use case:
 
-| Use Case | bindValue | bindVisible | bindEnabled | bindText | bindThemeName | bindClassName | bindHelperText | bindAttribute | bindItems | bindComponentChildren | Signal.create | Signal.compute | signal.map | signal.addListener | Async Operations | Collections | Validation |
-|----------|-----------|-------------|-------------|----------|---------------|---------------|----------------|---------------|-----------|----------------------|---------------|----------------|------------|-------------------|------------------|-------------|------------|
-| 1. Profile Settings | ✓ | ✓ | | | | | | | | | ✓ | | | | | | |
-| 2. Form Field Sync | ✓ | | | ✓ | | | | | | | ✓ | ✓ | ✓ | | | | |
-| 3. Dynamic Button State | ✓ | | ✓ | ✓ | ✓ | | | | | | ✓ | ✓ | ✓ | | ✓ | | ✓ |
-| 4. Product Configurator | ✓ | | ✓ | ✓ | ✓ | | | ✓ | | | ✓ | ✓ | ✓ | | | | |
-| 5. Pricing Calculator | ✓ | ✓ | | ✓ | | | ✓ | | | | ✓ | ✓ | ✓ | | | | ✓ |
-| 6. Conditional Subforms | ✓ | ✓ | | | | | | | | | ✓ | | ✓ | | | | |
-| 7. Nested Conditions | ✓ | ✓ | | | | | | | | | ✓ | ✓ | | ✓ | | | |
-| 8. Permission-Based UI | | ✓ | | ✓ | | | | | | | ✓ | | ✓ | | | | |
-| 9. Filtered Data Grid | ✓ | | | ✓ | | | | | ✓ | | ✓ | ✓ | ✓ | | | ✓ | |
-| 10. Dynamic Task List | ✓ | | ✓ | ✓ | | | | | | ✓ | ✓ | ✓ | ✓ | | | ✓ | |
-| 11. Cascading Selector | ✓ | ✓ | ✓ | ✓ | | | | | ✓ | | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | |
-| 12. Shopping Cart | ✓ | ✓ | | ✓ | | | ✓ | | | ✓ | ✓ | ✓ | ✓ | | | ✓ | ✓ |
-| 13. Master-Detail | | ✓ | ✓ | ✓ | ✓ | | | | ✓ | | ✓ | | ✓ | | | | |
-| 14. Multi-Step Wizard | ✓ | ✓ | ✓ | ✓ | | ✓ | | | | | ✓ | ✓ | ✓ | | | | ✓ |
+| Use Case | bindValue | bindVisible | bindEnabled | bindText | bindThemeName | bindClassName | bindHelperText | bindRequired | bindAttribute | bindItems | bindComponentChildren | Signal.create | Signal.compute | signal.map | signal.addListener | Binder Integration | ComponentToggle | Reactive Providers | Async Ops | Collections | Validation |
+|----------|-----------|-------------|-------------|----------|---------------|---------------|----------------|--------------|---------------|-----------|----------------------|---------------|----------------|------------|-------------------|-------------------|-----------------|-------------------|-----------|-------------|------------|
+| 1. Profile Settings | ✓ | ✓ | | | | | | | | | | ✓ | | | | | | | | | |
+| 2. Form Field Sync | ✓ | | | ✓ | | | | | | | | ✓ | ✓ | ✓ | | | | | | | |
+| 3. Dynamic Button State | ✓ | | ✓ | ✓ | ✓ | | | | | | | ✓ | ✓ | ✓ | | | | | ✓ | | ✓ |
+| 4. Product Configurator | ✓ | | ✓ | ✓ | ✓ | | | | ✓ | | | ✓ | ✓ | ✓ | | | | | | | |
+| 5. Pricing Calculator | ✓ | ✓ | | ✓ | | | ✓ | | | | | ✓ | ✓ | ✓ | | | | | | | ✓ |
+| 6. Conditional Subforms | ✓ | ✓ | | | | | | | | | | ✓ | | ✓ | | | | | | | |
+| 7. Nested Conditions | ✓ | ✓ | | | | | | | | | | ✓ | ✓ | | ✓ | | | | | | |
+| 8. Permission-Based UI | | ✓ | | ✓ | | | | | | | | ✓ | | ✓ | | | | | | | |
+| 9. Filtered Data Grid | ✓ | | | ✓ | | | | | | ✓ | | ✓ | ✓ | ✓ | | | | | | ✓ | |
+| 10. Dynamic Task List | ✓ | | ✓ | ✓ | | | | | | | ✓ | ✓ | ✓ | ✓ | | | | | | ✓ | |
+| 11. Cascading Selector | ✓ | ✓ | ✓ | ✓ | | | | | | ✓ | | ✓ | ✓ | ✓ | ✓ | | | | ✓ | ✓ | |
+| 12. Shopping Cart | ✓ | ✓ | | ✓ | | | ✓ | | | | ✓ | ✓ | ✓ | ✓ | | | | | | ✓ | ✓ |
+| 13. Master-Detail | | ✓ | ✓ | ✓ | ✓ | | | | | ✓ | | ✓ | | ✓ | | | | | | | |
+| 14. Multi-Step Wizard | ✓ | ✓ | ✓ | ✓ | | ✓ | | | | | | ✓ | ✓ | ✓ | | | | | | | ✓ |
+| **15. Binder Integration** | ✓ | ✓ | ✓ | ✓ | | ✓ | | ✓ | | | ✓ | ✓ | ✓ | ✓ | | ✓ | | | | | ✓ |
+| **16. ComponentToggle** | ✓ | | | ✓ | ✓ | | | | | ✓ | ✓ | ✓ | ✓ | ✓ | | | ✓ | | | ✓ | |
+| **17. Grid Providers** | ✓ | ✓ | | ✓ | | | | | | ✓ | | ✓ | ✓ | ✓ | ✓ | | | ✓ | | ✓ | |
 
 ### API Feature Usage Summary
 
 **Most Used Features:**
-- `Signal.create()` - 14/14 use cases (100%)
-- `signal.map()` - 13/14 use cases (93%)
-- `bindVisible()` - 10/14 use cases (71%)
-- `bindValue()` - 10/14 use cases (71%)
-- `bindText()` - 10/14 use cases (71%)
-- `Signal.compute()` - 10/14 use cases (71%)
+- `Signal.create()` - 17/17 use cases (100%)
+- `signal.map()` - 16/17 use cases (94%)
+- `bindText()` - 13/17 use cases (76%)
+- `bindVisible()` - 11/17 use cases (65%)
+- `bindValue()` - 13/17 use cases (76%)
+- `Signal.compute()` - 13/17 use cases (76%)
 
 **Moderately Used Features:**
-- `bindEnabled()` - 6/14 use cases (43%)
-- `bindThemeName()` - 4/14 use cases (29%)
-- `bindItems()` - 4/14 use cases (29%)
+- `bindEnabled()` - 7/17 use cases (41%)
+- `bindItems()` - 7/17 use cases (41%)
+- `bindThemeName()` - 5/17 use cases (29%)
+- `signal.addListener()` - 4/17 use cases (24%)
+- `bindComponentChildren()` - 5/17 use cases (29%)
+- `bindClassName()` - 3/17 use cases (18%)
 
 **Specialized Features:**
-- `bindComponentChildren()` - 3/14 use cases (21%)
-- `signal.addListener()` - 3/14 use cases (21%)
-- `bindHelperText()` - 2/14 use cases (14%)
-- `bindClassName()` - 2/14 use cases (14%)
-- `bindAttribute()` - 1/14 use cases (7%)
+- `bindHelperText()` - 2/17 use cases (12%)
+- `bindAttribute()` - 1/17 use cases (6%)
+- `bindRequired()` - 1/17 use case (6%) **[NEW]**
+
+**Advanced Features:**
+- **Binder Integration** (`getValidationStatus()`, `Binding::value()`) - 1/17 use case (6%) **[NEW]**
+- **ComponentToggle** (`addExclusive()`, `addFallback()`) - 1/17 use case (6%) **[NEW]**
+- **Reactive Providers** (`setCellEditableProvider()`, `setItemSelectableProvider()`, `setDropFilter()`, `setDynamicContentHandler()`) - 1/17 use case (6%) **[NEW]**
 
 **Pattern Coverage:**
-- **Collections**: 6/14 use cases (43%)
-- **Validation**: 6/14 use cases (43%)
-- **Async Operations**: 2/14 use cases (14%)
+- **Collections**: 9/17 use cases (53%)
+- **Validation**: 7/17 use cases (41%)
+- **Async Operations**: 2/17 use cases (12%)
 
 ---
 
@@ -2411,19 +3147,38 @@ When implementing the signal API, ensure tests cover:
 
 ## Conclusion
 
-These 14 use cases demonstrate that the Vaadin Signal API can handle a wide range of reactive patterns in business applications, from simple one-way bindings to complex multi-step forms with validation.
+These **17 use cases** demonstrate that the Vaadin Signal API can handle a wide range of reactive patterns in business applications, from simple one-way bindings to advanced features like Binder integration, ComponentToggle utilities, and reactive provider APIs.
 
 The API excels at:
 - Eliminating boilerplate event listener code
 - Providing declarative, readable component bindings
 - Automatically managing dependencies and lifecycles
 - Supporting both simple and complex reactive patterns
+- Integrating seamlessly with existing Vaadin components and APIs
 
-By implementing and testing against these use cases, the Vaadin team can ensure the signal API meets real-world requirements and identify any gaps or rough edges before release.
+### Complete Coverage
+
+The extended collection now covers **all major features** mentioned in the signal API proposal:
+
+✅ **Core Bindings**: `bindValue()`, `bindVisible()`, `bindEnabled()`, `bindText()`
+✅ **Dynamic Properties**: `bindThemeName()`, `bindClassName()`, `bindHelperText()`, `bindRequired()`, `bindAttribute()`
+✅ **Collection Rendering**: `bindItems()`, `bindComponentChildren()`
+✅ **Signal Creation & Transformation**: `Signal.create()`, `Signal.compute()`, `signal.map()`, `signal.addListener()`
+✅ **Binder Integration**: `getValidationStatus()`, `Binding::value()` for cross-field validation
+✅ **ComponentToggle**: `addExclusive()`, `addFallback()` for mutually exclusive rendering
+✅ **Reactive Providers**: `setCellEditableProvider()`, `setItemSelectableProvider()`, `setDropFilter()`, `setDynamicContentHandler()`
+
+### Remaining Gaps
+
+The only features not fully demonstrated are:
+- **Component-specific two-way bindings**: `Details::setOpened()`, `AppLayout::setDrawerOpened()`, `Checkbox::setIndeterminate()`, `MenuItemBase::setChecked()`, `Crud::setDirty()`
+- **Element-level APIs**: `bindElementChildren()` for low-level DOM manipulation
+
+These are lower-priority features that follow the same patterns as demonstrated use cases.
 
 ### Next Steps
 
-1. **Prototype Implementation**: Implement 2-3 representative use cases to validate API ergonomics
+1. **Prototype Implementation**: Implement 3-4 representative use cases (including one with Binder, one with ComponentToggle, and one with reactive providers) to validate API ergonomics
 2. **Performance Testing**: Benchmark signal performance with realistic component counts
 3. **Developer Feedback**: Share use cases with Vaadin developers for feedback
 4. **API Refinement**: Iterate on API design based on implementation learnings
