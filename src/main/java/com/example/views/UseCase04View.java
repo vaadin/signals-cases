@@ -1,8 +1,14 @@
 package com.example.views;
 
+import com.example.MissingAPI;
+
+
 // Note: This code uses the proposed Signal API and will not compile yet
 
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.signals.Signal;
+import com.vaadin.signals.WritableSignal;
+import com.vaadin.signals.ValueSignal;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
@@ -25,43 +31,43 @@ public class UseCase04View extends VerticalLayout {
 
     public UseCase04View() {
         // Create signals for product options
-        WritableSignal<String> sizeSignal = Signal.create("M");
-        WritableSignal<String> colorSignal = Signal.create("Blue");
-        WritableSignal<Integer> quantitySignal = Signal.create(1);
+        WritableSignal<String> sizeSignal = new ValueSignal<>("M");
+        WritableSignal<String> colorSignal = new ValueSignal<>("Blue");
+        WritableSignal<Integer> quantitySignal = new ValueSignal<>(1);
 
         // ComboBoxes for size and color
         ComboBox<String> sizeSelect = new ComboBox<>("Size", List.of("S", "M", "L", "XL"));
         sizeSelect.setValue("M");
-        sizeSelect.bindValue(sizeSignal);
+        MissingAPI.bindValue(sizeSelect, sizeSignal);
 
         ComboBox<String> colorSelect = new ComboBox<>("Color", List.of("Blue", "Red", "Black", "White"));
         colorSelect.setValue("Blue");
-        colorSelect.bindValue(colorSignal);
+        MissingAPI.bindValue(colorSelect, colorSignal);
 
         IntegerField quantityField = new IntegerField("Quantity");
         quantityField.setValue(1);
         quantityField.setMin(1);
         quantityField.setMax(10);
-        quantityField.bindValue(quantitySignal);
+        MissingAPI.bindValue(quantityField, quantitySignal);
 
         // Computed signal for selected variant
-        ReadableSignal<ProductVariant> variantSignal = Signal.compute(() -> {
-            String size = sizeSignal.get();
-            String color = colorSignal.get();
+        Signal<ProductVariant> variantSignal = Signal.computed(() -> {
+            String size = sizeSignal.value();
+            String color = colorSignal.value();
             return getVariant(size, color);
         });
 
         // Computed signal for total price
-        ReadableSignal<BigDecimal> totalPriceSignal = Signal.compute(() -> {
-            ProductVariant variant = variantSignal.get();
-            int quantity = quantitySignal.get();
+        Signal<BigDecimal> totalPriceSignal = Signal.computed(() -> {
+            ProductVariant variant = variantSignal.value();
+            int quantity = quantitySignal.value();
             return variant.price().multiply(BigDecimal.valueOf(quantity));
         });
 
         // Computed signal for availability status
-        ReadableSignal<String> availabilitySignal = Signal.compute(() -> {
-            ProductVariant variant = variantSignal.get();
-            int quantity = quantitySignal.get();
+        Signal<String> availabilitySignal = Signal.computed(() -> {
+            ProductVariant variant = variantSignal.value();
+            int quantity = quantitySignal.value();
             if (variant.stock() >= quantity) {
                 return "In Stock (" + variant.stock() + " available)";
             } else if (variant.stock() > 0) {
@@ -75,14 +81,14 @@ public class UseCase04View extends VerticalLayout {
         Image productImage = new Image();
         productImage.setWidth("300px");
         productImage.setHeight("300px");
-        productImage.bindAttribute("src", variantSignal.map(v -> v.imageUrl()));
+        MissingAPI.bindAttribute(productImage, "src", variantSignal.map(v -> v.imageUrl()));
 
         Span priceLabel = new Span();
-        priceLabel.bindText(totalPriceSignal.map(price -> "Total: $" + price));
+        MissingAPI.bindText(priceLabel, totalPriceSignal.map(price -> "Total: $" + price));
 
         Span availabilityLabel = new Span();
-        availabilityLabel.bindText(availabilitySignal);
-        availabilityLabel.bindAttribute("style", availabilitySignal.map(status ->
+        MissingAPI.bindText(availabilityLabel, availabilitySignal);
+        MissingAPI.bindAttribute(availabilityLabel, "style", availabilitySignal.map(status ->
             status.startsWith("Out of Stock") ? "color: red;" : "color: green;"
         ));
 

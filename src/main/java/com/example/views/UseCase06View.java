@@ -1,8 +1,14 @@
 package com.example.views;
 
+import com.example.MissingAPI;
+
+
 // Note: This code uses the proposed Signal API and will not compile yet
 
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.signals.Signal;
+import com.vaadin.signals.WritableSignal;
+import com.vaadin.signals.ValueSignal;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -21,12 +27,12 @@ public class UseCase06View extends VerticalLayout {
 
     public UseCase06View() {
         // Create signal for insurance type
-        WritableSignal<InsuranceType> insuranceTypeSignal = Signal.create(InsuranceType.AUTO);
+        WritableSignal<InsuranceType> insuranceTypeSignal = new ValueSignal<>(InsuranceType.AUTO);
 
         // Insurance type selector
         ComboBox<InsuranceType> typeSelect = new ComboBox<>("Insurance Type", InsuranceType.values());
         typeSelect.setValue(InsuranceType.AUTO);
-        typeSelect.bindValue(insuranceTypeSignal);
+        MissingAPI.bindValue(typeSelect, insuranceTypeSignal);
 
         // Auto insurance form
         VerticalLayout autoForm = new VerticalLayout();

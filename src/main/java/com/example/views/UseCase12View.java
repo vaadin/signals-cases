@@ -1,8 +1,14 @@
 package com.example.views;
 
+import com.example.MissingAPI;
+
+
 // Note: This code uses the proposed Signal API and will not compile yet
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.signals.Signal;
+import com.vaadin.signals.WritableSignal;
+import com.vaadin.signals.ValueSignal;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
@@ -32,28 +38,28 @@ public class UseCase12View extends VerticalLayout {
 
     public UseCase12View() {
         // Create signals for cart state
-        WritableSignal<List<CartItem>> cartItemsSignal = Signal.create(new ArrayList<>(List.of(
+        WritableSignal<List<CartItem>> cartItemsSignal = new ValueSignal<>(new ArrayList<>(List.of(
             new CartItem("1", "Laptop", new BigDecimal("999.99"), 1),
             new CartItem("2", "Mouse", new BigDecimal("25.99"), 2),
             new CartItem("3", "Keyboard", new BigDecimal("79.99"), 1)
         )));
 
-        WritableSignal<String> discountCodeSignal = Signal.create("");
-        WritableSignal<ShippingOption> shippingOptionSignal = Signal.create(ShippingOption.STANDARD);
+        WritableSignal<String> discountCodeSignal = new ValueSignal<>("");
+        WritableSignal<ShippingOption> shippingOptionSignal = new ValueSignal<>(ShippingOption.STANDARD);
 
         // Computed signal for subtotal
-        ReadableSignal<BigDecimal> subtotalSignal = Signal.compute(() ->
-            cartItemsSignal.get().stream()
+        Signal<BigDecimal> subtotalSignal = Signal.computed(() ->
+            cartItemsSignal.value().stream()
                 .map(item -> item.price().multiply(BigDecimal.valueOf(item.quantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
         );
 
         // Computed signal for discount
-        ReadableSignal<BigDecimal> discountSignal = Signal.compute(() -> {
-            String code = discountCodeSignal.get();
+        Signal<BigDecimal> discountSignal = Signal.computed(() -> {
+            String code = discountCodeSignal.value();
             DiscountCode discount = validateDiscountCode(code);
             if (discount != null) {
-                return subtotalSignal.get()
+                return subtotalSignal.value()
                     .multiply(discount.percentage())
                     .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
             }
@@ -61,31 +67,31 @@ public class UseCase12View extends VerticalLayout {
         });
 
         // Computed signal for shipping cost
-        ReadableSignal<BigDecimal> shippingSignal = Signal.compute(() ->
-            getShippingCost(shippingOptionSignal.get())
+        Signal<BigDecimal> shippingSignal = Signal.computed(() ->
+            getShippingCost(shippingOptionSignal.value())
         );
 
         // Computed signal for tax (8%)
-        ReadableSignal<BigDecimal> taxSignal = Signal.compute(() ->
-            subtotalSignal.get()
-                .subtract(discountSignal.get())
+        Signal<BigDecimal> taxSignal = Signal.computed(() ->
+            subtotalSignal.value()
+                .subtract(discountSignal.value())
                 .multiply(new BigDecimal("0.08"))
                 .setScale(2, RoundingMode.HALF_UP)
         );
 
         // Computed signal for grand total
-        ReadableSignal<BigDecimal> totalSignal = Signal.compute(() ->
-            subtotalSignal.get()
-                .subtract(discountSignal.get())
-                .add(shippingSignal.get())
-                .add(taxSignal.get())
+        Signal<BigDecimal> totalSignal = Signal.computed(() ->
+            subtotalSignal.value()
+                .subtract(discountSignal.value())
+                .add(shippingSignal.value())
+                .add(taxSignal.value())
                 .setScale(2, RoundingMode.HALF_UP)
         );
 
         // Cart items display
         VerticalLayout cartItemsLayout = new VerticalLayout();
         cartItemsLayout.add(new H3("Shopping Cart"));
-        cartItemsLayout.bindChildren(cartItemsSignal.map(items ->
+        MissingAPI.bindChildren(cartItemsLayout, cartItemsSignal.map(items ->
             items.stream()
                 .map(item -> createCartItemRow(item, cartItemsSignal))
                 .toList()
@@ -93,32 +99,32 @@ public class UseCase12View extends VerticalLayout {
 
         // Discount code input
         TextField discountField = new TextField("Discount Code");
-        discountField.bindValue(discountCodeSignal);
+        MissingAPI.bindValue(discountField, discountCodeSignal);
 
         // Shipping options
         ComboBox<ShippingOption> shippingSelect = new ComboBox<>("Shipping Method", ShippingOption.values());
         shippingSelect.setValue(ShippingOption.STANDARD);
-        shippingSelect.bindValue(shippingOptionSignal);
+        MissingAPI.bindValue(shippingSelect, shippingOptionSignal);
 
         // Totals display
         Div totalsDiv = new Div();
         totalsDiv.add(new H3("Order Summary"));
 
         Span subtotalLabel = new Span();
-        subtotalLabel.bindText(subtotalSignal.map(total -> "Subtotal: $" + total.setScale(2, RoundingMode.HALF_UP)));
+        MissingAPI.bindText(subtotalLabel, subtotalSignal.map(total -> "Subtotal: $" + total.setScale(2, RoundingMode.HALF_UP)));
 
         Span discountLabel = new Span();
-        discountLabel.bindText(discountSignal.map(discount -> "Discount: -$" + discount.setScale(2, RoundingMode.HALF_UP)));
+        MissingAPI.bindText(discountLabel, discountSignal.map(discount -> "Discount: -$" + discount.setScale(2, RoundingMode.HALF_UP)));
         discountLabel.bindVisible(discountSignal.map(d -> d.compareTo(BigDecimal.ZERO) > 0));
 
         Span shippingLabel = new Span();
-        shippingLabel.bindText(shippingSignal.map(shipping -> "Shipping: $" + shipping.setScale(2, RoundingMode.HALF_UP)));
+        MissingAPI.bindText(shippingLabel, shippingSignal.map(shipping -> "Shipping: $" + shipping.setScale(2, RoundingMode.HALF_UP)));
 
         Span taxLabel = new Span();
-        taxLabel.bindText(taxSignal.map(tax -> "Tax (8%): $" + tax.setScale(2, RoundingMode.HALF_UP)));
+        MissingAPI.bindText(taxLabel, taxSignal.map(tax -> "Tax (8%): $" + tax.setScale(2, RoundingMode.HALF_UP)));
 
         Span totalLabel = new Span();
-        totalLabel.bindText(totalSignal.map(total -> "Total: $" + total.setScale(2, RoundingMode.HALF_UP)));
+        MissingAPI.bindText(totalLabel, totalSignal.map(total -> "Total: $" + total.setScale(2, RoundingMode.HALF_UP)));
         totalLabel.getStyle().set("font-weight", "bold");
         totalLabel.getStyle().set("font-size", "1.5em");
 
@@ -137,11 +143,11 @@ public class UseCase12View extends VerticalLayout {
         quantityField.setMax(99);
         quantityField.setWidth("80px");
         quantityField.addValueChangeListener(e -> {
-            List<CartItem> currentItems = new ArrayList<>(cartItemsSignal.get());
+            List<CartItem> currentItems = new ArrayList<>(cartItemsSignal.value());
             int index = currentItems.indexOf(item);
             if (index >= 0) {
                 currentItems.set(index, new CartItem(item.id(), item.name(), item.price(), e.getValue()));
-                cartItemsSignal.set(currentItems);
+                cartItemsSignal.value(currentItems);
             }
         });
 
@@ -150,9 +156,9 @@ public class UseCase12View extends VerticalLayout {
         itemTotalLabel.getStyle().set("text-align", "right");
 
         Button removeButton = new Button("Remove", e -> {
-            List<CartItem> currentItems = new ArrayList<>(cartItemsSignal.get());
+            List<CartItem> currentItems = new ArrayList<>(cartItemsSignal.value());
             currentItems.remove(item);
-            cartItemsSignal.set(currentItems);
+            cartItemsSignal.value(currentItems);
         });
         removeButton.addThemeName("error");
         removeButton.addThemeName("small");

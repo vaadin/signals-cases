@@ -1,8 +1,14 @@
 package com.example.views;
 
+import com.example.MissingAPI;
+
+
 // Note: This code uses the proposed Signal API and will not compile yet
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.signals.Signal;
+import com.vaadin.signals.WritableSignal;
+import com.vaadin.signals.ValueSignal;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
@@ -32,66 +38,66 @@ public class UseCase05View extends VerticalLayout {
 
     public UseCase05View() {
         // Create signals for pricing inputs
-        WritableSignal<ServiceType> serviceSignal = Signal.create(ServiceType.BASIC);
-        WritableSignal<Set<AddOn>> addOnsSignal = Signal.create(Set.of());
-        WritableSignal<Integer> quantitySignal = Signal.create(1);
-        WritableSignal<String> discountCodeSignal = Signal.create("");
-        WritableSignal<BigDecimal> taxRateSignal = Signal.create(new BigDecimal("0.08"));
+        WritableSignal<ServiceType> serviceSignal = new ValueSignal<>(ServiceType.BASIC);
+        WritableSignal<Set<AddOn>> addOnsSignal = new ValueSignal<>(Set.of());
+        WritableSignal<Integer> quantitySignal = new ValueSignal<>(1);
+        WritableSignal<String> discountCodeSignal = new ValueSignal<>("");
+        WritableSignal<BigDecimal> taxRateSignal = new ValueSignal<>(new BigDecimal("0.08"));
 
         // UI components
         ComboBox<ServiceType> serviceSelect = new ComboBox<>("Base Service", ServiceType.values());
         serviceSelect.setValue(ServiceType.BASIC);
-        serviceSelect.bindValue(serviceSignal);
+        MissingAPI.bindValue(serviceSelect, serviceSignal);
 
         CheckboxGroup<AddOn> addOnsCheckbox = new CheckboxGroup<>("Add-ons", AddOn.values());
-        addOnsCheckbox.bindValue(addOnsSignal);
+        MissingAPI.bindValue(addOnsCheckbox, addOnsSignal);
 
         IntegerField quantityField = new IntegerField("Quantity");
         quantityField.setValue(1);
         quantityField.setMin(1);
-        quantityField.bindValue(quantitySignal);
+        MissingAPI.bindValue(quantityField, quantitySignal);
 
         TextField discountField = new TextField("Discount Code");
-        discountField.bindValue(discountCodeSignal);
+        MissingAPI.bindValue(discountField, discountCodeSignal);
 
         TextField taxRateField = new TextField("Tax Rate (%)");
         taxRateField.setValue("8");
 
         // Computed signals for price breakdown
-        ReadableSignal<BigDecimal> basePrice = Signal.compute(() -> getServicePrice(serviceSignal.get()));
+        Signal<BigDecimal> basePrice = Signal.computed(() -> getServicePrice(serviceSignal.value()));
 
-        ReadableSignal<BigDecimal> addOnsPrice = Signal.compute(() ->
-            addOnsSignal.get().stream()
+        Signal<BigDecimal> addOnsPrice = Signal.computed(() ->
+            addOnsSignal.value().stream()
                 .map(this::getAddOnPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
         );
 
-        ReadableSignal<BigDecimal> subtotal = Signal.compute(() -> {
-            BigDecimal base = basePrice.get();
-            BigDecimal addOns = addOnsPrice.get();
-            int quantity = quantitySignal.get();
+        Signal<BigDecimal> subtotal = Signal.computed(() -> {
+            BigDecimal base = basePrice.value();
+            BigDecimal addOns = addOnsPrice.value();
+            int quantity = quantitySignal.value();
             return base.add(addOns).multiply(BigDecimal.valueOf(quantity));
         });
 
-        ReadableSignal<BigDecimal> discountAmount = Signal.compute(() -> {
-            String code = discountCodeSignal.get();
+        Signal<BigDecimal> discountAmount = Signal.computed(() -> {
+            String code = discountCodeSignal.value();
             DiscountCode discount = validateDiscountCode(code);
             if (discount != null) {
-                return subtotal.get().multiply(discount.percentage()).divide(new BigDecimal("100"));
+                return subtotal.value().multiply(discount.percentage()).divide(new BigDecimal("100"));
             }
             return BigDecimal.ZERO;
         });
 
-        ReadableSignal<BigDecimal> subtotalAfterDiscount = Signal.compute(() ->
-            subtotal.get().subtract(discountAmount.get())
+        Signal<BigDecimal> subtotalAfterDiscount = Signal.computed(() ->
+            subtotal.value().subtract(discountAmount.value())
         );
 
-        ReadableSignal<BigDecimal> tax = Signal.compute(() ->
-            subtotalAfterDiscount.get().multiply(taxRateSignal.get())
+        Signal<BigDecimal> tax = Signal.computed(() ->
+            subtotalAfterDiscount.value().multiply(taxRateSignal.value())
         );
 
-        ReadableSignal<BigDecimal> total = Signal.compute(() ->
-            subtotalAfterDiscount.get().add(tax.get())
+        Signal<BigDecimal> total = Signal.computed(() ->
+            subtotalAfterDiscount.value().add(tax.value())
         );
 
         // Display components
@@ -99,23 +105,23 @@ public class UseCase05View extends VerticalLayout {
         priceBreakdown.add(new H3("Price Breakdown"));
 
         Span basePriceLabel = new Span();
-        basePriceLabel.bindText(basePrice.map(p -> "Base Service: $" + p));
+        MissingAPI.bindText(basePriceLabel, basePrice.map(p -> "Base Service: $" + p));
 
         Span addOnsPriceLabel = new Span();
-        addOnsPriceLabel.bindText(addOnsPrice.map(p -> "Add-ons: $" + p));
+        MissingAPI.bindText(addOnsPriceLabel, addOnsPrice.map(p -> "Add-ons: $" + p));
 
         Span subtotalLabel = new Span();
-        subtotalLabel.bindText(subtotal.map(p -> "Subtotal: $" + p.setScale(2, RoundingMode.HALF_UP)));
+        MissingAPI.bindText(subtotalLabel, subtotal.map(p -> "Subtotal: $" + p.setScale(2, RoundingMode.HALF_UP)));
 
         Span discountLabel = new Span();
-        discountLabel.bindText(discountAmount.map(p -> "Discount: -$" + p.setScale(2, RoundingMode.HALF_UP)));
+        MissingAPI.bindText(discountLabel, discountAmount.map(p -> "Discount: -$" + p.setScale(2, RoundingMode.HALF_UP)));
         discountLabel.bindVisible(discountAmount.map(p -> p.compareTo(BigDecimal.ZERO) > 0));
 
         Span taxLabel = new Span();
-        taxLabel.bindText(tax.map(p -> "Tax: $" + p.setScale(2, RoundingMode.HALF_UP)));
+        MissingAPI.bindText(taxLabel, tax.map(p -> "Tax: $" + p.setScale(2, RoundingMode.HALF_UP)));
 
         Span totalLabel = new Span();
-        totalLabel.bindText(total.map(p -> "Total: $" + p.setScale(2, RoundingMode.HALF_UP)));
+        MissingAPI.bindText(totalLabel, total.map(p -> "Total: $" + p.setScale(2, RoundingMode.HALF_UP)));
         totalLabel.getStyle().set("font-weight", "bold");
         totalLabel.getStyle().set("font-size", "1.5em");
 

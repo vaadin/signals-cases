@@ -1,8 +1,14 @@
 package com.example.views;
 
+import com.example.MissingAPI;
+
+
 // Note: This code uses the proposed Signal API and will not compile yet
 
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.signals.Signal;
+import com.vaadin.signals.WritableSignal;
+import com.vaadin.signals.ValueSignal;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -18,31 +24,31 @@ public class UseCase11View extends VerticalLayout {
 
     public UseCase11View() {
         // Create signals for selections
-        WritableSignal<String> countrySignal = Signal.create(null);
-        WritableSignal<String> stateSignal = Signal.create(null);
-        WritableSignal<String> citySignal = Signal.create(null);
+        WritableSignal<String> countrySignal = new ValueSignal<>(null);
+        WritableSignal<String> stateSignal = new ValueSignal<>(null);
+        WritableSignal<String> citySignal = new ValueSignal<>(null);
 
         // Country selector
         ComboBox<String> countrySelect = new ComboBox<>("Country");
         countrySelect.setItems(loadCountries());
-        countrySelect.bindValue(countrySignal);
+        MissingAPI.bindValue(countrySelect, countrySignal);
 
         // State selector - computed items based on country
         ComboBox<String> stateSelect = new ComboBox<>("State/Province");
-        stateSelect.bindItems(countrySignal.map(country -> {
-            stateSignal.set(null); // Reset state when country changes
+        MissingAPI.bindItems(stateSelect, countrySignal.map(country -> {
+            stateSignal.value(null); // Reset state when country changes
             return country != null ? loadStates(country) : List.of();
         }));
-        stateSelect.bindValue(stateSignal);
+        MissingAPI.bindValue(stateSelect, stateSignal);
         stateSelect.bindEnabled(countrySignal.map(country -> country != null));
 
         // City selector - computed items based on state
         ComboBox<String> citySelect = new ComboBox<>("City");
-        citySelect.bindItems(stateSignal.map(state -> {
-            citySignal.set(null); // Reset city when state changes
-            return state != null ? loadCities(countrySignal.get(), state) : List.of();
+        MissingAPI.bindItems(citySelect, stateSignal.map(state -> {
+            citySignal.value(null); // Reset city when state changes
+            return state != null ? loadCities(countrySignal.value(), state) : List.of();
         }));
-        citySelect.bindValue(citySignal);
+        MissingAPI.bindValue(citySelect, citySignal);
         citySelect.bindEnabled(stateSignal.map(state -> state != null));
 
         add(countrySelect, stateSelect, citySelect);

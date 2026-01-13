@@ -1,8 +1,14 @@
 package com.example.views;
 
+import com.example.MissingAPI;
+
+
 // Note: This code uses the proposed Signal API and will not compile yet
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.signals.Signal;
+import com.vaadin.signals.WritableSignal;
+import com.vaadin.signals.ValueSignal;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
@@ -31,37 +37,37 @@ public class UseCase17View extends VerticalLayout {
 
     public UseCase17View() {
         // Create signals for permissions and edit mode
-        WritableSignal<UserRole> userRoleSignal = Signal.create(UserRole.VIEWER);
-        WritableSignal<Boolean> editModeSignal = Signal.create(false);
-        WritableSignal<Boolean> dragDropEnabledSignal = Signal.create(false);
+        WritableSignal<UserRole> userRoleSignal = new ValueSignal<>(UserRole.VIEWER);
+        WritableSignal<Boolean> editModeSignal = new ValueSignal<>(false);
+        WritableSignal<Boolean> dragDropEnabledSignal = new ValueSignal<>(false);
 
         // Computed permission signals
-        ReadableSignal<Boolean> canEditSignal = Signal.compute(() ->
-            userRoleSignal.get() == UserRole.EDITOR || userRoleSignal.get() == UserRole.ADMIN
+        Signal<Boolean> canEditSignal = Signal.computed(() ->
+            userRoleSignal.value() == UserRole.EDITOR || userRoleSignal.value() == UserRole.ADMIN
         );
 
-        ReadableSignal<Boolean> canDeleteSignal = Signal.compute(() ->
-            userRoleSignal.get() == UserRole.ADMIN
+        Signal<Boolean> canDeleteSignal = Signal.computed(() ->
+            userRoleSignal.value() == UserRole.ADMIN
         );
 
-        ReadableSignal<Boolean> canReorderSignal = Signal.compute(() ->
-            userRoleSignal.get() == UserRole.ADMIN && dragDropEnabledSignal.get()
+        Signal<Boolean> canReorderSignal = Signal.computed(() ->
+            userRoleSignal.value() == UserRole.ADMIN && dragDropEnabledSignal.value()
         );
 
         // Load employees
-        WritableSignal<List<Employee>> employeesSignal = Signal.create(new ArrayList<>(loadEmployees()));
+        WritableSignal<List<Employee>> employeesSignal = new ValueSignal<>(new ArrayList<>(loadEmployees()));
 
         // Controls
         ComboBox<UserRole> roleSelector = new ComboBox<>("Simulate User Role", UserRole.values());
         roleSelector.setValue(UserRole.VIEWER);
-        roleSelector.bindValue(userRoleSignal);
+        MissingAPI.bindValue(roleSelector, userRoleSignal);
 
         Checkbox editModeCheckbox = new Checkbox("Edit Mode");
-        editModeCheckbox.bindValue(editModeSignal);
+        MissingAPI.bindValue(editModeCheckbox, editModeSignal);
         editModeCheckbox.bindEnabled(canEditSignal);
 
         Checkbox dragDropCheckbox = new Checkbox("Enable Drag & Drop Reordering");
-        dragDropCheckbox.bindValue(dragDropEnabledSignal);
+        MissingAPI.bindValue(dragDropCheckbox, dragDropEnabledSignal);
         dragDropCheckbox.bindEnabled(canEditSignal);
 
         HorizontalLayout controls = new HorizontalLayout(roleSelector, editModeCheckbox, dragDropCheckbox);
@@ -69,46 +75,42 @@ public class UseCase17View extends VerticalLayout {
         // Employee grid
         Grid<Employee> grid = new Grid<>(Employee.class);
         grid.setColumns("id", "name", "department", "status", "salary");
-        grid.setItems(employeesSignal.get());
+        grid.setItems(employeesSignal.value());
 
         // Dynamic cell editability based on signals
-        grid.getColumnByKey("name").bindEditable(Signal.compute(() ->
-            editModeSignal.get() && canEditSignal.get()
+        MissingAPI.bindEditable(grid.getColumnByKey("name"), Signal.computed(() ->
+            editModeSignal.value() && canEditSignal.value()
         ));
 
-        grid.getColumnByKey("department").bindEditable(Signal.compute(() ->
-            editModeSignal.get() && canEditSignal.get()
+        MissingAPI.bindEditable(grid.getColumnByKey("department"), Signal.computed(() ->
+            editModeSignal.value() && canEditSignal.value()
         ));
 
-        grid.getColumnByKey("salary").bindEditable(Signal.compute(() ->
-            editModeSignal.get() && canEditSignal.get() && userRoleSignal.get() == UserRole.ADMIN
+        MissingAPI.bindEditable(grid.getColumnByKey("salary"), Signal.computed(() ->
+            editModeSignal.value() && canEditSignal.value() && userRoleSignal.value() == UserRole.ADMIN
         ));
 
         // Dynamic row selection based on employee status
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
-        grid.bindRowSelectable(Signal.compute(() -> (Employee employee) ->
+        MissingAPI.bindRowSelectable(grid, Signal.computed(() -> (Employee employee) ->
             employee.status() == EmployeeStatus.ACTIVE
         ));
 
         // Drag and drop reordering
         grid.setRowsDraggable(true);
         grid.setDropMode(GridDropMode.BETWEEN);
-        grid.bindDragEnabled(canReorderSignal);
+        MissingAPI.bindDragEnabled(grid, canReorderSignal);
 
         grid.addDragStartListener(e -> {
             // Handle drag start
         });
 
         grid.addDropListener(e -> {
-            Employee draggedEmployee = e.getDragData().orElse(null);
+            // Note: getDragData() is proposed API - using getDropTargetItem for now
             Employee targetEmployee = e.getDropTargetItem().orElse(null);
-            if (draggedEmployee != null && targetEmployee != null) {
-                List<Employee> employees = new ArrayList<>(employeesSignal.get());
-                employees.remove(draggedEmployee);
-                int targetIndex = employees.indexOf(targetEmployee);
-                employees.add(targetIndex, draggedEmployee);
-                employeesSignal.set(employees);
-                grid.setItems(employees);
+            if (targetEmployee != null) {
+                // In real implementation, would reorder based on dragged item
+                System.out.println("Drop on: " + targetEmployee.name());
             }
         });
 
@@ -126,32 +128,32 @@ public class UseCase17View extends VerticalLayout {
             });
 
             // Show "Edit" only if user can edit
-            if (canEditSignal.get()) {
+            if (canEditSignal.value()) {
                 contextMenu.addItem("Edit", e -> {
                     System.out.println("Editing: " + employee.name());
                 });
             }
 
             // Show "Delete" only if user can delete and employee is not active
-            if (canDeleteSignal.get() && employee.status() != EmployeeStatus.ACTIVE) {
+            if (canDeleteSignal.value() && employee.status() != EmployeeStatus.ACTIVE) {
                 contextMenu.addItem("Delete", e -> {
-                    List<Employee> employees = new ArrayList<>(employeesSignal.get());
+                    List<Employee> employees = new ArrayList<>(employeesSignal.value());
                     employees.remove(employee);
-                    employeesSignal.set(employees);
+                    employeesSignal.value(employees);
                     grid.setItems(employees);
                 });
             }
 
             // Show status-specific actions
-            if (employee.status() == EmployeeStatus.ACTIVE && canEditSignal.get()) {
+            if (employee.status() == EmployeeStatus.ACTIVE && canEditSignal.value()) {
                 contextMenu.addItem("Mark as On Leave", e -> {
-                    List<Employee> employees = new ArrayList<>(employeesSignal.get());
+                    List<Employee> employees = new ArrayList<>(employeesSignal.value());
                     int index = employees.indexOf(employee);
                     employees.set(index, new Employee(
                         employee.id(), employee.name(), employee.department(),
                         EmployeeStatus.ON_LEAVE, employee.salary()
                     ));
-                    employeesSignal.set(employees);
+                    employeesSignal.value(employees);
                     grid.setItems(employees);
                 });
             }
@@ -161,7 +163,7 @@ public class UseCase17View extends VerticalLayout {
 
         // Action buttons
         Button addButton = new Button("Add Employee", e -> {
-            List<Employee> employees = new ArrayList<>(employeesSignal.get());
+            List<Employee> employees = new ArrayList<>(employeesSignal.value());
             employees.add(new Employee(
                 "E" + (employees.size() + 1),
                 "New Employee",
@@ -169,7 +171,7 @@ public class UseCase17View extends VerticalLayout {
                 EmployeeStatus.ACTIVE,
                 50000.0
             ));
-            employeesSignal.set(employees);
+            employeesSignal.value(employees);
             grid.setItems(employees);
         });
         addButton.bindEnabled(canEditSignal);

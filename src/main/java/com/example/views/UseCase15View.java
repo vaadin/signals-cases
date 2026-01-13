@@ -1,8 +1,14 @@
 package com.example.views;
 
+import com.example.MissingAPI;
+
+
 // Note: This code uses the proposed Signal API and will not compile yet
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.signals.Signal;
+import com.vaadin.signals.WritableSignal;
+import com.vaadin.signals.ValueSignal;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
@@ -43,46 +49,46 @@ public class UseCase15View extends VerticalLayout {
         IntegerField ageField = new IntegerField("Age");
 
         // Create signals for reactive validation
-        WritableSignal<String> usernameSignal = Signal.create("");
-        WritableSignal<String> emailSignal = Signal.create("");
-        WritableSignal<String> passwordSignal = Signal.create("");
-        WritableSignal<String> confirmPasswordSignal = Signal.create("");
-        WritableSignal<AccountType> accountTypeSignal = Signal.create(AccountType.PERSONAL);
-        WritableSignal<Integer> ageSignal = Signal.create(null);
+        WritableSignal<String> usernameSignal = new ValueSignal<>("");
+        WritableSignal<String> emailSignal = new ValueSignal<>("");
+        WritableSignal<String> passwordSignal = new ValueSignal<>("");
+        WritableSignal<String> confirmPasswordSignal = new ValueSignal<>("");
+        WritableSignal<AccountType> accountTypeSignal = new ValueSignal<>(AccountType.PERSONAL);
+        WritableSignal<Integer> ageSignal = new ValueSignal<>(null);
 
         // Bind fields to signals
-        usernameField.bindValue(usernameSignal);
-        emailField.bindValue(emailSignal);
-        passwordField.bindValue(passwordSignal);
-        confirmPasswordField.bindValue(confirmPasswordSignal);
-        accountTypeSelect.bindValue(accountTypeSignal);
-        ageField.bindValue(ageSignal);
+        MissingAPI.bindValue(usernameField, usernameSignal);
+        MissingAPI.bindValue(emailField, emailSignal);
+        MissingAPI.bindValue(passwordField, passwordSignal);
+        MissingAPI.bindValue(confirmPasswordField, confirmPasswordSignal);
+        MissingAPI.bindValue(accountTypeSelect, accountTypeSignal);
+        MissingAPI.bindValue(ageField, ageSignal);
 
         // Validation signals
-        ReadableSignal<Boolean> usernameValidSignal = Signal.compute(() -> {
-            String username = usernameSignal.get();
+        Signal<Boolean> usernameValidSignal = Signal.computed(() -> {
+            String username = usernameSignal.value();
             return username != null && username.length() >= 3;
         });
 
-        ReadableSignal<Boolean> emailValidSignal = Signal.compute(() -> {
-            String email = emailSignal.get();
+        Signal<Boolean> emailValidSignal = Signal.computed(() -> {
+            String email = emailSignal.value();
             return email != null && email.contains("@") && email.contains(".");
         });
 
-        ReadableSignal<Boolean> passwordValidSignal = Signal.compute(() -> {
-            String password = passwordSignal.get();
+        Signal<Boolean> passwordValidSignal = Signal.computed(() -> {
+            String password = passwordSignal.value();
             return password != null && password.length() >= 8;
         });
 
-        ReadableSignal<Boolean> passwordsMatchSignal = Signal.compute(() -> {
-            String password = passwordSignal.get();
-            String confirmPassword = confirmPasswordSignal.get();
+        Signal<Boolean> passwordsMatchSignal = Signal.computed(() -> {
+            String password = passwordSignal.value();
+            String confirmPassword = confirmPasswordSignal.value();
             return password != null && password.equals(confirmPassword);
         });
 
-        ReadableSignal<Boolean> ageValidSignal = Signal.compute(() -> {
-            Integer age = ageSignal.get();
-            AccountType accountType = accountTypeSignal.get();
+        Signal<Boolean> ageValidSignal = Signal.computed(() -> {
+            Integer age = ageSignal.value();
+            AccountType accountType = accountTypeSignal.value();
             if (age == null) return false;
             // Business accounts require age >= 18
             if (accountType == AccountType.BUSINESS) {
@@ -92,12 +98,12 @@ public class UseCase15View extends VerticalLayout {
             return age >= 13;
         });
 
-        ReadableSignal<Boolean> formValidSignal = Signal.compute(() ->
-            usernameValidSignal.get() &&
-            emailValidSignal.get() &&
-            passwordValidSignal.get() &&
-            passwordsMatchSignal.get() &&
-            ageValidSignal.get()
+        Signal<Boolean> formValidSignal = Signal.computed(() ->
+            usernameValidSignal.value() &&
+            emailValidSignal.value() &&
+            passwordValidSignal.value() &&
+            passwordsMatchSignal.value() &&
+            ageValidSignal.value()
         );
 
         // Validation feedback
@@ -115,25 +121,25 @@ public class UseCase15View extends VerticalLayout {
 
         Span confirmPasswordError = new Span("Passwords do not match");
         confirmPasswordError.getStyle().set("color", "red");
-        confirmPasswordError.bindVisible(Signal.compute(() -> {
-            String password = passwordSignal.get();
-            String confirmPassword = confirmPasswordSignal.get();
+        confirmPasswordError.bindVisible(Signal.computed(() -> {
+            String password = passwordSignal.value();
+            String confirmPassword = confirmPasswordSignal.value();
             return confirmPassword != null && !confirmPassword.isEmpty() &&
                    password != null && !password.equals(confirmPassword);
         }));
 
         Span ageError = new Span();
-        ageError.bindText(Signal.compute(() -> {
-            AccountType accountType = accountTypeSignal.get();
+        MissingAPI.bindText(ageError, Signal.computed(() -> {
+            AccountType accountType = accountTypeSignal.value();
             if (accountType == AccountType.BUSINESS) {
                 return "Business accounts require age 18 or older";
             }
             return "Personal accounts require age 13 or older";
         }));
         ageError.getStyle().set("color", "red");
-        ageError.bindVisible(Signal.compute(() -> {
-            Integer age = ageSignal.get();
-            AccountType accountType = accountTypeSignal.get();
+        ageError.bindVisible(Signal.computed(() -> {
+            Integer age = ageSignal.value();
+            AccountType accountType = accountTypeSignal.value();
             if (age == null || age == 0) return false;
             if (accountType == AccountType.BUSINESS) {
                 return age < 18;
@@ -151,10 +157,10 @@ public class UseCase15View extends VerticalLayout {
         // Form status
         Div statusDiv = new Div();
         Span statusLabel = new Span();
-        statusLabel.bindText(formValidSignal.map(valid ->
+        MissingAPI.bindText(statusLabel, formValidSignal.map(valid ->
             valid ? "Form is valid - Ready to submit" : "Please complete all required fields correctly"
         ));
-        statusLabel.bindAttribute("style", formValidSignal.map(valid ->
+        MissingAPI.bindAttribute(statusLabel, "style", formValidSignal.map(valid ->
             valid ? "color: green; font-weight: bold;" : "color: orange;"
         ));
         statusDiv.add(statusLabel);

@@ -1,8 +1,14 @@
 package com.example.views;
 
+import com.example.MissingAPI;
+
+
 // Note: This code uses the proposed Signal API and will not compile yet
 
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.signals.Signal;
+import com.vaadin.signals.WritableSignal;
+import com.vaadin.signals.ValueSignal;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;
@@ -17,20 +23,20 @@ public class UseCase02View extends FormLayout {
 
     public UseCase02View() {
         // Create signals for input fields
-        WritableSignal<String> firstNameSignal = Signal.create("");
-        WritableSignal<String> lastNameSignal = Signal.create("");
+        WritableSignal<String> firstNameSignal = new ValueSignal<>("");
+        WritableSignal<String> lastNameSignal = new ValueSignal<>("");
 
         // Input fields with two-way binding
         TextField firstNameField = new TextField("First Name");
-        firstNameField.bindValue(firstNameSignal);
+        MissingAPI.bindValue(firstNameField, firstNameSignal);
 
         TextField lastNameField = new TextField("Last Name");
-        lastNameField.bindValue(lastNameSignal);
+        MissingAPI.bindValue(lastNameField, lastNameSignal);
 
         // Computed signal for username
-        Signal<String> usernameSignal = Signal.compute(() -> {
-            String first = firstNameSignal.getValue();
-            String last = lastNameSignal.getValue();
+        Signal<String> usernameSignal = Signal.computed(() -> {
+            String first = firstNameSignal.value();
+            String last = lastNameSignal.value();
             if (first.isEmpty() || last.isEmpty()) {
                 return "";
             }
@@ -39,13 +45,13 @@ public class UseCase02View extends FormLayout {
 
         // Multiple displays bound to the same computed signal
         H3 welcomeHeader = new H3();
-        welcomeHeader.bindText(usernameSignal.map(u -> "Welcome, " + u));
+        MissingAPI.bindText(welcomeHeader, usernameSignal.map(u -> "Welcome, " + u));
 
         Span profilePreview = new Span();
-        profilePreview.bindText(usernameSignal.map(u -> "Your public profile: " + u));
+        MissingAPI.bindText(profilePreview, usernameSignal.map(u -> "Your public profile: " + u));
 
         Span confirmation = new Span();
-        confirmation.bindText(usernameSignal.map(u -> "Account will be created for: " + u));
+        MissingAPI.bindText(confirmation, usernameSignal.map(u -> "Account will be created for: " + u));
 
         add(firstNameField, lastNameField,
             welcomeHeader, profilePreview, confirmation);

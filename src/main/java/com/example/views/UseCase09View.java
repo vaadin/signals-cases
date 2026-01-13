@@ -1,8 +1,14 @@
 package com.example.views;
 
+import com.example.MissingAPI;
+
+
 // Note: This code uses the proposed Signal API and will not compile yet
 
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.signals.Signal;
+import com.vaadin.signals.WritableSignal;
+import com.vaadin.signals.ValueSignal;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -22,18 +28,18 @@ public class UseCase09View extends VerticalLayout {
 
     public UseCase09View() {
         // Create signals for filter inputs
-        WritableSignal<String> categoryFilterSignal = Signal.create("All");
-        WritableSignal<String> searchTermSignal = Signal.create("");
-        WritableSignal<Boolean> inStockOnlySignal = Signal.create(false);
+        WritableSignal<String> categoryFilterSignal = new ValueSignal<>("All");
+        WritableSignal<String> searchTermSignal = new ValueSignal<>("");
+        WritableSignal<Boolean> inStockOnlySignal = new ValueSignal<>(false);
 
         // Load all products
         List<Product> allProducts = loadProducts();
 
         // Computed signal for filtered products
-        ReadableSignal<List<Product>> filteredProductsSignal = Signal.compute(() -> {
-            String category = categoryFilterSignal.get();
-            String searchTerm = searchTermSignal.get().toLowerCase();
-            boolean inStockOnly = inStockOnlySignal.get();
+        Signal<List<Product>> filteredProductsSignal = Signal.computed(() -> {
+            String category = categoryFilterSignal.value();
+            String searchTerm = searchTermSignal.value().toLowerCase();
+            boolean inStockOnly = inStockOnlySignal.value();
 
             return allProducts.stream()
                 .filter(p -> category.equals("All") || p.category().equals(category))
@@ -48,19 +54,19 @@ public class UseCase09View extends VerticalLayout {
         ComboBox<String> categoryFilter = new ComboBox<>("Category",
             List.of("All", "Electronics", "Clothing", "Books", "Home & Garden"));
         categoryFilter.setValue("All");
-        categoryFilter.bindValue(categoryFilterSignal);
+        MissingAPI.bindValue(categoryFilter, categoryFilterSignal);
 
         TextField searchField = new TextField("Search");
         searchField.setPlaceholder("Search by name or ID");
-        searchField.bindValue(searchTermSignal);
+        MissingAPI.bindValue(searchField, searchTermSignal);
 
         Checkbox inStockCheckbox = new Checkbox("Show in-stock items only");
-        inStockCheckbox.bindValue(inStockOnlySignal);
+        MissingAPI.bindValue(inStockCheckbox, inStockOnlySignal);
 
         // Data grid
         Grid<Product> grid = new Grid<>(Product.class);
         grid.setColumns("id", "name", "category", "price", "stock");
-        grid.bindItems(filteredProductsSignal);
+        MissingAPI.bindItems(grid, filteredProductsSignal);
 
         add(categoryFilter, searchField, inStockCheckbox, grid);
     }

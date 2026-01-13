@@ -1,8 +1,14 @@
 package com.example.views;
 
+import com.example.MissingAPI;
+
+
 // Note: This code uses the proposed Signal API and will not compile yet
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.signals.Signal;
+import com.vaadin.signals.WritableSignal;
+import com.vaadin.signals.ValueSignal;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
@@ -27,27 +33,27 @@ public class UseCase10View extends VerticalLayout {
 
     public UseCase10View() {
         // Create signal for task list
-        WritableSignal<List<Task>> tasksSignal = Signal.create(new ArrayList<>(List.of(
+        WritableSignal<List<Task>> tasksSignal = new ValueSignal<>(new ArrayList<>(List.of(
             new Task("1", "Complete project proposal", false),
             new Task("2", "Review code changes", true),
             new Task("3", "Update documentation", false)
         )));
 
         // Computed signals for task statistics
-        ReadableSignal<Integer> totalCountSignal = Signal.compute(() -> tasksSignal.get().size());
+        Signal<Integer> totalCountSignal = Signal.computed(() -> tasksSignal.value().size());
 
-        ReadableSignal<Integer> completedCountSignal = Signal.compute(() ->
-            (int) tasksSignal.get().stream().filter(Task::completed).count()
+        Signal<Integer> completedCountSignal = Signal.computed(() ->
+            (int) tasksSignal.value().stream().filter(Task::completed).count()
         );
 
-        ReadableSignal<Integer> pendingCountSignal = Signal.compute(() ->
-            totalCountSignal.get() - completedCountSignal.get()
+        Signal<Integer> pendingCountSignal = Signal.computed(() ->
+            totalCountSignal.value() - completedCountSignal.value()
         );
 
-        ReadableSignal<Double> progressSignal = Signal.compute(() -> {
-            int total = totalCountSignal.get();
+        Signal<Double> progressSignal = Signal.computed(() -> {
+            int total = totalCountSignal.value();
             if (total == 0) return 0.0;
-            return (double) completedCountSignal.get() / total;
+            return (double) completedCountSignal.value() / total;
         });
 
         // Add task form
@@ -57,9 +63,9 @@ public class UseCase10View extends VerticalLayout {
         Button addButton = new Button("Add Task", e -> {
             String title = newTaskField.getValue();
             if (!title.isEmpty()) {
-                List<Task> currentTasks = new ArrayList<>(tasksSignal.get());
+                List<Task> currentTasks = new ArrayList<>(tasksSignal.value());
                 currentTasks.add(new Task(String.valueOf(System.currentTimeMillis()), title, false));
-                tasksSignal.set(currentTasks);
+                tasksSignal.value(currentTasks);
                 newTaskField.clear();
             }
         });
@@ -69,23 +75,24 @@ public class UseCase10View extends VerticalLayout {
         // Statistics display
         Div statsDiv = new Div();
         Span totalLabel = new Span();
-        totalLabel.bindText(totalCountSignal.map(count -> "Total: " + count));
+        MissingAPI.bindText(totalLabel, totalCountSignal.map(count -> "Total: " + count));
 
         Span completedLabel = new Span();
-        completedLabel.bindText(completedCountSignal.map(count -> "Completed: " + count));
+        MissingAPI.bindText(completedLabel, completedCountSignal.map(count -> "Completed: " + count));
 
         Span pendingLabel = new Span();
-        pendingLabel.bindText(pendingCountSignal.map(count -> "Pending: " + count));
+        MissingAPI.bindText(pendingLabel, pendingCountSignal.map(count -> "Pending: " + count));
 
         ProgressBar progressBar = new ProgressBar();
-        progressBar.bindValue(progressSignal);
+        // Bind progress bar value manually since it's read-only
+        Signal.effect(() -> progressBar.setValue(progressSignal.value()));
 
         statsDiv.add(new H3("Task Statistics"), totalLabel, completedLabel, pendingLabel, progressBar);
 
         // Task lists
         VerticalLayout pendingTasksLayout = new VerticalLayout();
         pendingTasksLayout.add(new H3("Pending Tasks"));
-        pendingTasksLayout.bindChildren(tasksSignal.map(tasks ->
+        MissingAPI.bindChildren(pendingTasksLayout, tasksSignal.map(tasks ->
             tasks.stream()
                 .filter(task -> !task.completed())
                 .map(task -> createTaskItem(task, tasksSignal))
@@ -94,7 +101,7 @@ public class UseCase10View extends VerticalLayout {
 
         VerticalLayout completedTasksLayout = new VerticalLayout();
         completedTasksLayout.add(new H3("Completed Tasks"));
-        completedTasksLayout.bindChildren(tasksSignal.map(tasks ->
+        MissingAPI.bindChildren(completedTasksLayout, tasksSignal.map(tasks ->
             tasks.stream()
                 .filter(Task::completed)
                 .map(task -> createTaskItem(task, tasksSignal))
@@ -107,18 +114,18 @@ public class UseCase10View extends VerticalLayout {
     private HorizontalLayout createTaskItem(Task task, WritableSignal<List<Task>> tasksSignal) {
         Checkbox checkbox = new Checkbox(task.title(), task.completed());
         checkbox.addValueChangeListener(e -> {
-            List<Task> currentTasks = new ArrayList<>(tasksSignal.get());
+            List<Task> currentTasks = new ArrayList<>(tasksSignal.value());
             int index = currentTasks.indexOf(task);
             if (index >= 0) {
                 currentTasks.set(index, new Task(task.id(), task.title(), e.getValue()));
-                tasksSignal.set(currentTasks);
+                tasksSignal.value(currentTasks);
             }
         });
 
         Button removeButton = new Button("Remove", e -> {
-            List<Task> currentTasks = new ArrayList<>(tasksSignal.get());
+            List<Task> currentTasks = new ArrayList<>(tasksSignal.value());
             currentTasks.remove(task);
-            tasksSignal.set(currentTasks);
+            tasksSignal.value(currentTasks);
         });
         removeButton.addThemeName("error");
         removeButton.addThemeName("small");

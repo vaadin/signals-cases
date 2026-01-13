@@ -1,8 +1,14 @@
 package com.example.views;
 
+import com.example.MissingAPI;
+
+
 // Note: This code uses the proposed Signal API and will not compile yet
 
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.signals.Signal;
+import com.vaadin.signals.WritableSignal;
+import com.vaadin.signals.ValueSignal;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
@@ -19,11 +25,11 @@ public class UseCase01View extends VerticalLayout {
 
     public UseCase01View() {
         // Create signal for advanced mode state
-        WritableSignal<Boolean> advancedModeSignal = Signal.create(false);
+        WritableSignal<Boolean> advancedModeSignal = new ValueSignal<>(false);
 
         // Advanced mode checkbox
         Checkbox advancedModeCheckbox = new Checkbox("Enable Advanced Mode");
-        advancedModeCheckbox.bindValue(advancedModeSignal);
+        MissingAPI.bindValue(advancedModeCheckbox, advancedModeSignal);
 
         // Advanced settings panel
         VerticalLayout advancedPanel = new VerticalLayout();

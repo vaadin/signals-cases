@@ -1,8 +1,14 @@
 package com.example.views;
 
+import com.example.MissingAPI;
+
+
 // Note: This code uses the proposed Signal API and will not compile yet
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.signals.Signal;
+import com.vaadin.signals.WritableSignal;
+import com.vaadin.signals.ValueSignal;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
@@ -13,6 +19,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import java.util.Set;
+import java.util.function.Function;
 
 @Route(value = "use-case-08", layout = MainLayout.class)
 @PageTitle("Use Case 8: Permission-Based Component Visibility")
@@ -24,20 +31,20 @@ public class UseCase08View extends VerticalLayout {
 
     public UseCase08View() {
         // Create signal for current user role (simulating user switching)
-        WritableSignal<UserRole> currentRoleSignal = Signal.create(UserRole.VIEWER);
+        WritableSignal<UserRole> currentRoleSignal = new ValueSignal<>(UserRole.VIEWER);
 
         // Role selector (for demo purposes)
         ComboBox<UserRole> roleSelector = new ComboBox<>("Simulate User Role", UserRole.values());
         roleSelector.setValue(UserRole.VIEWER);
-        roleSelector.bindValue(currentRoleSignal);
+        MissingAPI.bindValue(roleSelector, currentRoleSignal);
 
         // Computed signal for user permissions based on role
-        ReadableSignal<Set<Permission>> permissionsSignal = Signal.compute(() ->
-            getPermissionsForRole(currentRoleSignal.get())
+        Signal<Set<Permission>> permissionsSignal = Signal.computed(() ->
+            getPermissionsForRole(currentRoleSignal.value())
         );
 
         // Helper function to create permission-based visibility signal
-        var hasPermission = (Permission permission) ->
+        Function<Permission, Signal<Boolean>> hasPermission = (Permission permission) ->
             permissionsSignal.map(perms -> perms.contains(permission));
 
         // Dashboard section
@@ -84,7 +91,7 @@ public class UseCase08View extends VerticalLayout {
         // Status indicator showing current permissions
         Div permissionsDisplay = new Div();
         permissionsDisplay.add(new H3("Your Current Permissions:"));
-        permissionsDisplay.bindText(permissionsSignal.map(perms ->
+        MissingAPI.bindText(permissionsDisplay, permissionsSignal.map(perms ->
             "Your Current Permissions: " + String.join(", ", perms.stream()
                 .map(Permission::name)
                 .toList())

@@ -1,8 +1,14 @@
 package com.example.views;
 
+import com.example.MissingAPI;
+
+
 // Note: This code uses the proposed Signal API and will not compile yet
 
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.signals.Signal;
+import com.vaadin.signals.WritableSignal;
+import com.vaadin.signals.ValueSignal;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
@@ -28,11 +34,11 @@ public class UseCase13View extends VerticalLayout {
 
     public UseCase13View() {
         // Create signal for selected invoice
-        WritableSignal<Invoice> selectedInvoiceSignal = Signal.create(null);
+        WritableSignal<Invoice> selectedInvoiceSignal = new ValueSignal<>(null);
 
         // Computed signal for invoice details
-        ReadableSignal<InvoiceDetails> invoiceDetailsSignal = Signal.compute(() -> {
-            Invoice selected = selectedInvoiceSignal.get();
+        Signal<InvoiceDetails> invoiceDetailsSignal = Signal.computed(() -> {
+            Invoice selected = selectedInvoiceSignal.value();
             return selected != null ? loadInvoiceDetails(selected.id()) : null;
         });
 
@@ -41,7 +47,7 @@ public class UseCase13View extends VerticalLayout {
         invoiceGrid.setColumns("id", "customerName", "date", "total", "status");
         invoiceGrid.setItems(loadInvoices());
         invoiceGrid.asSingleSelect().addValueChangeListener(e ->
-            selectedInvoiceSignal.set(e.getValue())
+            selectedInvoiceSignal.value(e.getValue())
         );
 
         // Detail: Invoice details panel
@@ -51,17 +57,17 @@ public class UseCase13View extends VerticalLayout {
         // Customer information
         Div customerInfo = new Div();
         Span customerName = new Span();
-        customerName.bindText(invoiceDetailsSignal.map(details ->
+        MissingAPI.bindText(customerName, invoiceDetailsSignal.map(details ->
             details != null ? "Customer: " + details.invoice().customerName() : ""
         ));
 
         Span customerEmail = new Span();
-        customerEmail.bindText(invoiceDetailsSignal.map(details ->
+        MissingAPI.bindText(customerEmail, invoiceDetailsSignal.map(details ->
             details != null ? "Email: " + details.customerEmail() : ""
         ));
 
         Span customerAddress = new Span();
-        customerAddress.bindText(invoiceDetailsSignal.map(details ->
+        MissingAPI.bindText(customerAddress, invoiceDetailsSignal.map(details ->
             details != null ? "Address: " + details.customerAddress() : ""
         ));
 
@@ -70,13 +76,13 @@ public class UseCase13View extends VerticalLayout {
         // Line items grid
         Grid<LineItem> lineItemsGrid = new Grid<>(LineItem.class);
         lineItemsGrid.setColumns("description", "quantity", "unitPrice", "total");
-        lineItemsGrid.bindItems(invoiceDetailsSignal.map(details ->
+        MissingAPI.bindItems(lineItemsGrid, invoiceDetailsSignal.map(details ->
             details != null ? details.lineItems() : List.of()
         ));
 
         // Payment status
         Span paymentStatus = new Span();
-        paymentStatus.bindText(invoiceDetailsSignal.map(details ->
+        MissingAPI.bindText(paymentStatus, invoiceDetailsSignal.map(details ->
             details != null ? "Payment Status: " + details.paymentStatus() : ""
         ));
         paymentStatus.getStyle().set("font-weight", "bold");

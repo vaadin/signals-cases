@@ -1,8 +1,14 @@
 package com.example.views;
 
+import com.example.MissingAPI;
+
+
 // Note: This code uses the proposed Signal API and will not compile yet
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.signals.Signal;
+import com.vaadin.signals.WritableSignal;
+import com.vaadin.signals.ValueSignal;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
@@ -31,42 +37,42 @@ public class UseCase14View extends VerticalLayout {
 
     public UseCase14View() {
         // Create signals for current step and form data
-        WritableSignal<Step> currentStepSignal = Signal.create(Step.PERSONAL_INFO);
-        WritableSignal<String> firstNameSignal = Signal.create("");
-        WritableSignal<String> lastNameSignal = Signal.create("");
-        WritableSignal<String> emailSignal = Signal.create("");
-        WritableSignal<String> companyNameSignal = Signal.create("");
-        WritableSignal<String> companySizeSignal = Signal.create("");
-        WritableSignal<String> industrySignal = Signal.create("");
-        WritableSignal<Plan> planSignal = Signal.create(Plan.STARTER);
+        WritableSignal<Step> currentStepSignal = new ValueSignal<>(Step.PERSONAL_INFO);
+        WritableSignal<String> firstNameSignal = new ValueSignal<>("");
+        WritableSignal<String> lastNameSignal = new ValueSignal<>("");
+        WritableSignal<String> emailSignal = new ValueSignal<>("");
+        WritableSignal<String> companyNameSignal = new ValueSignal<>("");
+        WritableSignal<String> companySizeSignal = new ValueSignal<>("");
+        WritableSignal<String> industrySignal = new ValueSignal<>("");
+        WritableSignal<Plan> planSignal = new ValueSignal<>(Plan.STARTER);
 
         // Validation signals
-        ReadableSignal<Boolean> step1ValidSignal = Signal.compute(() ->
-            !firstNameSignal.get().isEmpty() &&
-            !lastNameSignal.get().isEmpty() &&
-            emailSignal.get().contains("@")
+        Signal<Boolean> step1ValidSignal = Signal.computed(() ->
+            !firstNameSignal.value().isEmpty() &&
+            !lastNameSignal.value().isEmpty() &&
+            emailSignal.value().contains("@")
         );
 
-        ReadableSignal<Boolean> step2ValidSignal = Signal.compute(() ->
-            !companyNameSignal.get().isEmpty() &&
-            !companySizeSignal.get().isEmpty() &&
-            !industrySignal.get().isEmpty()
+        Signal<Boolean> step2ValidSignal = Signal.computed(() ->
+            !companyNameSignal.value().isEmpty() &&
+            !companySizeSignal.value().isEmpty() &&
+            !industrySignal.value().isEmpty()
         );
 
-        ReadableSignal<Boolean> step3ValidSignal = Signal.create(true); // Plan always selected
+        Signal<Boolean> step3ValidSignal = new ValueSignal<>(true); // Plan always selected
 
         // Step 1: Personal Info
         VerticalLayout step1Layout = new VerticalLayout();
         step1Layout.add(new H3("Step 1: Personal Information"));
 
         TextField firstNameField = new TextField("First Name");
-        firstNameField.bindValue(firstNameSignal);
+        MissingAPI.bindValue(firstNameField, firstNameSignal);
 
         TextField lastNameField = new TextField("Last Name");
-        lastNameField.bindValue(lastNameSignal);
+        MissingAPI.bindValue(lastNameField, lastNameSignal);
 
         EmailField emailField = new EmailField("Email");
-        emailField.bindValue(emailSignal);
+        MissingAPI.bindValue(emailField, emailSignal);
 
         step1Layout.add(firstNameField, lastNameField, emailField);
         step1Layout.bindVisible(currentStepSignal.map(step -> step == Step.PERSONAL_INFO));
@@ -76,15 +82,15 @@ public class UseCase14View extends VerticalLayout {
         step2Layout.add(new H3("Step 2: Company Information"));
 
         TextField companyNameField = new TextField("Company Name");
-        companyNameField.bindValue(companyNameSignal);
+        MissingAPI.bindValue(companyNameField, companyNameSignal);
 
         ComboBox<String> companySizeSelect = new ComboBox<>("Company Size",
             List.of("1-10", "11-50", "51-200", "201-1000", "1000+"));
-        companySizeSelect.bindValue(companySizeSignal);
+        MissingAPI.bindValue(companySizeSelect, companySizeSignal);
 
         ComboBox<String> industrySelect = new ComboBox<>("Industry",
             List.of("Technology", "Healthcare", "Finance", "Retail", "Manufacturing", "Other"));
-        industrySelect.bindValue(industrySignal);
+        MissingAPI.bindValue(industrySelect, industrySignal);
 
         step2Layout.add(companyNameField, companySizeSelect, industrySelect);
         step2Layout.bindVisible(currentStepSignal.map(step -> step == Step.COMPANY_INFO));
@@ -95,10 +101,10 @@ public class UseCase14View extends VerticalLayout {
 
         ComboBox<Plan> planSelect = new ComboBox<>("Plan", Plan.values());
         planSelect.setValue(Plan.STARTER);
-        planSelect.bindValue(planSignal);
+        MissingAPI.bindValue(planSelect, planSignal);
 
         Span planDescription = new Span();
-        planDescription.bindText(planSignal.map(plan -> switch (plan) {
+        MissingAPI.bindText(planDescription, planSignal.map(plan -> switch (plan) {
             case STARTER -> "Perfect for small teams - $29/month";
             case PROFESSIONAL -> "For growing businesses - $99/month";
             case ENTERPRISE -> "Custom solutions - Contact sales";
@@ -112,13 +118,13 @@ public class UseCase14View extends VerticalLayout {
         step4Layout.add(new H3("Step 4: Review Your Information"));
 
         Div reviewDiv = new Div();
-        reviewDiv.bindText(Signal.compute(() ->
-            "Name: " + firstNameSignal.get() + " " + lastNameSignal.get() + "\n" +
-            "Email: " + emailSignal.get() + "\n" +
-            "Company: " + companyNameSignal.get() + "\n" +
-            "Size: " + companySizeSignal.get() + "\n" +
-            "Industry: " + industrySignal.get() + "\n" +
-            "Plan: " + planSignal.get()
+        MissingAPI.bindText(reviewDiv, Signal.computed(() ->
+            "Name: " + firstNameSignal.value() + " " + lastNameSignal.value() + "\n" +
+            "Email: " + emailSignal.value() + "\n" +
+            "Company: " + companyNameSignal.value() + "\n" +
+            "Size: " + companySizeSignal.value() + "\n" +
+            "Industry: " + industrySignal.value() + "\n" +
+            "Plan: " + planSignal.value()
         ));
 
         step4Layout.add(reviewDiv);
@@ -128,30 +134,30 @@ public class UseCase14View extends VerticalLayout {
         HorizontalLayout navigationLayout = new HorizontalLayout();
 
         Button previousButton = new Button("Previous", e -> {
-            Step current = currentStepSignal.get();
+            Step current = currentStepSignal.value();
             switch (current) {
-                case COMPANY_INFO -> currentStepSignal.set(Step.PERSONAL_INFO);
-                case PLAN_SELECTION -> currentStepSignal.set(Step.COMPANY_INFO);
-                case REVIEW -> currentStepSignal.set(Step.PLAN_SELECTION);
+                case COMPANY_INFO -> currentStepSignal.value(Step.PERSONAL_INFO);
+                case PLAN_SELECTION -> currentStepSignal.value(Step.COMPANY_INFO);
+                case REVIEW -> currentStepSignal.value(Step.PLAN_SELECTION);
             }
         });
         previousButton.bindVisible(currentStepSignal.map(step -> step != Step.PERSONAL_INFO));
 
         Button nextButton = new Button("Next", e -> {
-            Step current = currentStepSignal.get();
+            Step current = currentStepSignal.value();
             switch (current) {
-                case PERSONAL_INFO -> currentStepSignal.set(Step.COMPANY_INFO);
-                case COMPANY_INFO -> currentStepSignal.set(Step.PLAN_SELECTION);
-                case PLAN_SELECTION -> currentStepSignal.set(Step.REVIEW);
+                case PERSONAL_INFO -> currentStepSignal.value(Step.COMPANY_INFO);
+                case COMPANY_INFO -> currentStepSignal.value(Step.PLAN_SELECTION);
+                case PLAN_SELECTION -> currentStepSignal.value(Step.REVIEW);
             }
         });
         nextButton.bindVisible(currentStepSignal.map(step -> step != Step.REVIEW));
-        nextButton.bindEnabled(Signal.compute(() -> {
-            Step current = currentStepSignal.get();
+        nextButton.bindEnabled(Signal.computed(() -> {
+            Step current = currentStepSignal.value();
             return switch (current) {
-                case PERSONAL_INFO -> step1ValidSignal.get();
-                case COMPANY_INFO -> step2ValidSignal.get();
-                case PLAN_SELECTION -> step3ValidSignal.get();
+                case PERSONAL_INFO -> step1ValidSignal.value();
+                case COMPANY_INFO -> step2ValidSignal.value();
+                case PLAN_SELECTION -> step3ValidSignal.value();
                 case REVIEW -> false;
             };
         }));
@@ -166,7 +172,7 @@ public class UseCase14View extends VerticalLayout {
 
         // Progress indicator
         Span progressIndicator = new Span();
-        progressIndicator.bindText(currentStepSignal.map(step -> {
+        MissingAPI.bindText(progressIndicator, currentStepSignal.map(step -> {
             int stepNumber = switch (step) {
                 case PERSONAL_INFO -> 1;
                 case COMPANY_INFO -> 2;

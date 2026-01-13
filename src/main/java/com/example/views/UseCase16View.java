@@ -1,8 +1,14 @@
 package com.example.views;
 
+import com.example.MissingAPI;
+
+
 // Note: This code uses the proposed Signal API and will not compile yet
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.signals.Signal;
+import com.vaadin.signals.WritableSignal;
+import com.vaadin.signals.ValueSignal;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.ChartType;
@@ -34,13 +40,13 @@ public class UseCase16View extends VerticalLayout {
         List<DataItem> data = loadData();
 
         // Create signal for view mode
-        WritableSignal<ViewMode> viewModeSignal = Signal.create(ViewMode.TABLE);
+        WritableSignal<ViewMode> viewModeSignal = new ValueSignal<>(ViewMode.TABLE);
 
         // View mode selector buttons
         HorizontalLayout viewModeButtons = new HorizontalLayout();
-        Button tableButton = new Button("Table View", e -> viewModeSignal.set(ViewMode.TABLE));
-        Button cardsButton = new Button("Cards View", e -> viewModeSignal.set(ViewMode.CARDS));
-        Button chartButton = new Button("Chart View", e -> viewModeSignal.set(ViewMode.CHART));
+        Button tableButton = new Button("Table View", e -> viewModeSignal.value(ViewMode.TABLE));
+        Button cardsButton = new Button("Cards View", e -> viewModeSignal.value(ViewMode.CARDS));
+        Button chartButton = new Button("Chart View", e -> viewModeSignal.value(ViewMode.CHART));
         viewModeButtons.add(tableButton, cardsButton, chartButton);
 
         // Table view
@@ -91,12 +97,12 @@ public class UseCase16View extends VerticalLayout {
 
         // Responsive behavior: default view based on viewport width
         // This would typically be set based on actual viewport detection
-        ReadableSignal<Boolean> isMobileSignal = Signal.create(false);
+        Signal<Boolean> isMobileSignal = new ValueSignal<>(false);
 
         // Auto-select view mode on first load based on device
         Signal.effect(() -> {
-            if (isMobileSignal.get() && viewModeSignal.get() == ViewMode.TABLE) {
-                viewModeSignal.set(ViewMode.CARDS);
+            if (isMobileSignal.value() && viewModeSignal.value() == ViewMode.TABLE) {
+                viewModeSignal.value(ViewMode.CARDS);
             }
         });
 
