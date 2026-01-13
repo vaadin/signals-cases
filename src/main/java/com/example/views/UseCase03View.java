@@ -45,12 +45,15 @@ public class UseCase03View extends VerticalLayout {
 
         // Form fields
         EmailField emailField = new EmailField("Email");
+        emailField.setHelperText("Valid email address required");
         MissingAPI.bindValue(emailField, emailSignal);
 
         PasswordField passwordField = new PasswordField("Password");
+        passwordField.setHelperText("Minimum 8 characters required");
         MissingAPI.bindValue(passwordField, passwordSignal);
 
         PasswordField confirmField = new PasswordField("Confirm Password");
+        confirmField.setHelperText("Must match password");
         MissingAPI.bindValue(confirmField, confirmPasswordSignal);
 
         // Submit button with multiple signal bindings
