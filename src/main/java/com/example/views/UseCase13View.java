@@ -1,158 +1,185 @@
 package com.example.views;
 
 import com.example.MissingAPI;
-
-
-// Note: This code uses the proposed Signal API and will not compile yet
-
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.WritableSignal;
-import com.vaadin.signals.ValueSignal;
+import com.example.security.CurrentUserSignal;
+import com.example.security.SecurityService;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
+import com.vaadin.signals.Signal;
 import jakarta.annotation.security.PermitAll;
 
+/**
+ * Use Case 13: Application-Wide Current User Signal
+ *
+ * Demonstrates using a shared signal for current user information that can be:
+ * - Used in multiple views and the main layout
+ * - Reactive to authentication changes (login, logout, impersonation)
+ * - Source of derived signals for role-based UI customization
+ *
+ * Key Patterns:
+ * - Application-scoped signal (Spring @Component)
+ * - Signal shared across multiple components
+ * - Integration with Spring Security AuthenticationContext
+ * - Reactive to security context changes
+ */
 @Route(value = "use-case-13", layout = MainLayout.class)
-@PageTitle("Use Case 13: Master-Detail Invoice View")
-@Menu(order = 52, title = "UC 13: Master-Detail Invoice")
+@PageTitle("Use Case 13: Current User Signal")
+@Menu(order = 40, title = "UC 13: Current User Signal")
 @PermitAll
 public class UseCase13View extends VerticalLayout {
 
-    record Invoice(String id, String customerName, LocalDate date, BigDecimal total, String status) {}
-    record LineItem(String description, int quantity, BigDecimal unitPrice, BigDecimal total) {}
-    record InvoiceDetails(Invoice invoice, String customerEmail, String customerAddress,
-                         List<LineItem> lineItems, String paymentStatus) {}
+    public UseCase13View(CurrentUserSignal currentUserSignal, SecurityService securityService) {
+        setSpacing(true);
+        setPadding(true);
 
-    public UseCase13View() {
-        // Create signal for selected invoice
-        WritableSignal<Invoice> selectedInvoiceSignal = new ValueSignal<>(null);
+        H2 title = new H2("Use Case 13: Application-Wide Current User Signal");
 
-        // Computed signal for invoice details
-        Signal<InvoiceDetails> invoiceDetailsSignal = Signal.computed(() -> {
-            Invoice selected = selectedInvoiceSignal.value();
-            return selected != null ? loadInvoiceDetails(selected.id()) : null;
+        Paragraph description = new Paragraph(
+            "This use case demonstrates an application-scoped signal holding current user information. " +
+            "The signal is shared across views and the main layout, and reacts to authentication changes " +
+            "including login, logout, and impersonation (via Vaadin Copilot)."
+        );
+
+        // Current user info display
+        Div userInfoBox = new Div();
+        userInfoBox.getStyle()
+            .set("background-color", "#e8f5e9")
+            .set("padding", "1.5em")
+            .set("border-radius", "8px")
+            .set("margin", "1em 0");
+
+        H3 userInfoTitle = new H3("Current User from Signal");
+        userInfoTitle.getStyle().set("margin-top", "0");
+
+        Span usernameDisplay = new Span();
+        usernameDisplay.getStyle()
+            .set("font-size", "1.2em")
+            .set("font-weight", "bold")
+            .set("display", "block")
+            .set("margin-bottom", "0.5em");
+        MissingAPI.bindText(usernameDisplay,
+            currentUserSignal.getUserSignal().map(user ->
+                user.isAuthenticated() ? "👤 " + user.getUsername() : "👤 Not logged in"
+            )
+        );
+
+        Span rolesDisplay = new Span();
+        rolesDisplay.getStyle()
+            .set("display", "block")
+            .set("color", "var(--lumo-secondary-text-color)");
+        MissingAPI.bindText(rolesDisplay,
+            currentUserSignal.getUserSignal().map(user -> {
+                if (!user.isAuthenticated()) {
+                    return "Anonymous user";
+                }
+                return "Roles: " + String.join(", ", user.getRoles());
+            })
+        );
+
+        Button refreshButton = new Button("Refresh Signal", event -> {
+            currentUserSignal.refresh();
         });
+        refreshButton.addThemeName("small");
 
-        // Master: Invoice grid
-        Grid<Invoice> invoiceGrid = new Grid<>(Invoice.class);
-        invoiceGrid.setColumns("id", "customerName", "date", "total", "status");
-        invoiceGrid.setItems(loadInvoices());
-        invoiceGrid.asSingleSelect().addValueChangeListener(e ->
-            selectedInvoiceSignal.value(e.getValue())
+        userInfoBox.add(userInfoTitle, usernameDisplay, rolesDisplay, refreshButton);
+
+        // Role-based content sections
+        H3 roleBasedTitle = new H3("Role-Based UI Customization");
+
+        // Viewer content
+        Div viewerSection = new Div();
+        viewerSection.getStyle()
+            .set("padding", "1em")
+            .set("background-color", "#e3f2fd")
+            .set("border-radius", "4px")
+            .set("margin-bottom", "0.5em");
+        viewerSection.add(new Paragraph("📖 Viewer Content - You can view dashboards"));
+        Signal<Boolean> hasViewerRole = currentUserSignal.getUserSignal()
+            .map(user -> user.hasAnyRole("VIEWER", "EDITOR", "ADMIN", "SUPER_ADMIN"));
+        viewerSection.bindVisible(hasViewerRole);
+
+        // Editor content
+        Div editorSection = new Div();
+        editorSection.getStyle()
+            .set("padding", "1em")
+            .set("background-color", "#fff3e0")
+            .set("border-radius", "4px")
+            .set("margin-bottom", "0.5em");
+        editorSection.add(new Paragraph("✏️ Editor Content - You can edit content"));
+        Signal<Boolean> hasEditorRole = currentUserSignal.getUserSignal()
+            .map(user -> user.hasAnyRole("EDITOR", "ADMIN", "SUPER_ADMIN"));
+        editorSection.bindVisible(hasEditorRole);
+
+        // Admin content
+        Div adminSection = new Div();
+        adminSection.getStyle()
+            .set("padding", "1em")
+            .set("background-color", "#fce4ec")
+            .set("border-radius", "4px")
+            .set("margin-bottom", "0.5em");
+        adminSection.add(new Paragraph("⚙️ Admin Content - You can manage users and settings"));
+        Signal<Boolean> hasAdminRole = currentUserSignal.getUserSignal()
+            .map(user -> user.hasAnyRole("ADMIN", "SUPER_ADMIN"));
+        adminSection.bindVisible(hasAdminRole);
+
+        // Super Admin content
+        Div superAdminSection = new Div();
+        superAdminSection.getStyle()
+            .set("padding", "1em")
+            .set("background-color", "#f3e5f5")
+            .set("border-radius", "4px")
+            .set("margin-bottom", "0.5em");
+        superAdminSection.add(new Paragraph("🔒 Super Admin Content - Full system access"));
+        Signal<Boolean> hasSuperAdminRole = currentUserSignal.getUserSignal()
+            .map(user -> user.hasRole("SUPER_ADMIN"));
+        superAdminSection.bindVisible(hasSuperAdminRole);
+
+        // Actions
+        HorizontalLayout actions = new HorizontalLayout();
+        actions.setSpacing(true);
+
+        Button logoutButton = new Button("Logout", event -> {
+            securityService.logout();
+            currentUserSignal.refresh();
+        });
+        logoutButton.addThemeName("error");
+
+        actions.add(logoutButton);
+
+        // Info about signal sharing
+        Div infoBox = new Div();
+        infoBox.getStyle()
+            .set("background-color", "#e0f7fa")
+            .set("padding", "1em")
+            .set("border-radius", "4px")
+            .set("margin-top", "1em")
+            .set("font-style", "italic");
+        infoBox.add(new Paragraph(
+            "💡 This signal is application-scoped and can be injected into any view or the main layout. " +
+            "Try using Vaadin Copilot's impersonation feature to switch roles and see the UI update reactively. " +
+            "The MainLayout also uses this signal to display your username in the header."
+        ));
+
+        add(
+            title,
+            description,
+            userInfoBox,
+            roleBasedTitle,
+            viewerSection,
+            editorSection,
+            adminSection,
+            superAdminSection,
+            actions,
+            infoBox
         );
-
-        // Detail: Invoice details panel
-        VerticalLayout detailsPanel = new VerticalLayout();
-        detailsPanel.add(new H3("Invoice Details"));
-
-        // Customer information
-        Div customerInfo = new Div();
-        Span customerName = new Span();
-        MissingAPI.bindText(customerName, invoiceDetailsSignal.map(details ->
-            details != null ? "Customer: " + details.invoice().customerName() : ""
-        ));
-
-        Span customerEmail = new Span();
-        MissingAPI.bindText(customerEmail, invoiceDetailsSignal.map(details ->
-            details != null ? "Email: " + details.customerEmail() : ""
-        ));
-
-        Span customerAddress = new Span();
-        MissingAPI.bindText(customerAddress, invoiceDetailsSignal.map(details ->
-            details != null ? "Address: " + details.customerAddress() : ""
-        ));
-
-        customerInfo.add(customerName, customerEmail, customerAddress);
-
-        // Line items grid
-        Grid<LineItem> lineItemsGrid = new Grid<>(LineItem.class);
-        lineItemsGrid.setColumns("description", "quantity", "unitPrice", "total");
-        MissingAPI.bindItems(lineItemsGrid, invoiceDetailsSignal.map(details ->
-            details != null ? details.lineItems() : List.of()
-        ));
-
-        // Payment status
-        Span paymentStatus = new Span();
-        MissingAPI.bindText(paymentStatus, invoiceDetailsSignal.map(details ->
-            details != null ? "Payment Status: " + details.paymentStatus() : ""
-        ));
-        paymentStatus.getStyle().set("font-weight", "bold");
-
-        detailsPanel.add(customerInfo, new H3("Line Items"), lineItemsGrid, paymentStatus);
-        detailsPanel.bindVisible(invoiceDetailsSignal.map(details -> details != null));
-
-        // Layout
-        HorizontalLayout mainLayout = new HorizontalLayout(invoiceGrid, detailsPanel);
-        mainLayout.setSizeFull();
-        add(new H3("Invoices"), mainLayout);
-    }
-
-    private List<Invoice> loadInvoices() {
-        // Stub implementation - returns mock data
-        return List.of(
-            new Invoice("INV-001", "Acme Corp", LocalDate.of(2025, 1, 15), new BigDecimal("1250.00"), "Paid"),
-            new Invoice("INV-002", "TechStart Inc", LocalDate.of(2025, 1, 16), new BigDecimal("3400.50"), "Pending"),
-            new Invoice("INV-003", "Global Solutions", LocalDate.of(2025, 1, 17), new BigDecimal("890.00"), "Paid"),
-            new Invoice("INV-004", "Beta Corp", LocalDate.of(2025, 1, 18), new BigDecimal("2100.75"), "Overdue")
-        );
-    }
-
-    private InvoiceDetails loadInvoiceDetails(String invoiceId) {
-        // Stub implementation - returns mock data
-        return switch (invoiceId) {
-            case "INV-001" -> new InvoiceDetails(
-                new Invoice("INV-001", "Acme Corp", LocalDate.of(2025, 1, 15), new BigDecimal("1250.00"), "Paid"),
-                "contact@acmecorp.com",
-                "123 Main St, New York, NY 10001",
-                List.of(
-                    new LineItem("Software License", 5, new BigDecimal("200.00"), new BigDecimal("1000.00")),
-                    new LineItem("Support Package", 1, new BigDecimal("250.00"), new BigDecimal("250.00"))
-                ),
-                "Paid on 2025-01-20"
-            );
-            case "INV-002" -> new InvoiceDetails(
-                new Invoice("INV-002", "TechStart Inc", LocalDate.of(2025, 1, 16), new BigDecimal("3400.50"), "Pending"),
-                "info@techstart.com",
-                "456 Tech Ave, San Francisco, CA 94102",
-                List.of(
-                    new LineItem("Enterprise License", 10, new BigDecimal("300.00"), new BigDecimal("3000.00")),
-                    new LineItem("Training Session", 2, new BigDecimal("200.00"), new BigDecimal("400.00")),
-                    new LineItem("Setup Fee", 1, new BigDecimal("0.50"), new BigDecimal("0.50"))
-                ),
-                "Payment pending - Due 2025-02-15"
-            );
-            case "INV-003" -> new InvoiceDetails(
-                new Invoice("INV-003", "Global Solutions", LocalDate.of(2025, 1, 17), new BigDecimal("890.00"), "Paid"),
-                "billing@globalsolutions.com",
-                "789 Business Blvd, Boston, MA 02108",
-                List.of(
-                    new LineItem("Consulting Hours", 8, new BigDecimal("100.00"), new BigDecimal("800.00")),
-                    new LineItem("Travel Expenses", 1, new BigDecimal("90.00"), new BigDecimal("90.00"))
-                ),
-                "Paid on 2025-01-25"
-            );
-            case "INV-004" -> new InvoiceDetails(
-                new Invoice("INV-004", "Beta Corp", LocalDate.of(2025, 1, 18), new BigDecimal("2100.75"), "Overdue"),
-                "accounts@betacorp.com",
-                "321 Commerce St, Chicago, IL 60601",
-                List.of(
-                    new LineItem("Annual Subscription", 1, new BigDecimal("2000.00"), new BigDecimal("2000.00")),
-                    new LineItem("Extra Storage", 1, new BigDecimal("100.75"), new BigDecimal("100.75"))
-                ),
-                "OVERDUE - Payment was due 2025-01-31"
-            );
-            default -> null;
-        };
     }
 }

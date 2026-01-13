@@ -26,18 +26,18 @@ import java.util.List;
 import java.util.Set;
 import jakarta.annotation.security.PermitAll;
 
-@Route(value = "use-case-17", layout = MainLayout.class)
-@PageTitle("Use Case 17: Employee Management Grid with Dynamic Editability")
-@Menu(order = 63, title = "UC 17: Grid Providers")
+@Route(value = "use-case-10", layout = MainLayout.class)
+@PageTitle("Use Case 10: Employee Management Grid with Dynamic Editability")
+@Menu(order = 63, title = "UC 10: Grid Providers")
 @PermitAll
-public class UseCase17View extends VerticalLayout {
+public class UseCase10View extends VerticalLayout {
 
     enum UserRole { VIEWER, EDITOR, ADMIN }
     enum EmployeeStatus { ACTIVE, ON_LEAVE, TERMINATED }
 
     record Employee(String id, String name, String department, EmployeeStatus status, double salary) {}
 
-    public UseCase17View() {
+    public UseCase10View() {
         // Create signals for permissions and edit mode
         WritableSignal<UserRole> userRoleSignal = new ValueSignal<>(UserRole.VIEWER);
         WritableSignal<Boolean> editModeSignal = new ValueSignal<>(false);

@@ -1,102 +1,189 @@
 package com.example.views;
 
 import com.example.MissingAPI;
-
-
-// Note: This code uses the proposed Signal API and will not compile yet
+import com.example.security.SecurityService;
 
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.WritableSignal;
-import com.vaadin.signals.ValueSignal;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.EmailField;
-import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.signals.Signal;
+import com.vaadin.signals.ValueSignal;
+import com.vaadin.signals.WritableSignal;
 import jakarta.annotation.security.PermitAll;
-import java.util.concurrent.CompletableFuture;
 
-@Route(value = "use-case-03", layout = MainLayout.class)
-@PageTitle("Use Case 3: Dynamic Button State")
-@Menu(order = 12, title = "UC 3: Dynamic Button State")
+import java.util.Set;
+import java.util.function.Function;
+
+@Route(value = "use-case-08", layout = MainLayout.class)
+@PageTitle("Use Case 3: Permission-Based Component Visibility")
+@Menu(order = 32, title = "UC 3: Permission-Based UI")
 @PermitAll
 public class UseCase03View extends VerticalLayout {
 
-    enum SubmissionState { IDLE, SUBMITTING, SUCCESS, ERROR }
+    enum Permission { VIEW_DASHBOARD, EDIT_CONTENT, DELETE_CONTENT, MANAGE_USERS, VIEW_LOGS, SYSTEM_SETTINGS }
 
-    public UseCase03View() {
-        // Field signals
-        WritableSignal<String> emailSignal = new ValueSignal<>("");
-        WritableSignal<String> passwordSignal = new ValueSignal<>("");
-        WritableSignal<String> confirmPasswordSignal = new ValueSignal<>("");
-        WritableSignal<SubmissionState> submissionStateSignal =
-            new ValueSignal<>(SubmissionState.IDLE);
+    private final SecurityService securityService;
 
-        // Computed validity signal
-        Signal<Boolean> isValidSignal = Signal.computed(() -> {
-            String email = emailSignal.value();
-            String password = passwordSignal.value();
-            String confirm = confirmPasswordSignal.value();
+    public UseCase03View(SecurityService securityService) {
+        this.securityService = securityService;
 
-            return email.contains("@")
-                && password.length() >= 8
-                && password.equals(confirm);
-        });
+        // Get current user info from Spring Security
+        String username = securityService.getUsername();
+        Set<String> roles = securityService.getRoles();
 
-        // Form fields
-        EmailField emailField = new EmailField("Email");
-        emailField.setHelperText("Valid email address required");
-        MissingAPI.bindValue(emailField, emailSignal);
+        // Create signal for user permissions based on actual Spring Security roles
+        WritableSignal<Set<Permission>> permissionsSignal = new ValueSignal<Set<Permission>>(
+            getPermissionsForRoles(roles)
+        );
 
-        PasswordField passwordField = new PasswordField("Password");
-        passwordField.setHelperText("Minimum 8 characters required");
-        MissingAPI.bindValue(passwordField, passwordSignal);
+        // User info display
+        Div userInfoBox = new Div();
+        userInfoBox.getStyle()
+            .set("background-color", "#e8f5e9")
+            .set("padding", "1em")
+            .set("border-radius", "4px")
+            .set("margin-bottom", "1em");
 
-        PasswordField confirmField = new PasswordField("Confirm Password");
-        confirmField.setHelperText("Must match password");
-        MissingAPI.bindValue(confirmField, confirmPasswordSignal);
+        H3 userInfoTitle = new H3("Current User Information");
+        userInfoTitle.getStyle().set("margin-top", "0");
 
-        // Submit button with multiple signal bindings
-        Button submitButton = new Button();
-
-        // Bind enabled state: enabled when valid AND not submitting
-        submitButton.bindEnabled(Signal.computed(() ->
-            isValidSignal.value()
-            && submissionStateSignal.value() == SubmissionState.IDLE
+        Paragraph userInfo = new Paragraph();
+        userInfo.getStyle()
+            .set("font-family", "monospace")
+            .set("white-space", "pre-line");
+        userInfo.setText(String.format(
+            "Username: %s\nRoles: %s\nPermissions: %d granted",
+            username,
+            String.join(", ", roles),
+            permissionsSignal.value().size()
         ));
 
-        // Bind button text based on submission state
-        MissingAPI.bindText(submitButton, submissionStateSignal.map(state -> switch(state) {
-            case IDLE -> "Create Account";
-            case SUBMITTING -> "Creating...";
-            case SUCCESS -> "Success!";
-            case ERROR -> "Retry";
+        Button logoutButton = new Button("Logout", event -> securityService.logout());
+        logoutButton.addThemeName("error");
+        logoutButton.addThemeName("small");
+
+        userInfoBox.add(userInfoTitle, userInfo, logoutButton);
+
+        // Helper function to create permission-based visibility signal
+        Function<Permission, Signal<Boolean>> hasPermission = (Permission permission) ->
+            permissionsSignal.map(perms -> perms.contains(permission));
+
+        // Dashboard section
+        Div dashboardSection = new Div();
+        dashboardSection.add(new H3("Dashboard"), new Div("Dashboard content here..."));
+        dashboardSection.bindVisible(hasPermission.apply(Permission.VIEW_DASHBOARD));
+
+        // Content editing buttons
+        HorizontalLayout editButtons = new HorizontalLayout();
+        Button editButton = new Button("Edit Content");
+        editButton.bindVisible(hasPermission.apply(Permission.EDIT_CONTENT));
+
+        Button deleteButton = new Button("Delete Content");
+        deleteButton.bindVisible(hasPermission.apply(Permission.DELETE_CONTENT));
+        deleteButton.addThemeName("error");
+
+        editButtons.add(editButton, deleteButton);
+
+        // User management section
+        Div userManagementSection = new Div();
+        userManagementSection.add(
+            new H3("User Management"),
+            new Button("Add User"),
+            new Button("Remove User"),
+            new Button("Edit Permissions")
+        );
+        userManagementSection.bindVisible(hasPermission.apply(Permission.MANAGE_USERS));
+
+        // System logs section
+        Div logsSection = new Div();
+        logsSection.add(new H3("System Logs"), new Div("Log entries..."));
+        logsSection.bindVisible(hasPermission.apply(Permission.VIEW_LOGS));
+
+        // System settings section
+        Div settingsSection = new Div();
+        settingsSection.add(
+            new H3("System Settings"),
+            new Button("Configure System"),
+            new Button("Backup Database"),
+            new Button("Manage Integrations")
+        );
+        settingsSection.bindVisible(hasPermission.apply(Permission.SYSTEM_SETTINGS));
+
+        // Status indicator showing current permissions
+        Div permissionsDisplay = new Div();
+        permissionsDisplay.getStyle()
+            .set("background-color", "#fff3e0")
+            .set("padding", "1em")
+            .set("border-radius", "4px")
+            .set("margin-top", "1em");
+
+        Span permissionsTitle = new Span("Visible Sections Based On Your Permissions:");
+        permissionsTitle.getStyle()
+            .set("font-weight", "bold")
+            .set("display", "block")
+            .set("margin-bottom", "0.5em");
+
+        Span permissionsList = new Span();
+        MissingAPI.bindText(permissionsList, permissionsSignal.map(perms -> {
+            if (perms == null || perms.isEmpty()) {
+                return "None";
+            }
+            StringBuilder sb = new StringBuilder();
+            boolean first = true;
+            for (Object p : perms) {
+                if (!first) sb.append(", ");
+                sb.append(p.toString());
+                first = false;
+            }
+            return sb.toString();
         }));
 
-        // Bind theme variant
-        MissingAPI.bindThemeName(submitButton, submissionStateSignal.map(state ->
-            state == SubmissionState.SUCCESS ? "success" : "primary"
-        ));
+        permissionsDisplay.add(permissionsTitle, permissionsList);
 
-        submitButton.addClickListener(e -> {
-            submissionStateSignal.value(SubmissionState.SUBMITTING);
-            // Simulate async submission
-            CompletableFuture.runAsync(() -> {
-                try {
-                    Thread.sleep(2000);
-                    getUI().ifPresent(ui -> ui.access(() ->
-                        submissionStateSignal.value(SubmissionState.SUCCESS)
-                    ));
-                } catch (Exception ex) {
-                    getUI().ifPresent(ui -> ui.access(() ->
-                        submissionStateSignal.value(SubmissionState.ERROR)
-                    ));
-                }
-            });
-        });
+        // Info about impersonation
+        Div impersonationHint = new Div();
+        impersonationHint.getStyle()
+            .set("background-color", "#e3f2fd")
+            .set("padding", "1em")
+            .set("border-radius", "4px")
+            .set("margin-top", "1em")
+            .set("font-style", "italic");
+        impersonationHint.setText(
+            "💡 Tip: Use Vaadin Copilot's impersonation feature to test different user roles without logging out"
+        );
 
-        add(emailField, passwordField, confirmField, submitButton);
+        add(userInfoBox, permissionsDisplay, impersonationHint,
+            dashboardSection, editButtons, userManagementSection, logsSection, settingsSection);
+    }
+
+    private Set<Permission> getPermissionsForRoles(Set<String> roles) {
+        // Map Spring Security roles to application permissions
+        Set<Permission> permissions = new java.util.HashSet<>();
+
+        if (roles.contains("VIEWER")) {
+            permissions.add(Permission.VIEW_DASHBOARD);
+        }
+        if (roles.contains("EDITOR")) {
+            permissions.add(Permission.VIEW_DASHBOARD);
+            permissions.add(Permission.EDIT_CONTENT);
+        }
+        if (roles.contains("ADMIN")) {
+            permissions.add(Permission.VIEW_DASHBOARD);
+            permissions.add(Permission.EDIT_CONTENT);
+            permissions.add(Permission.DELETE_CONTENT);
+            permissions.add(Permission.MANAGE_USERS);
+        }
+        if (roles.contains("SUPER_ADMIN")) {
+            permissions.addAll(Set.of(Permission.values()));
+        }
+
+        return permissions;
     }
 }

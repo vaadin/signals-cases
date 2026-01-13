@@ -1,93 +1,317 @@
 package com.example.views;
 
 import com.example.MissingAPI;
-
-
-// Note: This code uses the proposed Signal API and will not compile yet
-
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.WritableSignal;
-import com.vaadin.signals.ValueSignal;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-
-import java.util.List;
-import java.util.Map;
+import com.vaadin.flow.shared.Registration;
+import com.vaadin.signals.Signal;
+import com.vaadin.signals.ValueSignal;
+import com.vaadin.signals.WritableSignal;
 import jakarta.annotation.security.PermitAll;
 
+/**
+ * Use Case 11: Responsive Layout with Window Size Signal
+ *
+ * Demonstrates using browser window size as a reactive signal to:
+ * - Show/hide components based on screen size
+ * - Switch between mobile and desktop layouts
+ * - Adjust component configurations for different viewports
+ *
+ * Key Patterns:
+ * - Signal from browser window resize events
+ * - Debounced browser event handling
+ * - Computed signals for breakpoint detection
+ * - Responsive component visibility
+ */
 @Route(value = "use-case-11", layout = MainLayout.class)
-@PageTitle("Use Case 11: Cascading Location Selector")
-@Menu(order = 50, title = "UC 11: Cascading Selector")
+@PageTitle("Use Case 11: Responsive Layout")
+@Menu(order = 30, title = "UC 11: Responsive Layout")
 @PermitAll
 public class UseCase11View extends VerticalLayout {
 
+    public static class WindowSize {
+        private final int width;
+        private final int height;
+
+        public WindowSize(int width, int height) {
+            this.width = width;
+            this.height = height;
+        }
+
+        public int getWidth() {
+            return width;
+        }
+
+        public int getHeight() {
+            return height;
+        }
+
+        public boolean isSmallScreen() {
+            return width < 768; // Mobile breakpoint
+        }
+
+        public boolean isMediumScreen() {
+            return width >= 768 && width < 1024; // Tablet breakpoint
+        }
+
+        public boolean isLargeScreen() {
+            return width >= 1024; // Desktop breakpoint
+        }
+
+        @Override
+        public String toString() {
+            return width + "×" + height + "px";
+        }
+    }
+
+    private final WritableSignal<WindowSize> windowSizeSignal = new ValueSignal<>(new WindowSize(1024, 768));
+    private Registration resizeRegistration;
+
     public UseCase11View() {
-        // Create signals for selections
-        WritableSignal<String> countrySignal = new ValueSignal<>(null);
-        WritableSignal<String> stateSignal = new ValueSignal<>(null);
-        WritableSignal<String> citySignal = new ValueSignal<>(null);
+        setSpacing(true);
+        setPadding(true);
 
-        // Country selector
-        ComboBox<String> countrySelect = new ComboBox<>("Country");
-        countrySelect.setItems(loadCountries());
-        MissingAPI.bindValue(countrySelect, countrySignal);
+        H2 title = new H2("Use Case 11: Responsive Layout with Window Size Signal");
 
-        // State selector - computed items based on country
-        ComboBox<String> stateSelect = new ComboBox<>("State/Province");
-        MissingAPI.bindItems(stateSelect, countrySignal.map(country -> {
-            stateSignal.value(null); // Reset state when country changes
-            return country != null ? loadStates(country) : List.of();
-        }));
-        MissingAPI.bindValue(stateSelect, stateSignal);
-        stateSelect.bindEnabled(countrySignal.map(country -> country != null));
-
-        // City selector - computed items based on state
-        ComboBox<String> citySelect = new ComboBox<>("City");
-        MissingAPI.bindItems(citySelect, stateSignal.map(state -> {
-            citySignal.value(null); // Reset city when state changes
-            return state != null ? loadCities(countrySignal.value(), state) : List.of();
-        }));
-        MissingAPI.bindValue(citySelect, citySignal);
-        citySelect.bindEnabled(stateSignal.map(state -> state != null));
-
-        add(countrySelect, stateSelect, citySelect);
-    }
-
-    private List<String> loadCountries() {
-        // Stub implementation - returns mock data
-        return List.of("United States", "Canada", "United Kingdom", "Germany");
-    }
-
-    private List<String> loadStates(String country) {
-        // Stub implementation - returns mock data
-        Map<String, List<String>> statesByCountry = Map.of(
-            "United States", List.of("California", "Texas", "New York", "Florida"),
-            "Canada", List.of("Ontario", "Quebec", "British Columbia", "Alberta"),
-            "United Kingdom", List.of("England", "Scotland", "Wales", "Northern Ireland"),
-            "Germany", List.of("Bavaria", "Berlin", "Hamburg", "Hesse")
+        Paragraph description = new Paragraph(
+            "This use case demonstrates responsive UI adaptation based on browser window size. " +
+            "The window size is exposed as a reactive signal, allowing components to show/hide " +
+            "and adjust their layout based on screen breakpoints. Try resizing your browser window!"
         );
-        return statesByCountry.getOrDefault(country, List.of());
+
+        // Window size display
+        Div sizeInfoBox = new Div();
+        sizeInfoBox.getStyle()
+            .set("background-color", "#e3f2fd")
+            .set("padding", "1em")
+            .set("border-radius", "4px")
+            .set("margin", "1em 0");
+
+        H3 sizeTitle = new H3("Current Window Size");
+        sizeTitle.getStyle().set("margin-top", "0");
+
+        Paragraph sizeDisplay = new Paragraph();
+        sizeDisplay.getStyle()
+            .set("font-family", "monospace")
+            .set("font-size", "1.2em")
+            .set("font-weight", "bold");
+        Signal<String> sizeText = windowSizeSignal.map(WindowSize::toString);
+        MissingAPI.bindText(sizeDisplay, sizeText);
+
+        Paragraph breakpointDisplay = new Paragraph();
+        Signal<String> breakpointText = windowSizeSignal.map(size -> {
+            if (size.isSmallScreen()) return "📱 Small Screen (Mobile)";
+            if (size.isMediumScreen()) return "💻 Medium Screen (Tablet)";
+            return "🖥️ Large Screen (Desktop)";
+        });
+        MissingAPI.bindText(breakpointDisplay, breakpointText);
+
+        sizeInfoBox.add(sizeTitle, sizeDisplay, breakpointDisplay);
+
+        // Mobile-only content
+        Div mobileSection = createSection("📱 Mobile-Only Content",
+            "This section is only visible on small screens (width < 768px). " +
+            "Perfect for mobile-specific navigation or simplified UI.",
+            "#fff3e0");
+        Signal<Boolean> isSmallScreen = windowSizeSignal.map(WindowSize::isSmallScreen);
+        MissingAPI.bindVisible(mobileSection, isSmallScreen);
+
+        // Tablet-only content
+        Div tabletSection = createSection("💻 Tablet-Only Content",
+            "This section appears on medium screens (768px ≤ width < 1024px). " +
+            "Good for tablet-optimized layouts.",
+            "#f3e5f5");
+        Signal<Boolean> isMediumScreen = windowSizeSignal.map(WindowSize::isMediumScreen);
+        MissingAPI.bindVisible(tabletSection, isMediumScreen);
+
+        // Desktop-only content
+        Div desktopSection = createSection("🖥️ Desktop-Only Content",
+            "This section is for large screens (width ≥ 1024px). " +
+            "Can show advanced features and detailed information.",
+            "#e8f5e9");
+        Signal<Boolean> isLargeScreen = windowSizeSignal.map(WindowSize::isLargeScreen);
+        MissingAPI.bindVisible(desktopSection, isLargeScreen);
+
+        // Responsive card grid
+        H3 cardGridTitle = new H3("Responsive Card Grid");
+
+        // Use different layouts based on screen size
+        Component cardGrid = createResponsiveCardGrid();
+
+        // Test controls
+        Div controlsBox = new Div();
+        controlsBox.getStyle()
+            .set("background-color", "#fff9c4")
+            .set("padding", "1em")
+            .set("border-radius", "4px")
+            .set("margin-top", "1em");
+
+        Paragraph controlsLabel = new Paragraph("Simulate Screen Sizes:");
+        controlsLabel.getStyle().set("font-weight", "bold");
+
+        HorizontalLayout testButtons = new HorizontalLayout();
+        testButtons.setSpacing(true);
+
+        Button mobileBtn = new Button("📱 Mobile (375×667)", event ->
+            windowSizeSignal.value(new WindowSize(375, 667)));
+        mobileBtn.addThemeName("small");
+
+        Button tabletBtn = new Button("💻 Tablet (768×1024)", event ->
+            windowSizeSignal.value(new WindowSize(768, 1024)));
+        tabletBtn.addThemeName("small");
+
+        Button desktopBtn = new Button("🖥️ Desktop (1920×1080)", event ->
+            windowSizeSignal.value(new WindowSize(1920, 1080)));
+        desktopBtn.addThemeName("small");
+
+        Button resetBtn = new Button("↻ Detect Actual Size", event ->
+            detectWindowSize());
+        resetBtn.addThemeName("small");
+
+        testButtons.add(mobileBtn, tabletBtn, desktopBtn, resetBtn);
+
+        controlsBox.add(controlsLabel, testButtons);
+
+        // Info box
+        Div infoBox = new Div();
+        infoBox.getStyle()
+            .set("background-color", "#e0f7fa")
+            .set("padding", "1em")
+            .set("border-radius", "4px")
+            .set("margin-top", "1em")
+            .set("font-style", "italic");
+        infoBox.add(new Paragraph(
+            "💡 The window size signal is updated from browser resize events with debouncing. " +
+            "In a real application, this pattern enables fully responsive UIs without media queries, " +
+            "with the added benefit of reactive state management. Try resizing the browser window " +
+            "or use the test buttons above."
+        ));
+
+        add(
+            title,
+            description,
+            sizeInfoBox,
+            mobileSection,
+            tabletSection,
+            desktopSection,
+            cardGridTitle,
+            cardGrid,
+            controlsBox,
+            infoBox
+        );
     }
 
-    private List<String> loadCities(String country, String state) {
-        // Stub implementation - returns mock data
-        Map<String, Map<String, List<String>>> citiesByState = Map.of(
-            "United States", Map.of(
-                "California", List.of("Los Angeles", "San Francisco", "San Diego", "Sacramento"),
-                "Texas", List.of("Houston", "Austin", "Dallas", "San Antonio"),
-                "New York", List.of("New York City", "Buffalo", "Rochester", "Albany"),
-                "Florida", List.of("Miami", "Orlando", "Tampa", "Jacksonville")
-            ),
-            "Canada", Map.of(
-                "Ontario", List.of("Toronto", "Ottawa", "Mississauga", "Hamilton"),
-                "Quebec", List.of("Montreal", "Quebec City", "Laval", "Gatineau"),
-                "British Columbia", List.of("Vancouver", "Victoria", "Kelowna", "Burnaby"),
-                "Alberta", List.of("Calgary", "Edmonton", "Red Deer", "Lethbridge")
-            )
+    private Div createSection(String title, String content, String backgroundColor) {
+        Div section = new Div();
+        section.getStyle()
+            .set("background-color", backgroundColor)
+            .set("padding", "1.5em")
+            .set("border-radius", "8px")
+            .set("margin", "0.5em 0");
+
+        H3 sectionTitle = new H3(title);
+        sectionTitle.getStyle()
+            .set("margin-top", "0")
+            .set("margin-bottom", "0.5em");
+
+        Paragraph sectionContent = new Paragraph(content);
+        sectionContent.getStyle().set("margin", "0");
+
+        section.add(sectionTitle, sectionContent);
+        return section;
+    }
+
+    private Component createResponsiveCardGrid() {
+        Div gridContainer = new Div();
+
+        // Create sample cards
+        for (int i = 1; i <= 6; i++) {
+            Div card = new Div();
+            card.getStyle()
+                .set("background-color", "#ffffff")
+                .set("border", "1px solid #e0e0e0")
+                .set("border-radius", "4px")
+                .set("padding", "1em")
+                .set("margin", "0.5em")
+                .set("flex", "1 1 200px")
+                .set("min-width", "150px");
+
+            H3 cardTitle = new H3("Card " + i);
+            cardTitle.getStyle()
+                .set("margin", "0 0 0.5em 0")
+                .set("font-size", "1em");
+
+            Paragraph cardContent = new Paragraph("Sample card content");
+            cardContent.getStyle().set("margin", "0");
+
+            card.add(cardTitle, cardContent);
+            gridContainer.add(card);
+        }
+
+        // Set responsive flex layout
+        Signal<String> flexDirection = windowSizeSignal.map(size -> {
+            if (size.isSmallScreen()) return "column"; // Stack vertically on mobile
+            return "row"; // Row layout on larger screens
+        });
+
+        Signal<String> flexWrap = windowSizeSignal.map(size ->
+            size.isSmallScreen() ? "nowrap" : "wrap"
         );
-        return citiesByState.getOrDefault(country, Map.of()).getOrDefault(state, List.of());
+
+        gridContainer.getStyle()
+            .set("display", "flex")
+            .set("margin", "1em 0");
+
+        MissingAPI.bindStyle(gridContainer, "flex-direction", flexDirection);
+        MissingAPI.bindStyle(gridContainer, "flex-wrap", flexWrap);
+
+        return gridContainer;
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+
+        UI ui = attachEvent.getUI();
+
+        // Detect initial window size
+        detectWindowSize();
+
+        // Set up resize listener with debouncing (simulated here)
+        // In real implementation, would use Page.retrieveExtendedClientDetails()
+        // or JavaScript execution with window.addEventListener('resize', ...)
+        resizeRegistration = ui.getPage().addBrowserWindowResizeListener(event -> {
+            int width = event.getWidth();
+            int height = event.getHeight();
+            windowSizeSignal.value(new WindowSize(width, height));
+        });
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        super.onDetach(detachEvent);
+        if (resizeRegistration != null) {
+            resizeRegistration.remove();
+        }
+    }
+
+    private void detectWindowSize() {
+        UI.getCurrent().getPage().retrieveExtendedClientDetails(details -> {
+            int width = details.getBodyClientWidth();
+            int height = details.getBodyClientHeight();
+            windowSizeSignal.value(new WindowSize(width, height));
+        });
     }
 }
