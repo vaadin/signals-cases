@@ -11,7 +11,9 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.signals.Signal;
 import com.vaadin.signals.WritableSignal;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.WeakHashMap;
 import java.util.function.Function;
 
 /**
@@ -19,6 +21,32 @@ import java.util.function.Function;
  * until the official API is implemented in Vaadin.
  */
 public class MissingAPI {
+
+    // WeakHashMap to store effect cleanup runnables per component
+    private static final WeakHashMap<Component, List<Runnable>> EFFECT_CLEANUPS = new WeakHashMap<>();
+
+    /**
+     * Stores an effect cleanup runnable with the component so it doesn't get garbage collected
+     * and can be cleaned up when the component is detached.
+     */
+    private static void registerEffectCleanup(Component component, Runnable cleanup) {
+        List<Runnable> cleanups = EFFECT_CLEANUPS.get(component);
+        if (cleanups == null) {
+            cleanups = new ArrayList<>();
+            EFFECT_CLEANUPS.put(component, cleanups);
+
+            // Register detach listener to clean up all effects when component is removed
+            component.addDetachListener(event -> {
+                List<Runnable> toClean = EFFECT_CLEANUPS.get(event.getSource());
+                if (toClean != null) {
+                    toClean.forEach(Runnable::run);
+                    toClean.clear();
+                    EFFECT_CLEANUPS.remove(event.getSource());
+                }
+            });
+        }
+        cleanups.add(cleanup);
+    }
 
     /**
      * Binds a component's value to a WritableSignal with two-way synchronization.
@@ -74,10 +102,13 @@ public class MissingAPI {
      */
     public static void bindText(HasText component, Signal<String> signal) {
         UI ui = UI.getCurrent();
-        Signal.effect(() -> {
+        Runnable cleanup = Signal.effect(() -> {
             String text = signal.value();
             ui.access(() -> component.setText(text));
         });
+        if (component instanceof Component) {
+            registerEffectCleanup((Component) component, cleanup);
+        }
     }
 
     /**
