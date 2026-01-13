@@ -2,6 +2,7 @@ package com.example.views;
 
 import com.example.MissingAPI;
 import com.example.security.CurrentUserSignal;
+import com.example.signals.UserSessionRegistry;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.html.H1;
@@ -12,11 +13,14 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import jakarta.annotation.security.PermitAll;
 
+import java.util.stream.Collectors;
+
 @PageTitle("Signal API Use Cases")
 @PermitAll
 public class MainLayout extends AppLayout {
 
-    public MainLayout(CurrentUserSignal currentUserSignal) {
+    public MainLayout(CurrentUserSignal currentUserSignal,
+                      UserSessionRegistry userSessionRegistry) {
         DrawerToggle toggle = new DrawerToggle();
 
         H1 title = new H1("Signal API Use Cases");
@@ -24,10 +28,28 @@ public class MainLayout extends AppLayout {
                 .set("font-size", "var(--lumo-font-size-l)")
                 .set("margin", "0");
 
-        // User display using signal
+        // Active users display using signal
+        Span activeUsersDisplay = new Span();
+        activeUsersDisplay.getStyle()
+                .set("margin-left", "auto")
+                .set("margin-right", "1em")
+                .set("color", "var(--lumo-secondary-text-color)")
+                .set("font-size", "var(--lumo-font-size-s)");
+        MissingAPI.bindText(activeUsersDisplay,
+            userSessionRegistry.getActiveUsersSignal().map(users -> {
+                if (users.isEmpty()) {
+                    return "";
+                }
+                String usernames = users.stream()
+                    .map(UserSessionRegistry.UserInfo::username)
+                    .collect(Collectors.joining(", "));
+                return "👥 " + users.size() + " online: " + usernames;
+            })
+        );
+
+        // Current user display using signal
         Span userDisplay = new Span();
         userDisplay.getStyle()
-                .set("margin-left", "auto")
                 .set("margin-right", "1em")
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-size", "var(--lumo-font-size-s)");
@@ -37,7 +59,7 @@ public class MainLayout extends AppLayout {
             )
         );
 
-        addToNavbar(toggle, title, userDisplay);
+        addToNavbar(toggle, title, activeUsersDisplay, userDisplay);
 
         // Add auto-menu from @Menu annotations
         SideNav nav = new SideNav();
