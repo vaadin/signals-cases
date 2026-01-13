@@ -85,7 +85,11 @@ public class UseCase10View extends VerticalLayout {
 
         ProgressBar progressBar = new ProgressBar();
         // Bind progress bar value manually since it's read-only
-        Signal.effect(() -> progressBar.setValue(progressSignal.value()));
+        com.vaadin.flow.component.UI ui = com.vaadin.flow.component.UI.getCurrent();
+        Signal.effect(() -> {
+            double progress = progressSignal.value();
+            ui.access(() -> progressBar.setValue(progress));
+        });
 
         statsDiv.add(new H3("Task Statistics"), totalLabel, completedLabel, pendingLabel, progressBar);
 
