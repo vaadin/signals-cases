@@ -39,7 +39,7 @@ public class UseCase08View extends VerticalLayout {
         Set<String> roles = securityService.getRoles();
 
         // Create signal for user permissions based on actual Spring Security roles
-        WritableSignal<Set<Permission>> permissionsSignal = new ValueSignal<>(
+        WritableSignal<Set<Permission>> permissionsSignal = new ValueSignal<Set<Permission>>(
             getPermissionsForRoles(roles)
         );
 
@@ -131,11 +131,19 @@ public class UseCase08View extends VerticalLayout {
             .set("margin-bottom", "0.5em");
 
         Span permissionsList = new Span();
-        MissingAPI.bindText(permissionsList, permissionsSignal.map(perms ->
-            String.join(", ", perms.stream()
-                .map(Permission::name)
-                .toList())
-        ));
+        MissingAPI.bindText(permissionsList, permissionsSignal.map(perms -> {
+            if (perms == null || perms.isEmpty()) {
+                return "None";
+            }
+            StringBuilder sb = new StringBuilder();
+            boolean first = true;
+            for (Object p : perms) {
+                if (!first) sb.append(", ");
+                sb.append(p.toString());
+                first = false;
+            }
+            return sb.toString();
+        }));
 
         permissionsDisplay.add(permissionsTitle, permissionsList);
 
