@@ -3,6 +3,8 @@ package com.example.views;
 import com.example.MissingAPI;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.signals.Signal;
 import com.vaadin.signals.WritableSignal;
 import com.vaadin.signals.ValueSignal;
@@ -24,6 +26,18 @@ public class UseCase01View extends VerticalLayout {
     enum SubmissionState { IDLE, SUBMITTING, SUCCESS, ERROR }
 
     public UseCase01View() {
+        setSpacing(true);
+        setPadding(true);
+
+        H2 title = new H2("Use Case 1: Dynamic Button State");
+
+        Paragraph description = new Paragraph(
+            "This use case demonstrates reactive form validation with dynamic button states. " +
+            "The submit button is enabled only when all fields are valid: email contains '@', " +
+            "password is at least 8 characters, and passwords match. " +
+            "The button also reactively changes text during form submission."
+        );
+
         // Field signals
         WritableSignal<String> emailSignal = new ValueSignal<>("");
         WritableSignal<String> passwordSignal = new ValueSignal<>("");
@@ -90,6 +104,6 @@ public class UseCase01View extends VerticalLayout {
             });
         });
 
-        add(emailField, passwordField, confirmField, submitButton);
+        add(title, description, emailField, passwordField, confirmField, submitButton);
     }
 }

@@ -3,6 +3,8 @@ package com.example.views;
 import com.example.MissingAPI;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.signals.Signal;
 import com.vaadin.signals.WritableSignal;
 import com.vaadin.signals.ValueSignal;
@@ -26,6 +28,18 @@ public class UseCase04View extends VerticalLayout {
     public static record Product(String id, String name, String category, double price, int stock) {}
 
     public UseCase04View() {
+        setSpacing(true);
+        setPadding(true);
+
+        H2 title = new H2("Use Case 4: Filtered and Sorted Data Grid");
+
+        Paragraph description = new Paragraph(
+            "This use case demonstrates a Grid with reactive client-side filtering and sorting. " +
+            "Filter by category, search by name/ID, and toggle in-stock only. " +
+            "All filters are applied reactively through computed signals. " +
+            "The filtered list updates automatically as you change any filter."
+        );
+
         // Create signals for filter inputs
         WritableSignal<String> categoryFilterSignal = new ValueSignal<>("All");
         WritableSignal<String> searchTermSignal = new ValueSignal<>("");
@@ -67,7 +81,7 @@ public class UseCase04View extends VerticalLayout {
         grid.setColumns("id", "name", "category", "price", "stock");
         MissingAPI.bindItems(grid, filteredProductsSignal);
 
-        add(categoryFilter, searchField, inStockCheckbox, grid);
+        add(title, description, categoryFilter, searchField, inStockCheckbox, grid);
     }
 
     private List<Product> loadProducts() {

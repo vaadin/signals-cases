@@ -5,7 +5,9 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -137,6 +139,18 @@ public class UseCase02View extends VerticalLayout {
     }
 
     public UseCase02View() {
+        setSpacing(true);
+        setPadding(true);
+
+        H2 title = new H2("Use Case 2: Progressive Disclosure with Nested Conditions");
+
+        Paragraph description = new Paragraph(
+            "This use case demonstrates progressive disclosure with multi-level conditional forms. " +
+            "Fields appear and disappear reactively based on previous selections. " +
+            "Check the visa sponsorship checkbox to reveal nested visa type selection, " +
+            "which then reveals type-specific fields in a cascading manner."
+        );
+
         // Create binder and bean
         Binder<VisaApplicationData> binder = new Binder<>(VisaApplicationData.class);
         VisaApplicationData data = new VisaApplicationData();
@@ -274,6 +288,8 @@ public class UseCase02View extends VerticalLayout {
         showValuesButton.addThemeName("primary");
 
         add(
+            title,
+            description,
             needsVisaCheckbox,
             visaSection,
             h1bSection,

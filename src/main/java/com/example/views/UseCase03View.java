@@ -5,6 +5,7 @@ import com.example.security.SecurityService;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
@@ -33,6 +34,18 @@ public class UseCase03View extends VerticalLayout {
 
     public UseCase03View(SecurityService securityService) {
         this.securityService = securityService;
+
+        setSpacing(true);
+        setPadding(true);
+
+        H2 title = new H2("Use Case 3: Permission-Based Component Visibility");
+
+        Paragraph description = new Paragraph(
+            "This use case demonstrates role-based UI with reactive permission checks from Spring Security. " +
+            "Different sections appear based on your user role. " +
+            "The permissions signal is derived from Spring Security roles and controls component visibility. " +
+            "Use Vaadin Copilot's impersonation feature to test different roles without logging out."
+        );
 
         // Get current user info from Spring Security
         String username = securityService.getUsername();
@@ -159,7 +172,7 @@ public class UseCase03View extends VerticalLayout {
             "💡 Tip: Use Vaadin Copilot's impersonation feature to test different user roles without logging out"
         );
 
-        add(userInfoBox, permissionsDisplay, impersonationHint,
+        add(title, description, userInfoBox, permissionsDisplay, impersonationHint,
             dashboardSection, editButtons, userManagementSection, logsSection, settingsSection);
     }
 
