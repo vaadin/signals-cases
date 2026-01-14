@@ -1,5 +1,6 @@
 package com.example.security;
 
+import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.signals.ValueSignal;
 import com.vaadin.signals.WritableSignal;
@@ -9,10 +10,12 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 /**
- * Application-scoped signal holding the current authenticated user information.
+ * Session-scoped signal holding the current authenticated user information.
  * This signal is reactive to authentication changes including login, logout, and impersonation.
+ * Each user session has its own instance.
  */
 @Component
+@VaadinSessionScope
 public class CurrentUserSignal {
 
     public static class UserInfo {
