@@ -56,7 +56,7 @@ public class UseCase09View extends VerticalLayout {
         WritableSignal<String> passwordSignal = new ValueSignal<>("");
         WritableSignal<String> confirmPasswordSignal = new ValueSignal<>("");
         WritableSignal<AccountType> accountTypeSignal = new ValueSignal<>(AccountType.PERSONAL);
-        WritableSignal<Integer> ageSignal = new ValueSignal<>(null);
+        WritableSignal<Integer> ageSignal = new ValueSignal<>(0);
 
         // Bind fields to signals
         MissingAPI.bindValue(usernameField, usernameSignal);
