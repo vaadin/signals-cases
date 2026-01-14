@@ -2,9 +2,6 @@ package com.example.views;
 
 import com.example.MissingAPI;
 
-
-// Note: This code uses the proposed Signal API and will not compile yet
-
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.signals.Signal;
 import com.vaadin.signals.WritableSignal;
