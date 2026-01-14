@@ -32,10 +32,10 @@ import jakarta.annotation.security.PermitAll;
 @PermitAll
 public class UseCase10View extends VerticalLayout {
 
-    enum UserRole { VIEWER, EDITOR, ADMIN }
-    enum EmployeeStatus { ACTIVE, ON_LEAVE, TERMINATED }
+    public enum UserRole { VIEWER, EDITOR, ADMIN }
+    public enum EmployeeStatus { ACTIVE, ON_LEAVE, TERMINATED }
 
-    record Employee(String id, String name, String department, EmployeeStatus status, double salary) {}
+    public static record Employee(String id, String name, String department, EmployeeStatus status, double salary) {}
 
     public UseCase10View() {
         // Create signals for permissions and edit mode
