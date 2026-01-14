@@ -77,6 +77,10 @@ public class CollaborativeSignals {
             0);
     private final WritableSignal<Integer> buttonTopSignal = new ValueSignal<>(
             0);
+    private final WritableSignal<Integer> clicksRemainingSignal = new ValueSignal<>(
+            0);
+    private final WritableSignal<Integer> roundNumberSignal = new ValueSignal<>(
+            0);
 
     public WritableSignal<Map<String, Integer>> getLeaderboardSignal() {
         return leaderboardSignal;
@@ -94,6 +98,14 @@ public class CollaborativeSignals {
         return buttonTopSignal;
     }
 
+    public WritableSignal<Integer> getClicksRemainingSignal() {
+        return clicksRemainingSignal;
+    }
+
+    public WritableSignal<Integer> getRoundNumberSignal() {
+        return roundNumberSignal;
+    }
+
     public void initializePlayerScore(String username) {
         Map<String, Integer> scores = new ConcurrentHashMap<>(
                 leaderboardSignal.value());
@@ -101,22 +113,34 @@ public class CollaborativeSignals {
         leaderboardSignal.value(scores);
     }
 
-    public synchronized void awardPoint(String username) {
-        if (!buttonVisibleSignal.value()) {
-            return; // Already claimed
+    public synchronized boolean awardPoint(String username) {
+        if (!buttonVisibleSignal.value()
+                || clicksRemainingSignal.value() <= 0) {
+            return false; // Round already finished
         }
 
-        buttonVisibleSignal.value(false);
-
+        // Award the point
         Map<String, Integer> scores = new ConcurrentHashMap<>(
                 leaderboardSignal.value());
         scores.merge(username, 1, Integer::sum);
         leaderboardSignal.value(scores);
+
+        // Decrement clicks remaining
+        int remaining = clicksRemainingSignal.value() - 1;
+        clicksRemainingSignal.value(remaining);
+
+        // Hide button temporarily (will be repositioned by view)
+        buttonVisibleSignal.value(false);
+
+        // Return true if more clicks remain in this round
+        return remaining > 0;
     }
 
     public void showButtonAt(int left, int top) {
         buttonLeftSignal.value(left);
         buttonTopSignal.value(top);
+        clicksRemainingSignal.value(5); // 5 clicks per round
+        roundNumberSignal.value(roundNumberSignal.value() + 1);
         buttonVisibleSignal.value(true);
     }
 

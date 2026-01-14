@@ -66,11 +66,27 @@ public class MUC03View extends VerticalLayout {
 
         Paragraph description = new Paragraph(
                 "This demonstrates race condition handling in a multi-user game. "
-                        + "Click the START button to spawn a target button at a random location. "
-                        + "The fastest user to click it gets a point. Only one user can score per round.");
+                        + "Click START to begin a round. Each round has 5 targets that appear one after another at random locations with random delays. "
+                        + "The fastest user to click each target gets a point. Race to get the most points!");
+
+        // Round status
+        Div roundStatus = new Div();
+        roundStatus.getStyle().set("font-size", "1.2em")
+                .set("font-weight", "bold").set("margin-bottom", "0.5em");
+        roundStatus.bindText(collaborativeSignals.getRoundNumberSignal()
+                .map(round -> round == 0 ? "Click START to begin"
+                        : "Round " + round));
+
+        Div clicksStatus = new Div();
+        clicksStatus.getStyle().set("font-size", "1em").set("color",
+                "var(--lumo-secondary-text-color)");
+        clicksStatus.bindText(collaborativeSignals.getClicksRemainingSignal()
+                .map(clicks -> clicks > 0 ? "Targets remaining: " + clicks
+                        : ""));
 
         // Game area
         Div gameArea = new Div();
+        gameArea.setWidthFull();
         gameArea.getStyle().set("position", "relative")
                 .set("background-color", "#f5f5f5")
                 .set("border", "2px solid #e0e0e0").set("border-radius", "4px")
@@ -84,6 +100,10 @@ public class MUC03View extends VerticalLayout {
         targetButton.addThemeName("large");
         targetButton.getStyle().set("position", "absolute").set("z-index",
                 "10");
+
+        // Bind button text to show clicks remaining
+        targetButton.bindText(collaborativeSignals.getClicksRemainingSignal()
+                .map(clicks -> "CLICK ME! (" + clicks + ")"));
 
         targetButton.bindVisible(collaborativeSignals.getButtonVisibleSignal());
         targetButton.getStyle().bind("left", collaborativeSignals
@@ -146,11 +166,13 @@ public class MUC03View extends VerticalLayout {
                 .set("margin-top", "1em").set("font-style", "italic");
         infoBox.add(new Paragraph(
                 "💡 This demonstrates atomic operations and conflict resolution in multi-user scenarios. "
+                        + "Each round has 5 targets that appear with random delays (500-2000ms) at random positions. "
                         + "When multiple users try to click simultaneously, only the first click is counted (atomic operation). "
-                        + "The leaderboard is a shared signal that updates for all users in real-time."));
+                        + "The leaderboard is a shared signal that updates for all users in real-time. "
+                        + "Race against other players to get the most points!"));
 
-        add(title, description, gameArea, controls, leaderboardTitle,
-                leaderboardDiv, infoBox);
+        add(title, description, roundStatus, clicksStatus, gameArea, controls,
+                leaderboardTitle, leaderboardDiv, infoBox);
     }
 
     private void startNewRound() {
@@ -164,7 +186,28 @@ public class MUC03View extends VerticalLayout {
     private void handleButtonClick() {
         // Atomic operation: Only first click counts (handled by
         // CollaborativeSignals)
-        collaborativeSignals.awardPoint(currentUser);
+        boolean moreClicksRemain = collaborativeSignals.awardPoint(currentUser);
+
+        // If there are more clicks remaining, spawn next button after random
+        // delay
+        if (moreClicksRemain) {
+            new Thread(() -> {
+                try {
+                    // Random delay between 500ms and 2000ms
+                    int delay = 500 + random.nextInt(1500);
+                    Thread.sleep(delay);
+
+                    // Position next button randomly
+                    int left = random.nextInt(400);
+                    int top = random.nextInt(200);
+
+                    getUI().ifPresent(ui -> ui.access(() -> collaborativeSignals
+                            .showButtonAt(left, top)));
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }).start();
+        }
     }
 
     @Override
