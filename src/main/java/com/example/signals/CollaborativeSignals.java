@@ -1,18 +1,19 @@
 package com.example.signals;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.springframework.stereotype.Component;
+
 import com.vaadin.signals.ListSignal;
 import com.vaadin.signals.ValueSignal;
 import com.vaadin.signals.WritableSignal;
-import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Application-scoped signals for collaborative use cases.
- * These signals are shared across all user sessions.
+ * Application-scoped signals for collaborative use cases. These signals are
+ * shared across all user sessions.
  */
 @Component
 public class CollaborativeSignals {
@@ -29,7 +30,8 @@ public class CollaborativeSignals {
         }
     }
 
-    private final ListSignal<Message> messagesSignal = new ListSignal<>(Message.class);
+    private final ListSignal<Message> messagesSignal = new ListSignal<>(
+            Message.class);
 
     public ListSignal<Message> getMessagesSignal() {
         return messagesSignal;
@@ -52,26 +54,29 @@ public class CollaborativeSignals {
         }
     }
 
-    private final Map<String, WritableSignal<CursorPosition>> userCursors =
-        new ConcurrentHashMap<>();
+    private final Map<String, WritableSignal<CursorPosition>> userCursors = new ConcurrentHashMap<>();
 
     public Map<String, WritableSignal<CursorPosition>> getUserCursors() {
         return userCursors;
     }
 
-    public WritableSignal<CursorPosition> getCursorSignalForUser(String username) {
+    public WritableSignal<CursorPosition> getCursorSignalForUser(
+            String username) {
         return userCursors.computeIfAbsent(username,
-            k -> new ValueSignal<>(new CursorPosition(0, 0)));
+                k -> new ValueSignal<>(new CursorPosition(0, 0)));
     }
 
     // ========== Use Case 20: Click Game ===========
 
-    private final WritableSignal<Map<String, Integer>> leaderboardSignal =
-        new ValueSignal<>(new ConcurrentHashMap<>());
+    private final WritableSignal<Map<String, Integer>> leaderboardSignal = new ValueSignal<>(
+            new ConcurrentHashMap<>());
 
-    private final WritableSignal<Boolean> buttonVisibleSignal = new ValueSignal<>(false);
-    private final WritableSignal<Integer> buttonLeftSignal = new ValueSignal<>(0);
-    private final WritableSignal<Integer> buttonTopSignal = new ValueSignal<>(0);
+    private final WritableSignal<Boolean> buttonVisibleSignal = new ValueSignal<>(
+            false);
+    private final WritableSignal<Integer> buttonLeftSignal = new ValueSignal<>(
+            0);
+    private final WritableSignal<Integer> buttonTopSignal = new ValueSignal<>(
+            0);
 
     public WritableSignal<Map<String, Integer>> getLeaderboardSignal() {
         return leaderboardSignal;
@@ -90,7 +95,8 @@ public class CollaborativeSignals {
     }
 
     public void initializePlayerScore(String username) {
-        Map<String, Integer> scores = new ConcurrentHashMap<>(leaderboardSignal.value());
+        Map<String, Integer> scores = new ConcurrentHashMap<>(
+                leaderboardSignal.value());
         scores.putIfAbsent(username, 0);
         leaderboardSignal.value(scores);
     }
@@ -102,7 +108,8 @@ public class CollaborativeSignals {
 
         buttonVisibleSignal.value(false);
 
-        Map<String, Integer> scores = new ConcurrentHashMap<>(leaderboardSignal.value());
+        Map<String, Integer> scores = new ConcurrentHashMap<>(
+                leaderboardSignal.value());
         scores.merge(username, 1, Integer::sum);
         leaderboardSignal.value(scores);
     }
@@ -119,11 +126,12 @@ public class CollaborativeSignals {
 
     // ========== Use Case 21: Form Locking ===========
 
-    private final WritableSignal<String> companyNameSignal = new ValueSignal<>("");
+    private final WritableSignal<String> companyNameSignal = new ValueSignal<>(
+            "");
     private final WritableSignal<String> addressSignal = new ValueSignal<>("");
     private final WritableSignal<String> phoneSignal = new ValueSignal<>("");
-    private final WritableSignal<Map<String, String>> fieldLocksSignal =
-        new ValueSignal<>(new ConcurrentHashMap<>());
+    private final WritableSignal<Map<String, String>> fieldLocksSignal = new ValueSignal<>(
+            new ConcurrentHashMap<>());
 
     public WritableSignal<String> getCompanyNameSignal() {
         return companyNameSignal;
@@ -142,13 +150,15 @@ public class CollaborativeSignals {
     }
 
     public void lockField(String fieldName, String username) {
-        Map<String, String> locks = new ConcurrentHashMap<>(fieldLocksSignal.value());
+        Map<String, String> locks = new ConcurrentHashMap<>(
+                fieldLocksSignal.value());
         locks.put(fieldName, username);
         fieldLocksSignal.value(locks);
     }
 
     public void unlockField(String fieldName, String username) {
-        Map<String, String> locks = new ConcurrentHashMap<>(fieldLocksSignal.value());
+        Map<String, String> locks = new ConcurrentHashMap<>(
+                fieldLocksSignal.value());
         if (username.equals(locks.get(fieldName))) {
             locks.remove(fieldName);
             fieldLocksSignal.value(locks);

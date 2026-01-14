@@ -1,18 +1,19 @@
 package com.example.security;
 
+import java.util.Set;
+
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.signals.ValueSignal;
 import com.vaadin.signals.WritableSignal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
-
-import java.util.Set;
 
 /**
  * Session-scoped signal holding the current authenticated user information.
- * This signal is reactive to authentication changes including login, logout, and impersonation.
- * Each user session has its own instance.
+ * This signal is reactive to authentication changes including login, logout,
+ * and impersonation. Each user session has its own instance.
  */
 @Component
 @VaadinSessionScope
@@ -23,7 +24,8 @@ public class CurrentUserSignal {
         private final Set<String> roles;
         private final boolean authenticated;
 
-        public UserInfo(String username, Set<String> roles, boolean authenticated) {
+        public UserInfo(String username, Set<String> roles,
+                boolean authenticated) {
             this.username = username;
             this.roles = roles;
             this.authenticated = authenticated;
@@ -33,7 +35,8 @@ public class CurrentUserSignal {
             return new UserInfo(null, Set.of(), false);
         }
 
-        public static UserInfo authenticated(String username, Set<String> roles) {
+        public static UserInfo authenticated(String username,
+                Set<String> roles) {
             return new UserInfo(username, roles, true);
         }
 
@@ -80,16 +83,16 @@ public class CurrentUserSignal {
     }
 
     /**
-     * Get the signal holding current user information.
-     * This signal updates when authentication state changes.
+     * Get the signal holding current user information. This signal updates when
+     * authentication state changes.
      */
     public WritableSignal<UserInfo> getUserSignal() {
         return userSignal;
     }
 
     /**
-     * Refresh the user signal from the current authentication context.
-     * Call this after login, logout, or impersonation changes.
+     * Refresh the user signal from the current authentication context. Call
+     * this after login, logout, or impersonation changes.
      */
     public void refresh() {
         userSignal.value(getCurrentUserInfo());
@@ -97,10 +100,10 @@ public class CurrentUserSignal {
 
     private UserInfo getCurrentUserInfo() {
         return authenticationContext.getAuthenticatedUser(UserDetails.class)
-            .map(user -> {
-                Set<String> roles = new java.util.HashSet<>(authenticationContext.getGrantedRoles());
-                return UserInfo.authenticated(user.getUsername(), roles);
-            })
-            .orElse(UserInfo.anonymous());
+                .map(user -> {
+                    Set<String> roles = new java.util.HashSet<>(
+                            authenticationContext.getGrantedRoles());
+                    return UserInfo.authenticated(user.getUsername(), roles);
+                }).orElse(UserInfo.anonymous());
     }
 }

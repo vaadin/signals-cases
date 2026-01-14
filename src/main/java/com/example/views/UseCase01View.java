@@ -1,21 +1,23 @@
 package com.example.views;
 
+import jakarta.annotation.security.PermitAll;
+
+import java.util.concurrent.CompletableFuture;
+
 import com.example.MissingAPI;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.WritableSignal;
-import com.vaadin.signals.ValueSignal;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import jakarta.annotation.security.PermitAll;
-import java.util.concurrent.CompletableFuture;
+import com.vaadin.signals.Signal;
+import com.vaadin.signals.ValueSignal;
+import com.vaadin.signals.WritableSignal;
 
 @Route(value = "use-case-03", layout = MainLayout.class)
 @PageTitle("Use Case 1: Dynamic Button State")
@@ -23,7 +25,9 @@ import java.util.concurrent.CompletableFuture;
 @PermitAll
 public class UseCase01View extends VerticalLayout {
 
-    enum SubmissionState { IDLE, SUBMITTING, SUCCESS, ERROR }
+    enum SubmissionState {
+        IDLE, SUBMITTING, SUCCESS, ERROR
+    }
 
     public UseCase01View() {
         setSpacing(true);
@@ -32,18 +36,17 @@ public class UseCase01View extends VerticalLayout {
         H2 title = new H2("Use Case 1: Dynamic Button State");
 
         Paragraph description = new Paragraph(
-            "This use case demonstrates reactive form validation with dynamic button states. " +
-            "The submit button is enabled only when all fields are valid: email contains '@', " +
-            "password is at least 8 characters, and passwords match. " +
-            "The button also reactively changes text during form submission."
-        );
+                "This use case demonstrates reactive form validation with dynamic button states. "
+                        + "The submit button is enabled only when all fields are valid: email contains '@', "
+                        + "password is at least 8 characters, and passwords match. "
+                        + "The button also reactively changes text during form submission.");
 
         // Field signals
         WritableSignal<String> emailSignal = new ValueSignal<>("");
         WritableSignal<String> passwordSignal = new ValueSignal<>("");
         WritableSignal<String> confirmPasswordSignal = new ValueSignal<>("");
-        WritableSignal<SubmissionState> submissionStateSignal =
-            new ValueSignal<>(SubmissionState.IDLE);
+        WritableSignal<SubmissionState> submissionStateSignal = new ValueSignal<>(
+                SubmissionState.IDLE);
 
         // Computed validity signal
         Signal<Boolean> isValidSignal = Signal.computed(() -> {
@@ -51,9 +54,8 @@ public class UseCase01View extends VerticalLayout {
             String password = passwordSignal.value();
             String confirm = confirmPasswordSignal.value();
 
-            return email.contains("@")
-                && password.length() >= 8
-                && password.equals(confirm);
+            return email.contains("@") && password.length() >= 8
+                    && password.equals(confirm);
         });
 
         // Form fields
@@ -73,23 +75,23 @@ public class UseCase01View extends VerticalLayout {
         Button submitButton = new Button();
 
         // Bind enabled state: enabled when valid AND not submitting
-        submitButton.bindEnabled(Signal.computed(() ->
-            isValidSignal.value()
-            && submissionStateSignal.value() == SubmissionState.IDLE
-        ));
+        submitButton.bindEnabled(Signal.computed(() -> isValidSignal.value()
+                && submissionStateSignal.value() == SubmissionState.IDLE));
 
         // Bind button text based on submission state
-        submitButton.bindText(submissionStateSignal.map(state -> switch (state) {
-            case IDLE -> "Create Account";
-            case SUBMITTING -> "Creating...";
-            case SUCCESS -> "Success!";
-            case ERROR -> "Retry";
-        }));
+        submitButton
+                .bindText(submissionStateSignal.map(state -> switch (state) {
+                case IDLE -> "Create Account";
+                case SUBMITTING -> "Creating...";
+                case SUCCESS -> "Success!";
+                case ERROR -> "Retry";
+                }));
 
         // Bind theme variant
-        MissingAPI.bindThemeName(submitButton, submissionStateSignal.map(state ->
-            state == SubmissionState.SUCCESS ? "success" : "primary"
-        ));
+        MissingAPI.bindThemeName(submitButton,
+                submissionStateSignal.map(
+                        state -> state == SubmissionState.SUCCESS ? "success"
+                                : "primary"));
 
         submitButton.addClickListener(e -> {
             submissionStateSignal.value(SubmissionState.SUBMITTING);
@@ -104,6 +106,7 @@ public class UseCase01View extends VerticalLayout {
             });
         });
 
-        add(title, description, emailField, passwordField, confirmField, submitButton);
+        add(title, description, emailField, passwordField, confirmField,
+                submitButton);
     }
 }

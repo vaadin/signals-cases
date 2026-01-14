@@ -1,6 +1,10 @@
 package com.example.views;
 
-import com.example.MissingAPI;
+import jakarta.annotation.security.PermitAll;
+
+import java.util.Set;
+import java.util.function.Function;
+
 import com.example.security.SecurityService;
 
 import com.vaadin.flow.component.button.Button;
@@ -17,10 +21,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.signals.Signal;
 import com.vaadin.signals.ValueSignal;
 import com.vaadin.signals.WritableSignal;
-import jakarta.annotation.security.PermitAll;
-
-import java.util.Set;
-import java.util.function.Function;
 
 @Route(value = "use-case-08", layout = MainLayout.class)
 @PageTitle("Use Case 3: Permission-Based Component Visibility")
@@ -28,7 +28,14 @@ import java.util.function.Function;
 @PermitAll
 public class UseCase03View extends VerticalLayout {
 
-    enum Permission { VIEW_DASHBOARD, EDIT_CONTENT, DELETE_CONTENT, MANAGE_USERS, VIEW_LOGS, SYSTEM_SETTINGS }
+    enum Permission {
+        VIEW_DASHBOARD,
+        EDIT_CONTENT,
+        DELETE_CONTENT,
+        MANAGE_USERS,
+        VIEW_LOGS,
+        SYSTEM_SETTINGS
+    }
 
     private final SecurityService securityService;
 
@@ -41,57 +48,54 @@ public class UseCase03View extends VerticalLayout {
         H2 title = new H2("Use Case 3: Permission-Based Component Visibility");
 
         Paragraph description = new Paragraph(
-            "This use case demonstrates role-based UI with reactive permission checks from Spring Security. " +
-            "Different sections appear based on your user role. " +
-            "The permissions signal is derived from Spring Security roles and controls component visibility. " +
-            "Use Vaadin Copilot's impersonation feature to test different roles without logging out."
-        );
+                "This use case demonstrates role-based UI with reactive permission checks from Spring Security. "
+                        + "Different sections appear based on your user role. "
+                        + "The permissions signal is derived from Spring Security roles and controls component visibility. "
+                        + "Use Vaadin Copilot's impersonation feature to test different roles without logging out.");
 
         // Get current user info from Spring Security
         String username = securityService.getUsername();
         Set<String> roles = securityService.getRoles();
 
-        // Create signal for user permissions based on actual Spring Security roles
+        // Create signal for user permissions based on actual Spring Security
+        // roles
         WritableSignal<Set<Permission>> permissionsSignal = new ValueSignal<Set<Permission>>(
-            getPermissionsForRoles(roles)
-        );
+                getPermissionsForRoles(roles));
 
         // User info display
         Div userInfoBox = new Div();
-        userInfoBox.getStyle()
-            .set("background-color", "#e8f5e9")
-            .set("padding", "1em")
-            .set("border-radius", "4px")
-            .set("margin-bottom", "1em");
+        userInfoBox.getStyle().set("background-color", "#e8f5e9")
+                .set("padding", "1em").set("border-radius", "4px")
+                .set("margin-bottom", "1em");
 
         H3 userInfoTitle = new H3("Current User Information");
         userInfoTitle.getStyle().set("margin-top", "0");
 
         Paragraph userInfo = new Paragraph();
-        userInfo.getStyle()
-            .set("font-family", "monospace")
-            .set("white-space", "pre-line");
+        userInfo.getStyle().set("font-family", "monospace").set("white-space",
+                "pre-line");
         userInfo.setText(String.format(
-            "Username: %s\nRoles: %s\nPermissions: %d granted",
-            username,
-            String.join(", ", roles),
-            permissionsSignal.value().size()
-        ));
+                "Username: %s\nRoles: %s\nPermissions: %d granted", username,
+                String.join(", ", roles), permissionsSignal.value().size()));
 
-        Button logoutButton = new Button("Logout", event -> securityService.logout());
+        Button logoutButton = new Button("Logout",
+                event -> securityService.logout());
         logoutButton.addThemeName("error");
         logoutButton.addThemeName("small");
 
         userInfoBox.add(userInfoTitle, userInfo, logoutButton);
 
         // Helper function to create permission-based visibility signal
-        Function<Permission, Signal<Boolean>> hasPermission = (Permission permission) ->
-            permissionsSignal.map(perms -> perms.contains(permission));
+        Function<Permission, Signal<Boolean>> hasPermission = (
+                Permission permission) -> permissionsSignal
+                        .map(perms -> perms.contains(permission));
 
         // Dashboard section
         Div dashboardSection = new Div();
-        dashboardSection.add(new H3("Dashboard"), new Div("Dashboard content here..."));
-        dashboardSection.bindVisible(hasPermission.apply(Permission.VIEW_DASHBOARD));
+        dashboardSection.add(new H3("Dashboard"),
+                new Div("Dashboard content here..."));
+        dashboardSection
+                .bindVisible(hasPermission.apply(Permission.VIEW_DASHBOARD));
 
         // Content editing buttons
         HorizontalLayout editButtons = new HorizontalLayout();
@@ -99,20 +103,19 @@ public class UseCase03View extends VerticalLayout {
         editButton.bindVisible(hasPermission.apply(Permission.EDIT_CONTENT));
 
         Button deleteButton = new Button("Delete Content");
-        deleteButton.bindVisible(hasPermission.apply(Permission.DELETE_CONTENT));
+        deleteButton
+                .bindVisible(hasPermission.apply(Permission.DELETE_CONTENT));
         deleteButton.addThemeName("error");
 
         editButtons.add(editButton, deleteButton);
 
         // User management section
         Div userManagementSection = new Div();
-        userManagementSection.add(
-            new H3("User Management"),
-            new Button("Add User"),
-            new Button("Remove User"),
-            new Button("Edit Permissions")
-        );
-        userManagementSection.bindVisible(hasPermission.apply(Permission.MANAGE_USERS));
+        userManagementSection.add(new H3("User Management"),
+                new Button("Add User"), new Button("Remove User"),
+                new Button("Edit Permissions"));
+        userManagementSection
+                .bindVisible(hasPermission.apply(Permission.MANAGE_USERS));
 
         // System logs section
         Div logsSection = new Div();
@@ -121,27 +124,22 @@ public class UseCase03View extends VerticalLayout {
 
         // System settings section
         Div settingsSection = new Div();
-        settingsSection.add(
-            new H3("System Settings"),
-            new Button("Configure System"),
-            new Button("Backup Database"),
-            new Button("Manage Integrations")
-        );
-        settingsSection.bindVisible(hasPermission.apply(Permission.SYSTEM_SETTINGS));
+        settingsSection.add(new H3("System Settings"),
+                new Button("Configure System"), new Button("Backup Database"),
+                new Button("Manage Integrations"));
+        settingsSection
+                .bindVisible(hasPermission.apply(Permission.SYSTEM_SETTINGS));
 
         // Status indicator showing current permissions
         Div permissionsDisplay = new Div();
-        permissionsDisplay.getStyle()
-            .set("background-color", "#fff3e0")
-            .set("padding", "1em")
-            .set("border-radius", "4px")
-            .set("margin-top", "1em");
+        permissionsDisplay.getStyle().set("background-color", "#fff3e0")
+                .set("padding", "1em").set("border-radius", "4px")
+                .set("margin-top", "1em");
 
-        Span permissionsTitle = new Span("Visible Sections Based On Your Permissions:");
-        permissionsTitle.getStyle()
-            .set("font-weight", "bold")
-            .set("display", "block")
-            .set("margin-bottom", "0.5em");
+        Span permissionsTitle = new Span(
+                "Visible Sections Based On Your Permissions:");
+        permissionsTitle.getStyle().set("font-weight", "bold")
+                .set("display", "block").set("margin-bottom", "0.5em");
 
         Span permissionsList = new Span();
         permissionsList.bindText(permissionsSignal.map(perms -> {
@@ -151,7 +149,8 @@ public class UseCase03View extends VerticalLayout {
             StringBuilder sb = new StringBuilder();
             boolean first = true;
             for (Object p : perms) {
-                if (!first) sb.append(", ");
+                if (!first)
+                    sb.append(", ");
                 sb.append(p.toString());
                 first = false;
             }
@@ -162,18 +161,15 @@ public class UseCase03View extends VerticalLayout {
 
         // Info about impersonation
         Div impersonationHint = new Div();
-        impersonationHint.getStyle()
-            .set("background-color", "#e3f2fd")
-            .set("padding", "1em")
-            .set("border-radius", "4px")
-            .set("margin-top", "1em")
-            .set("font-style", "italic");
+        impersonationHint.getStyle().set("background-color", "#e3f2fd")
+                .set("padding", "1em").set("border-radius", "4px")
+                .set("margin-top", "1em").set("font-style", "italic");
         impersonationHint.setText(
-            "💡 Tip: Use Vaadin Copilot's impersonation feature to test different user roles without logging out"
-        );
+                "💡 Tip: Use Vaadin Copilot's impersonation feature to test different user roles without logging out");
 
-        add(title, description, userInfoBox, permissionsDisplay, impersonationHint,
-            dashboardSection, editButtons, userManagementSection, logsSection, settingsSection);
+        add(title, description, userInfoBox, permissionsDisplay,
+                impersonationHint, dashboardSection, editButtons,
+                userManagementSection, logsSection, settingsSection);
     }
 
     private Set<Permission> getPermissionsForRoles(Set<String> roles) {

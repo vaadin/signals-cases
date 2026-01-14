@@ -1,25 +1,26 @@
 package com.example.security;
 
-import com.vaadin.flow.spring.security.VaadinSecurityConfigurer;
+import com.example.views.LoginView;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
-import com.example.views.LoginView;
+import com.vaadin.flow.spring.security.VaadinSecurityConfigurer;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http)
+            throws Exception {
         // Configure Vaadin's security using VaadinSecurityConfigurer
         http.with(VaadinSecurityConfigurer.vaadin(), configurer -> {
             // Register the login view for navigation access control
@@ -30,33 +31,29 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
+    public UserDetailsService userDetailsService(
+            PasswordEncoder passwordEncoder) {
         // Hardcoded users with different roles
         return new InMemoryUserDetailsManager(
-            // viewer: password / Roles: VIEWER
-            User.withUsername("viewer")
-                .password(passwordEncoder.encode("password"))
-                .roles("VIEWER")
-                .build(),
+                // viewer: password / Roles: VIEWER
+                User.withUsername("viewer")
+                        .password(passwordEncoder.encode("password"))
+                        .roles("VIEWER").build(),
 
-            // editor: password / Roles: EDITOR
-            User.withUsername("editor")
-                .password(passwordEncoder.encode("password"))
-                .roles("EDITOR")
-                .build(),
+                // editor: password / Roles: EDITOR
+                User.withUsername("editor")
+                        .password(passwordEncoder.encode("password"))
+                        .roles("EDITOR").build(),
 
-            // admin: password / Roles: ADMIN
-            User.withUsername("admin")
-                .password(passwordEncoder.encode("password"))
-                .roles("ADMIN")
-                .build(),
+                // admin: password / Roles: ADMIN
+                User.withUsername("admin")
+                        .password(passwordEncoder.encode("password"))
+                        .roles("ADMIN").build(),
 
-            // superadmin: password / Roles: SUPER_ADMIN
-            User.withUsername("superadmin")
-                .password(passwordEncoder.encode("password"))
-                .roles("SUPER_ADMIN")
-                .build()
-        );
+                // superadmin: password / Roles: SUPER_ADMIN
+                User.withUsername("superadmin")
+                        .password(passwordEncoder.encode("password"))
+                        .roles("SUPER_ADMIN").build());
     }
 
     @Bean

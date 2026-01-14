@@ -1,16 +1,18 @@
 package com.example.signals;
 
-import com.vaadin.signals.ListSignal;
 import org.springframework.stereotype.Component;
 
+import com.vaadin.signals.ListSignal;
+
 /**
- * Application-scoped registry of currently logged-in users.
- * Provides a reactive signal containing the list of active users.
+ * Application-scoped registry of currently logged-in users. Provides a reactive
+ * signal containing the list of active users.
  */
 @Component
 public class UserSessionRegistry {
 
-    private final ListSignal<UserInfo> activeUsersSignal = new ListSignal<>(UserInfo.class);
+    private final ListSignal<UserInfo> activeUsersSignal = new ListSignal<>(
+            UserInfo.class);
 
     /**
      * Get the signal containing the list of active users.
@@ -28,8 +30,8 @@ public class UserSessionRegistry {
         }
 
         // Check if user is already registered
-        boolean exists = activeUsersSignal.value().stream()
-            .anyMatch(userSignal -> username.equals(userSignal.value().username()));
+        boolean exists = activeUsersSignal.value().stream().anyMatch(
+                userSignal -> username.equals(userSignal.value().username()));
 
         if (!exists) {
             activeUsersSignal.insertLast(new UserInfo(username));
@@ -44,10 +46,9 @@ public class UserSessionRegistry {
             throw new IllegalArgumentException("Username cannot be null");
         }
 
-        activeUsersSignal.value().stream()
-            .filter(userSignal -> username.equals(userSignal.value().username()))
-            .findFirst()
-            .ifPresent(activeUsersSignal::remove);
+        activeUsersSignal.value().stream().filter(
+                userSignal -> username.equals(userSignal.value().username()))
+                .findFirst().ifPresent(activeUsersSignal::remove);
     }
 
     /**
@@ -65,8 +66,7 @@ public class UserSessionRegistry {
             throw new IllegalArgumentException("Username cannot be null");
         }
 
-        return activeUsersSignal.value().stream()
-            .anyMatch(userSignal -> username.equals(userSignal.value().username()));
+        return activeUsersSignal.value().stream().anyMatch(
+                userSignal -> username.equals(userSignal.value().username()));
     }
 }
-

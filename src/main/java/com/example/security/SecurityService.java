@@ -1,12 +1,13 @@
 package com.example.security;
 
-import com.vaadin.flow.spring.security.AuthenticationContext;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.vaadin.flow.spring.security.AuthenticationContext;
 
 @Component
 public class SecurityService {
@@ -18,7 +19,8 @@ public class SecurityService {
     }
 
     public UserDetails getAuthenticatedUser() {
-        return authenticationContext.getAuthenticatedUser(UserDetails.class).orElse(null);
+        return authenticationContext.getAuthenticatedUser(UserDetails.class)
+                .orElse(null);
     }
 
     public String getUsername() {
@@ -32,9 +34,10 @@ public class SecurityService {
             return Set.of();
         }
         return user.getAuthorities().stream()
-            .map(GrantedAuthority::getAuthority)
-            .map(role -> role.startsWith("ROLE_") ? role.substring(5) : role)
-            .collect(Collectors.toSet());
+                .map(GrantedAuthority::getAuthority)
+                .map(role -> role.startsWith("ROLE_") ? role.substring(5)
+                        : role)
+                .collect(Collectors.toSet());
     }
 
     public boolean hasRole(String role) {

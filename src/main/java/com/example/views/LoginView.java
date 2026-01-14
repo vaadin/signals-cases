@@ -28,46 +28,33 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
         // Add helpful information about available users
         Div infoBox = new Div();
-        infoBox.getStyle()
-            .set("background-color", "#f0f8ff")
-            .set("padding", "1em")
-            .set("border-radius", "4px")
-            .set("margin-bottom", "1em")
-            .set("max-width", "400px");
+        infoBox.getStyle().set("background-color", "#f0f8ff")
+                .set("padding", "1em").set("border-radius", "4px")
+                .set("margin-bottom", "1em").set("max-width", "400px");
 
         H3 infoTitle = new H3("Demo Users");
         infoTitle.getStyle().set("margin-top", "0");
 
         Paragraph infoText = new Paragraph();
-        infoText.getStyle()
-            .set("font-family", "monospace")
-            .set("white-space", "pre-line")
-            .set("margin", "0.5em 0");
-        infoText.setText(
-            "viewer / password → VIEWER\n" +
-            "editor / password → EDITOR\n" +
-            "admin / password → ADMIN\n" +
-            "superadmin / password → SUPER_ADMIN"
-        );
+        infoText.getStyle().set("font-family", "monospace")
+                .set("white-space", "pre-line").set("margin", "0.5em 0");
+        infoText.setText("viewer / password → VIEWER\n"
+                + "editor / password → EDITOR\n" + "admin / password → ADMIN\n"
+                + "superadmin / password → SUPER_ADMIN");
 
         Paragraph hint = new Paragraph("Use UC 8 to see permission-based UI");
-        hint.getStyle()
-            .set("font-style", "italic")
-            .set("margin-top", "0.5em")
-            .set("color", "#666");
+        hint.getStyle().set("font-style", "italic").set("margin-top", "0.5em")
+                .set("color", "#666");
 
         infoBox.add(infoTitle, infoText, hint);
 
-        add(
-            new H1("Signal API Use Cases"),
-            infoBox,
-            loginForm
-        );
+        add(new H1("Signal API Use Cases"), infoBox, loginForm);
     }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        if (event.getLocation().getQueryParameters().getParameters().containsKey("error")) {
+        if (event.getLocation().getQueryParameters().getParameters()
+                .containsKey("error")) {
             loginForm.setError(true);
         }
     }
