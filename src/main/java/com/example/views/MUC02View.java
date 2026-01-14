@@ -72,6 +72,7 @@ public class MUC02View extends VerticalLayout {
         // Canvas area for cursor tracking
         Div canvas = new Div();
         canvas.setId("cursor-canvas");
+        canvas.setWidthFull();
         canvas.getStyle().set("position", "relative")
                 .set("background-color", "#f5f5f5")
                 .set("border", "2px solid #e0e0e0").set("border-radius", "4px")

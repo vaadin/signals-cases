@@ -72,9 +72,10 @@ public class MUC01View extends VerticalLayout {
 
         // Message display area
         Div messagesContainer = new Div();
+        messagesContainer.setWidthFull();
         messagesContainer.getStyle().set("background-color", "#f5f5f5")
                 .set("border", "1px solid #e0e0e0").set("border-radius", "4px")
-                .set("padding", "1em").set("flex-grow", "1")
+                .set("padding", "1em").set("min-height", "200px")
                 .set("overflow-y", "auto").set("max-height", "400px");
 
         // Bind message list to UI
