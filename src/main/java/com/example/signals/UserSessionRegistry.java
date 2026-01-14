@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Application-scoped registry of currently logged-in users.
@@ -15,14 +14,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Component
 public class UserSessionRegistry {
 
-    public record UserInfo(String username, long sessionStartTime) {
-        public UserInfo(String username) {
-            this(username, System.currentTimeMillis());
-        }
-    }
-
     private final WritableSignal<List<UserInfo>> activeUsersSignal =
-        new ValueSignal<>(new CopyOnWriteArrayList<>());
+        new ValueSignal<>(new ArrayList<>());
 
     /**
      * Get the signal containing the list of active users.
@@ -71,3 +64,4 @@ public class UserSessionRegistry {
             .anyMatch(u -> u.username().equals(username));
     }
 }
+

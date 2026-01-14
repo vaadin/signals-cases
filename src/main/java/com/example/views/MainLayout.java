@@ -2,6 +2,7 @@ package com.example.views;
 
 import com.example.MissingAPI;
 import com.example.security.CurrentUserSignal;
+import com.example.signals.UserInfo;
 import com.example.signals.UserSessionRegistry;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
@@ -41,7 +42,7 @@ public class MainLayout extends AppLayout {
                     return "";
                 }
                 String usernames = users.stream()
-                    .map(UserSessionRegistry.UserInfo::username)
+                    .map(UserInfo::username)
                     .collect(Collectors.joining(", "));
                 return "👥 " + users.size() + " online: " + usernames;
             })
