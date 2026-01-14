@@ -248,7 +248,7 @@ public class UseCase14View extends VerticalLayout {
         Signal<String> errorTextSignal = usersSignal.map(state ->
             state.isError() ? state.getError() : ""
         );
-        MissingAPI.bindText(errorMessage, errorTextSignal);
+        errorMessage.bindText(errorTextSignal);
 
         Button retryButton = new Button("Retry", event -> loadUsers());
         retryButton.addThemeVariants();

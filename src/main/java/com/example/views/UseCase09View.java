@@ -142,7 +142,7 @@ public class UseCase09View extends VerticalLayout {
         }));
 
         Span ageError = new Span();
-        MissingAPI.bindText(ageError, Signal.computed(() -> {
+        ageError.bindText(Signal.computed(() -> {
             AccountType accountType = accountTypeSignal.value();
             if (accountType == AccountType.BUSINESS) {
                 return "Business accounts require age 18 or older";
@@ -170,7 +170,7 @@ public class UseCase09View extends VerticalLayout {
         // Form status
         Div statusDiv = new Div();
         Span statusLabel = new Span();
-        MissingAPI.bindText(statusLabel, formValidSignal.map(valid ->
+        statusLabel.bindText(formValidSignal.map(valid ->
             valid ? "Form is valid - Ready to submit" : "Please complete all required fields correctly"
         ));
         MissingAPI.bindAttribute(statusLabel, "style", formValidSignal.map(valid ->

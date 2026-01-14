@@ -716,7 +716,7 @@ public class UseCase17View extends VerticalLayout {
             }
             return "Complete Build First";
         });
-        MissingAPI.bindText(addToCartButton, cartButtonText);
+        addToCartButton.bindText(cartButtonText);
 
         actions.add(resetButton, addToCartButton);
 
@@ -833,7 +833,7 @@ public class UseCase17View extends VerticalLayout {
             .set("margin-bottom", "0.5em");
 
         Span powerValue = new Span();
-        MissingAPI.bindText(powerValue, totalPowerSignal.map(p -> p + "W total"));
+        powerValue.bindText(totalPowerSignal.map(p -> p + "W total"));
         powerValue.getStyle().set("display", "block");
 
         Span psuStatus = new Span();
@@ -845,7 +845,7 @@ public class UseCase17View extends VerticalLayout {
             return psu.getWattage() + "W PSU: " +
                    (sufficient ? "✓ OK (+" + margin + "W)" : "⚠ Insufficient");
         });
-        MissingAPI.bindText(psuStatus, psuStatusText);
+        psuStatus.bindText(psuStatusText);
         psuStatus.getStyle().set("display", "block");
 
         powerBox.add(powerLabel, powerValue, psuStatus);
@@ -870,18 +870,18 @@ public class UseCase17View extends VerticalLayout {
             .set("margin-bottom", "0.5em");
 
         Span perfRating = new Span();
-        MissingAPI.bindText(perfRating, performanceRatingSignal);
+        perfRating.bindText(performanceRatingSignal);
         perfRating.getStyle()
             .set("display", "block")
             .set("font-size", "1.2em")
             .set("color", "var(--lumo-primary-color)");
 
         Span perfGaming = new Span();
-        MissingAPI.bindText(perfGaming, gamingScoreSignal.map(s -> "Gaming: " + s + "/100"));
+        perfGaming.bindText(gamingScoreSignal.map(s -> "Gaming: " + s + "/100"));
         perfGaming.getStyle().set("display", "block").set("font-size", "0.9em");
 
         Span perfBottleneck = new Span();
-        MissingAPI.bindText(perfBottleneck, bottleneckSignal.map(b -> "Bottleneck: " + b));
+        perfBottleneck.bindText(bottleneckSignal.map(b -> "Bottleneck: " + b));
         perfBottleneck.getStyle().set("display", "block").set("font-size", "0.9em");
 
         perfBox.add(perfLabel, perfRating, perfGaming, perfBottleneck);
@@ -905,7 +905,7 @@ public class UseCase17View extends VerticalLayout {
             .set("margin-bottom", "0.5em");
 
         Span valueSpan = new Span();
-        MissingAPI.bindText(valueSpan, valueSignal);
+        valueSpan.bindText(valueSignal);
         valueSpan.getStyle()
             .set("display", "block")
             .set("font-size", "1.2em");
@@ -929,7 +929,7 @@ public class UseCase17View extends VerticalLayout {
             .set("margin-bottom", "0.5em");
 
         Span valueSpan = new Span();
-        MissingAPI.bindText(valueSpan, valueSignal);
+        valueSpan.bindText(valueSignal);
         valueSpan.getStyle()
             .set("display", "block")
             .set("font-size", "1.2em");

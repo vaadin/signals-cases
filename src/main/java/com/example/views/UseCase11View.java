@@ -108,7 +108,7 @@ public class UseCase11View extends VerticalLayout {
             .set("font-size", "1.2em")
             .set("font-weight", "bold");
         Signal<String> sizeText = windowSizeSignal.map(WindowSize::toString);
-        MissingAPI.bindText(sizeDisplay, sizeText);
+        sizeDisplay.bindText(sizeText);
 
         Paragraph breakpointDisplay = new Paragraph();
         Signal<String> breakpointText = windowSizeSignal.map(size -> {
@@ -116,7 +116,7 @@ public class UseCase11View extends VerticalLayout {
             if (size.isMediumScreen()) return "💻 Medium Screen (Tablet)";
             return "🖥️ Large Screen (Desktop)";
         });
-        MissingAPI.bindText(breakpointDisplay, breakpointText);
+        breakpointDisplay.bindText(breakpointText);
 
         sizeInfoBox.add(sizeTitle, sizeDisplay, breakpointDisplay);
 

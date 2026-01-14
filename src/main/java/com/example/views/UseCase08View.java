@@ -117,7 +117,7 @@ public class UseCase08View extends VerticalLayout {
         planSelect.bindValue(planSignal);
 
         Span planDescription = new Span();
-        MissingAPI.bindText(planDescription, planSignal.map(plan -> switch (plan) {
+        planDescription.bindText(planSignal.map(plan -> switch (plan) {
             case STARTER -> "Perfect for small teams - $29/month";
             case PROFESSIONAL -> "For growing businesses - $99/month";
             case ENTERPRISE -> "Custom solutions - Contact sales";
@@ -131,7 +131,7 @@ public class UseCase08View extends VerticalLayout {
         step4Layout.add(new H3("Step 4: Review Your Information"));
 
         Div reviewDiv = new Div();
-        MissingAPI.bindText(reviewDiv, Signal.computed(() ->
+        reviewDiv.bindText(Signal.computed(() ->
             "Name: " + firstNameSignal.value() + " " + lastNameSignal.value() + "\n" +
             "Email: " + emailSignal.value() + "\n" +
             "Company: " + companyNameSignal.value() + "\n" +
@@ -185,7 +185,7 @@ public class UseCase08View extends VerticalLayout {
 
         // Progress indicator
         Span progressIndicator = new Span();
-        MissingAPI.bindText(progressIndicator, currentStepSignal.map(step -> {
+        progressIndicator.bindText(currentStepSignal.map(step -> {
             int stepNumber = switch (step) {
                 case PERSONAL_INFO -> 1;
                 case COMPANY_INFO -> 2;

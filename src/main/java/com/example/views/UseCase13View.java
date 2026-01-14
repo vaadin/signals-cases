@@ -66,7 +66,7 @@ public class UseCase13View extends VerticalLayout {
             .set("font-weight", "bold")
             .set("display", "block")
             .set("margin-bottom", "0.5em");
-        MissingAPI.bindText(usernameDisplay,
+        usernameDisplay.bindText(
             currentUserSignal.getUserSignal().map(user ->
                 user.isAuthenticated() ? "👤 " + user.getUsername() : "👤 Not logged in"
             )
@@ -76,7 +76,7 @@ public class UseCase13View extends VerticalLayout {
         rolesDisplay.getStyle()
             .set("display", "block")
             .set("color", "var(--lumo-secondary-text-color)");
-        MissingAPI.bindText(rolesDisplay,
+        rolesDisplay.bindText(
             currentUserSignal.getUserSignal().map(user -> {
                 if (!user.isAuthenticated()) {
                     return "Anonymous user";

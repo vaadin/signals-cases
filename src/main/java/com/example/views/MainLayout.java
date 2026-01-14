@@ -36,7 +36,7 @@ public class MainLayout extends AppLayout {
                 .set("margin-right", "1em")
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-size", "var(--lumo-font-size-s)");
-        MissingAPI.bindText(activeUsersDisplay,
+        activeUsersDisplay.bindText(
             userSessionRegistry.getActiveUsersSignal().map(userSignals -> {
                 if (userSignals.isEmpty()) {
                     return "";
@@ -54,7 +54,7 @@ public class MainLayout extends AppLayout {
                 .set("margin-right", "1em")
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-size", "var(--lumo-font-size-s)");
-        MissingAPI.bindText(userDisplay,
+        userDisplay.bindText(
             currentUserSignal.getUserSignal().map(user ->
                 user.isAuthenticated() ? "👤 " + user.getUsername() : ""
             )

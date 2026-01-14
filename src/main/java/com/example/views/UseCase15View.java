@@ -127,7 +127,7 @@ public class UseCase15View extends VerticalLayout {
         instantValue.getStyle()
             .set("font-family", "monospace")
             .set("font-weight", "bold");
-        MissingAPI.bindText(instantValue, searchQuerySignal.map(q ->
+        instantValue.bindText(searchQuerySignal.map(q ->
             q.isEmpty() ? "(empty)" : "\"" + q + "\""
         ));
         instantQueryDiv.add(instantLabel, instantValue);
@@ -140,7 +140,7 @@ public class UseCase15View extends VerticalLayout {
             .set("font-family", "monospace")
             .set("font-weight", "bold")
             .set("color", "var(--lumo-primary-color)");
-        MissingAPI.bindText(debouncedValue, debouncedQuerySignal.map(q ->
+        debouncedValue.bindText(debouncedQuerySignal.map(q ->
             q.isEmpty() ? "(empty)" : "\"" + q + "\""
         ));
         debouncedQueryDiv.add(debouncedLabel, debouncedValue);
@@ -152,7 +152,7 @@ public class UseCase15View extends VerticalLayout {
         countValue.getStyle()
             .set("font-weight", "bold")
             .set("color", "var(--lumo-success-color)");
-        MissingAPI.bindText(countValue, searchCountSignal.map(String::valueOf));
+        countValue.bindText(searchCountSignal.map(String::valueOf));
         searchCountDiv.add(countLabel, countValue);
 
         statsBox.add(instantQueryDiv, debouncedQueryDiv, searchCountDiv);
@@ -170,7 +170,7 @@ public class UseCase15View extends VerticalLayout {
         MissingAPI.bindVisible(searchingIcon, isSearchingSignal);
 
         Span statusText = new Span();
-        MissingAPI.bindText(statusText, isSearchingSignal.map(searching ->
+        statusText.bindText(isSearchingSignal.map(searching ->
             searching ? "Searching..." : ""
         ));
         statusText.getStyle().set("color", "var(--lumo-primary-color)");
@@ -187,7 +187,7 @@ public class UseCase15View extends VerticalLayout {
             }
             return "Type to search";
         });
-        MissingAPI.bindText(resultsTitle, resultsTitleSignal);
+        resultsTitle.bindText(resultsTitleSignal);
 
         Div resultsContainer = new Div();
         resultsContainer.getStyle()

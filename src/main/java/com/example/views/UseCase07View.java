@@ -73,17 +73,17 @@ public class UseCase07View extends VerticalLayout {
         // Customer information
         Div customerInfo = new Div();
         Span customerName = new Span();
-        MissingAPI.bindText(customerName, invoiceDetailsSignal.map(details ->
+        customerName.bindText(invoiceDetailsSignal.map(details ->
             details != null ? "Customer: " + details.invoice().customerName() : ""
         ));
 
         Span customerEmail = new Span();
-        MissingAPI.bindText(customerEmail, invoiceDetailsSignal.map(details ->
+        customerEmail.bindText(invoiceDetailsSignal.map(details ->
             details != null ? "Email: " + details.customerEmail() : ""
         ));
 
         Span customerAddress = new Span();
-        MissingAPI.bindText(customerAddress, invoiceDetailsSignal.map(details ->
+        customerAddress.bindText(invoiceDetailsSignal.map(details ->
             details != null ? "Address: " + details.customerAddress() : ""
         ));
 
@@ -98,7 +98,7 @@ public class UseCase07View extends VerticalLayout {
 
         // Payment status
         Span paymentStatus = new Span();
-        MissingAPI.bindText(paymentStatus, invoiceDetailsSignal.map(details ->
+        paymentStatus.bindText(invoiceDetailsSignal.map(details ->
             details != null ? "Payment Status: " + details.paymentStatus() : ""
         ));
         paymentStatus.getStyle().set("font-weight", "bold");

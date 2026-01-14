@@ -3,7 +3,6 @@ package com.example;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.HasEnabled;
-import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
@@ -33,16 +32,6 @@ public class MissingAPI {
         if (component instanceof Component comp) {
             ComponentEffect.bind(comp, signal, (c, enabled) ->
                 component.setEnabled(enabled));
-        }
-    }
-
-    /**
-     * Binds a component's text content to a Signal.
-     */
-    public static void bindText(HasText component, Signal<String> signal) {
-        if (component instanceof Component comp) {
-            ComponentEffect.bind(comp, signal, (c, text) ->
-                component.setText(text));
         }
     }
 

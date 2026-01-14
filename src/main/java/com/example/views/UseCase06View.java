@@ -148,11 +148,11 @@ public class UseCase06View extends VerticalLayout {
         summaryTitle.getStyle().set("margin-top", "0");
 
         Span subtotalLabel = new Span();
-        MissingAPI.bindText(subtotalLabel, subtotalSignal.map(total -> "Subtotal: $" + total.setScale(2, RoundingMode.HALF_UP)));
+        subtotalLabel.bindText(subtotalSignal.map(total -> "Subtotal: $" + total.setScale(2, RoundingMode.HALF_UP)));
         subtotalLabel.getStyle().set("display", "block").set("margin-bottom", "0.5em");
 
         Span discountLabel = new Span();
-        MissingAPI.bindText(discountLabel, discountSignal.map(discount -> "Discount: -$" + discount.setScale(2, RoundingMode.HALF_UP)));
+        discountLabel.bindText(discountSignal.map(discount -> "Discount: -$" + discount.setScale(2, RoundingMode.HALF_UP)));
         discountLabel.bindVisible(discountSignal.map(d -> d.compareTo(BigDecimal.ZERO) > 0));
         discountLabel.getStyle()
             .set("display", "block")
@@ -160,11 +160,11 @@ public class UseCase06View extends VerticalLayout {
             .set("color", "var(--lumo-success-color)");
 
         Span shippingLabel = new Span();
-        MissingAPI.bindText(shippingLabel, shippingSignal.map(shipping -> "Shipping: $" + shipping.setScale(2, RoundingMode.HALF_UP)));
+        shippingLabel.bindText(shippingSignal.map(shipping -> "Shipping: $" + shipping.setScale(2, RoundingMode.HALF_UP)));
         shippingLabel.getStyle().set("display", "block").set("margin-bottom", "0.5em");
 
         Span taxLabel = new Span();
-        MissingAPI.bindText(taxLabel, taxSignal.map(tax -> "Tax (8%): $" + tax.setScale(2, RoundingMode.HALF_UP)));
+        taxLabel.bindText(taxSignal.map(tax -> "Tax (8%): $" + tax.setScale(2, RoundingMode.HALF_UP)));
         taxLabel.getStyle().set("display", "block").set("margin-bottom", "0.5em");
 
         Div divider = new Div();
@@ -173,7 +173,7 @@ public class UseCase06View extends VerticalLayout {
             .set("margin", "0.75em 0");
 
         Span totalLabel = new Span();
-        MissingAPI.bindText(totalLabel, totalSignal.map(total -> "Total: $" + total.setScale(2, RoundingMode.HALF_UP)));
+        totalLabel.bindText(totalSignal.map(total -> "Total: $" + total.setScale(2, RoundingMode.HALF_UP)));
         totalLabel.getStyle()
             .set("display", "block")
             .set("font-weight", "bold")

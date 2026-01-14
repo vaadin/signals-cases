@@ -144,7 +144,7 @@ public class UseCase03View extends VerticalLayout {
             .set("margin-bottom", "0.5em");
 
         Span permissionsList = new Span();
-        MissingAPI.bindText(permissionsList, permissionsSignal.map(perms -> {
+        permissionsList.bindText(permissionsSignal.map(perms -> {
             if (perms == null || perms.isEmpty()) {
                 return "None";
             }

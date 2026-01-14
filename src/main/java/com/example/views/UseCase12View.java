@@ -80,7 +80,7 @@ public class UseCase12View extends VerticalLayout {
             .set("margin", "0")
             .set("font-family", "monospace")
             .set("font-size", "1.1em");
-        MissingAPI.bindText(titleDisplay, viewTitleSignal);
+        titleDisplay.bindText(viewTitleSignal);
 
         Paragraph browserTitleLabel = new Paragraph("Browser Tab Title:");
         browserTitleLabel.getStyle()
@@ -98,7 +98,7 @@ public class UseCase12View extends VerticalLayout {
         Signal<String> fullTitleSignal = viewTitleSignal.map(viewTitle ->
             APP_NAME + " - " + viewTitle
         );
-        MissingAPI.bindText(browserTitleDisplay, fullTitleSignal);
+        browserTitleDisplay.bindText(fullTitleSignal);
 
         currentTitleBox.add(titleLabel, titleDisplay, browserTitleLabel, browserTitleDisplay);
 

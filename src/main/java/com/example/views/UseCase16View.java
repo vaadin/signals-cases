@@ -166,7 +166,7 @@ public class UseCase16View extends VerticalLayout implements HasUrlParameter<Str
             return url.toString();
         });
 
-        MissingAPI.bindText(urlDisplay, currentUrlSignal);
+        urlDisplay.bindText(currentUrlSignal);
 
         urlBox.add(urlTitle, urlDisplay);
 
@@ -192,7 +192,7 @@ public class UseCase16View extends VerticalLayout implements HasUrlParameter<Str
         Signal<String> resultsTitleSignal = filteredArticlesSignal.map(articles ->
             articles.size() + " article" + (articles.size() == 1 ? "" : "s") + " found"
         );
-        MissingAPI.bindText(resultsTitle, resultsTitleSignal);
+        resultsTitle.bindText(resultsTitleSignal);
 
         Div resultsContainer = new Div();
         resultsContainer.getStyle()
