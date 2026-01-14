@@ -142,19 +142,21 @@ public class MUC03View extends VerticalLayout {
                     return scores.entrySet().stream().sorted(
                             (e1, e2) -> e2.getValue().compareTo(e1.getValue()))
                             .map(entry -> {
+                                String username = entry.getKey();
+                                boolean isCurrentUser = username
+                                        .equals(currentUser);
+
                                 Div item = new Div();
                                 item.setText(String.format("%s: %d points",
-                                        entry.getKey(), entry.getValue()));
+                                        username, entry.getValue()));
                                 item.getStyle().set("padding", "0.5em")
                                         .set("background-color",
-                                                entry.getKey().equals(
-                                                        currentUser) ? "#fff3e0"
-                                                                : "transparent")
+                                                isCurrentUser ? "#fff3e0"
+                                                        : "transparent")
                                         .set("border-radius", "4px")
                                         .set("font-weight",
-                                                entry.getKey().equals(
-                                                        currentUser) ? "bold"
-                                                                : "normal");
+                                                isCurrentUser ? "bold"
+                                                        : "normal");
                                 return item;
                             }).toList();
                 }));
@@ -177,10 +179,8 @@ public class MUC03View extends VerticalLayout {
 
     private void startNewRound() {
         // Position button randomly and start a new round
-        int left = random.nextInt(400);
-        int top = random.nextInt(200);
-
-        collaborativeSignals.startNewRound(left, top);
+        int[] position = getRandomPosition();
+        collaborativeSignals.startNewRound(position[0], position[1]);
     }
 
     private void handleButtonClick() {
@@ -198,16 +198,20 @@ public class MUC03View extends VerticalLayout {
                     Thread.sleep(delay);
 
                     // Reposition button at random location
-                    int left = random.nextInt(400);
-                    int top = random.nextInt(200);
-
+                    int[] position = getRandomPosition();
                     getUI().ifPresent(ui -> ui.access(() -> collaborativeSignals
-                            .repositionButton(left, top)));
+                            .repositionButton(position[0], position[1])));
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
             }).start();
         }
+    }
+
+    private int[] getRandomPosition() {
+        int left = random.nextInt(400);
+        int top = random.nextInt(200);
+        return new int[] { left, top };
     }
 
     @Override
