@@ -1,12 +1,7 @@
 package com.example.signals;
 
-import com.vaadin.signals.ValueSignal;
-import com.vaadin.signals.WritableSignal;
+import com.vaadin.signals.ListSignal;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Application-scoped registry of currently logged-in users.
@@ -15,19 +10,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Component
 public class UserSessionRegistry {
 
-    public record UserInfo(String username, long sessionStartTime) {
-        public UserInfo(String username) {
-            this(username, System.currentTimeMillis());
-        }
-    }
-
-    private final WritableSignal<List<UserInfo>> activeUsersSignal =
-        new ValueSignal<>(new CopyOnWriteArrayList<>());
+    private final ListSignal<UserInfo> activeUsersSignal = new ListSignal<>(UserInfo.class);
 
     /**
      * Get the signal containing the list of active users.
      */
-    public WritableSignal<List<UserInfo>> getActiveUsersSignal() {
+    public ListSignal<UserInfo> getActiveUsersSignal() {
         return activeUsersSignal;
     }
 
@@ -35,15 +23,12 @@ public class UserSessionRegistry {
      * Register a user as active.
      */
     public void registerUser(String username) {
-        List<UserInfo> users = new ArrayList<>(activeUsersSignal.value());
-
         // Check if user is already registered
-        boolean exists = users.stream()
-            .anyMatch(u -> u.username().equals(username));
+        boolean exists = activeUsersSignal.value().stream()
+            .anyMatch(userSignal -> userSignal.value().username().equals(username));
 
         if (!exists) {
-            users.add(new UserInfo(username));
-            activeUsersSignal.value(users);
+            activeUsersSignal.insertLast(new UserInfo(username));
         }
     }
 
@@ -51,9 +36,10 @@ public class UserSessionRegistry {
      * Unregister a user (e.g., on logout or session timeout).
      */
     public void unregisterUser(String username) {
-        List<UserInfo> users = new ArrayList<>(activeUsersSignal.value());
-        users.removeIf(u -> u.username().equals(username));
-        activeUsersSignal.value(users);
+        activeUsersSignal.value().stream()
+            .filter(userSignal -> userSignal.value().username().equals(username))
+            .findFirst()
+            .ifPresent(activeUsersSignal::remove);
     }
 
     /**
@@ -68,6 +54,7 @@ public class UserSessionRegistry {
      */
     public boolean isUserActive(String username) {
         return activeUsersSignal.value().stream()
-            .anyMatch(u -> u.username().equals(username));
+            .anyMatch(userSignal -> userSignal.value().username().equals(username));
     }
 }
+

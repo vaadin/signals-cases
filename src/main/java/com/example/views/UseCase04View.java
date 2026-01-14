@@ -2,9 +2,6 @@ package com.example.views;
 
 import com.example.MissingAPI;
 
-
-// Note: This code uses the proposed Signal API and will not compile yet
-
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.signals.Signal;
 import com.vaadin.signals.WritableSignal;
@@ -26,7 +23,7 @@ import jakarta.annotation.security.PermitAll;
 @PermitAll
 public class UseCase04View extends VerticalLayout {
 
-    record Product(String id, String name, String category, double price, int stock) {}
+    public static record Product(String id, String name, String category, double price, int stock) {}
 
     public UseCase04View() {
         // Create signals for filter inputs

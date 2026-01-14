@@ -2,10 +2,8 @@ package com.example.views;
 
 import com.example.MissingAPI;
 
-
-// Note: This code uses the proposed Signal API and will not compile yet
-
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.signals.ListSignal;
 import com.vaadin.signals.Signal;
 import com.vaadin.signals.WritableSignal;
 import com.vaadin.signals.ValueSignal;
@@ -32,10 +30,10 @@ import jakarta.annotation.security.PermitAll;
 @PermitAll
 public class UseCase10View extends VerticalLayout {
 
-    enum UserRole { VIEWER, EDITOR, ADMIN }
-    enum EmployeeStatus { ACTIVE, ON_LEAVE, TERMINATED }
+    public enum UserRole { VIEWER, EDITOR, ADMIN }
+    public enum EmployeeStatus { ACTIVE, ON_LEAVE, TERMINATED }
 
-    record Employee(String id, String name, String department, EmployeeStatus status, double salary) {}
+    public static record Employee(String id, String name, String department, EmployeeStatus status, double salary) {}
 
     public UseCase10View() {
         // Create signals for permissions and edit mode
@@ -57,7 +55,8 @@ public class UseCase10View extends VerticalLayout {
         );
 
         // Load employees
-        WritableSignal<List<Employee>> employeesSignal = new ValueSignal<>(new ArrayList<>(loadEmployees()));
+        ListSignal<Employee> employeesSignal = new ListSignal<>(Employee.class);
+        loadEmployees().forEach(employeesSignal::insertLast);
 
         // Controls
         ComboBox<UserRole> roleSelector = new ComboBox<>("Simulate User Role", UserRole.values());
@@ -77,7 +76,9 @@ public class UseCase10View extends VerticalLayout {
         // Employee grid
         Grid<Employee> grid = new Grid<>(Employee.class);
         grid.setColumns("id", "name", "department", "status", "salary");
-        grid.setItems(employeesSignal.value());
+        MissingAPI.bindItems(grid, employeesSignal.map(empSignals ->
+            empSignals.stream().map(ValueSignal::value).toList()
+        ));
 
         // Dynamic cell editability based on signals
         MissingAPI.bindEditable(grid.getColumnByKey("name"), Signal.computed(() ->
@@ -139,24 +140,23 @@ public class UseCase10View extends VerticalLayout {
             // Show "Delete" only if user can delete and employee is not active
             if (canDeleteSignal.value() && employee.status() != EmployeeStatus.ACTIVE) {
                 contextMenu.addItem("Delete", e -> {
-                    List<Employee> employees = new ArrayList<>(employeesSignal.value());
-                    employees.remove(employee);
-                    employeesSignal.value(employees);
-                    grid.setItems(employees);
+                    employeesSignal.value().stream()
+                        .filter(empSignal -> empSignal.value().equals(employee))
+                        .findFirst()
+                        .ifPresent(employeesSignal::remove);
                 });
             }
 
             // Show status-specific actions
             if (employee.status() == EmployeeStatus.ACTIVE && canEditSignal.value()) {
                 contextMenu.addItem("Mark as On Leave", e -> {
-                    List<Employee> employees = new ArrayList<>(employeesSignal.value());
-                    int index = employees.indexOf(employee);
-                    employees.set(index, new Employee(
-                        employee.id(), employee.name(), employee.department(),
-                        EmployeeStatus.ON_LEAVE, employee.salary()
-                    ));
-                    employeesSignal.value(employees);
-                    grid.setItems(employees);
+                    employeesSignal.value().stream()
+                        .filter(empSignal -> empSignal.value().equals(employee))
+                        .findFirst()
+                        .ifPresent(empSignal -> empSignal.value(new Employee(
+                            employee.id(), employee.name(), employee.department(),
+                            EmployeeStatus.ON_LEAVE, employee.salary()
+                        )));
                 });
             }
 
@@ -165,16 +165,13 @@ public class UseCase10View extends VerticalLayout {
 
         // Action buttons
         Button addButton = new Button("Add Employee", e -> {
-            List<Employee> employees = new ArrayList<>(employeesSignal.value());
-            employees.add(new Employee(
-                "E" + (employees.size() + 1),
+            employeesSignal.insertLast(new Employee(
+                "E" + (employeesSignal.value().size() + 1),
                 "New Employee",
                 "Unassigned",
                 EmployeeStatus.ACTIVE,
                 50000.0
             ));
-            employeesSignal.value(employees);
-            grid.setItems(employees);
         });
         addButton.bindEnabled(canEditSignal);
 

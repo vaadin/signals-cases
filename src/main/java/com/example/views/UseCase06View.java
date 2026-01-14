@@ -2,10 +2,8 @@ package com.example.views;
 
 import com.example.MissingAPI;
 
-
-// Note: This code uses the proposed Signal API and will not compile yet
-
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.signals.ListSignal;
 import com.vaadin.signals.Signal;
 import com.vaadin.signals.WritableSignal;
 import com.vaadin.signals.ValueSignal;
@@ -40,11 +38,10 @@ public class UseCase06View extends VerticalLayout {
 
     public UseCase06View() {
         // Create signals for cart state
-        WritableSignal<List<CartItem>> cartItemsSignal = new ValueSignal<>(new ArrayList<>(List.of(
-            new CartItem("1", "Laptop", new BigDecimal("999.99"), 1),
-            new CartItem("2", "Mouse", new BigDecimal("25.99"), 2),
-            new CartItem("3", "Keyboard", new BigDecimal("79.99"), 1)
-        )));
+        ListSignal<CartItem> cartItemsSignal = new ListSignal<>(CartItem.class);
+        cartItemsSignal.insertLast(new CartItem("1", "Laptop", new BigDecimal("999.99"), 1));
+        cartItemsSignal.insertLast(new CartItem("2", "Mouse", new BigDecimal("25.99"), 2));
+        cartItemsSignal.insertLast(new CartItem("3", "Keyboard", new BigDecimal("79.99"), 1));
 
         WritableSignal<String> discountCodeSignal = new ValueSignal<>("");
         WritableSignal<ShippingOption> shippingOptionSignal = new ValueSignal<>(ShippingOption.STANDARD);
@@ -52,7 +49,10 @@ public class UseCase06View extends VerticalLayout {
         // Computed signal for subtotal
         Signal<BigDecimal> subtotalSignal = Signal.computed(() ->
             cartItemsSignal.value().stream()
-                .map(item -> item.price().multiply(BigDecimal.valueOf(item.quantity())))
+                .map(itemSignal -> {
+                    CartItem item = itemSignal.value();
+                    return item.price().multiply(BigDecimal.valueOf(item.quantity()));
+                })
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
         );
 
@@ -93,9 +93,9 @@ public class UseCase06View extends VerticalLayout {
         // Cart items display
         VerticalLayout cartItemsLayout = new VerticalLayout();
         cartItemsLayout.add(new H3("Shopping Cart"));
-        MissingAPI.bindChildren(cartItemsLayout, cartItemsSignal.map(items ->
-            items.stream()
-                .map(item -> createCartItemRow(item, cartItemsSignal))
+        MissingAPI.bindChildren(cartItemsLayout, cartItemsSignal.map(itemSignals ->
+            itemSignals.stream()
+                .map(itemSignal -> createCartItemRow(itemSignal, cartItemsSignal))
                 .toList()
         ));
 
@@ -135,7 +135,8 @@ public class UseCase06View extends VerticalLayout {
         add(cartItemsLayout, discountField, shippingSelect, totalsDiv);
     }
 
-    private HorizontalLayout createCartItemRow(CartItem item, WritableSignal<List<CartItem>> cartItemsSignal) {
+    private HorizontalLayout createCartItemRow(ValueSignal<CartItem> itemSignal, ListSignal<CartItem> cartItemsSignal) {
+        CartItem item = itemSignal.value();
         Span nameLabel = new Span(item.name() + " - $" + item.price());
         nameLabel.getStyle().set("flex-grow", "1");
 
@@ -145,12 +146,8 @@ public class UseCase06View extends VerticalLayout {
         quantityField.setMax(99);
         quantityField.setWidth("80px");
         quantityField.addValueChangeListener(e -> {
-            List<CartItem> currentItems = new ArrayList<>(cartItemsSignal.value());
-            int index = currentItems.indexOf(item);
-            if (index >= 0) {
-                currentItems.set(index, new CartItem(item.id(), item.name(), item.price(), e.getValue()));
-                cartItemsSignal.value(currentItems);
-            }
+            CartItem current = itemSignal.value();
+            itemSignal.value(new CartItem(current.id(), current.name(), current.price(), e.getValue()));
         });
 
         Span itemTotalLabel = new Span("$" + item.price().multiply(BigDecimal.valueOf(item.quantity())));
@@ -158,9 +155,7 @@ public class UseCase06View extends VerticalLayout {
         itemTotalLabel.getStyle().set("text-align", "right");
 
         Button removeButton = new Button("Remove", e -> {
-            List<CartItem> currentItems = new ArrayList<>(cartItemsSignal.value());
-            currentItems.remove(item);
-            cartItemsSignal.value(currentItems);
+            cartItemsSignal.remove(itemSignal);
         });
         removeButton.addThemeName("error");
         removeButton.addThemeName("small");

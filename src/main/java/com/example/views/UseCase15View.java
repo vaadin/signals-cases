@@ -15,6 +15,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.signals.ListSignal;
 import com.vaadin.signals.Signal;
 import com.vaadin.signals.ValueSignal;
 import com.vaadin.signals.WritableSignal;
@@ -50,24 +51,7 @@ import java.util.stream.Collectors;
 @PermitAll
 public class UseCase15View extends VerticalLayout {
 
-    public static class Product {
-        private final String id;
-        private final String name;
-        private final String category;
-        private final double price;
-
-        public Product(String id, String name, String category, double price) {
-            this.id = id;
-            this.name = name;
-            this.category = category;
-            this.price = price;
-        }
-
-        public String getId() { return id; }
-        public String getName() { return name; }
-        public String getCategory() { return category; }
-        public double getPrice() { return price; }
-
+    public record Product(String id, String name, String category, double price) {
         public boolean matches(String query) {
             String lowerQuery = query.toLowerCase();
             return name.toLowerCase().contains(lowerQuery) ||
@@ -97,7 +81,7 @@ public class UseCase15View extends VerticalLayout {
     private final WritableSignal<String> searchQuerySignal = new ValueSignal<>("");
     private final WritableSignal<String> debouncedQuerySignal = new ValueSignal<>("");
     private final WritableSignal<Boolean> isSearchingSignal = new ValueSignal<>(false);
-    private final WritableSignal<List<Product>> searchResultsSignal = new ValueSignal<>(List.of());
+    private final ListSignal<Product> searchResultsSignal = new ListSignal<>(Product.class);
     private final WritableSignal<Integer> searchCountSignal = new ValueSignal<>(0);
 
     private Timer debounceTimer;
@@ -212,7 +196,9 @@ public class UseCase15View extends VerticalLayout {
             .set("gap", "0.5em")
             .set("margin-top", "1em");
 
-        MissingAPI.bindComponentChildren(resultsContainer, searchResultsSignal, product -> {
+        MissingAPI.bindComponentChildren(resultsContainer,
+            searchResultsSignal.map(prodSignals -> prodSignals.stream().map(ValueSignal::value).toList()),
+            product -> {
             Div card = new Div();
             card.getStyle()
                 .set("background-color", "#ffffff")
@@ -229,16 +215,16 @@ public class UseCase15View extends VerticalLayout {
 
             // Highlight matching text
             String query = debouncedQuerySignal.value();
-            nameDiv.getElement().setProperty("innerHTML", highlightMatch(product.getName(), query));
+            nameDiv.getElement().setProperty("innerHTML", highlightMatch(product.name(), query));
 
-            Div categoryDiv = new Div(product.getCategory());
+            Div categoryDiv = new Div(product.category());
             categoryDiv.getStyle()
                 .set("font-size", "0.9em")
                 .set("color", "var(--lumo-secondary-text-color)");
 
             leftSide.add(nameDiv, categoryDiv);
 
-            Div priceDiv = new Div("$" + String.format("%.2f", product.getPrice()));
+            Div priceDiv = new Div("$" + String.format("%.2f", product.price()));
             priceDiv.getStyle()
                 .set("font-weight", "bold")
                 .set("color", "var(--lumo-primary-color)");
@@ -322,7 +308,7 @@ public class UseCase15View extends VerticalLayout {
         }
 
         if (query.isEmpty()) {
-            searchResultsSignal.value(List.of());
+            searchResultsSignal.clear();
             return;
         }
 
@@ -345,7 +331,8 @@ public class UseCase15View extends VerticalLayout {
                 .collect(Collectors.toList());
 
             getUI().ifPresent(ui -> ui.access(() -> {
-                searchResultsSignal.value(results);
+                searchResultsSignal.clear();
+                results.forEach(searchResultsSignal::insertLast);
                 isSearchingSignal.value(false);
             }));
         });
