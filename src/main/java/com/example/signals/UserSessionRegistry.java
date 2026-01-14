@@ -23,9 +23,13 @@ public class UserSessionRegistry {
      * Register a user as active.
      */
     public void registerUser(String username) {
+        if (username == null) {
+            throw new IllegalArgumentException("Username cannot be null");
+        }
+
         // Check if user is already registered
         boolean exists = activeUsersSignal.value().stream()
-            .anyMatch(userSignal -> userSignal.value().username().equals(username));
+            .anyMatch(userSignal -> username.equals(userSignal.value().username()));
 
         if (!exists) {
             activeUsersSignal.insertLast(new UserInfo(username));
@@ -36,8 +40,12 @@ public class UserSessionRegistry {
      * Unregister a user (e.g., on logout or session timeout).
      */
     public void unregisterUser(String username) {
+        if (username == null) {
+            throw new IllegalArgumentException("Username cannot be null");
+        }
+
         activeUsersSignal.value().stream()
-            .filter(userSignal -> userSignal.value().username().equals(username))
+            .filter(userSignal -> username.equals(userSignal.value().username()))
             .findFirst()
             .ifPresent(activeUsersSignal::remove);
     }
@@ -53,8 +61,12 @@ public class UserSessionRegistry {
      * Check if a user is currently active.
      */
     public boolean isUserActive(String username) {
+        if (username == null) {
+            throw new IllegalArgumentException("Username cannot be null");
+        }
+
         return activeUsersSignal.value().stream()
-            .anyMatch(userSignal -> userSignal.value().username().equals(username));
+            .anyMatch(userSignal -> username.equals(userSignal.value().username()));
     }
 }
 

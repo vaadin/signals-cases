@@ -49,7 +49,11 @@ public class MUC03View extends VerticalLayout {
     public MUC03View(CurrentUserSignal currentUserSignal,
                          CollaborativeSignals collaborativeSignals,
                          UserSessionRegistry userSessionRegistry) {
-        this.currentUser = currentUserSignal.getUserSignal().value().getUsername();
+        CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal().value();
+        if (userInfo == null || !userInfo.isAuthenticated()) {
+            throw new IllegalStateException("User must be authenticated to access this view");
+        }
+        this.currentUser = userInfo.getUsername();
         this.collaborativeSignals = collaborativeSignals;
         this.userSessionRegistry = userSessionRegistry;
 
