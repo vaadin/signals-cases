@@ -9,7 +9,6 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.signals.Signal;
-import com.vaadin.signals.WritableSignal;
 
 import java.util.List;
 import java.util.function.Function;
@@ -19,30 +18,6 @@ import java.util.function.Function;
  * until the official API is implemented in Vaadin.
  */
 public class MissingAPI {
-
-    /**
-     * Binds a component's value to a WritableSignal with two-way synchronization.
-     */
-    public static <T, C extends HasValue<?, T>> void bindValue(C component, WritableSignal<T> signal) {
-        // Set initial value from signal to component
-        component.setValue(signal.value());
-
-        // Component -> Signal
-        component.addValueChangeListener(event -> {
-            if (event.isFromClient()) {
-                signal.value(event.getValue());
-            }
-        });
-
-        // Signal -> Component using ComponentEffect
-        if (component instanceof Component comp) {
-            ComponentEffect.bind(comp, signal, (c, value) -> {
-                if (!java.util.Objects.equals(component.getValue(), value)) {
-                    component.setValue(value);
-                }
-            });
-        }
-    }
 
     /**
      * Binds a component's visibility to a Signal.
