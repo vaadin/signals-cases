@@ -1,6 +1,6 @@
 # Vaadin Signal API Use Cases - Current Implementation
 
-This document describes the 21 use cases currently implemented in this project.
+This document describes the 20 use cases currently implemented in this project.
 
 ## Introduction
 
@@ -8,7 +8,7 @@ Signals provide a reactive, declarative approach to building UIs where component
 
 ---
 
-## Single-User Use Cases (UC 1-17)
+## Single-User Use Cases (UC 1-16)
 
 ### UC 1: Dynamic Button State
 
@@ -228,23 +228,6 @@ Signals provide a reactive, declarative approach to building UIs where component
 
 ---
 
-### UC 17: Form Auto-Save with Persistence
-
-**Description**: Support request form with auto-save functionality. Form automatically saves draft to localStorage every 30 seconds if modified. Draft is restored on page load and cleared after successful submission.
-
-**Key Patterns**:
-- Form dirty state tracking
-- Periodic auto-save (30 second interval)
-- localStorage persistence via JavaScript
-- Draft status signal (IDLE/DIRTY/SAVING/SAVED/LOADED)
-- Visual indication of save status
-- Draft restoration on page load
-- Clear draft after submit
-
-**Route**: `/use-case-17`
-
----
-
 ## Multi-User Collaboration (MUC 1-4)
 
 ### MUC 1: Shared Chat/Message List
@@ -361,5 +344,5 @@ Multi-user use cases share signals across sessions:
 
 ---
 
-**Total Use Cases**: 21 (17 single-user + 4 multi-user)
-**Last Updated**: 2026-01-13
+**Total Use Cases**: 20 (16 single-user + 4 multi-user)
+**Last Updated**: 2026-01-14
