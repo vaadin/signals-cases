@@ -178,10 +178,10 @@ public class UseCase09View extends VerticalLayout {
         statusLabel.bindText(formValidSignal
                 .map(valid -> valid ? "Form is valid - Ready to submit"
                         : "Please complete all required fields correctly"));
-        statusLabel.getElement().bindAttribute("style",
-                formValidSignal
-                        .map(valid -> valid ? "color: green; font-weight: bold;"
-                                : "color: orange;"));
+        statusLabel.getStyle().bind("color",
+                formValidSignal.map(valid -> valid ? "green" : "orange"));
+        statusLabel.getStyle().bind("font-weight",
+                formValidSignal.map(valid -> valid ? "bold" : "normal"));
         statusDiv.add(statusLabel);
 
         add(title, description, usernameField, usernameError, emailField,
