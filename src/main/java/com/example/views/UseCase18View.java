@@ -27,9 +27,9 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.messages.MessageInput;
-import com.vaadin.flow.component.markdown.Markdown;
+import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -63,9 +63,8 @@ public class UseCase18View extends VerticalLayout {
     private final TaskLLMService taskLLMService;
 
     // UI Components
-    private VerticalLayout messageListContainer;
+    private MessageList messageList;
     private MessageInput messageInput;
-    private Scroller messageScroller;
 
     // Signals for UI state
     private final WritableSignal<Boolean> messageInputEnabledSignal = new ValueSignal<>(true);
@@ -350,28 +349,28 @@ public class UseCase18View extends VerticalLayout {
         chatContainer.setSpacing(true);
         chatContainer.getStyle().set("min-height", "0");
 
-        // Message list container
-        messageListContainer = new VerticalLayout();
-        messageListContainer.setPadding(false);
-        messageListContainer.setSpacing(true);
-        messageListContainer.setWidthFull();
-
-        messageScroller = new Scroller(messageListContainer);
-        messageScroller.setWidthFull();
-        messageScroller.getStyle().set("background-color", "#f5f5f5").set("border-radius", "8px").set("padding", "1em")
-                .set("min-height", "0");
+        // Message list
+        messageList = new MessageList();
+        messageList.setWidthFull();
+        messageList.setMarkdown(true);
 
         // Reactively update message list using ComponentEffect
-        com.vaadin.flow.component.ComponentEffect.bind(messageListContainer, chatMessagesSignal,
-                (container, msgSignals) -> {
+        com.vaadin.flow.component.ComponentEffect.bind(messageList, chatMessagesSignal,
+                (msgList, msgSignals) -> {
                     if (msgSignals != null) {
-                        container.removeAll();
-                        msgSignals.stream().forEach(msgSignal -> {
-                            ChatMessageData msg = msgSignal.value();
-                            container.add(createMessageComponent(msg));
-                        });
-                        // Scroll to bottom after updating messages
-                        scrollToBottom();
+                        var items = msgSignals.stream()
+                                .map(msgSignal -> {
+                                    ChatMessageData msg = msgSignal.value();
+                                    MessageListItem item = new MessageListItem(
+                                            msg.content().isBlank() ? "_typing..._" : msg.content(),
+                                            msg.timestamp(),
+                                            msg.role()
+                                    );
+                                    item.setUserColorIndex(msg.role().equals("You") ? 0 : 1);
+                                    return item;
+                                })
+                                .toList();
+                        msgList.setItems(items);
                     }
                 });
 
@@ -392,54 +391,10 @@ public class UseCase18View extends VerticalLayout {
         inputLayout.add(messageInput, clearButton);
         inputLayout.setFlexGrow(1, messageInput);
 
-        chatContainer.add(messageScroller, inputLayout);
-        chatContainer.setFlexGrow(1, messageScroller);
+        chatContainer.add(messageList, inputLayout);
+        chatContainer.setFlexGrow(1, messageList);
 
         return chatContainer;
-    }
-
-    private void scrollToBottom() {
-        // Use getElement().executeJs() to scroll to bottom
-        // We need to do this after the DOM has updated
-        getUI().ifPresent(ui -> ui.access(() -> {
-            messageScroller.getElement().executeJs("this.scrollTop = this.scrollHeight");
-        }));
-    }
-
-    private Div createMessageComponent(ChatMessageData msg) {
-        Div messageContainer = new Div();
-        messageContainer.setWidthFull();
-        messageContainer.getStyle().set("margin-bottom", "1em").set("padding", "0.75em").set("border-radius", "8px");
-
-        // Style based on role
-        if (msg.role().equals("You")) {
-            messageContainer.getStyle().set("background-color", "#e3f2fd").set("border-left", "4px solid #2196F3");
-        } else {
-            messageContainer.getStyle().set("background-color", "#f3e5f5").set("border-left", "4px solid #9c27b0");
-        }
-
-        // Header with role and timestamp
-        HorizontalLayout header = new HorizontalLayout();
-        header.setWidthFull();
-        header.setPadding(false);
-        header.setSpacing(true);
-        header.setAlignItems(Alignment.CENTER);
-
-        Span roleLabel = new Span(msg.role());
-        roleLabel.getStyle().set("font-weight", "bold").set("color", "var(--lumo-secondary-text-color)");
-
-        Span timeLabel = new Span(msg.timestamp().toString());
-        timeLabel.getStyle().set("font-size", "0.75em").set("color", "var(--lumo-tertiary-text-color)");
-
-        header.add(roleLabel, timeLabel);
-        header.setFlexGrow(1, new Div()); // Spacer
-
-        // Content with markdown rendering
-        Markdown contentMarkdown = new Markdown(msg.content().isBlank() ? "_typing..._" : msg.content());
-        contentMarkdown.setWidthFull();
-
-        messageContainer.add(header, contentMarkdown);
-        return messageContainer;
     }
 
     private void onMessageSubmit(MessageInput.SubmitEvent event) {
