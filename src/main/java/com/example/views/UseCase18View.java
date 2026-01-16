@@ -493,12 +493,10 @@ public class UseCase18View extends VerticalLayout {
     }
 
     private void updateTaskField(String taskId, java.util.function.Function<Task, Task> updater) {
-        getUI().ifPresent(ui -> ui.access(() -> {
-            tasksSignal.value().stream()
-                    .filter(sig -> sig.value().id().equals(taskId))
-                    .findFirst()
-                    .ifPresent(sig -> sig.value(updater.apply(sig.value())));
-        }));
+        tasksSignal.value().stream()
+                .filter(sig -> sig.value().id().equals(taskId))
+                .findFirst()
+                .ifPresent(sig -> sig.value(updater.apply(sig.value())));
     }
 
     private TaskContext createTaskContext() {
@@ -510,19 +508,15 @@ public class UseCase18View extends VerticalLayout {
 
             @Override
             public void addTask(Task task) {
-                getUI().ifPresent(ui -> ui.access(() -> {
-                    tasksSignal.insertLast(task);
-                }));
+                tasksSignal.insertLast(task);
             }
 
             @Override
             public void removeTask(String taskId) {
-                getUI().ifPresent(ui -> ui.access(() -> {
-                    tasksSignal.value().stream()
-                            .filter(sig -> sig.value().id().equals(taskId))
-                            .findFirst()
-                            .ifPresent(tasksSignal::remove);
-                }));
+                tasksSignal.value().stream()
+                        .filter(sig -> sig.value().id().equals(taskId))
+                        .findFirst()
+                        .ifPresent(tasksSignal::remove);
             }
 
             @Override
