@@ -4,9 +4,9 @@ import jakarta.annotation.security.PermitAll;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 
-import com.example.MissingAPI;
-
+import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
@@ -24,7 +24,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.signals.ListSignal;
 import com.vaadin.signals.Signal;
 import com.vaadin.signals.ValueSignal;
-import com.vaadin.signals.WritableSignal;
 
 @Route(value = "use-case-06", layout = MainLayout.class)
 @PageTitle("Use Case 6: Shopping Cart with Real-time Totals")
@@ -32,7 +31,10 @@ import com.vaadin.signals.WritableSignal;
 @PermitAll
 public class UseCase06View extends VerticalLayout {
 
-    record CartItem(String id, String name, BigDecimal price, int quantity) {
+    record Product(String id, String name, BigDecimal price) {
+    }
+
+    record CartItem(Product product, int quantity) {
     }
 
     record DiscountCode(String code, BigDecimal percentage) {
@@ -46,37 +48,28 @@ public class UseCase06View extends VerticalLayout {
         setSpacing(true);
         setPadding(true);
 
-        H2 title = new H2("Use Case 6: Shopping Cart with Real-time Totals");
+        var title = new H2("Use Case 6: Shopping Cart with Real-time Totals");
 
-        Paragraph description = new Paragraph(
+        var description = new Paragraph(
                 "This use case demonstrates a shopping cart with reactive totals. "
                         + "As you adjust quantities, add/remove items, enter discount codes, or change shipping options, "
                         + "all totals (subtotal, discount, tax, shipping, and grand total) update automatically. "
                         + "Try using discount codes SAVE10 or SAVE20.");
 
         // Create signals for cart state
-        ListSignal<CartItem> cartItemsSignal = new ListSignal<>(CartItem.class);
-        cartItemsSignal.insertLast(
-                new CartItem("1", "Laptop", new BigDecimal("999.99"), 1));
-        cartItemsSignal.insertLast(
-                new CartItem("2", "Mouse", new BigDecimal("25.99"), 2));
-        cartItemsSignal.insertLast(
-                new CartItem("3", "Keyboard", new BigDecimal("79.99"), 1));
-
-        WritableSignal<String> discountCodeSignal = new ValueSignal<>("");
-        WritableSignal<ShippingOption> shippingOptionSignal = new ValueSignal<>(
-                ShippingOption.STANDARD);
+        var cartItemsSignal = new ListSignal<>(CartItem.class);
+        var discountCodeSignal = new ValueSignal<>("");
+        var shippingOptionSignal = new ValueSignal<>(ShippingOption.STANDARD);
 
         // Computed signal for subtotal
-        Signal<BigDecimal> subtotalSignal = Signal.computed(
-                () -> cartItemsSignal.value().stream().map(itemSignal -> {
-                    CartItem item = itemSignal.value();
-                    return item.price()
-                            .multiply(BigDecimal.valueOf(item.quantity()));
-                }).reduce(BigDecimal.ZERO, BigDecimal::add));
+        var subtotalSignal = Signal.computed(
+                () -> cartItemsSignal.value().stream().map(ValueSignal::value)
+                        .map(item -> item.product().price()
+                                .multiply(BigDecimal.valueOf(item.quantity())))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add));
 
         // Computed signal for discount
-        Signal<BigDecimal> discountSignal = Signal.computed(() -> {
+        var discountSignal = Signal.computed(() -> {
             String code = discountCodeSignal.value();
             DiscountCode discount = validateDiscountCode(code);
             if (discount != null) {
@@ -87,48 +80,74 @@ public class UseCase06View extends VerticalLayout {
         });
 
         // Computed signal for shipping cost
-        Signal<BigDecimal> shippingSignal = Signal
+        var shippingSignal = Signal
                 .computed(() -> getShippingCost(shippingOptionSignal.value()));
 
         // Computed signal for tax (8%)
-        Signal<BigDecimal> taxSignal = Signal.computed(
+        var taxSignal = Signal.computed(
                 () -> subtotalSignal.value().subtract(discountSignal.value())
                         .multiply(new BigDecimal("0.08"))
                         .setScale(2, RoundingMode.HALF_UP));
 
         // Computed signal for grand total
-        Signal<BigDecimal> totalSignal = Signal.computed(
-                () -> subtotalSignal.value().subtract(discountSignal.value())
-                        .add(shippingSignal.value()).add(taxSignal.value())
-                        .setScale(2, RoundingMode.HALF_UP));
+        var totalSignal = Signal.computed(() -> subtotalSignal.value()
+                .subtract(discountSignal.value()).add(shippingSignal.value())
+                .add(taxSignal.value()).setScale(2, RoundingMode.HALF_UP));
+
+        var products = List.of(
+                new Product("1", "Laptop", new BigDecimal("999.99")),
+                new Product("2", "Mouse", new BigDecimal("25.99")),
+                new Product("3", "Keyboard", new BigDecimal("79.99")),
+                new Product("4", "Monitor", new BigDecimal("249.50")));
+
+        // Products list
+        var productsTitle = new H3("Available Products");
+        var productsContainer = new Div();
+        productsContainer.getStyle().set("background-color", "#fff3e0")
+                .set("padding", "1em").set("border-radius", "4px")
+                .set("margin-bottom", "1em");
+        products.forEach(product -> productsContainer
+                .add(createProductRow(product, cartItemsSignal)));
 
         // Cart items display
-        H3 cartTitle = new H3("Shopping Cart");
-        Div cartItemsContainer = new Div();
+        var cartTitle = new H3("Shopping Cart");
+        var emptyCartButton = new Button("Empty cart",
+                e -> cartItemsSignal.clear());
+        emptyCartButton.addThemeName("error");
+        emptyCartButton.addThemeName("small");
+
+        var cartHeader = new HorizontalLayout(cartTitle, emptyCartButton);
+        cartHeader.setWidthFull();
+        cartHeader.setAlignItems(Alignment.CENTER);
+        cartHeader.expand(cartTitle);
+        var cartItemsContainer = new Div();
         cartItemsContainer.getStyle().set("background-color", "#f5f5f5")
                 .set("padding", "1em").set("border-radius", "4px")
                 .set("margin-bottom", "1em");
 
-        MissingAPI
-                .bindChildren(cartItemsContainer,
-                        cartItemsSignal
-                                .map(itemSignals -> itemSignals.stream()
-                                        .map(itemSignal -> createCartItemRow(
-                                                itemSignal, cartItemsSignal))
-                                        .toList()));
+        var cartItemsList = new Div();
+        ComponentEffect.bindChildren(cartItemsList, cartItemsSignal,
+                itemSignal -> createCartItemRow(itemSignal, cartItemsSignal));
+
+        var emptyCart = new Paragraph("Empty cart");
+        emptyCart.getStyle().set("margin", "0").set("font-style", "italic")
+                .set("color", "var(--lumo-secondary-text-color)");
+        emptyCart.bindVisible(
+                Signal.computed(() -> cartItemsSignal.value().isEmpty()));
+        cartItemsContainer.add(emptyCart, cartItemsList);
 
         // Options section
-        HorizontalLayout optionsLayout = new HorizontalLayout();
+        var optionsLayout = new HorizontalLayout();
         optionsLayout.setWidthFull();
         optionsLayout.setSpacing(true);
 
-        TextField discountField = new TextField("Discount Code");
+        var discountField = new TextField("Discount Code");
         discountField.setPlaceholder("Enter SAVE10 or SAVE20");
         discountField.setWidth("250px");
         discountField.bindValue(discountCodeSignal);
 
-        ComboBox<ShippingOption> shippingSelect = new ComboBox<>(
-                "Shipping Method", ShippingOption.values());
+        var shippingSelect = new ComboBox<>("Shipping Method",
+                ShippingOption.values());
         shippingSelect.setValue(ShippingOption.STANDARD);
         shippingSelect.setWidth("200px");
         shippingSelect.bindValue(shippingOptionSignal);
@@ -136,21 +155,21 @@ public class UseCase06View extends VerticalLayout {
         optionsLayout.add(discountField, shippingSelect);
 
         // Totals display
-        Div totalsBox = new Div();
+        var totalsBox = new Div();
         totalsBox.getStyle().set("background-color", "#e8f5e9")
                 .set("padding", "1.5em").set("border-radius", "4px")
                 .set("margin-top", "1em");
 
-        H3 summaryTitle = new H3("Order Summary");
+        var summaryTitle = new H3("Order Summary");
         summaryTitle.getStyle().set("margin-top", "0");
 
-        Span subtotalLabel = new Span();
+        var subtotalLabel = new Span();
         subtotalLabel.bindText(subtotalSignal.map(total -> "Subtotal: $"
                 + total.setScale(2, RoundingMode.HALF_UP)));
         subtotalLabel.getStyle().set("display", "block").set("margin-bottom",
                 "0.5em");
 
-        Span discountLabel = new Span();
+        var discountLabel = new Span();
         discountLabel.bindText(discountSignal.map(discount -> "Discount: -$"
                 + discount.setScale(2, RoundingMode.HALF_UP)));
         discountLabel.bindVisible(
@@ -159,24 +178,24 @@ public class UseCase06View extends VerticalLayout {
                 .set("margin-bottom", "0.5em")
                 .set("color", "var(--lumo-success-color)");
 
-        Span shippingLabel = new Span();
+        var shippingLabel = new Span();
         shippingLabel.bindText(shippingSignal.map(shipping -> "Shipping: $"
                 + shipping.setScale(2, RoundingMode.HALF_UP)));
         shippingLabel.getStyle().set("display", "block").set("margin-bottom",
                 "0.5em");
 
-        Span taxLabel = new Span();
+        var taxLabel = new Span();
         taxLabel.bindText(taxSignal.map(
                 tax -> "Tax (8%): $" + tax.setScale(2, RoundingMode.HALF_UP)));
         taxLabel.getStyle().set("display", "block").set("margin-bottom",
                 "0.5em");
 
-        Div divider = new Div();
+        var divider = new Div();
         divider.getStyle()
                 .set("border-top", "2px solid var(--lumo-contrast-20pct)")
                 .set("margin", "0.75em 0");
 
-        Span totalLabel = new Span();
+        var totalLabel = new Span();
         totalLabel.bindText(totalSignal.map(
                 total -> "Total: $" + total.setScale(2, RoundingMode.HALF_UP)));
         totalLabel.getStyle().set("display", "block").set("font-weight", "bold")
@@ -187,7 +206,7 @@ public class UseCase06View extends VerticalLayout {
                 taxLabel, divider, totalLabel);
 
         // Info box
-        Div infoBox = new Div();
+        var infoBox = new Div();
         infoBox.getStyle().set("background-color", "#e0f7fa")
                 .set("padding", "1em").set("border-radius", "4px")
                 .set("margin-top", "1em").set("font-style", "italic");
@@ -197,44 +216,80 @@ public class UseCase06View extends VerticalLayout {
                         + "the tax is computed from (subtotal - discount), and the final total combines all values. "
                         + "All calculations happen reactively as you modify any input."));
 
-        add(title, description, cartTitle, cartItemsContainer, optionsLayout,
-                totalsBox, infoBox);
+        add(title, description, productsTitle, productsContainer, cartHeader,
+                cartItemsContainer, optionsLayout, totalsBox, infoBox);
     }
 
-    private HorizontalLayout createCartItemRow(ValueSignal<CartItem> itemSignal,
+    private HorizontalLayout createProductRow(Product product,
             ListSignal<CartItem> cartItemsSignal) {
-        CartItem item = itemSignal.value();
-
-        HorizontalLayout row = new HorizontalLayout();
+        var row = new HorizontalLayout();
         row.setWidthFull();
-        row.setAlignItems(HorizontalLayout.Alignment.CENTER);
+        row.setAlignItems(Alignment.CENTER);
         row.setSpacing(true);
         row.getStyle().set("background-color", "#ffffff")
                 .set("padding", "0.75em").set("border-radius", "4px")
                 .set("margin-bottom", "0.5em");
 
-        Span nameLabel = new Span(item.name() + " - $" + item.price());
+        var nameLabel = new Span(product.name() + " - $"
+                + product.price().setScale(2, RoundingMode.HALF_UP));
         nameLabel.getStyle().set("flex-grow", "1").set("font-weight", "500");
 
-        IntegerField quantityField = new IntegerField();
+        var addButton = new Button("Add",
+                e -> addToCart(product, cartItemsSignal));
+        addButton.addThemeName("primary");
+        addButton.addThemeName("small");
+
+        row.add(nameLabel, addButton);
+        return row;
+    }
+
+    private HorizontalLayout createCartItemRow(ValueSignal<CartItem> itemSignal,
+            ListSignal<CartItem> cartItemsSignal) {
+        var item = itemSignal.value();
+
+        var row = new HorizontalLayout();
+        row.setWidthFull();
+        row.setAlignItems(Alignment.CENTER);
+        row.setSpacing(true);
+        row.getStyle().set("background-color", "#ffffff")
+                .set("padding", "0.75em").set("border-radius", "4px")
+                .set("margin-bottom", "0.5em");
+
+        var nameLabel = new Span(item.product().name() + " - $"
+                + item.product().price().setScale(2, RoundingMode.HALF_UP));
+        nameLabel.getStyle().set("flex-grow", "1").set("font-weight", "500");
+
+        var quantityField = new IntegerField();
         quantityField.setValue(item.quantity());
         quantityField.setMin(1);
         quantityField.setMax(99);
-        quantityField.setWidth("80px");
+        quantityField.setWidth("120px");
+        quantityField.setStepButtonsVisible(true);
         quantityField.addValueChangeListener(e -> {
-            CartItem current = itemSignal.value();
-            itemSignal.value(new CartItem(current.id(), current.name(),
-                    current.price(), e.getValue()));
+            var value = e.getValue();
+            updateQuantity(itemSignal, cartItemsSignal,
+                    value == null ? 0 : value);
         });
+        ComponentEffect.bind(quantityField, itemSignal.map(CartItem::quantity),
+                (field, value) -> {
+                    if (value != null && !value.equals(field.getValue())) {
+                        field.setValue(value);
+                    }
+                });
 
-        Span itemTotalLabel = new Span("$"
-                + item.price().multiply(BigDecimal.valueOf(item.quantity())));
+        var itemTotalLabel = new Span();
+        itemTotalLabel.bindText(Signal.computed(() -> {
+            var current = itemSignal.value();
+            return "$" + current.product().price()
+                    .multiply(BigDecimal.valueOf(current.quantity()))
+                    .setScale(2, RoundingMode.HALF_UP);
+        }));
         itemTotalLabel.setWidth("100px");
         itemTotalLabel.getStyle().set("text-align", "right")
                 .set("font-weight", "bold")
                 .set("color", "var(--lumo-primary-color)");
 
-        Button removeButton = new Button("Remove", e -> {
+        var removeButton = new Button("Remove", e -> {
             cartItemsSignal.remove(itemSignal);
         });
         removeButton.addThemeName("error");
@@ -242,6 +297,17 @@ public class UseCase06View extends VerticalLayout {
 
         row.add(nameLabel, quantityField, itemTotalLabel, removeButton);
         return row;
+    }
+
+    private void addToCart(Product product,
+            ListSignal<CartItem> cartItemsSignal) {
+        cartItemsSignal.value().stream().filter(
+                signal -> signal.value().product().id().equals(product.id()))
+                .findFirst().ifPresentOrElse(
+                        existing -> updateQuantity(existing, cartItemsSignal,
+                                existing.value().quantity() + 1),
+                        () -> cartItemsSignal
+                                .insertLast(new CartItem(product, 1)));
     }
 
     private DiscountCode validateDiscountCode(String code) {
@@ -259,5 +325,16 @@ public class UseCase06View extends VerticalLayout {
         case EXPRESS -> new BigDecimal("12.99");
         case OVERNIGHT -> new BigDecimal("24.99");
         };
+    }
+
+    private void updateQuantity(ValueSignal<CartItem> itemSignal,
+            ListSignal<CartItem> cartItemsSignal, int quantity) {
+        if (quantity < 1) {
+            cartItemsSignal.remove(itemSignal);
+            return;
+        }
+
+        var current = itemSignal.value();
+        itemSignal.value(new CartItem(current.product(), quantity));
     }
 }
