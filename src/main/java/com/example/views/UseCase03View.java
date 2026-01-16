@@ -4,6 +4,7 @@ import jakarta.annotation.security.PermitAll;
 
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.example.security.SecurityService;
 
@@ -18,8 +19,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.signals.ReferenceSignal;
 import com.vaadin.signals.Signal;
-import com.vaadin.signals.ValueSignal;
 import com.vaadin.signals.WritableSignal;
 
 @Route(value = "use-case-03", layout = MainLayout.class)
@@ -45,13 +46,7 @@ public class UseCase03View extends VerticalLayout {
         setSpacing(true);
         setPadding(true);
 
-        H2 title = new H2("Use Case 3: Permission-Based Component Visibility");
-
-        Paragraph description = new Paragraph(
-                "This use case demonstrates role-based UI with reactive permission checks from Spring Security. "
-                        + "Different sections appear based on your user role. "
-                        + "The permissions signal is derived from Spring Security roles and controls component visibility. "
-                        + "Use Vaadin Copilot's impersonation feature to test different roles without logging out.");
+        addPageHeader();
 
         // Get current user info from Spring Security
         String username = securityService.getUsername();
@@ -59,8 +54,13 @@ public class UseCase03View extends VerticalLayout {
 
         // Create signal for user permissions based on actual Spring Security
         // roles
-        WritableSignal<Set<Permission>> permissionsSignal = new ValueSignal<Set<Permission>>(
+        WritableSignal<Set<Permission>> permissionsSignal = new ReferenceSignal<>(
                 getPermissionsForRoles(roles));
+
+        // Helper function to create permission-based visibility signal
+        Function<Permission, Signal<Boolean>> hasPermission = (
+                Permission permission) -> permissionsSignal
+                        .map(perms -> perms.contains(permission));
 
         // User info display
         Div userInfoBox = new Div();
@@ -84,11 +84,6 @@ public class UseCase03View extends VerticalLayout {
         logoutButton.addThemeName("small");
 
         userInfoBox.add(userInfoTitle, userInfo, logoutButton);
-
-        // Helper function to create permission-based visibility signal
-        Function<Permission, Signal<Boolean>> hasPermission = (
-                Permission permission) -> permissionsSignal
-                        .map(perms -> perms.contains(permission));
 
         // Dashboard section
         Div dashboardSection = new Div();
@@ -146,18 +141,24 @@ public class UseCase03View extends VerticalLayout {
             if (perms == null || perms.isEmpty()) {
                 return "None";
             }
-            StringBuilder sb = new StringBuilder();
-            boolean first = true;
-            for (Object p : perms) {
-                if (!first)
-                    sb.append(", ");
-                sb.append(p.toString());
-                first = false;
-            }
-            return sb.toString();
+            return perms.stream().map(Permission::toString)
+                    .collect(Collectors.joining(", "));
         }));
 
         permissionsDisplay.add(permissionsTitle, permissionsList);
+
+        add(userInfoBox, permissionsDisplay, dashboardSection, editButtons,
+                userManagementSection, logsSection, settingsSection);
+    }
+
+    private void addPageHeader() {
+        H2 title = new H2("Use Case 3: Permission-Based Component Visibility");
+
+        Paragraph description = new Paragraph(
+                "This use case demonstrates role-based UI with reactive permission checks from Spring Security. "
+                        + "Different sections appear based on your user role. "
+                        + "The permissions signal is derived from Spring Security roles and controls component visibility. "
+                        + "Use Vaadin Copilot's impersonation feature to test different roles without logging out.");
 
         // Info about impersonation
         Div impersonationHint = new Div();
@@ -167,9 +168,7 @@ public class UseCase03View extends VerticalLayout {
         impersonationHint.setText(
                 "💡 Tip: Use Vaadin Copilot's impersonation feature to test different user roles without logging out");
 
-        add(title, description, userInfoBox, permissionsDisplay,
-                impersonationHint, dashboardSection, editButtons,
-                userManagementSection, logsSection, settingsSection);
+        add(title, description, impersonationHint);
     }
 
     private Set<Permission> getPermissionsForRoles(Set<String> roles) {
