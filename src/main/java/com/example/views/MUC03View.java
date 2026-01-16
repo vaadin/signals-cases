@@ -17,6 +17,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -132,21 +133,8 @@ public class MUC03View extends VerticalLayout {
         controls.add(startButton, resetButton);
 
         // Active sessions display
-        Div activeSessionsBox = new Div();
-        activeSessionsBox.getStyle().set("background-color", "#fff3e0")
-                .set("padding", "0.75em").set("border-radius", "4px")
-                .set("margin-bottom", "1em");
-
-        Span sessionCountLabel = new Span();
-        sessionCountLabel.bindText(userSessionRegistry.getDisplayNamesSignal()
-                .map(displayNames -> {
-                    String usernames = String.join(", ", displayNames);
-                    return "👥 Active sessions: " + displayNames.size() + " ("
-                            + usernames + ")";
-                }));
-        sessionCountLabel.getStyle().set("font-weight", "500");
-
-        activeSessionsBox.add(sessionCountLabel);
+        ActiveUsersDisplay activeSessionsBox = new ActiveUsersDisplay(
+                userSessionRegistry, "muc-03");
 
         // Leaderboard
         H3 leaderboardTitle = new H3("Leaderboard");
@@ -186,9 +174,13 @@ public class MUC03View extends VerticalLayout {
                                         && sessionKey.equals(
                                                 currentUser + ":" + sessionId);
 
-                                Div item = new Div();
-                                item.setText(String.format("%s: %d points",
-                                        displayName, score));
+                                // Extract username from sessionKey (format: "username:sessionId")
+                                String username = sessionKey.split(":")[0];
+
+                                HorizontalLayout item = new HorizontalLayout();
+                                item.setSpacing(true);
+                                item.setAlignItems(
+                                        com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
                                 item.getStyle().set("padding", "0.5em")
                                         .set("background-color",
                                                 isCurrentSession ? "#fff3e0"
@@ -197,6 +189,21 @@ public class MUC03View extends VerticalLayout {
                                         .set("font-weight",
                                                 isCurrentSession ? "bold"
                                                         : "normal");
+
+                                // Avatar
+                                Image avatar = new Image(
+                                        MainLayout.getProfilePicturePath(username),
+                                        "");
+                                avatar.setWidth("32px");
+                                avatar.setHeight("32px");
+                                avatar.getStyle().set("border-radius", "50%")
+                                        .set("object-fit", "cover");
+
+                                // Name and score
+                                Span nameLabel = new Span(String.format("%s: %d points",
+                                        displayName, score));
+
+                                item.add(avatar, nameLabel);
                                 return item;
                             }).toList();
                 }));
@@ -259,14 +266,12 @@ public class MUC03View extends VerticalLayout {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         this.sessionId = SessionIdHelper.getCurrentSessionId();
-        userSessionRegistry.registerUser(currentUser, sessionId);
         collaborativeSignals.initializePlayerScore(currentUser, sessionId);
     }
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
-        userSessionRegistry.unregisterUser(currentUser, sessionId);
         collaborativeSignals.unregisterScore(currentUser, sessionId);
     }
 }

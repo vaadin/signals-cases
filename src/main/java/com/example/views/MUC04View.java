@@ -15,8 +15,10 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
@@ -82,21 +84,8 @@ public class MUC04View extends VerticalLayout {
                 collaborativeSignals.getPhoneSignal());
 
         // Active sessions display
-        Div activeSessionsBox = new Div();
-        activeSessionsBox.getStyle().set("background-color", "#fff3e0")
-                .set("padding", "0.75em").set("border-radius", "4px")
-                .set("margin-bottom", "1em");
-
-        Span sessionCountLabel = new Span();
-        sessionCountLabel.bindText(userSessionRegistry.getDisplayNamesSignal()
-                .map(displayNames -> {
-                    String usernames = String.join(", ", displayNames);
-                    return "👥 Active sessions: " + displayNames.size() + " ("
-                            + usernames + ")";
-                }));
-        sessionCountLabel.getStyle().set("font-weight", "500");
-
-        activeSessionsBox.add(sessionCountLabel);
+        ActiveUsersDisplay activeSessionsBox = new ActiveUsersDisplay(
+                userSessionRegistry, "muc-04");
 
         // Active editors display
         H3 editorsTitle = new H3("Active Editors");
@@ -105,29 +94,50 @@ public class MUC04View extends VerticalLayout {
                 .set("padding", "1em").set("border-radius", "4px");
 
         MissingAPI.bindChildren(editorsDiv,
-                collaborativeSignals.getFieldLocksSignal().map(locks -> {
-                    if (locks.isEmpty()) {
-                        Div msg = new Div();
-                        msg.setText("No fields are currently being edited");
-                        msg.getStyle().set("font-style", "italic");
-                        return java.util.List.of(msg);
-                    }
+                collaborativeSignals.getFieldLocksSignal()
+                        .map(locks -> {
+                            if (locks.isEmpty()) {
+                                HorizontalLayout msg = new HorizontalLayout();
+                                Span msgText = new Span(
+                                        "No fields are currently being edited");
+                                msgText.getStyle().set("font-style", "italic");
+                                msg.add(msgText);
+                                return java.util.List.of(msg);
+                            }
 
-                    return locks.entrySet().stream().map(entry -> {
-                        Div item = new Div();
+                            return locks.entrySet().stream().map(entry -> {
                         String fieldLabel = formatFieldName(entry.getKey());
                         CollaborativeSignals.FieldLock lock = entry.getValue()
                                 .value();
-                        item.setText(String.format("🔒 %s: %s", fieldLabel,
-                                lock.username()));
                         boolean isCurrentSession = sessionId != null
                                 && lock.username().equals(currentUser)
                                 && lock.sessionId().equals(sessionId);
+
+                        HorizontalLayout item = new HorizontalLayout();
+                        item.setSpacing(true);
+                        item.setAlignItems(
+                                com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
                         item.getStyle().set("padding", "0.5em")
                                 .set("background-color",
                                         isCurrentSession ? "#fff3e0"
                                                 : "transparent")
                                 .set("border-radius", "4px");
+
+                        // Avatar
+                        Image avatar = new Image(
+                                MainLayout.getProfilePicturePath(lock.username()),
+                                "");
+                        avatar.setWidth("32px");
+                        avatar.setHeight("32px");
+                        avatar.getStyle().set("border-radius", "50%")
+                                .set("object-fit", "cover");
+
+                        // Field and user info
+                        Span label = new Span(
+                                String.format("🔒 %s: %s", fieldLabel,
+                                        lock.username()));
+
+                        item.add(avatar, label);
                         return item;
                     }).toList();
                 }));
@@ -249,12 +259,5 @@ public class MUC04View extends VerticalLayout {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         this.sessionId = SessionIdHelper.getCurrentSessionId();
-        userSessionRegistry.registerUser(currentUser, sessionId);
-    }
-
-    @Override
-    protected void onDetach(DetachEvent detachEvent) {
-        super.onDetach(detachEvent);
-        userSessionRegistry.unregisterUser(currentUser, sessionId);
     }
 }
