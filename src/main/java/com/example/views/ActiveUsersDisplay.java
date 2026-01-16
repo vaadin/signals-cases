@@ -72,10 +72,6 @@ public class ActiveUsersDisplay extends Div {
                     "4px solid var(--lumo-warning-color)");
         }
 
-        // Title with count
-        Span title = new Span();
-        title.getStyle().set("font-weight", "500");
-
         // Users container with avatars
         Div usersContainer = new Div();
         usersContainer.getStyle().set("display", "flex")
@@ -86,10 +82,11 @@ public class ActiveUsersDisplay extends Div {
                 ? userSessionRegistry.getActiveUsersOnView(viewRoute)
                 : userSessionRegistry.getDisplayNamesSignal();
 
-        // Bind title with count
-        title.bindText(displayNamesSignal
+        // Title with count
+        Span title = new Span(displayNamesSignal
                 .map(displayNames -> "👥 " + labelText + ": "
                         + displayNames.size()));
+        title.getStyle().set("font-weight", "500");
 
         // Bind user avatars and names
         MissingAPI.bindChildren(usersContainer, Signal.computed(() -> {

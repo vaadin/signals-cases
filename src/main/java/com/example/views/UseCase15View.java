@@ -120,32 +120,29 @@ public class UseCase15View extends VerticalLayout {
         Span instantLabel = new Span("Instant value: ");
         instantLabel.getStyle().set("color",
                 "var(--lumo-secondary-text-color)");
-        Span instantValue = new Span();
+        Span instantValue = new Span(searchQuerySignal
+                .map(q -> q.isEmpty() ? "(empty)" : "\"" + q + "\""));
         instantValue.getStyle().set("font-family", "monospace")
                 .set("font-weight", "bold");
-        instantValue.bindText(searchQuerySignal
-                .map(q -> q.isEmpty() ? "(empty)" : "\"" + q + "\""));
         instantQueryDiv.add(instantLabel, instantValue);
 
         Div debouncedQueryDiv = new Div();
         Span debouncedLabel = new Span("Debounced value (300ms): ");
         debouncedLabel.getStyle().set("color",
                 "var(--lumo-secondary-text-color)");
-        Span debouncedValue = new Span();
+        Span debouncedValue = new Span(debouncedQuerySignal
+                .map(q -> q.isEmpty() ? "(empty)" : "\"" + q + "\""));
         debouncedValue.getStyle().set("font-family", "monospace")
                 .set("font-weight", "bold")
                 .set("color", "var(--lumo-primary-color)");
-        debouncedValue.bindText(debouncedQuerySignal
-                .map(q -> q.isEmpty() ? "(empty)" : "\"" + q + "\""));
         debouncedQueryDiv.add(debouncedLabel, debouncedValue);
 
         Div searchCountDiv = new Div();
         Span countLabel = new Span("Searches performed: ");
         countLabel.getStyle().set("color", "var(--lumo-secondary-text-color)");
-        Span countValue = new Span();
+        Span countValue = new Span(searchCountSignal.map(String::valueOf));
         countValue.getStyle().set("font-weight", "bold").set("color",
                 "var(--lumo-success-color)");
-        countValue.bindText(searchCountSignal.map(String::valueOf));
         searchCountDiv.add(countLabel, countValue);
 
         statsBox.add(instantQueryDiv, debouncedQueryDiv, searchCountDiv);
@@ -159,15 +156,13 @@ public class UseCase15View extends VerticalLayout {
         searchingIcon.getStyle().set("animation", "spin 1s linear infinite");
         searchingIcon.bindVisible(isSearchingSignal);
 
-        Span statusText = new Span();
-        statusText.bindText(isSearchingSignal
+        Span statusText = new Span(isSearchingSignal
                 .map(searching -> searching ? "Searching..." : ""));
         statusText.getStyle().set("color", "var(--lumo-primary-color)");
 
         statusBox.add(searchingIcon, statusText);
 
         // Results
-        H3 resultsTitle = new H3();
         Signal<String> resultsTitleSignal = searchResultsSignal.map(results -> {
             if (results.isEmpty() && !debouncedQuerySignal.value().isEmpty()) {
                 return "No results found";
@@ -177,7 +172,7 @@ public class UseCase15View extends VerticalLayout {
             }
             return "Type to search";
         });
-        resultsTitle.bindText(resultsTitleSignal);
+        H3 resultsTitle = new H3(resultsTitleSignal);
 
         Div resultsContainer = new Div();
         resultsContainer.getStyle().set("display", "flex")
@@ -266,10 +261,8 @@ public class UseCase15View extends VerticalLayout {
             debounceTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    getUI().ifPresent(ui -> ui.access(() -> {
-                        debouncedQuerySignal.value(query);
-                        performSearch(query);
-                    }));
+                    debouncedQuerySignal.value(query);
+                    performSearch(query);
                 }
             }, 300); // 300ms debounce delay
         });
