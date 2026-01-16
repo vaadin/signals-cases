@@ -70,21 +70,7 @@ public class TaskToolsService {
         return "Task updated successfully";
     }
 
-    @Tool(description = "Mark a task as completed or not completed by its ID")
-    public String markComplete(String taskId, boolean completed, ToolContext toolContext) {
-        logger.info("🔧 Tool called: markComplete(taskId={}, completed={})", taskId, completed);
-
-        TaskContext context = (TaskContext) toolContext.getContext().get("taskContext");
-        if (context == null) {
-            return "Error: Task context not available";
-        }
-
-        context.markComplete(taskId, completed);
-        logger.info("✅ Task marked as {}", completed ? "completed" : "not completed");
-        return "Task marked as " + (completed ? "completed" : "not completed");
-    }
-
-    @Tool(description = "Change a task's status (TODO, IN_PROGRESS, or DONE) by its ID")
+    @Tool(description = "Change a task's status by its ID. Use DONE to mark as completed, TODO to reopen a task, or IN_PROGRESS for tasks being worked on.")
     public String changeStatus(String taskId, String status, ToolContext toolContext) {
         logger.info("🔧 Tool called: changeStatus(taskId={}, status={})", taskId, status);
 
@@ -118,9 +104,8 @@ public class TaskToolsService {
         }
 
         String result = tasks.stream()
-                .map(task -> String.format("- [%s] %s (Status: %s, Completed: %s, Due: %s)\n  Description: %s",
-                        task.id(), task.title(), task.status(), task.completed(), task.dueDate(),
-                        task.description()))
+                .map(task -> String.format("- [%s] %s (Status: %s, Due: %s)\n  Description: %s",
+                        task.id(), task.title(), task.status(), task.dueDate(), task.description()))
                 .reduce((a, b) -> a + "\n\n" + b).orElse("");
 
         logger.info("✅ Listed {} tasks", tasks.size());

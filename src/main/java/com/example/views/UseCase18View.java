@@ -86,7 +86,7 @@ public class UseCase18View extends VerticalLayout {
         // Set up computed signals
         totalTasksSignal = tasksSignal.map(list -> list.size());
         completedTasksSignal = Signal.computed(
-                () -> (int) tasksSignal.value().stream().filter(t -> t.value().completed()).count());
+                () -> (int) tasksSignal.value().stream().filter(t -> t.value().isCompleted()).count());
         pendingTasksSignal = Signal.computed(() -> totalTasksSignal.value() - completedTasksSignal.value());
 
         // Build UI - Chat on top, Grid below
@@ -102,13 +102,11 @@ public class UseCase18View extends VerticalLayout {
 
     private void initializeSampleTasks() {
         tasksSignal.insertLast(new Task(UUID.randomUUID().toString(), "Review pull requests",
-                "Review and merge pending pull requests", Task.TaskStatus.TODO, false,
-                LocalDate.now().plusDays(2)));
+                "Review and merge pending pull requests", Task.TaskStatus.TODO, LocalDate.now().plusDays(2)));
         tasksSignal.insertLast(new Task(UUID.randomUUID().toString(), "Write unit tests",
-                "Add unit tests for new features", Task.TaskStatus.IN_PROGRESS, false, LocalDate.now().plusDays(5)));
+                "Add unit tests for new features", Task.TaskStatus.IN_PROGRESS, LocalDate.now().plusDays(5)));
         tasksSignal.insertLast(new Task(UUID.randomUUID().toString(), "Deploy to staging",
-                "Deploy latest changes to staging environment", Task.TaskStatus.TODO, false,
-                LocalDate.now().plusDays(7)));
+                "Deploy latest changes to staging environment", Task.TaskStatus.TODO, LocalDate.now().plusDays(7)));
     }
 
     private VerticalLayout buildChatPanel() {
@@ -264,8 +262,6 @@ public class UseCase18View extends VerticalLayout {
         grid.addColumn(Task::title).setHeader("Title").setFlexGrow(2).setAutoWidth(true);
         grid.addColumn(Task::description).setHeader("Description").setFlexGrow(3);
         grid.addColumn(Task::status).setHeader("Status").setFlexGrow(1).setAutoWidth(true);
-        grid.addColumn(task -> task.completed() ? "Yes" : "No").setHeader("Completed").setFlexGrow(1)
-                .setAutoWidth(true);
         grid.addColumn(Task::dueDate).setHeader("Due Date").setFlexGrow(1).setAutoWidth(true);
 
         grid.addComponentColumn(task -> {
@@ -319,7 +315,7 @@ public class UseCase18View extends VerticalLayout {
         statusCombo.setWidthFull();
 
         Checkbox completedCheckbox = new Checkbox("Completed");
-        completedCheckbox.setValue(task.completed());
+        completedCheckbox.setValue(task.isCompleted());
 
         DatePicker dueDatePicker = new DatePicker("Due Date");
         dueDatePicker.setValue(task.dueDate());
@@ -330,8 +326,10 @@ public class UseCase18View extends VerticalLayout {
         Button saveButton = new Button("Save", e -> {
             // Find the signal for this task and update it
             tasksSignal.value().stream().filter(sig -> sig.value().id().equals(task.id())).findFirst().ifPresent(sig -> {
+                // If checkbox is checked, override status to DONE; otherwise use selected status
+                Task.TaskStatus finalStatus = completedCheckbox.getValue() ? Task.TaskStatus.DONE : statusCombo.getValue();
                 Task updatedTask = new Task(task.id(), titleField.getValue(), descriptionField.getValue(),
-                        statusCombo.getValue(), completedCheckbox.getValue(), dueDatePicker.getValue());
+                        finalStatus, dueDatePicker.getValue());
                 sig.value(updatedTask);
             });
             dialog.close();
@@ -520,11 +518,6 @@ public class UseCase18View extends VerticalLayout {
             @Override
             public void updateTask(String taskId, String title, String description) {
                 updateTaskField(taskId, task -> task.withTitle(title).withDescription(description));
-            }
-
-            @Override
-            public void markComplete(String taskId, boolean completed) {
-                updateTaskField(taskId, task -> task.withCompleted(completed));
             }
 
             @Override

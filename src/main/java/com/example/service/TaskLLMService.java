@@ -45,8 +45,8 @@ public class TaskLLMService {
     private String buildSystemPrompt(TaskContext context) {
         // Include current task list in the prompt
         String taskList = context.getAllTasks().stream()
-                .map(task -> String.format("- [%s] %s (Status: %s, Completed: %s, Due: %s)", task.id(), task.title(),
-                        task.status(), task.completed(), task.dueDate()))
+                .map(task -> String.format("- [%s] %s (Status: %s, Due: %s)", task.id(), task.title(),
+                        task.status(), task.dueDate()))
                 .reduce("", (a, b) -> a + "\n" + b);
 
         return """
@@ -55,6 +55,7 @@ public class TaskLLMService {
                 Current tasks:
                 %s
 
+                Task status can be TODO, IN_PROGRESS, or DONE. DONE means the task is completed.
                 When users ask to manage tasks, use the appropriate tools.
                 Be conversational and confirm actions after executing them.
                 """.formatted(taskList.isBlank() ? "No tasks yet." : taskList);

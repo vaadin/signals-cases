@@ -18,7 +18,5 @@ public interface TaskContext {
 
     void updateTask(String taskId, String title, String description);
 
-    void markComplete(String taskId, boolean completed);
-
     void changeStatus(String taskId, Task.TaskStatus status);
 }
