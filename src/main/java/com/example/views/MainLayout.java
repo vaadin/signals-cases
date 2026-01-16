@@ -70,13 +70,12 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         activeUsersDisplay.getStyle().set("margin-left", "auto")
                 .set("margin-right", "1em");
 
-        Span activeUsersLabel = new Span();
+        Span activeUsersLabel = new Span(userSessionRegistry.getDisplayNamesSignal()
+                .map(displayNames -> displayNames.isEmpty() ? ""
+                        : "👥 " + displayNames.size() + " online:"));
         activeUsersLabel.getStyle().set("color",
                 "var(--lumo-secondary-text-color)")
                 .set("font-size", "var(--lumo-font-size-s)");
-        activeUsersLabel.bindText(userSessionRegistry.getDisplayNamesSignal()
-                .map(displayNames -> displayNames.isEmpty() ? ""
-                        : "👥 " + displayNames.size() + " online:"));
 
         com.vaadin.flow.component.html.Div avatarsContainer = new com.vaadin.flow.component.html.Div();
         avatarsContainer.getStyle().set("display", "flex").set("gap", "0.25em");
@@ -137,11 +136,10 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         userAvatar.bindVisible(currentUserSignal.getUserSignal()
                 .map(user -> user.isAuthenticated()));
 
-        Span userName = new Span();
+        Span userName = new Span(currentUserSignal.getUserSignal()
+                .map(user -> user.isAuthenticated() ? user.getUsername() : ""));
         userName.getStyle().set("color", "var(--lumo-secondary-text-color)")
                 .set("font-size", "var(--lumo-font-size-s)");
-        userName.bindText(currentUserSignal.getUserSignal()
-                .map(user -> user.isAuthenticated() ? user.getUsername() : ""));
 
         userDisplay.add(userAvatar, userName);
 

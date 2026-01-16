@@ -163,8 +163,7 @@ public class MUC02View extends VerticalLayout {
                 userLabel.getStyle().set("font-weight", "500");
 
                 // Position label
-                Div positionLabel = new Div();
-                positionLabel.bindText(positionSignal
+                Div positionLabel = new Div(positionSignal
                         .map(CollaborativeSignals.CursorPosition::toString));
                 positionLabel.getStyle().set("font-family", "monospace")
                         .set("color", "var(--lumo-secondary-text-color)")

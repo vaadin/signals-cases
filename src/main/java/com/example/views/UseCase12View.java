@@ -71,24 +71,21 @@ public class UseCase12View extends VerticalLayout {
         titleLabel.getStyle().set("margin", "0 0 0.5em 0").set("font-weight",
                 "bold");
 
-        Paragraph titleDisplay = new Paragraph();
+        Paragraph titleDisplay = new Paragraph(viewTitleSignal);
         titleDisplay.getStyle().set("margin", "0")
                 .set("font-family", "monospace").set("font-size", "1.1em");
-        titleDisplay.bindText(viewTitleSignal);
 
         Paragraph browserTitleLabel = new Paragraph("Browser Tab Title:");
         browserTitleLabel.getStyle().set("margin", "1em 0 0.5em 0")
                 .set("font-weight", "bold");
 
-        Paragraph browserTitleDisplay = new Paragraph();
-        browserTitleDisplay.getStyle().set("margin", "0")
-                .set("font-family", "monospace").set("font-size", "1.1em")
-                .set("color", "var(--lumo-primary-color)");
-
         // Compose app name + view title
         Signal<String> fullTitleSignal = viewTitleSignal
                 .map(viewTitle -> APP_NAME + " - " + viewTitle);
-        browserTitleDisplay.bindText(fullTitleSignal);
+        Paragraph browserTitleDisplay = new Paragraph(fullTitleSignal);
+        browserTitleDisplay.getStyle().set("margin", "0")
+                .set("font-family", "monospace").set("font-size", "1.1em")
+                .set("color", "var(--lumo-primary-color)");
 
         currentTitleBox.add(titleLabel, titleDisplay, browserTitleLabel,
                 browserTitleDisplay);

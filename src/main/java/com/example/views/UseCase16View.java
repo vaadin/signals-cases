@@ -161,12 +161,6 @@ public class UseCase16View extends VerticalLayout
         H3 urlTitle = new H3("Current URL");
         urlTitle.getStyle().set("margin-top", "0");
 
-        Paragraph urlDisplay = new Paragraph();
-        urlDisplay.getStyle().set("font-family", "monospace")
-                .set("word-break", "break-all")
-                .set("background-color", "#ffffff").set("padding", "0.5em")
-                .set("border-radius", "4px");
-
         // Update URL display based on signals
         Signal<String> currentUrlSignal = Signal.computed(() -> {
             String baseUrl = getBaseUrl();
@@ -188,7 +182,11 @@ public class UseCase16View extends VerticalLayout
             return url.toString();
         });
 
-        urlDisplay.bindText(currentUrlSignal);
+        Paragraph urlDisplay = new Paragraph(currentUrlSignal);
+        urlDisplay.getStyle().set("font-family", "monospace")
+                .set("word-break", "break-all")
+                .set("background-color", "#ffffff").set("padding", "0.5em")
+                .set("border-radius", "4px");
 
         urlBox.add(urlTitle, urlDisplay);
 
@@ -212,11 +210,10 @@ public class UseCase16View extends VerticalLayout
         shareLinks.add(link1, link2, link3);
 
         // Results
-        H3 resultsTitle = new H3();
         Signal<String> resultsTitleSignal = filteredArticlesSignal
                 .map(articles -> articles.size() + " article"
                         + (articles.size() == 1 ? "" : "s") + " found");
-        resultsTitle.bindText(resultsTitleSignal);
+        H3 resultsTitle = new H3(resultsTitleSignal);
 
         Div resultsContainer = new Div();
         resultsContainer.getStyle().set("display", "flex")

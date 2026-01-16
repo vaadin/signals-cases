@@ -1018,11 +1018,9 @@ public class UseCase17View extends VerticalLayout {
         powerLabel.getStyle().set("display", "block").set("font-weight", "bold")
                 .set("margin-bottom", "0.5em");
 
-        Span powerValue = new Span();
-        powerValue.bindText(totalPowerSignal.map(p -> p + "W total"));
+        Span powerValue = new Span(totalPowerSignal.map(p -> p + "W total"));
         powerValue.getStyle().set("display", "block");
 
-        Span psuStatus = new Span();
         Signal<String> psuStatusText = Signal.computed(() -> {
             PSU psu = psuSignal.value();
             if (psu == null)
@@ -1033,7 +1031,7 @@ public class UseCase17View extends VerticalLayout {
                     + (sufficient ? "✓ OK (+" + margin + "W)"
                             : "⚠ Insufficient");
         });
-        psuStatus.bindText(psuStatusText);
+        Span psuStatus = new Span(psuStatusText);
         psuStatus.getStyle().set("display", "block");
 
         powerBox.add(powerLabel, powerValue, psuStatus);
@@ -1053,18 +1051,14 @@ public class UseCase17View extends VerticalLayout {
         perfLabel.getStyle().set("display", "block").set("font-weight", "bold")
                 .set("margin-bottom", "0.5em");
 
-        Span perfRating = new Span();
-        perfRating.bindText(performanceRatingSignal);
+        Span perfRating = new Span(performanceRatingSignal);
         perfRating.getStyle().set("display", "block").set("font-size", "1.2em")
                 .set("color", "var(--lumo-primary-color)");
 
-        Span perfGaming = new Span();
-        perfGaming
-                .bindText(gamingScoreSignal.map(s -> "Gaming: " + s + "/100"));
+        Span perfGaming = new Span(gamingScoreSignal.map(s -> "Gaming: " + s + "/100"));
         perfGaming.getStyle().set("display", "block").set("font-size", "0.9em");
 
-        Span perfBottleneck = new Span();
-        perfBottleneck.bindText(bottleneckSignal.map(b -> "Bottleneck: " + b));
+        Span perfBottleneck = new Span(bottleneckSignal.map(b -> "Bottleneck: " + b));
         perfBottleneck.getStyle().set("display", "block").set("font-size",
                 "0.9em");
 
@@ -1084,8 +1078,7 @@ public class UseCase17View extends VerticalLayout {
         labelSpan.getStyle().set("display", "block").set("font-weight", "bold")
                 .set("margin-bottom", "0.5em");
 
-        Span valueSpan = new Span();
-        valueSpan.bindText(valueSignal);
+        Span valueSpan = new Span(valueSignal);
         valueSpan.getStyle().set("display", "block").set("font-size", "1.2em");
 
         box.add(labelSpan, valueSpan);
@@ -1103,8 +1096,7 @@ public class UseCase17View extends VerticalLayout {
         labelSpan.getStyle().set("display", "block").set("font-weight", "bold")
                 .set("margin-bottom", "0.5em");
 
-        Span valueSpan = new Span();
-        valueSpan.bindText(valueSignal);
+        Span valueSpan = new Span(valueSignal);
         valueSpan.getStyle().set("display", "block").set("font-size", "1.2em");
 
         box.add(labelSpan, valueSpan);
