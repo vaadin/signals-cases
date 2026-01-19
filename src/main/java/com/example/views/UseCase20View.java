@@ -16,11 +16,11 @@ import jakarta.annotation.security.PermitAll;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@Route(value = "use-case-19", layout = MainLayout.class)
-@PageTitle("Use Case 19: Session-scoped User Preferences")
-@Menu(order = 19, title = "UC 19: User Preferences")
+@Route(value = "use-case-20", layout = MainLayout.class)
+@PageTitle("Use Case 20: Session-scoped User Preferences")
+@Menu(order = 20, title = "UC 20: User Preferences")
 @PermitAll
-public class UseCase19View extends VerticalLayout {
+public class UseCase20View extends VerticalLayout {
 
     private static final Map<String, String> PRESET_COLORS = createPresetColors();
 
@@ -35,7 +35,7 @@ public class UseCase19View extends VerticalLayout {
         return map;
     }
 
-    public UseCase19View(UserPreferences preferences) {
+    public UseCase20View(UserPreferences preferences) {
         setSpacing(true);
         setPadding(true);
 
