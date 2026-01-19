@@ -39,8 +39,8 @@ public class MissingAPI {
             List<ValueSignal<T>> signals = listSignal.value();
             // Read each individual signal to register dependency
             List<T> items = signals.stream()
-                .map(ValueSignal::value)
-                .toList();
+                    .map(ValueSignal::value)
+                    .toList();
             grid.setItems(items);
         });
     }
@@ -146,5 +146,17 @@ public class MissingAPI {
                 ui.getPage().setTitle(title);
             }
         });
+    }
+
+    /**
+     * Binds a component's invalid state to a Signal containing a boolean value.
+     */
+    public static void bindInvalid(
+            com.vaadin.flow.component.HasValidation component,
+            Signal<Boolean> signal) {
+        component.setManualValidation(true);
+        ComponentEffect.bind((Component) component, signal,
+                (c, invalid) -> ((com.vaadin.flow.component.HasValidation) c)
+                        .setInvalid(invalid));
     }
 }

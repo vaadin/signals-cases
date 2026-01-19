@@ -4,9 +4,12 @@ import jakarta.annotation.security.PermitAll;
 
 import java.util.concurrent.CompletableFuture;
 
+import com.example.MissingAPI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
@@ -46,6 +49,18 @@ public class UseCase01View extends VerticalLayout {
         WritableSignal<SubmissionState> submissionStateSignal = new ValueSignal<>(
                 SubmissionState.IDLE);
 
+        // Individual field validity signals
+        Signal<Boolean> isPasswordValidSignal = Signal.computed(() -> {
+            String password = passwordSignal.value();
+            return password.isEmpty() || password.length() >= 8;
+        });
+
+        Signal<Boolean> isConfirmValidSignal = Signal.computed(() -> {
+            String password = passwordSignal.value();
+            String confirm = confirmPasswordSignal.value();
+            return confirm.isEmpty() || password.equals(confirm);
+        });
+
         // Computed validity signal
         Signal<Boolean> isValidSignal = Signal.computed(() -> {
             String email = emailSignal.value();
@@ -64,10 +79,14 @@ public class UseCase01View extends VerticalLayout {
         PasswordField passwordField = new PasswordField("Password");
         passwordField.setHelperText("Minimum 8 characters required");
         passwordField.bindValue(passwordSignal);
+        passwordField.setMinLength(8);
 
         PasswordField confirmField = new PasswordField("Confirm Password");
         confirmField.setHelperText("Must match password");
         confirmField.bindValue(confirmPasswordSignal);
+        confirmField.setErrorMessage("Passwords do not match");
+        MissingAPI.bindInvalid(confirmField,
+                isConfirmValidSignal.map(valid -> !valid));
 
         // Submit button with multiple signal bindings
         Button submitButton = new Button();
@@ -98,6 +117,23 @@ public class UseCase01View extends VerticalLayout {
                 try {
                     Thread.sleep(2000);
                     submissionStateSignal.value(SubmissionState.SUCCESS);
+
+                    // Show success notification and reset form
+                    getUI().ifPresent(ui -> ui.access(() -> {
+                        Notification notification = Notification.show(
+                                "Account created successfully!");
+                        notification.addThemeVariants(
+                                NotificationVariant.LUMO_SUCCESS);
+                        notification.setDuration(3000);
+
+                        // Reset form fields
+                        emailSignal.value("");
+                        passwordSignal.value("");
+                        confirmPasswordSignal.value("");
+
+                        // Reset submission state back to IDLE
+                        submissionStateSignal.value(SubmissionState.IDLE);
+                    }));
                 } catch (Exception ex) {
                     submissionStateSignal.value(SubmissionState.ERROR);
                 }
