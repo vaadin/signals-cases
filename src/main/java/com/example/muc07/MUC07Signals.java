@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
 
-import com.example.model.Task;
+import com.example.usecase18.Task;
 import com.example.usecase18.ChatMessageData;
 import com.vaadin.signals.ListSignal;
 

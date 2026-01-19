@@ -1,4 +1,4 @@
-package com.example.model;
+package com.example.usecase18;
 
 import java.time.LocalDate;
 import java.util.UUID;

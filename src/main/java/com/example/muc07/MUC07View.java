@@ -9,7 +9,7 @@ import jakarta.annotation.security.PermitAll;
 import java.util.UUID;
 
 import com.example.security.CurrentUserSignal;
-import com.example.service.TaskLLMService;
+import com.example.usecase18.TaskLLMService;
 import com.example.muc07.MUC07Signals;
 import com.example.signals.UserSessionRegistry;
 import com.vaadin.flow.router.Menu;
