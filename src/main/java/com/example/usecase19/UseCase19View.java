@@ -1,4 +1,6 @@
-package com.example.views;
+package com.example.usecase19;
+
+import com.example.views.MainLayout;
 
 import jakarta.annotation.security.PermitAll;
 
@@ -50,14 +52,6 @@ public class UseCase19View extends VerticalLayout {
     /**
      * Represents a data item with loading state
      */
-    record DataItem(
-        String id,
-        String name,
-        LoadingState.State state,
-        String data,
-        String error,
-        int simulatedDelayMs
-    ) {}
 
     private final DataLoadingService dataLoadingService;
     private final ListSignal<DataItem> itemsSignal = new ListSignal<>(DataItem.class);
