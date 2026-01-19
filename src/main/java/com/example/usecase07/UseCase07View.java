@@ -1,18 +1,11 @@
-package com.example.views;
+package com.example.usecase07;
 
 import jakarta.annotation.security.PermitAll;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
-import com.example.model.Invoice;
-import com.example.model.InvoiceDetails;
-import com.example.model.LineItem;
-import com.example.service.InvoiceService;
+import com.example.views.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.Focusable;
@@ -43,8 +36,8 @@ import com.vaadin.signals.Signal;
 import com.vaadin.signals.ValueSignal;
 import com.vaadin.signals.WritableSignal;
 
-import static com.example.service.InvoiceService.EMPTY_DETAILS;
-import static com.example.service.InvoiceService.EMPTY_INVOICE;
+import static com.example.usecase07.InvoiceService.EMPTY_DETAILS;
+import static com.example.usecase07.InvoiceService.EMPTY_INVOICE;
 
 @Route(value = "use-case-7", layout = MainLayout.class)
 @PageTitle("Use Case 7: Master-Detail Invoice View")
