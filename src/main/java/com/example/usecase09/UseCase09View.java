@@ -1,7 +1,8 @@
-package com.example.views;
+package com.example.usecase09;
 
 import jakarta.annotation.security.PermitAll;
 
+import com.example.views.MainLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
@@ -26,14 +27,6 @@ import com.vaadin.signals.WritableSignal;
 @Menu(order = 9, title = "UC 9: Binder Integration")
 @PermitAll
 public class UseCase09View extends VerticalLayout {
-
-    enum AccountType {
-        PERSONAL, BUSINESS
-    }
-
-    record UserRegistration(String username, String email, String password,
-            String confirmPassword, AccountType accountType, Integer age) {
-    }
 
     public UseCase09View() {
         setSpacing(true);
