@@ -1,15 +1,12 @@
-package com.example.service;
-
-import com.example.model.Invoice;
-import com.example.model.InvoiceDetails;
-import com.example.model.LineItem;
-import org.springframework.stereotype.Service;
+package com.example.usecase07;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import org.springframework.stereotype.Service;
 
 @Service
 public class InvoiceService {
@@ -28,8 +25,7 @@ public class InvoiceService {
 
     private final List<Invoice> invoices = new ArrayList<>();
     private final List<InvoiceDetails> invoiceDetails = new ArrayList<>();
-
-    public InvoiceService() {
+    {
         invoices.addAll(loadInitialInvoices());
         invoices.forEach(inv -> invoiceDetails
                 .add(loadInitialInvoiceDetails(inv.getId())));

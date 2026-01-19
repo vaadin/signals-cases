@@ -1,4 +1,4 @@
-package com.example.model;
+package com.example.usecase07;
 
 import java.util.List;
 
