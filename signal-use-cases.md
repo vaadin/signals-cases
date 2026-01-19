@@ -183,14 +183,15 @@ Signals provide a reactive, declarative approach to building UIs where component
 
 ### UC 14: Async Data Loading with States
 
-**Description**: User list view with async data loading that properly handles loading/success/error states. Shows loading spinner while fetching, displays data on success, or shows error message with retry button.
+**Description**: Analytics report generation demonstrating async operations with proper loading/success/error states. Simulates heavy processing (complex calculations, data aggregation) with realistic delays. Shows loading spinner during generation, displays dashboard-style metrics on success, or shows error message with retry button.
 
 **Key Patterns**:
 - `Signal<LoadingState<T>>` with Loading/Success/Error states
 - Async operations with CompletableFuture
-- Loading indicators during async operations
+- Loading indicators during heavy operations
 - Error handling with retry mechanism
-- Optimistic updates with rollback
+- Dashboard-style data visualization
+- Realistic example for report generation, analytics, PDF creation, or complex queries
 
 **Route**: `/use-case-14`
 

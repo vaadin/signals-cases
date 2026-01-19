@@ -8,6 +8,7 @@ import java.util.List;
 import com.example.MissingAPI;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -880,7 +881,7 @@ public class UseCase17View extends VerticalLayout {
         resetButton.addThemeName("tertiary");
 
         Button addToCartButton = new Button("Add to Cart");
-        addToCartButton.addThemeVariants();
+        addToCartButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         addToCartButton.bindEnabled(canBuildSignal);
 
         Signal<String> cartButtonText = Signal.computed(() -> {
