@@ -7,9 +7,7 @@ import jakarta.annotation.security.PermitAll;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import com.example.model.Task;
 import com.example.security.CurrentUserSignal;
-import com.example.service.TaskLLMService;
 import com.example.signals.UserSessionRegistry;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;

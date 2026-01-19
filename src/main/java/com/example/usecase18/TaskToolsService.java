@@ -1,4 +1,4 @@
-package com.example.service;
+package com.example.usecase18;
 
 import java.time.LocalDate;
 
@@ -7,8 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Service;
-
-import com.example.model.Task;
 
 /**
  * Service containing @Tool annotated methods for LLM to manage tasks.

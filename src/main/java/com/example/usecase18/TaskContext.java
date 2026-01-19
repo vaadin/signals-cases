@@ -1,9 +1,7 @@
-package com.example.service;
+package com.example.usecase18;
 
 import java.time.LocalDate;
 import java.util.List;
-
-import com.example.model.Task;
 
 /**
  * Interface for tool functions to access view-local task state.
