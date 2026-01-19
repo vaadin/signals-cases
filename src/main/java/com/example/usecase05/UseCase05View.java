@@ -1,4 +1,4 @@
-package com.example.views;
+package com.example.usecase05;
 
 import jakarta.annotation.security.PermitAll;
 
@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.example.MissingAPI;
+import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.H2;
