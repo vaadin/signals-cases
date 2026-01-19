@@ -6,15 +6,21 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import com.example.MissingAPI;
+import com.example.service.AnalyticsService;
+import com.example.service.AnalyticsService.AnalyticsReport;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
@@ -28,13 +34,22 @@ import com.vaadin.signals.WritableSignal;
 /**
  * Use Case 14: Async Data Loading with States
  *
- * Demonstrates async operations with loading/success/error states: - Signal
- * with LoadingState<T> (Loading/Success/Error) - Loading spinner while fetching
- * data - Display data on success - Error message with retry button - Optimistic
- * updates with rollback on error
+ * Demonstrates async operations with loading/success/error states using analytics
+ * report generation as a realistic heavy operation example:
+ * - Spring Boot @Async service for background processing
+ * - Signal with LoadingState (Loading/Success/Error states)
+ * - Loading spinner while processing data
+ * - Display analytics dashboard on success
+ * - Error message with retry button
+ * - Proper separation of concerns (View → Service)
  *
- * Key Patterns: - Async signal updates - Loading state representation - Error
- * handling with retry - Simulated server calls with delays
+ * Key Patterns:
+ * - Spring @Async service integration
+ * - CompletableFuture for async operations
+ * - Async signal updates with UI thread synchronization
+ * - Loading state representation
+ * - Error handling with retry
+ * - Dashboard-style data visualization
  */
 @Route(value = "use-case-14", layout = MainLayout.class)
 @PageTitle("Use Case 14: Async Data Loading")
@@ -46,17 +61,37 @@ public class UseCase14View extends VerticalLayout {
      * Represents the state of an async operation
      */
     public static class LoadingState<T> {
-        private final State state;
-        private final T data;
-        private final String error;
+        private State state;
+        private T data;
+        private String error;
 
         public enum State {
             IDLE, LOADING, SUCCESS, ERROR
         }
 
+        // Default constructor for Jackson
+        public LoadingState() {
+            this.state = State.IDLE;
+            this.data = null;
+            this.error = null;
+        }
+
+        // Constructor for internal use
         private LoadingState(State state, T data, String error) {
             this.state = state;
             this.data = data;
+            this.error = error;
+        }
+
+        public void setState(State state) {
+            this.state = state;
+        }
+
+        public void setData(T data) {
+            this.data = data;
+        }
+
+        public void setError(String error) {
             this.error = error;
         }
 
@@ -74,6 +109,10 @@ public class UseCase14View extends VerticalLayout {
 
         public static <T> LoadingState<T> error(String message) {
             return new LoadingState<>(State.ERROR, null, message);
+        }
+
+        public State getState() {
+            return state;
         }
 
         public boolean isIdle() {
@@ -101,62 +140,45 @@ public class UseCase14View extends VerticalLayout {
         }
     }
 
-    public static class User {
-        private final String id;
-        private final String name;
-        private final String email;
+    private final AnalyticsService analyticsService;
 
-        public User(String id, String name, String email) {
-            this.id = id;
-            this.name = name;
-            this.email = email;
-        }
+    private final WritableSignal<LoadingState.State> stateSignal = new ValueSignal<>(
+            LoadingState.State.IDLE);
 
-        public String getId() {
-            return id;
-        }
+    private final WritableSignal<AnalyticsReport> reportDataSignal = new ValueSignal<>(
+            AnalyticsReport.empty());
 
-        public String getName() {
-            return name;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-    }
-
-    private final WritableSignal<LoadingState<List<User>>> usersSignal = new ValueSignal<>(
-            LoadingState.idle());
+    private final WritableSignal<String> errorSignal = new ValueSignal<>("");
 
     private final WritableSignal<Boolean> shouldFailSignal = new ValueSignal<>(
             false);
 
-    public UseCase14View() {
+    private final WritableSignal<String> loadingMessageSignal = new ValueSignal<>("");
+
+    public UseCase14View(AnalyticsService analyticsService) {
+        this.analyticsService = analyticsService;
         setSpacing(true);
         setPadding(true);
 
         H2 title = new H2("Use Case 14: Async Data Loading with States");
 
         Paragraph description = new Paragraph(
-                "This use case demonstrates async operations with proper loading/success/error states. "
-                        + "Click 'Load Users' to fetch data with a simulated delay. Toggle 'Simulate Error' to see error handling. "
-                        + "The UI reactively shows loading spinners, data on success, or error messages with retry.");
+                "This use case demonstrates multi-step async operations with proper loading/success/error states. "
+                        + "Click 'Generate Analytics Report' to start a two-step process: first fetching relevant data, then generating the report. "
+                        + "Toggle 'Simulate Error' to see error handling. "
+                        + "The UI reactively shows progress through each step, displays data on success, or shows error messages with retry.");
 
         // Controls
         HorizontalLayout controls = new HorizontalLayout();
         controls.setSpacing(true);
 
-        Button loadButton = new Button("Load Users", event -> loadUsers());
-        loadButton.addThemeVariants();
+        Button loadButton = new Button("Generate Analytics Report", event -> loadReport());
+        loadButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         // Disable load button while loading
-        Signal<Boolean> isLoadingSignal = usersSignal
-                .map(LoadingState::isLoading);
+        Signal<Boolean> isLoadingSignal = stateSignal
+                .map(state -> state == LoadingState.State.LOADING);
         loadButton.bindEnabled(isLoadingSignal.map(loading -> !loading));
-
-        Button clearButton = new Button("Clear",
-                event -> usersSignal.value(LoadingState.idle()));
-        clearButton.addThemeName("tertiary");
 
         Div errorToggle = new Div();
         errorToggle.getStyle().set("display", "flex")
@@ -167,7 +189,7 @@ public class UseCase14View extends VerticalLayout {
         checkbox.bindValue(shouldFailSignal);
         errorToggle.add(checkbox);
 
-        controls.add(loadButton, clearButton, errorToggle);
+        controls.add(loadButton, errorToggle);
 
         // State display box
         Div stateBox = new Div();
@@ -179,11 +201,11 @@ public class UseCase14View extends VerticalLayout {
         // Idle state
         Div idleContent = new Div();
         Paragraph idleMessage = new Paragraph(
-                "👆 Click 'Load Users' to fetch data from the server");
+                "👆 Click 'Generate Analytics Report' to start the two-step process: fetch data, then generate comprehensive report with sales metrics and performance data");
         idleMessage.getStyle().set("color", "var(--lumo-secondary-text-color)")
                 .set("font-style", "italic");
         idleContent.add(idleMessage);
-        Signal<Boolean> isIdleSignal = usersSignal.map(LoadingState::isIdle);
+        Signal<Boolean> isIdleSignal = stateSignal.map(state -> state == LoadingState.State.IDLE);
         idleContent.bindVisible(isIdleSignal);
 
         // Loading state
@@ -196,7 +218,8 @@ public class UseCase14View extends VerticalLayout {
         progressBar.setIndeterminate(true);
         progressBar.setWidth("200px");
 
-        Paragraph loadingMessage = new Paragraph("Loading users...");
+        Paragraph loadingMessage = new Paragraph();
+        loadingMessage.bindText(loadingMessageSignal);
         loadingMessage.getStyle().set("color", "var(--lumo-primary-color)");
 
         loadingContent.add(progressBar, loadingMessage);
@@ -204,42 +227,63 @@ public class UseCase14View extends VerticalLayout {
 
         // Success state
         Div successContent = new Div();
-        H3 successTitle = new H3("Users Loaded Successfully");
+        H3 successTitle = new H3();
+        Signal<String> reportTitleSignal = reportDataSignal
+                .map(report -> !report.isEmpty()
+                        ? "Analytics Report - " + report.getPeriod()
+                        : "Analytics Report");
+        successTitle.bindText(reportTitleSignal);
         successTitle.getStyle().set("margin-top", "0").set("color",
                 "var(--lumo-success-color)");
 
-        Div userList = new Div();
-        userList.getStyle().set("display", "flex")
-                .set("flex-direction", "column").set("gap", "0.5em");
+        // Metrics grid
+        Div metricsGrid = new Div();
+        metricsGrid.getStyle().set("display", "grid")
+                .set("grid-template-columns", "repeat(auto-fit, minmax(200px, 1fr))")
+                .set("gap", "1em").set("margin-top", "1em");
 
-        // Bind user cards dynamically
-        Signal<List<User>> usersDataSignal = usersSignal
-                .map(state -> state.isSuccess() ? state.getData() : List.of());
-        MissingAPI.bindComponentChildren(userList, usersDataSignal, user -> {
-            Div card = new Div();
-            card.getStyle().set("background-color", "#f5f5f5")
-                    .set("padding", "1em").set("border-radius", "4px")
-                    .set("display", "flex").set("align-items", "center")
-                    .set("gap", "1em");
-
-            Icon userIcon = new Icon(VaadinIcon.USER);
-            userIcon.setColor("var(--lumo-primary-color)");
-
-            Div info = new Div();
-            Div nameDiv = new Div(user.getName());
-            nameDiv.getStyle().set("font-weight", "bold");
-            Div emailDiv = new Div(user.getEmail());
-            emailDiv.getStyle().set("font-size", "0.9em").set("color",
-                    "var(--lumo-secondary-text-color)");
-            info.add(nameDiv, emailDiv);
-
-            card.add(userIcon, info);
-            return card;
+        // Create metric cards with signals
+        Signal<String> revenueSignal = reportDataSignal.map(report -> {
+            if (!report.isEmpty()) {
+                return String.format("$%,d", report.getTotalRevenue());
+            }
+            return "";
         });
+        Card revenueCard = createMetricCardWithSignal("Total Revenue", revenueSignal,
+                VaadinIcon.DOLLAR, "#4CAF50");
 
-        successContent.add(successTitle, userList);
-        Signal<Boolean> isSuccessSignal = usersSignal
-                .map(LoadingState::isSuccess);
+        Signal<String> ordersSignal = reportDataSignal.map(report -> {
+            if (!report.isEmpty()) {
+                return String.format("%,d", report.getTotalOrders());
+            }
+            return "";
+        });
+        Card ordersCard = createMetricCardWithSignal("Total Orders", ordersSignal,
+                VaadinIcon.PACKAGE, "#2196F3");
+
+        Signal<String> conversionSignal = reportDataSignal.map(report -> {
+            if (!report.isEmpty()) {
+                return String.format("%.2f%%", report.getConversionRate());
+            }
+            return "";
+        });
+        Card conversionCard = createMetricCardWithSignal("Conversion Rate", conversionSignal,
+                VaadinIcon.TRENDING_UP, "#FF9800");
+
+        Signal<String> usersSignalValue = reportDataSignal.map(report -> {
+            if (!report.isEmpty()) {
+                return String.format("%,d", report.getActiveUsers());
+            }
+            return "";
+        });
+        Card usersCard = createMetricCardWithSignal("Active Users", usersSignalValue,
+                VaadinIcon.USERS, "#9C27B0");
+
+        metricsGrid.add(revenueCard, ordersCard, conversionCard, usersCard);
+
+        successContent.add(successTitle, metricsGrid);
+        Signal<Boolean> isSuccessSignal = stateSignal
+                .map(state -> state == LoadingState.State.SUCCESS);
         successContent.bindVisible(isSuccessSignal);
 
         // Error state
@@ -248,37 +292,20 @@ public class UseCase14View extends VerticalLayout {
                 .set("padding", "1em").set("border-radius", "4px")
                 .set("border-left", "4px solid var(--lumo-error-color)");
 
-        H3 errorTitle = new H3("❌ Failed to Load Users");
+        H3 errorTitle = new H3("❌ Report Generation Failed");
         errorTitle.getStyle().set("margin-top", "0").set("color",
                 "var(--lumo-error-color)");
 
-        Paragraph errorMessage = new Paragraph();
-        Signal<String> errorTextSignal = usersSignal
-                .map(state -> state.isError() ? state.getError() : "");
-        errorMessage.bindText(errorTextSignal);
+        Paragraph errorMessage = new Paragraph("Analytics report generation failed. Please contact the administrator.");
+        errorMessage.getStyle().set("margin", "0.5em 0");
 
-        Button retryButton = new Button("Retry", event -> loadUsers());
-        retryButton.addThemeVariants();
-        retryButton.setIcon(new Icon(VaadinIcon.REFRESH));
-
-        errorContent.add(errorTitle, errorMessage, retryButton);
-        Signal<Boolean> isErrorSignal = usersSignal.map(LoadingState::isError);
+        errorContent.add(errorTitle, errorMessage);
+        Signal<Boolean> isErrorSignal = stateSignal.map(state -> state == LoadingState.State.ERROR);
         errorContent.bindVisible(isErrorSignal);
 
         stateBox.add(idleContent, loadingContent, successContent, errorContent);
 
-        // Info box
-        Div infoBox = new Div();
-        infoBox.getStyle().set("background-color", "#e0f7fa")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("margin-top", "1em").set("font-style", "italic");
-        infoBox.add(new Paragraph(
-                "💡 This pattern is essential for real-world applications. The LoadingState<T> wrapper "
-                        + "provides a type-safe way to represent async operations. In production, this would integrate "
-                        + "with actual REST/GraphQL calls using CompletableFuture or reactive streams. "
-                        + "The signal automatically updates the UI as the state transitions: IDLE → LOADING → SUCCESS/ERROR."));
-
-        add(title, description, controls, stateBox, infoBox);
+        add(title, description, controls, stateBox);
     }
 
     @Override
@@ -287,40 +314,67 @@ public class UseCase14View extends VerticalLayout {
         // Could auto-load data on attach if desired
     }
 
-    private void loadUsers() {
+    private void loadReport() {
         // Set loading state immediately
-        usersSignal.value(LoadingState.loading());
+        stateSignal.value(LoadingState.State.LOADING);
+        reportDataSignal.value(AnalyticsReport.empty());
+        errorSignal.value("");
+        loadingMessageSignal.value("Fetching relevant data... (1/2)");
 
-        // Simulate async server call with delay
-        CompletableFuture.supplyAsync(() -> {
-            try {
-                Thread.sleep(2000); // Simulate network delay
+        // Step 1: Fetch raw data from data sources
+        // The @Async annotation causes Spring to execute this in a separate thread
+        analyticsService.fetchReportData(shouldFailSignal.value())
+                .thenCompose(rawData -> {
+                    // Signals are thread-safe - update directly from background thread
+                    loadingMessageSignal.value("Generating report... (2/2)");
 
-                if (shouldFailSignal.value()) {
-                    throw new RuntimeException(
-                            "Server returned 500: Internal Server Error");
-                }
+                    // Step 2: Process the fetched data into a report
+                    return analyticsService.generateReportFromData(rawData, shouldFailSignal.value());
+                })
+                .thenAccept(report -> {
+                    // Signals are thread-safe - update directly from background thread
+                    reportDataSignal.value(report);
+                    stateSignal.value(LoadingState.State.SUCCESS);
+                })
+                .exceptionally(error -> {
+                    // Signals are thread-safe - update directly from background thread
+                    stateSignal.value(LoadingState.State.ERROR);
+                    return null;
+                });
+    }
 
-                // Simulate fetched data
-                return List.of(
-                        new User("1", "Alice Johnson", "alice@example.com"),
-                        new User("2", "Bob Smith", "bob@example.com"),
-                        new User("3", "Charlie Davis", "charlie@example.com"),
-                        new User("4", "Diana Martinez", "diana@example.com"));
-            } catch (InterruptedException e) {
-                throw new RuntimeException("Request interrupted");
-            }
-        }).thenAccept(users -> {
-            // Update signal on UI thread
-            getUI().ifPresent(ui -> ui.access(() -> {
-                usersSignal.value(LoadingState.success(users));
-            }));
-        }).exceptionally(error -> {
-            // Handle error on UI thread
-            getUI().ifPresent(ui -> ui.access(() -> {
-                usersSignal.value(LoadingState.error(error.getMessage()));
-            }));
-            return null;
-        });
+    private Card createMetricCardWithSignal(String label, Signal<String> valueSignal,
+            VaadinIcon iconType, String color) {
+        // Create card using Vaadin Card component with proper slots
+        Card card = new Card();
+
+        // Use headerPrefix slot for icon
+        Icon icon = new Icon(iconType);
+        icon.setColor(color);
+        icon.setSize("var(--lumo-icon-size-m)");
+        card.setHeaderPrefix(icon);
+
+        // Use title slot for label
+        Span labelSpan = new Span(label);
+        labelSpan.getStyle()
+                .set("font-size", "var(--lumo-font-size-s)")
+                .set("color", "var(--lumo-secondary-text-color)")
+                .set("font-weight", "500");
+        card.setTitle(labelSpan);
+
+        // Main content slot for value display
+        Span valueSpan = new Span();
+        valueSpan.bindText(valueSignal);
+        valueSpan.getStyle()
+                .set("font-size", "var(--lumo-font-size-xxxl)")
+                .set("font-weight", "bold")
+                .set("color", color)
+                .set("line-height", "1");
+        card.add(valueSpan);
+
+        // Custom styling for colored border
+        card.getStyle().set("border-left", "4px solid " + color);
+
+        return card;
     }
 }
