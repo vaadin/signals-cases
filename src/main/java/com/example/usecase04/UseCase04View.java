@@ -1,10 +1,11 @@
-package com.example.views;
+package com.example.usecase04;
 
 import jakarta.annotation.security.PermitAll;
 
 import java.util.List;
 
 import com.example.MissingAPI;
+import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -25,10 +26,6 @@ import com.vaadin.signals.WritableSignal;
 @Menu(order = 4, title = "UC 4: Filtered Data Grid")
 @PermitAll
 public class UseCase04View extends VerticalLayout {
-
-    public static record Product(String id, String name, String category,
-            double price, int stock) {
-    }
 
     public UseCase04View() {
         setSpacing(true);
