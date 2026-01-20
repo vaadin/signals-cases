@@ -90,7 +90,7 @@ public class UseCase01View extends VerticalLayout {
 
         // Bind enabled state: enabled when valid AND not submitting
         submitButton.bindEnabled(Signal.computed(() -> isValidSignal.value()
-                && submissionStateSignal.value() == SubmissionState.IDLE));
+                && (submissionStateSignal.value() != SubmissionState.SUBMITTING)));
 
         // Bind button text based on submission state
         submitButton
@@ -103,7 +103,7 @@ public class UseCase01View extends VerticalLayout {
 
         // Bind theme variant
         submitButton.bindThemeName("success", submissionStateSignal
-                .map(state -> state == SubmissionState.SUCCESS));
+                .map(SubmissionState.SUCCESS::equals));
         submitButton.bindThemeName("primary", submissionStateSignal
                 .map(state -> state != SubmissionState.SUCCESS));
 
