@@ -1,10 +1,8 @@
 package com.example.usecase08;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.List;
-
 import com.example.views.MainLayout;
+import jakarta.annotation.security.PermitAll;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
@@ -16,12 +14,14 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.signals.Signal;
 import com.vaadin.signals.ValueSignal;
 import com.vaadin.signals.WritableSignal;
+import com.vaadin.signals.function.SignalMapper;
 
 @Route(value = "use-case-08", layout = MainLayout.class)
 @PageTitle("Use Case 8: Multi-Step Wizard with Validation")
@@ -42,30 +42,14 @@ public class UseCase08View extends VerticalLayout {
                         + "Review your information in the final step before submitting.");
 
         // Create signals for current step and form data
-        WritableSignal<Step> currentStepSignal = new ValueSignal<>(
-                Step.PERSONAL_INFO);
-        WritableSignal<String> firstNameSignal = new ValueSignal<>("");
-        WritableSignal<String> lastNameSignal = new ValueSignal<>("");
-        WritableSignal<String> emailSignal = new ValueSignal<>("");
-        WritableSignal<String> companyNameSignal = new ValueSignal<>("");
-        WritableSignal<String> companySizeSignal = new ValueSignal<>("");
-        WritableSignal<String> industrySignal = new ValueSignal<>("");
-        WritableSignal<Plan> planSignal = new ValueSignal<>(Plan.STARTER);
-
-        // Validation signals
-        Signal<Boolean> step1ValidSignal = Signal
-                .computed(() -> !firstNameSignal.value().isEmpty()
-                        && !lastNameSignal.value().isEmpty()
-                        && emailSignal.value().contains("@"));
-
-        Signal<Boolean> step2ValidSignal = Signal
-                .computed(() -> !companyNameSignal.value().isEmpty()
-                        && !companySizeSignal.value().isEmpty()
-                        && !industrySignal.value().isEmpty());
-
-        Signal<Boolean> step3ValidSignal = new ValueSignal<>(true); // Plan
-                                                                    // always
-                                                                    // selected
+        var currentStepSignal = new ValueSignal<>(Step.PERSONAL_INFO);
+        var firstNameSignal = new ValueSignal<>("");
+        var lastNameSignal = new ValueSignal<>("");
+        var emailSignal = new ValueSignal<>("");
+        var companyNameSignal = new ValueSignal<>("");
+        var companySizeSignal = new ValueSignal<>(String.class);
+        var industrySignal = new ValueSignal<>(String.class);
+        var planSignal = new ValueSignal<>(Plan.STARTER);
 
         // Step 1: Personal Info
         VerticalLayout step1Layout = new VerticalLayout();
@@ -73,12 +57,17 @@ public class UseCase08View extends VerticalLayout {
 
         TextField firstNameField = new TextField("First Name");
         firstNameField.bindValue(firstNameSignal);
+        firstNameField.setRequired(true);
+        firstNameField.setMinLength(2);
 
         TextField lastNameField = new TextField("Last Name");
         lastNameField.bindValue(lastNameSignal);
+        lastNameField.setRequired(true);
+        lastNameField.setMinLength(2);
 
         EmailField emailField = new EmailField("Email");
         emailField.bindValue(emailSignal);
+        emailField.setRequired(true);
 
         step1Layout.add(firstNameField, lastNameField, emailField);
         step1Layout.bindVisible(
@@ -90,15 +79,18 @@ public class UseCase08View extends VerticalLayout {
 
         TextField companyNameField = new TextField("Company Name");
         companyNameField.bindValue(companyNameSignal);
+        companyNameField.setRequired(true);
 
         ComboBox<String> companySizeSelect = new ComboBox<>("Company Size",
                 List.of("1-10", "11-50", "51-200", "201-1000", "1000+"));
         companySizeSelect.bindValue(companySizeSignal);
+        companySizeSelect.setRequired(true);
 
         ComboBox<String> industrySelect = new ComboBox<>("Industry",
                 List.of("Technology", "Healthcare", "Finance", "Retail",
                         "Manufacturing", "Other"));
         industrySelect.bindValue(industrySignal);
+        industrySelect.setRequired(true);
 
         step2Layout.add(companyNameField, companySizeSelect, industrySelect);
         step2Layout.bindVisible(
@@ -109,8 +101,8 @@ public class UseCase08View extends VerticalLayout {
         step3Layout.add(new H3("Step 3: Select Your Plan"));
 
         ComboBox<Plan> planSelect = new ComboBox<>("Plan", Plan.values());
-        planSelect.setValue(Plan.STARTER);
         planSelect.bindValue(planSignal);
+        planSelect.setRequired(true);
 
         Span planDescription = new Span();
         planDescription.bindText(planSignal.map(plan -> switch (plan) {
@@ -139,6 +131,22 @@ public class UseCase08View extends VerticalLayout {
         step4Layout.add(reviewDiv);
         step4Layout.bindVisible(
                 currentStepSignal.map(step -> step == Step.REVIEW));
+
+        Signal<Boolean> step1ValidSignal = Signal.computed(() -> {
+            boolean firstNameValid = firstNameSignal.map(isValid(firstNameField)).value();
+            boolean lastNameValid = lastNameSignal.map(isValid(lastNameField)).value();
+            boolean emailValid = emailSignal.map(isValid(emailField)).value();
+            return firstNameValid && lastNameValid && emailValid;
+        });
+
+        Signal<Boolean> step2ValidSignal = Signal.computed(() -> {
+            boolean companyNameValid = companyNameSignal.map(isValid(companyNameField)).value();
+            boolean companySizeValid = companySizeSignal.map(isValid(companySizeSelect)).value();
+            boolean industryValid = industrySignal.map(isValid(industrySelect)).value();
+            return companyNameValid && companySizeValid && industryValid;
+        });
+
+        Signal<Boolean> step3ValidSignal = Signal.computed(() -> planSignal.map(isValid(planSelect)).value());
 
         // Navigation buttons
         HorizontalLayout navigationLayout = new HorizontalLayout();
@@ -198,5 +206,12 @@ public class UseCase08View extends VerticalLayout {
 
         add(title, description, progressIndicator, step1Layout, step2Layout,
                 step3Layout, step4Layout, navigationLayout);
+    }
+
+    private <T> SignalMapper<T, Boolean> isValid(HasValidator<T> field) {
+        return value -> {
+            var validator = field.getDefaultValidator();
+            return !validator.apply(value, null).isError();
+        };
     }
 }
