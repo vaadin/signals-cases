@@ -23,6 +23,7 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -82,7 +83,6 @@ public class UseCase15View extends VerticalLayout {
             List.of());
     private final ValueSignal<Integer> searchCountSignal = new ValueSignal<>(0);
 
-    private Timer debounceTimer;
     private final AtomicReference<CompletableFuture<Void>> currentSearch = new AtomicReference<>();
 
     public UseCase15View() {
@@ -104,9 +104,15 @@ public class UseCase15View extends VerticalLayout {
         searchField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(
-                com.vaadin.flow.data.value.ValueChangeMode.EAGER);
+                ValueChangeMode.LAZY);
+        searchField.setValueChangeTimeout(300);
 
         searchField.bindValue(searchQuerySignal);
+        searchField.addValueChangeListener(event -> {
+            String query = event.getValue();
+            debouncedQuerySignal.value(query);
+            performSearch(query);
+        });
 
         // Search stats
         Div statsBox = new Div();
@@ -237,37 +243,11 @@ public class UseCase15View extends VerticalLayout {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-
-        // Set up debouncing: when searchQuerySignal changes, schedule debounced
-        // update
-        // This is done manually here; in real API would be:
-        // searchQuerySignal.debounce(300ms)
-        com.vaadin.flow.component.ComponentEffect.effect(this, () -> {
-            String query = searchQuerySignal.value();
-
-            // Cancel previous timer
-            if (debounceTimer != null) {
-                debounceTimer.cancel();
-            }
-
-            // Schedule new debounced update
-            debounceTimer = new Timer();
-            debounceTimer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    debouncedQuerySignal.value(query);
-                    performSearch(query);
-                }
-            }, 300); // 300ms debounce delay
-        });
     }
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
-        if (debounceTimer != null) {
-            debounceTimer.cancel();
-        }
         // Cancel any in-flight search
         CompletableFuture<Void> search = currentSearch.get();
         if (search != null) {
