@@ -2,8 +2,8 @@ package com.example.muc04;
 
 import org.springframework.stereotype.Component;
 
-import com.vaadin.signals.MapSignal;
-import com.vaadin.signals.ValueSignal;
+import com.vaadin.signals.shared.SharedMapSignal;
+import com.vaadin.signals.shared.SharedValueSignal;
 import com.vaadin.signals.WritableSignal;
 
 /**
@@ -15,12 +15,12 @@ public class MUC04Signals {
     public record FieldLock(String username, String sessionId) {
     }
 
-    private final WritableSignal<String> companyNameSignal = new ValueSignal<>(
+    private final WritableSignal<String> companyNameSignal = new SharedValueSignal<>(
             "");
-    private final WritableSignal<String> addressSignal = new ValueSignal<>("");
-    private final WritableSignal<String> phoneSignal = new ValueSignal<>("");
+    private final WritableSignal<String> addressSignal = new SharedValueSignal<>("");
+    private final WritableSignal<String> phoneSignal = new SharedValueSignal<>("");
     // MapSignal where key is fieldName and value is FieldLock
-    private final MapSignal<FieldLock> fieldLocksSignal = new MapSignal<>(
+    private final SharedMapSignal<FieldLock> fieldLocksSignal = new SharedMapSignal<>(
             FieldLock.class);
 
     public WritableSignal<String> getCompanyNameSignal() {
@@ -35,7 +35,7 @@ public class MUC04Signals {
         return phoneSignal;
     }
 
-    public MapSignal<FieldLock> getFieldLocksSignal() {
+    public SharedMapSignal<FieldLock> getFieldLocksSignal() {
         return fieldLocksSignal;
     }
 
@@ -45,7 +45,7 @@ public class MUC04Signals {
 
     public void unlockField(String fieldName, String username,
             String sessionId) {
-        com.vaadin.signals.ValueSignal<FieldLock> lockSignal = fieldLocksSignal.value()
+        SharedValueSignal<FieldLock> lockSignal = fieldLocksSignal.value()
                 .get(fieldName);
         if (lockSignal != null) {
             FieldLock lock = lockSignal.value();
@@ -58,7 +58,7 @@ public class MUC04Signals {
 
     public boolean isFieldLockedByOther(String fieldName, String username,
             String sessionId) {
-        com.vaadin.signals.ValueSignal<FieldLock> lockSignal = fieldLocksSignal.value()
+        SharedValueSignal<FieldLock> lockSignal = fieldLocksSignal.value()
                 .get(fieldName);
         if (lockSignal == null) {
             return false;

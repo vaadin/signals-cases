@@ -116,7 +116,7 @@ public class UseCase13View extends VerticalLayout {
 
         // Reactively bind children to active users list
         MissingAPI.bindChildren(userListContainer, Signal.computed(() -> {
-            List<com.vaadin.signals.ValueSignal<UserInfo>> userSignals =
+            List<com.vaadin.signals.shared.SharedValueSignal<UserInfo>> userSignals =
                     userSessionRegistry.getActiveUsersSignal().value();
             List<Card> userCards = new ArrayList<>();
 

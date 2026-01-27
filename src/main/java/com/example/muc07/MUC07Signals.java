@@ -6,7 +6,7 @@ import jakarta.annotation.PostConstruct;
 
 import com.example.usecase18.Task;
 import com.example.usecase18.ChatMessageData;
-import com.vaadin.signals.ListSignal;
+import com.vaadin.signals.shared.SharedListSignal;
 
 /**
  * Application-scoped signals for MUC07: LLM-Powered Shared Task List
@@ -14,16 +14,16 @@ import com.vaadin.signals.ListSignal;
 @Component
 public class MUC07Signals {
 
-    private final ListSignal<Task> llmTasksSignal = new ListSignal<>(
+    private final SharedListSignal<Task> llmTasksSignal = new SharedListSignal<>(
             Task.class);
-    private final ListSignal<ChatMessageData> llmChatMessagesSignal = new ListSignal<>(
+    private final SharedListSignal<ChatMessageData> llmChatMessagesSignal = new SharedListSignal<>(
             ChatMessageData.class);
 
-    public ListSignal<Task> getLlmTasksSignal() {
+    public SharedListSignal<Task> getLlmTasksSignal() {
         return llmTasksSignal;
     }
 
-    public ListSignal<ChatMessageData> getLlmChatMessagesSignal() {
+    public SharedListSignal<ChatMessageData> getLlmChatMessagesSignal() {
         return llmChatMessagesSignal;
     }
 

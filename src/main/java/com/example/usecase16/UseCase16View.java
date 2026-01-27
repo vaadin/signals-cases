@@ -27,10 +27,11 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinServletRequest;
-import com.vaadin.signals.ListSignal;
 import com.vaadin.signals.Signal;
-import com.vaadin.signals.ValueSignal;
 import com.vaadin.signals.WritableSignal;
+import com.vaadin.signals.local.ValueSignal;
+import com.vaadin.signals.shared.SharedListSignal;
+import com.vaadin.signals.shared.SharedValueSignal;
 
 /**
  * Use Case 16: Search with URL State (Router Integration)
@@ -118,7 +119,7 @@ public class UseCase16View extends VerticalLayout
             "");
     private final WritableSignal<String> categorySignal = new ValueSignal<>(
             "All");
-    private final ListSignal<Article> filteredArticlesSignal = new ListSignal<>(
+    private final SharedListSignal<Article> filteredArticlesSignal = new SharedListSignal<>(
             Article.class);
 
     private boolean isInitializing = true;
@@ -225,7 +226,7 @@ public class UseCase16View extends VerticalLayout
         MissingAPI
                 .bindComponentChildren(resultsContainer,
                         filteredArticlesSignal.map(artSignals -> artSignals
-                                .stream().map(ValueSignal::value).toList()),
+                                .stream().map(SharedValueSignal::value).toList()),
                         article -> {
                             Div card = new Div();
                             card.getStyle().set("background-color", "#ffffff")

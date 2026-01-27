@@ -12,7 +12,7 @@ import com.example.signals.UserSessionRegistry;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.ListSignal;
+import com.vaadin.signals.shared.SharedListSignal;
 
 @Route(value = "use-case-18", layout = MainLayout.class)
 @PageTitle("Use Case 18: LLM-Powered Task List")
@@ -24,8 +24,8 @@ public class UseCase18View extends AbstractTaskChatView {
                           CurrentUserSignal currentUserSignal,
                           UserSessionRegistry userSessionRegistry) {
         super(
-            new ListSignal<>(Task.class),                    // View-local task signal
-            new ListSignal<>(ChatMessageData.class),         // View-local chat signal
+            new SharedListSignal<>(Task.class),                    // View-local task signal
+            new SharedListSignal<>(ChatMessageData.class),         // View-local chat signal
             taskLLMService,
             UUID.randomUUID().toString(),                    // Per-instance conversation ID
             currentUserSignal,                                // Current user for avatar/name

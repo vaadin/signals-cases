@@ -32,16 +32,17 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.signals.ListSignal;
 import com.vaadin.signals.Signal;
-import com.vaadin.signals.ValueSignal;
 import com.vaadin.signals.WritableSignal;
+import com.vaadin.signals.local.ValueSignal;
+import com.vaadin.signals.shared.SharedListSignal;
+import com.vaadin.signals.shared.SharedValueSignal;
 
 public abstract class AbstractTaskChatView extends VerticalLayout {
 
     // Signals injected via constructor
-    protected final ListSignal<Task> tasksSignal;
-    protected final ListSignal<ChatMessageData> chatMessagesSignal;
+    protected final SharedListSignal<Task> tasksSignal;
+    protected final SharedListSignal<ChatMessageData> chatMessagesSignal;
     protected final String conversationId;
     protected final CurrentUserSignal currentUserSignal;
     protected final UserSessionRegistry userSessionRegistry;
@@ -66,8 +67,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
 
     // Constructor with signal injection
     protected AbstractTaskChatView(
-            ListSignal<Task> tasksSignal,
-            ListSignal<ChatMessageData> chatMessagesSignal,
+            SharedListSignal<Task> tasksSignal,
+            SharedListSignal<ChatMessageData> chatMessagesSignal,
             TaskLLMService taskLLMService,
             String conversationId,
             CurrentUserSignal currentUserSignal,
@@ -476,7 +477,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         return new TaskContext() {
             @Override
             public java.util.List<Task> getAllTasks() {
-                return tasksSignal.value().stream().map(ValueSignal::value).toList();
+                return tasksSignal.value().stream().map(SharedValueSignal::value).toList();
             }
 
             @Override

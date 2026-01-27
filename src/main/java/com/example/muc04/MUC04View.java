@@ -212,7 +212,7 @@ public class MUC04View extends VerticalLayout {
         // Show who is editing
         Signal<String> helperTextSignal = muc04Signals
                 .getFieldLocksSignal().map(locks -> {
-                    com.vaadin.signals.ValueSignal<MUC04Signals.FieldLock> lockSignal = locks
+                    com.vaadin.signals.shared.SharedValueSignal<MUC04Signals.FieldLock> lockSignal = locks
                             .get(fieldName);
                     if (lockSignal == null) {
                         return "Available to edit";
@@ -234,7 +234,7 @@ public class MUC04View extends VerticalLayout {
         // Disable if locked by another user
         Signal<Boolean> enabledSignal = muc04Signals
                 .getFieldLocksSignal().map(locks -> {
-                    com.vaadin.signals.ValueSignal<MUC04Signals.FieldLock> lockSignal = locks
+                    com.vaadin.signals.shared.SharedValueSignal<MUC04Signals.FieldLock> lockSignal = locks
                             .get(fieldName);
                     if (lockSignal == null) {
                         return true;

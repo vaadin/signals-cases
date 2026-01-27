@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
 
-import com.vaadin.signals.ListSignal;
+import com.vaadin.signals.shared.SharedListSignal;
 
 /**
  * Application-scoped signals for MUC06: Shared Task List
@@ -16,9 +16,9 @@ public class MUC06Signals {
             java.time.LocalDate dueDate) {
     }
 
-    private final ListSignal<Task> tasksSignal = new ListSignal<>(Task.class);
+    private final SharedListSignal<Task> tasksSignal = new SharedListSignal<>(Task.class);
 
-    public ListSignal<Task> getTasksSignal() {
+    public SharedListSignal<Task> getTasksSignal() {
         return tasksSignal;
     }
 

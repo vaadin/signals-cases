@@ -2,8 +2,8 @@ package com.example.muc03;
 
 import org.springframework.stereotype.Component;
 
-import com.vaadin.signals.MapSignal;
-import com.vaadin.signals.ValueSignal;
+import com.vaadin.signals.shared.SharedMapSignal;
+import com.vaadin.signals.shared.SharedValueSignal;
 import com.vaadin.signals.WritableSignal;
 
 /**
@@ -13,21 +13,21 @@ import com.vaadin.signals.WritableSignal;
 public class MUC03Signals {
 
     // MapSignal where key is "username:sessionId" and value is score (Integer)
-    private final MapSignal<Integer> leaderboardSignal = new MapSignal<>(
+    private final SharedMapSignal<Integer> leaderboardSignal = new SharedMapSignal<>(
             Integer.class);
 
-    private final WritableSignal<Boolean> buttonVisibleSignal = new ValueSignal<>(
+    private final WritableSignal<Boolean> buttonVisibleSignal = new SharedValueSignal<>(
             false);
-    private final WritableSignal<Integer> buttonLeftSignal = new ValueSignal<>(
+    private final WritableSignal<Integer> buttonLeftSignal = new SharedValueSignal<>(
             0);
-    private final WritableSignal<Integer> buttonTopSignal = new ValueSignal<>(
+    private final WritableSignal<Integer> buttonTopSignal = new SharedValueSignal<>(
             0);
-    private final WritableSignal<Integer> clicksRemainingSignal = new ValueSignal<>(
+    private final WritableSignal<Integer> clicksRemainingSignal = new SharedValueSignal<>(
             0);
-    private final WritableSignal<Integer> roundNumberSignal = new ValueSignal<>(
+    private final WritableSignal<Integer> roundNumberSignal = new SharedValueSignal<>(
             0);
 
-    public MapSignal<Integer> getLeaderboardSignal() {
+    public SharedMapSignal<Integer> getLeaderboardSignal() {
         return leaderboardSignal;
     }
 
@@ -64,7 +64,7 @@ public class MUC03Signals {
 
         // Award the point
         String sessionKey = username + ":" + sessionId;
-        com.vaadin.signals.ValueSignal<Integer> scoreSignal = leaderboardSignal.value()
+        SharedValueSignal<Integer> scoreSignal = leaderboardSignal.value()
                 .get(sessionKey);
         if (scoreSignal != null) {
             scoreSignal.value(scoreSignal.value() + 1);

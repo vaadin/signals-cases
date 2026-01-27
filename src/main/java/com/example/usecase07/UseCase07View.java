@@ -31,10 +31,11 @@ import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.ListSignal;
 import com.vaadin.signals.Signal;
-import com.vaadin.signals.ValueSignal;
 import com.vaadin.signals.WritableSignal;
+import com.vaadin.signals.local.ValueSignal;
+import com.vaadin.signals.shared.SharedListSignal;
+import com.vaadin.signals.shared.SharedValueSignal;
 
 import static com.example.usecase07.InvoiceService.EMPTY_DETAILS;
 import static com.example.usecase07.InvoiceService.EMPTY_INVOICE;
@@ -47,10 +48,10 @@ public class UseCase07View extends VerticalLayout {
 
     private final InvoiceService invoiceService;
 
-    private final ListSignal<Invoice> invoiceListSignal = new ListSignal<>(
+    private final SharedListSignal<Invoice> invoiceListSignal = new SharedListSignal<>(
             Invoice.class);
 
-    private final ListSignal<LineItem> lineItemsSignal = new ListSignal<>(
+    private final SharedListSignal<LineItem> lineItemsSignal = new SharedListSignal<>(
             LineItem.class);
 
     private Grid<Invoice> invoiceGrid;
@@ -93,7 +94,7 @@ public class UseCase07View extends VerticalLayout {
                 "status");
         ComponentEffect.bind(invoiceGrid, invoiceListSignal, (grid, items) -> {
             var invoices = invoiceListSignal.value().stream()
-                    .map(ValueSignal::peek).toList();
+                    .map(SharedValueSignal::peek).toList();
             if (items != null) {
                 grid.setItems(invoices);
             } else {
@@ -191,7 +192,7 @@ public class UseCase07View extends VerticalLayout {
 
         ComponentEffect.bind(lineItemsGrid, lineItemsSignal, (grid, items) -> {
             var lineItems = lineItemsSignal.value().stream()
-                    .map(ValueSignal::peek).toList();
+                    .map(SharedValueSignal::peek).toList();
             if (items != null) {
                 grid.setItems(lineItems);
             } else {
@@ -318,7 +319,7 @@ public class UseCase07View extends VerticalLayout {
     private void updateFooterTotal(Grid<LineItem> lineItemsGrid) {
         lineItemsGrid.getColumnByKey("total")
                 .setFooter("Total: "
-                        + lineItemsSignal.peek().stream().map(ValueSignal::peek)
+                        + lineItemsSignal.peek().stream().map(SharedValueSignal::peek)
                                 .toList().stream().map(LineItem::getTotal)
                                 .reduce(BigDecimal.ZERO, BigDecimal::add));
     }

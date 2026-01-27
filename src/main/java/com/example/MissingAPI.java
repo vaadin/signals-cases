@@ -9,9 +9,10 @@ import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.signals.ListSignal;
 import com.vaadin.signals.Signal;
-import com.vaadin.signals.ValueSignal;
+import com.vaadin.signals.local.ValueSignal;
+import com.vaadin.signals.shared.SharedListSignal;
+import com.vaadin.signals.shared.SharedValueSignal;
 import com.vaadin.signals.WritableSignal;
 
 /**
@@ -38,11 +39,11 @@ public class MissingAPI {
      * individual ValueSignals within the ListSignal by reading each one, so the
      * Grid updates when any item changes.
      */
-    public static <T> void bindItems(Grid<T> grid, ListSignal<T> listSignal) {
+    public static <T> void bindItems(Grid<T> grid, SharedListSignal<T> listSignal) {
         ComponentEffect.effect(grid, () -> {
-            List<ValueSignal<T>> signals = listSignal.value();
+            List<SharedValueSignal<T>> signals = listSignal.value();
             // Read each individual signal to register dependency
-            List<T> items = signals.stream().map(ValueSignal::value).toList();
+            List<T> items = signals.stream().map(SharedValueSignal::value).toList();
             grid.setItems(items);
         });
     }
