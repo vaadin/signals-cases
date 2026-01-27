@@ -34,9 +34,9 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.ListSignal;
+import com.vaadin.signals.shared.SharedListSignal;
 import com.vaadin.signals.Signal;
-import com.vaadin.signals.ValueSignal;
+import com.vaadin.signals.shared.SharedValueSignal;
 
 /**
  * Multi-User Case 6: Shared Task List with Inline Editing
@@ -88,7 +88,7 @@ public class MUC06View extends VerticalLayout {
         // Initialize sample tasks if list is empty
         muc06Signals.initializeSampleTasks();
 
-        ListSignal<MUC06Signals.Task> tasksSignal = muc06Signals
+        SharedListSignal<MUC06Signals.Task> tasksSignal = muc06Signals
                 .getTasksSignal();
 
         // Computed signals for statistics
@@ -169,8 +169,8 @@ public class MUC06View extends VerticalLayout {
     }
 
     private HorizontalLayout createTaskRow(
-            ValueSignal<MUC06Signals.Task> taskSignal,
-            ListSignal<MUC06Signals.Task> tasksSignal) {
+            SharedValueSignal<MUC06Signals.Task> taskSignal,
+            SharedListSignal<MUC06Signals.Task> tasksSignal) {
         MUC06Signals.Task task = taskSignal.value();
 
         // Checkbox for completed status

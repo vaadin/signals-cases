@@ -30,7 +30,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.signals.Signal;
-import com.vaadin.signals.ValueSignal;
+import com.vaadin.signals.local.ValueSignal;
 import com.vaadin.signals.WritableSignal;
 
 /**

@@ -27,10 +27,11 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.ListSignal;
 import com.vaadin.signals.Signal;
-import com.vaadin.signals.ValueSignal;
 import com.vaadin.signals.WritableSignal;
+import com.vaadin.signals.local.ValueSignal;
+import com.vaadin.signals.shared.SharedListSignal;
+import com.vaadin.signals.shared.SharedValueSignal;
 
 /**
  * Use Case 15: Debounced Search
@@ -82,7 +83,7 @@ public class UseCase15View extends VerticalLayout {
             "");
     private final WritableSignal<Boolean> isSearchingSignal = new ValueSignal<>(
             false);
-    private final ListSignal<Product> searchResultsSignal = new ListSignal<>(
+    private final SharedListSignal<Product> searchResultsSignal = new SharedListSignal<>(
             Product.class);
     private final WritableSignal<Integer> searchCountSignal = new ValueSignal<>(
             0);
@@ -186,7 +187,7 @@ public class UseCase15View extends VerticalLayout {
         MissingAPI
                 .bindComponentChildren(resultsContainer,
                         searchResultsSignal.map(prodSignals -> prodSignals
-                                .stream().map(ValueSignal::value).toList()),
+                                .stream().map(SharedValueSignal::value).toList()),
                         product -> {
                             Div card = new Div();
                             card.getStyle().set("background-color", "#ffffff")

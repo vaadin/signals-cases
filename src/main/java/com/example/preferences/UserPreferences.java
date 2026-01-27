@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 
 import com.vaadin.signals.WritableSignal;
-import com.vaadin.signals.ValueSignal;
+import com.vaadin.signals.local.ValueSignal;
 
 /**
  * Session-scoped user preference state.

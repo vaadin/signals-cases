@@ -28,7 +28,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.signals.Signal;
-import com.vaadin.signals.ValueSignal;
+import com.vaadin.signals.shared.SharedValueSignal;
 import com.vaadin.signals.WritableSignal;
 
 /**
@@ -135,7 +135,7 @@ public class MUC02View extends VerticalLayout {
 
             return cursors.entrySet().stream().map(entry -> {
                 String sessionKey = entry.getKey();
-                ValueSignal<MUC02Signals.CursorPosition> positionSignal = entry
+                SharedValueSignal<MUC02Signals.CursorPosition> positionSignal = entry
                         .getValue();
 
                 // Get display name and username from mapping
@@ -226,7 +226,7 @@ public class MUC02View extends VerticalLayout {
                             || !entry.getKey().equals(currentUser + ":" + sessionId))
                     .map(entry -> {
                         String sessionKey = entry.getKey();
-                        ValueSignal<MUC02Signals.CursorPosition> signal = entry
+                        SharedValueSignal<MUC02Signals.CursorPosition> signal = entry
                                 .getValue();
 
                         // Get display name from mapping (fallback to full sessionKey

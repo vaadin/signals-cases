@@ -2,7 +2,7 @@ package com.example.signals;
 
 import org.springframework.stereotype.Component;
 
-import com.vaadin.signals.ListSignal;
+import com.vaadin.signals.shared.SharedListSignal;
 import com.vaadin.signals.Signal;
 
 /**
@@ -12,7 +12,7 @@ import com.vaadin.signals.Signal;
 @Component
 public class UserSessionRegistry {
 
-    private final ListSignal<UserInfo> activeUsersSignal = new ListSignal<>(
+    private final SharedListSignal<UserInfo> activeUsersSignal = new SharedListSignal<>(
             UserInfo.class);
 
     // Computed signal for display names with session numbers and nicknames
@@ -60,7 +60,7 @@ public class UserSessionRegistry {
     /**
      * Get the signal containing the list of active users.
      */
-    public ListSignal<UserInfo> getActiveUsersSignal() {
+    public SharedListSignal<UserInfo> getActiveUsersSignal() {
         return activeUsersSignal;
     }
 

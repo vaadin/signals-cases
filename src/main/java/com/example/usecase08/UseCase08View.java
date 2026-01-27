@@ -19,7 +19,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.signals.Signal;
-import com.vaadin.signals.ValueSignal;
+import com.vaadin.signals.local.ValueSignal;
 import com.vaadin.signals.WritableSignal;
 import com.vaadin.signals.function.SignalMapper;
 
@@ -47,8 +47,8 @@ public class UseCase08View extends VerticalLayout {
         var lastNameSignal = new ValueSignal<>("");
         var emailSignal = new ValueSignal<>("");
         var companyNameSignal = new ValueSignal<>("");
-        var companySizeSignal = new ValueSignal<>(String.class);
-        var industrySignal = new ValueSignal<>(String.class);
+        var companySizeSignal = new ValueSignal<>((String) null);
+        var industrySignal = new ValueSignal<>((String) null);
         var planSignal = new ValueSignal<>(Plan.STARTER);
 
         // Step 1: Personal Info

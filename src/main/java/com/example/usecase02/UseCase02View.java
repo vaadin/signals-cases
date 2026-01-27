@@ -21,7 +21,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.ReferenceSignal;
+import com.vaadin.signals.local.ValueSignal;
 import com.vaadin.signals.WritableSignal;
 
 @Route(value = "use-case-02", layout = MainLayout.class)
@@ -50,10 +50,10 @@ public class UseCase02View extends VerticalLayout {
         binder.setBean(data);
 
         // Signals for conditional visibility
-        WritableSignal<Boolean> needsVisaSignal = new ReferenceSignal<>(false);
-        WritableSignal<VisaType> visaTypeSignal = new ReferenceSignal<>(
+        WritableSignal<Boolean> needsVisaSignal = new ValueSignal<>(false);
+        WritableSignal<VisaType> visaTypeSignal = new ValueSignal<>(
                 VisaType.H1B);
-        WritableSignal<Boolean> hasH1BPreviouslySignal = new ReferenceSignal<>(
+        WritableSignal<Boolean> hasH1BPreviouslySignal = new ValueSignal<>(
                 false);
 
         // Base question: needs visa sponsorship

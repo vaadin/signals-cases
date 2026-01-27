@@ -2,7 +2,7 @@ package com.example.muc02;
 
 import org.springframework.stereotype.Component;
 
-import com.vaadin.signals.MapSignal;
+import com.vaadin.signals.shared.SharedMapSignal;
 import com.vaadin.signals.WritableSignal;
 
 /**
@@ -24,10 +24,10 @@ public class MUC02Signals {
     }
 
     // MapSignal where key is "username:sessionId" and value is CursorPosition
-    private final MapSignal<CursorPosition> sessionCursorsSignal = new MapSignal<>(
+    private final SharedMapSignal<CursorPosition> sessionCursorsSignal = new SharedMapSignal<>(
             CursorPosition.class);
 
-    public MapSignal<CursorPosition> getSessionCursorsSignal() {
+    public SharedMapSignal<CursorPosition> getSessionCursorsSignal() {
         return sessionCursorsSignal;
     }
 
