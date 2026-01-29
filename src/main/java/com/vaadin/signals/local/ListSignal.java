@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.vaadin.signals.Signal;
-import com.vaadin.signals.WritableSignal;
 import com.vaadin.signals.function.CleanupCallback;
 import com.vaadin.signals.impl.TransientListener;
 import com.vaadin.signals.impl.UsageTracker;
@@ -43,10 +42,10 @@ import com.vaadin.signals.impl.UsageTracker.Usage;
  * @param <T>
  *            the element type
  */
-public class ListSignal<T> implements Signal<List<WritableSignal<T>>> {
+public class ListSignal<T> implements Signal<List<ValueSignal<T>>> {
 
     // Copy-on-write snapshot - never mutated after assignment
-    private volatile List<WritableSignal<T>> entries = List.of();
+    private List<ValueSignal<T>> entries = List.of();
     private final List<TransientListener> listeners = new ArrayList<>();
     private final ReentrantLock lock = new ReentrantLock();
     private int version;
@@ -58,7 +57,7 @@ public class ListSignal<T> implements Signal<List<WritableSignal<T>>> {
     }
 
     @Override
-    public List<WritableSignal<T>> value() {
+    public List<ValueSignal<T>> value() {
         lock.lock();
         try {
             if (UsageTracker.isActive()) {
@@ -71,7 +70,7 @@ public class ListSignal<T> implements Signal<List<WritableSignal<T>>> {
     }
 
     @Override
-    public List<WritableSignal<T>> peek() {
+    public List<ValueSignal<T>> peek() {
         lock.lock();
         try {
             return entries;
@@ -85,9 +84,9 @@ public class ListSignal<T> implements Signal<List<WritableSignal<T>>> {
      *
      * @param value
      *            the value to insert
-     * @return a writable signal for the inserted entry
+     * @return a signal for the inserted entry
      */
-    public WritableSignal<T> insertFirst(T value) {
+    public ValueSignal<T> insertFirst(T value) {
         return insertAt(0, value);
     }
 
@@ -96,9 +95,9 @@ public class ListSignal<T> implements Signal<List<WritableSignal<T>>> {
      *
      * @param value
      *            the value to insert
-     * @return a writable signal for the inserted entry
+     * @return a signal for the inserted entry
      */
-    public WritableSignal<T> insertLast(T value) {
+    public ValueSignal<T> insertLast(T value) {
         lock.lock();
         try {
             return insertAtInternal(entries.size(), value);
@@ -109,16 +108,23 @@ public class ListSignal<T> implements Signal<List<WritableSignal<T>>> {
 
     /**
      * Inserts a value at the given index in this list.
+     * <p>
+     * <b>Note:</b> This method should only be used in non-concurrent cases
+     * where the list structure is not being modified by other threads. The
+     * index is sensitive to concurrent modifications and may lead to unexpected
+     * results if the list is modified between determining the index and calling
+     * this method. For concurrent cases, prefer using {@link #insertFirst(Object)}
+     * or {@link #insertLast(Object)}.
      *
      * @param index
      *            the index at which to insert (0 for first, size() for last)
      * @param value
      *            the value to insert
-     * @return a writable signal for the inserted entry
+     * @return a signal for the inserted entry
      * @throws IndexOutOfBoundsException
      *             if index is negative or greater than size()
      */
-    public WritableSignal<T> insertAt(int index, T value) {
+    public ValueSignal<T> insertAt(int index, T value) {
         lock.lock();
         try {
             if (index < 0 || index > entries.size()) {
@@ -131,9 +137,9 @@ public class ListSignal<T> implements Signal<List<WritableSignal<T>>> {
         }
     }
 
-    private WritableSignal<T> insertAtInternal(int index, T value) {
+    private ValueSignal<T> insertAtInternal(int index, T value) {
         ValueSignal<T> entry = new ValueSignal<>(value);
-        List<WritableSignal<T>> newEntries = new ArrayList<>(entries);
+        List<ValueSignal<T>> newEntries = new ArrayList<>(entries);
         newEntries.add(index, entry);
         entries = Collections.unmodifiableList(newEntries);
         notifyListeners();
@@ -147,12 +153,12 @@ public class ListSignal<T> implements Signal<List<WritableSignal<T>>> {
      * @param entry
      *            the entry to remove
      */
-    public void remove(WritableSignal<T> entry) {
+    public void remove(ValueSignal<T> entry) {
         lock.lock();
         try {
             int index = entries.indexOf(entry);
             if (index >= 0) {
-                List<WritableSignal<T>> newEntries = new ArrayList<>(entries);
+                List<ValueSignal<T>> newEntries = new ArrayList<>(entries);
                 newEntries.remove(index);
                 entries = Collections.unmodifiableList(newEntries);
                 notifyListeners();

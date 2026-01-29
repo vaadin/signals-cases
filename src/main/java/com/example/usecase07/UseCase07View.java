@@ -32,7 +32,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.signals.Signal;
-import com.vaadin.signals.WritableSignal;
 import com.vaadin.signals.local.ListSignal;
 import com.vaadin.signals.local.ValueSignal;
 
@@ -71,10 +70,10 @@ public class UseCase07View extends VerticalLayout {
 
         // Create signal for selected invoice (use empty invoice as initial
         // value)
-        WritableSignal<Invoice> selectedInvoiceSignal = new ValueSignal<>(
+        ValueSignal<Invoice> selectedInvoiceSignal = new ValueSignal<>(
                 EMPTY_INVOICE);
 
-        WritableSignal<LineItem> selectedLineItemSignal = new ValueSignal<>(
+        ValueSignal<LineItem> selectedLineItemSignal = new ValueSignal<>(
                 InvoiceService.EMPTY_LINEITEM);
 
         // Computed signal for invoice details
@@ -91,7 +90,7 @@ public class UseCase07View extends VerticalLayout {
                 "status");
         ComponentEffect.bind(invoiceGrid, invoiceListSignal, (grid, items) -> {
             var invoices = invoiceListSignal.value().stream()
-                    .map(WritableSignal::peek).toList();
+                    .map(ValueSignal::peek).toList();
             if (items != null) {
                 grid.setItems(invoices);
             } else {
@@ -189,7 +188,7 @@ public class UseCase07View extends VerticalLayout {
 
         ComponentEffect.bind(lineItemsGrid, lineItemsSignal, (grid, items) -> {
             var lineItems = lineItemsSignal.value().stream()
-                    .map(WritableSignal::peek).toList();
+                    .map(ValueSignal::peek).toList();
             if (items != null) {
                 grid.setItems(lineItems);
             } else {
@@ -316,7 +315,7 @@ public class UseCase07View extends VerticalLayout {
     private void updateFooterTotal(Grid<LineItem> lineItemsGrid) {
         lineItemsGrid.getColumnByKey("total")
                 .setFooter("Total: "
-                        + lineItemsSignal.peek().stream().map(WritableSignal::peek)
+                        + lineItemsSignal.peek().stream().map(ValueSignal::peek)
                                 .toList().stream().map(LineItem::getTotal)
                                 .reduce(BigDecimal.ZERO, BigDecimal::add));
     }

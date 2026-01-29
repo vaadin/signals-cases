@@ -51,14 +51,14 @@ public class MissingAPI {
 
     /**
      * Binds a Grid's items to a local ListSignal. Registers dependencies on all
-     * individual WritableSignals within the ListSignal by reading each one, so
+     * individual ValueSignals within the ListSignal by reading each one, so
      * the Grid updates when any item changes.
      */
     public static <T> void bindItems(Grid<T> grid, ListSignal<T> listSignal) {
         ComponentEffect.effect(grid, () -> {
-            List<WritableSignal<T>> signals = listSignal.value();
+            List<ValueSignal<T>> signals = listSignal.value();
             // Read each individual signal to register dependency
-            List<T> items = signals.stream().map(WritableSignal::value).toList();
+            List<T> items = signals.stream().map(ValueSignal::value).toList();
             grid.setItems(items);
         });
     }

@@ -23,7 +23,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.signals.Signal;
-import com.vaadin.signals.WritableSignal;
 import com.vaadin.signals.local.ListSignal;
 import com.vaadin.signals.local.ValueSignal;
 
@@ -52,7 +51,7 @@ public class UseCase06View extends VerticalLayout {
 
         // Computed signal for subtotal
         var subtotalSignal = Signal.computed(
-                () -> cartItemsSignal.value().stream().map(WritableSignal::value)
+                () -> cartItemsSignal.value().stream().map(ValueSignal::value)
                         .map(item -> item.product().price()
                                 .multiply(BigDecimal.valueOf(item.quantity())))
                         .reduce(BigDecimal.ZERO, BigDecimal::add));
@@ -232,7 +231,7 @@ public class UseCase06View extends VerticalLayout {
         return row;
     }
 
-    private HorizontalLayout createCartItemRow(WritableSignal<CartItem> itemSignal,
+    private HorizontalLayout createCartItemRow(ValueSignal<CartItem> itemSignal,
             ListSignal<CartItem> cartItemsSignal) {
         var item = itemSignal.value();
 
@@ -316,7 +315,7 @@ public class UseCase06View extends VerticalLayout {
         };
     }
 
-    private void updateQuantity(WritableSignal<CartItem> itemSignal,
+    private void updateQuantity(ValueSignal<CartItem> itemSignal,
             ListSignal<CartItem> cartItemsSignal, int quantity) {
         if (quantity < 1) {
             cartItemsSignal.remove(itemSignal);
