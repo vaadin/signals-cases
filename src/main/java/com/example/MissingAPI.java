@@ -10,10 +10,11 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.signals.Signal;
+import com.vaadin.signals.WritableSignal;
+import com.vaadin.signals.local.ListSignal;
 import com.vaadin.signals.local.ValueSignal;
 import com.vaadin.signals.shared.SharedListSignal;
 import com.vaadin.signals.shared.SharedValueSignal;
-import com.vaadin.signals.WritableSignal;
 
 /**
  * Temporary helper class providing static methods for Signal-based component
@@ -35,7 +36,7 @@ public class MissingAPI {
     }
 
     /**
-     * Binds a Grid's items to a ListSignal. Registers dependencies on all
+     * Binds a Grid's items to a SharedListSignal. Registers dependencies on all
      * individual ValueSignals within the ListSignal by reading each one, so the
      * Grid updates when any item changes.
      */
@@ -44,6 +45,20 @@ public class MissingAPI {
             List<SharedValueSignal<T>> signals = listSignal.value();
             // Read each individual signal to register dependency
             List<T> items = signals.stream().map(SharedValueSignal::value).toList();
+            grid.setItems(items);
+        });
+    }
+
+    /**
+     * Binds a Grid's items to a local ListSignal. Registers dependencies on all
+     * individual WritableSignals within the ListSignal by reading each one, so
+     * the Grid updates when any item changes.
+     */
+    public static <T> void bindItems(Grid<T> grid, ListSignal<T> listSignal) {
+        ComponentEffect.effect(grid, () -> {
+            List<WritableSignal<T>> signals = listSignal.value();
+            // Read each individual signal to register dependency
+            List<T> items = signals.stream().map(WritableSignal::value).toList();
             grid.setItems(items);
         });
     }
