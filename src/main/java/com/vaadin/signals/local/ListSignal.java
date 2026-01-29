@@ -138,6 +138,7 @@ public class ListSignal<T> implements Signal<List<ValueSignal<T>>> {
     }
 
     private ValueSignal<T> insertAtInternal(int index, T value) {
+        assert lock.isHeldByCurrentThread();
         ValueSignal<T> entry = new ValueSignal<>(value);
         List<ValueSignal<T>> newEntries = new ArrayList<>(entries);
         newEntries.add(index, entry);
@@ -156,11 +157,10 @@ public class ListSignal<T> implements Signal<List<ValueSignal<T>>> {
     public void remove(ValueSignal<T> entry) {
         lock.lock();
         try {
-            int index = entries.indexOf(entry);
-            if (index >= 0) {
-                List<ValueSignal<T>> newEntries = new ArrayList<>(entries);
-                newEntries.remove(index);
-                entries = Collections.unmodifiableList(newEntries);
+            List<ValueSignal<T>> newEntries = entries.stream()
+                    .filter(e -> e != entry).toList();
+            if (newEntries.size() < entries.size()) {
+                entries = newEntries;
                 notifyListeners();
             }
         } finally {
@@ -184,6 +184,7 @@ public class ListSignal<T> implements Signal<List<ValueSignal<T>>> {
     }
 
     private void notifyListeners() {
+        assert lock.isHeldByCurrentThread();
         version++;
         List<TransientListener> copy = List.copyOf(listeners);
         listeners.clear();
@@ -194,6 +195,7 @@ public class ListSignal<T> implements Signal<List<ValueSignal<T>>> {
         }
     }
 
+    // TODO: Extract to helper or abstract base class (duplicates ValueSignal)
     private Usage createUsage(int originalVersion) {
         return new Usage() {
             @Override
