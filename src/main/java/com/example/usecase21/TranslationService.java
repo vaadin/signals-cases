@@ -4,23 +4,29 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.springframework.stereotype.Service;
+import org.springframework.web.context.annotation.SessionScope;
+
+import com.example.preferences.UserPreferences;
 import com.vaadin.signals.Signal;
 import com.vaadin.signals.WritableSignal;
 
 /**
- * Helper class that bridges ResourceBundle and Signals for reactive i18n.
+ * Session-scoped service that bridges ResourceBundle and Signals for reactive i18n.
  *
  * Each call to t(key) returns a computed signal that recomputes when the locale changes.
  * ResourceBundle.getBundle() has built-in caching so repeated calls are efficient.
  */
-public class TranslationHelper {
+@Service
+@SessionScope
+public class TranslationService {
 
     private static final String BUNDLE_NAME = "i18n.messages";
 
     private final WritableSignal<Locale> localeSignal;
 
-    public TranslationHelper(WritableSignal<Locale> localeSignal) {
-        this.localeSignal = localeSignal;
+    public TranslationService(UserPreferences userPreferences) {
+        this.localeSignal = userPreferences.localeSignal();
     }
 
     /**

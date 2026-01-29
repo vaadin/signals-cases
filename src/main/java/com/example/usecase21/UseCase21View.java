@@ -4,7 +4,6 @@ import jakarta.annotation.security.PermitAll;
 
 import java.util.Locale;
 
-import com.example.preferences.UserPreferences;
 import com.example.views.MainLayout;
 import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.button.Button;
@@ -29,13 +28,13 @@ import com.vaadin.signals.Signal;
 @PermitAll
 public class UseCase21View extends VerticalLayout {
 
-    private final TranslationHelper t;
+    private final TranslationService t;
 
-    public UseCase21View(UserPreferences userPreferences) {
+    public UseCase21View(TranslationService translationService) {
         setSpacing(true);
         setPadding(true);
 
-        t = new TranslationHelper(userPreferences.localeSignal());
+        this.t = translationService;
 
         // Title and description
         H2 title = new H2();
