@@ -1,9 +1,9 @@
 # Vaadin Signal API Use Cases - Current Implementation
 
-**Last Updated**: 2026-02-02
-**Current Implementation**: 23 use cases (17 single-user + 6 multi-user)
+**Last Updated**: 2026-02-09
+**Current Implementation**: 30 use cases (23 single-user + 7 multi-user)
 
-This document describes the 22 use cases currently implemented in this project.
+This document describes the 26 use cases currently implemented in this project.
 
 ## Introduction
 
@@ -11,7 +11,7 @@ Signals provide a reactive, declarative approach to building UIs where component
 
 ---
 
-## Single-User Use Cases (17 total)
+## Single-User Use Cases (23 total)
 
 ### UC 1: Dynamic Button State
 
@@ -290,6 +290,22 @@ quantityField.bindValue(quantitySignal);
 
 ---
 
+### UC 19: Parallel Data Loading with Individual Spinners
+
+**Description**: Parallel async loading where each item has its own loading state and spinner. Demonstrates managing multiple independent async operations with Signals.
+
+**Key Patterns**:
+- `ListSignal<ValueSignal<DataItem>>` for per-item state management
+- Spring `@Async` for true parallel execution
+- Individual loading spinners (ProgressBar indeterminate)
+- Per-item error handling with retry
+- CSS Grid for responsive layout
+- Vaadin Card components with conditional rendering
+
+**Route**: `/use-case-19`
+
+---
+
 ### UC 20: User Preferences
 
 **Description**: Session-scoped user preferences that persist across page navigations within the same session. Demonstrates session-level state management with signals, showing how preferences can be stored per-user and maintained throughout their browsing session.
@@ -317,6 +333,23 @@ quantityField.bindValue(quantitySignal);
 - **Single source of truth** - One signal holds the entire state
 
 **Route**: `/use-case-22`
+
+---
+
+### UC 23: Real-time Dashboard
+
+**Description**: Interactive dashboard with real-time updates for various metrics. Features multiple charts (area, pie), a data grid with service health status, and highlight cards showing key performance indicators with percentage changes.
+
+**Key Patterns**:
+- Real-time data updates with signals
+- Multiple chart types (Board, Charts)
+- Grid integration with signals
+- Custom highlight cards with reactive badges
+- Polling-based data simulation
+
+**Route**: `/use-case-23`
+
+---
 
 **Core Pattern:**
 ```java
@@ -508,6 +541,9 @@ Multi-user use cases (MUC01-04, MUC06-07) share signals across sessions:
 
 ## Recent Changes
 
+**2026-02-09 Update:**
+- Added UC23 (Real-time Dashboard)
+
 **2026-02-02 Update:**
 - Added UC22 (Two-Way Mapped Signals) - dedicated demonstration of `WritableSignal.map(getter, merger)` API
 - Updated UC06 documentation to highlight its use of two-way mapped signals
@@ -520,5 +556,5 @@ Multi-user use cases (MUC01-04, MUC06-07) share signals across sessions:
 
 ---
 
-**Total Use Cases**: 23 (17 single-user + 6 multi-user)
-**Last Updated**: 2026-02-02
+**Total Use Cases**: 30 (23 single-user + 7 multi-user)
+**Last Updated**: 2026-02-09
