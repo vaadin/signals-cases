@@ -23,9 +23,8 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.signals.Signal;
+import com.vaadin.signals.local.ListSignal;
 import com.vaadin.signals.local.ValueSignal;
-import com.vaadin.signals.shared.SharedListSignal;
-import com.vaadin.signals.shared.SharedValueSignal;
 
 @Route(value = "use-case-06", layout = MainLayout.class)
 @PageTitle("Use Case 6: Shopping Cart with Real-time Totals")
@@ -46,13 +45,13 @@ public class UseCase06View extends VerticalLayout {
                         + "Try using discount codes SAVE10 or SAVE20.");
 
         // Create signals for cart state
-        var cartItemsSignal = new SharedListSignal<>(CartItem.class);
+        var cartItemsSignal = new ListSignal<CartItem>();
         var discountCodeSignal = new ValueSignal<>("");
         var shippingOptionSignal = new ValueSignal<>(ShippingOption.STANDARD);
 
         // Computed signal for subtotal
         var subtotalSignal = Signal.computed(
-                () -> cartItemsSignal.value().stream().map(SharedValueSignal::value)
+                () -> cartItemsSignal.value().stream().map(ValueSignal::value)
                         .map(item -> item.product().price()
                                 .multiply(BigDecimal.valueOf(item.quantity())))
                         .reduce(BigDecimal.ZERO, BigDecimal::add));
@@ -210,7 +209,7 @@ public class UseCase06View extends VerticalLayout {
     }
 
     private HorizontalLayout createProductRow(Product product,
-            SharedListSignal<CartItem> cartItemsSignal) {
+            ListSignal<CartItem> cartItemsSignal) {
         var row = new HorizontalLayout();
         row.setWidthFull();
         row.setAlignItems(Alignment.CENTER);
@@ -232,8 +231,8 @@ public class UseCase06View extends VerticalLayout {
         return row;
     }
 
-    private HorizontalLayout createCartItemRow(SharedValueSignal<CartItem> itemSignal,
-            SharedListSignal<CartItem> cartItemsSignal) {
+    private HorizontalLayout createCartItemRow(ValueSignal<CartItem> itemSignal,
+            ListSignal<CartItem> cartItemsSignal) {
         var item = itemSignal.value();
 
         var row = new HorizontalLayout();
@@ -289,7 +288,7 @@ public class UseCase06View extends VerticalLayout {
     }
 
     private void addToCart(Product product,
-            SharedListSignal<CartItem> cartItemsSignal) {
+            ListSignal<CartItem> cartItemsSignal) {
         cartItemsSignal.value().stream().filter(
                 signal -> signal.value().product().id().equals(product.id()))
                 .findFirst().ifPresentOrElse(
@@ -316,8 +315,8 @@ public class UseCase06View extends VerticalLayout {
         };
     }
 
-    private void updateQuantity(SharedValueSignal<CartItem> itemSignal,
-            SharedListSignal<CartItem> cartItemsSignal, int quantity) {
+    private void updateQuantity(ValueSignal<CartItem> itemSignal,
+            ListSignal<CartItem> cartItemsSignal, int quantity) {
         if (quantity < 1) {
             cartItemsSignal.remove(itemSignal);
             return;

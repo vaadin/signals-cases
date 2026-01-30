@@ -25,10 +25,8 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.signals.Signal;
-import com.vaadin.signals.WritableSignal;
+import com.vaadin.signals.local.ListSignal;
 import com.vaadin.signals.local.ValueSignal;
-import com.vaadin.signals.shared.SharedListSignal;
-import com.vaadin.signals.shared.SharedValueSignal;
 
 /**
  * Use Case 19: Parallel Data Loading with Individual Spinners
@@ -55,8 +53,8 @@ public class UseCase19View extends VerticalLayout {
      */
 
     private final DataLoadingService dataLoadingService;
-    private final SharedListSignal<DataItem> itemsSignal = new SharedListSignal<>(DataItem.class);
-    private final WritableSignal<Boolean> simulateErrorsSignal = new ValueSignal<>(false);
+    private final ListSignal<DataItem> itemsSignal = new ListSignal<>();
+    private final ValueSignal<Boolean> simulateErrorsSignal = new ValueSignal<>(false);
 
     public UseCase19View(DataLoadingService dataLoadingService) {
         this.dataLoadingService = dataLoadingService;
@@ -165,7 +163,7 @@ public class UseCase19View extends VerticalLayout {
     /**
      * Retry loading a single item
      */
-    private void retryItem(SharedValueSignal<DataItem> itemSignal) {
+    private void retryItem(ValueSignal<DataItem> itemSignal) {
         DataItem item = itemSignal.value();
 
         // Update to LOADING state
@@ -219,7 +217,7 @@ public class UseCase19View extends VerticalLayout {
     /**
      * Create a Card component for a data item with conditional rendering based on state
      */
-    private Card createDataItemCard(SharedValueSignal<DataItem> itemSignal) {
+    private Card createDataItemCard(ValueSignal<DataItem> itemSignal) {
         Card card = new Card();
 
         // Set card size for flex layout
