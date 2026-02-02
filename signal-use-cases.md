@@ -1,7 +1,7 @@
 # Vaadin Signal API Use Cases - Current Implementation
 
-**Last Updated**: 2026-01-20
-**Current Implementation**: 22 use cases (16 single-user + 6 multi-user)
+**Last Updated**: 2026-02-02
+**Current Implementation**: 23 use cases (17 single-user + 6 multi-user)
 
 This document describes the 22 use cases currently implemented in this project.
 
@@ -11,7 +11,7 @@ Signals provide a reactive, declarative approach to building UIs where component
 
 ---
 
-## Single-User Use Cases (16 total)
+## Single-User Use Cases (17 total)
 
 ### UC 1: Dynamic Button State
 
@@ -92,14 +92,25 @@ Signals provide a reactive, declarative approach to building UIs where component
 
 ### UC 6: Shopping Cart with Real-time Totals
 
-**Description**: Shopping cart with add/remove items, quantity adjustment, and reactive totals (subtotal, tax, total).
+**Description**: Shopping cart with add/remove items, quantity adjustment, and reactive totals (subtotal, tax, total). **Demonstrates two-way mapped signals** for inline quantity editing.
 
 **Key Patterns**:
 - List modification signals
 - Aggregate computations
 - Multiple derived totals
+- **Two-way mapped signals** for cart item quantity (`itemSignal.map(CartItem::quantity, CartItem::withQuantity)`)
 
 **Route**: `/use-case-6`
+
+**Canonical Example - Two-Way Mapped Signals:**
+```java
+// In createCartItemRow():
+WritableSignal<Integer> quantitySignal = itemSignal.map(
+    CartItem::quantity,      // getter
+    CartItem::withQuantity   // merger (creates new CartItem)
+);
+quantityField.bindValue(quantitySignal);
+```
 
 ---
 
@@ -294,6 +305,56 @@ Signals provide a reactive, declarative approach to building UIs where component
 
 ---
 
+### UC 21: Two-Way Mapped Signals
+
+**Description**: Comprehensive demonstration of the `WritableSignal.map(getter, merger)` API for two-way computed signals. Shows how to bind form fields directly to immutable record properties with automatic bidirectional synchronization.
+
+**Key Patterns**:
+- **Two-way mapped signals** - `WritableSignal.map(getter, merger)` creates derived signals that can read AND write
+- **Direct field mapping** - Map a record signal to individual property signals
+- **Nested mapping** - Chain mappings for nested records (Person → Address → City)
+- **Immutable records** - Uses `with*` methods to create updated records
+- **Single source of truth** - One signal holds the entire state
+
+**Route**: `/use-case-21`
+
+**Core Pattern:**
+```java
+// Parent signal (single source of truth)
+var personSignal = new ValueSignal<>(Person.empty());
+
+// Direct field mapping
+WritableSignal<String> firstNameSignal = personSignal.map(
+    Person::firstName,      // getter: Person -> String
+    Person::withFirstName   // merger: (Person, String) -> Person
+);
+textField.bindValue(firstNameSignal);
+
+// Nested mapping (Person -> Address -> City)
+WritableSignal<Address> addressSignal = personSignal.map(
+    Person::address,
+    Person::withAddress
+);
+WritableSignal<String> citySignal = addressSignal.map(
+    Address::city,
+    Address::withCity
+);
+cityField.bindValue(citySignal);
+```
+
+**When to Use:**
+- Simple field-to-record binding without complex validation
+- Immutable record patterns with `with*` methods
+- Forms where you want automatic two-way synchronization
+
+**When to Use Binder Instead (see UC09):**
+- Complex cross-field validation
+- Bean validation annotations
+- Conversion between types
+- Custom error handling requirements
+
+---
+
 ## Multi-User Collaboration (6 total)
 
 ### MUC 1: Shared Chat/Message List
@@ -389,7 +450,8 @@ Signals provide a reactive, declarative approach to building UIs where component
 ### Core Signal Operations
 - `Signal.create()` / `new ValueSignal<>()` - Creating writable signals
 - `signal.value()` - Getting/setting signal values
-- `signal.map()` - Transforming signal values
+- `signal.map()` - Transforming signal values (one-way)
+- `WritableSignal.map(getter, merger)` - **Two-way mapped signals** (see UC06, UC21)
 - Computed signals combining multiple sources
 
 ### Component Bindings
@@ -404,6 +466,7 @@ Signals provide a reactive, declarative approach to building UIs where component
 - `bindHelperText()` - Field feedback text
 
 ### Advanced Patterns
+- **Two-way mapped signals** - Bidirectional field-to-record binding (UC06, UC21)
 - Application-scoped signals (Spring @Component)
 - Browser event integration (window resize)
 - Spring Security integration
@@ -445,6 +508,11 @@ Multi-user use cases (MUC01-04, MUC06-07) share signals across sessions:
 
 ## Recent Changes
 
+**2026-02-02 Update:**
+- Added UC21 (Two-Way Mapped Signals) - dedicated demonstration of `WritableSignal.map(getter, merger)` API
+- Updated UC06 documentation to highlight its use of two-way mapped signals
+- Documented the two-way mapped signals pattern in Signal API Features section
+
 **2026-01-20 Update:**
 - Removed UC3 (Permission-Based UI) - redundant with UC2/UC11/UC13
 - Removed UC10 (Grid Providers) - advanced Grid APIs out of scope
@@ -452,5 +520,5 @@ Multi-user use cases (MUC01-04, MUC06-07) share signals across sessions:
 
 ---
 
-**Total Use Cases**: 22 (16 single-user + 6 multi-user)
-**Last Updated**: 2026-01-20
+**Total Use Cases**: 23 (17 single-user + 6 multi-user)
+**Last Updated**: 2026-02-02
