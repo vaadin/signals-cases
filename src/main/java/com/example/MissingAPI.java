@@ -8,6 +8,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.signals.Signal;
 import com.vaadin.signals.WritableSignal;
@@ -187,6 +188,30 @@ public class MissingAPI {
             Stream.of(triggerSignals).forEach(Signal::value);
             binder.getBinding(validatedBindingProperty)
                     .ifPresent(Binder.Binding::validate);
+        });
+    }
+
+    /**
+     * Synchronizes the selected index between a Tabs component and
+     * a writable signal.
+     * <p>
+     * This method establishes bidirectional binding between a {@code Tabs}
+     * instance and a writable integer signal. Changes to the selected tab in
+     * the UI will update the signal's value, and changes to the signal's value
+     * will update the selected tab in the UI.
+     *
+     * @param tabs
+     *              The Tabs component whose selected index should be
+     *              synchronized with the signal. Must not be {@code null}.
+     * @param numberSignal
+     *              A writable integer signal that will receive the current
+     *              selected index of the Tabs and can also update it. Must not
+     *              be {@code null}.
+     */
+    public static void tabsSyncSelectedIndex(Tabs tabs, WritableSignal<Integer> numberSignal) {
+        ComponentEffect.bind(tabs, numberSignal, Tabs::setSelectedIndex);
+        tabs.addSelectedChangeListener(event -> {
+            numberSignal.value(event.getSource().getSelectedIndex());
         });
     }
 }

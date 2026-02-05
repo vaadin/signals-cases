@@ -1,5 +1,6 @@
 package com.example.usecase03;
 
+import com.example.MissingAPI;
 import jakarta.annotation.security.PermitAll;
 
 import com.example.components.Slider;
@@ -8,8 +9,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -24,7 +23,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.signals.Signal;
 import com.vaadin.signals.local.ValueSignal;
 import com.vaadin.signals.WritableSignal;
-import com.vaadin.flow.component.ComponentEffect;
 
 @Route(value = "use-case-03", layout = MainLayout.class)
 @PageTitle("Use Case 3: Interactive SVG Shape Editor")
@@ -56,7 +54,7 @@ public class UseCase03View extends VerticalLayout {
     private final WritableSignal<Double> starOpacitySignal = new ValueSignal<>(1.0);
 
     // Selected shape tracking
-    private final WritableSignal<String> selectedShapeSignal = new ValueSignal<>("rectangle");
+    private final WritableSignal<Integer> selectedShapeSignal = new ValueSignal<>(0);
 
     private Element rectElement;
     private Element starElement;
@@ -101,50 +99,28 @@ public class UseCase03View extends VerticalLayout {
         panel.setPadding(false);
 
         // Shape selector tabs
-        Tab rectangleTab = new Tab("🟢 Rectangle");
-        Tab starTab = new Tab("🟠 Star");
+        Tab rectangleTab = new Tab("\uD83D\uDFE9 Rectangle");
+        Tab starTab = new Tab("⭐\uFE0F Star");
 
         Tabs shapeTabs = new Tabs(rectangleTab, starTab);
+        MissingAPI.tabsSyncSelectedIndex(shapeTabs, selectedShapeSignal);
         shapeTabs.setWidthFull();
 
         // Controls container that shows only the selected shape's controls
         Div controlsContainer = new Div();
         controlsContainer.setWidthFull();
 
+        // Show/hide controls based on selected shape
+
         // Rectangle controls
         Div rectangleControls = createRectangleControls();
+        rectangleControls.bindVisible(selectedShapeSignal.map(Integer.valueOf(0)::equals));
 
         // Star controls
         Div starControls = createStarControls();
-
-        // Show/hide controls based on selected shape
-        ComponentEffect.effect(this, () -> {
-            String selected = selectedShapeSignal.value();
-            rectangleControls.setVisible("rectangle".equals(selected));
-            starControls.setVisible("star".equals(selected));
-        });
+        starControls.bindVisible(selectedShapeSignal.map(Integer.valueOf(1)::equals));
 
         controlsContainer.add(rectangleControls, starControls);
-
-        // Sync tabs with signal
-        shapeTabs.addSelectedChangeListener(event -> {
-            Tab selectedTab = event.getSelectedTab();
-            if (selectedTab == rectangleTab) {
-                selectedShapeSignal.value("rectangle");
-            } else if (selectedTab == starTab) {
-                selectedShapeSignal.value("star");
-            }
-        });
-
-        // Sync signal with tabs (for when shape is selected by clicking)
-        ComponentEffect.effect(this, () -> {
-            String selected = selectedShapeSignal.value();
-            if ("rectangle".equals(selected)) {
-                shapeTabs.setSelectedTab(rectangleTab);
-            } else if ("star".equals(selected)) {
-                shapeTabs.setSelectedTab(starTab);
-            }
-        });
 
         // Reset button
         Button resetButton = new Button("Reset to Defaults", e -> resetAll());
@@ -206,11 +182,11 @@ public class UseCase03View extends VerticalLayout {
 
         // Add click handlers to select shapes
         rectElement.addEventListener("click", e -> {
-            selectedShapeSignal.value("rectangle");
+            selectedShapeSignal.value(0);
         });
 
         starElement.addEventListener("click", e -> {
-            selectedShapeSignal.value("star");
+            selectedShapeSignal.value(1);
         });
 
         // Add cursor pointer style for shapes
@@ -317,11 +293,11 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500");
 
         Slider xSlider = new Slider("X", 0, 500);
-        xSlider.bind(rectXSignal);
+        xSlider.bindValue(mapIntegerToDoubleSignal(rectXSignal));
         xSlider.setWidthFull();
 
         Slider ySlider = new Slider("Y", 0, 500);
-        ySlider.bind(rectYSignal);
+        ySlider.bindValue(mapIntegerToDoubleSignal(rectYSignal));
         ySlider.setWidthFull();
 
         // Size section
@@ -332,15 +308,15 @@ public class UseCase03View extends VerticalLayout {
                 .set("margin-top", "8px");
 
         Slider widthSlider = new Slider("Width", 50, 250);
-        widthSlider.bind(rectWidthSignal);
+        widthSlider.bindValue(mapIntegerToDoubleSignal(rectWidthSignal));
         widthSlider.setWidthFull();
 
         Slider heightSlider = new Slider("Height", 30, 150);
-        heightSlider.bind(rectHeightSignal);
+        heightSlider.bindValue(mapIntegerToDoubleSignal(rectHeightSignal));
         heightSlider.setWidthFull();
 
         Slider cornerRadiusSlider = new Slider("Corner Radius", 0, 50);
-        cornerRadiusSlider.bind(rectCornerRadiusSignal);
+        cornerRadiusSlider.bindValue(mapIntegerToDoubleSignal(rectCornerRadiusSignal));
         cornerRadiusSlider.setWidthFull();
 
         // Appearance section
@@ -370,7 +346,7 @@ public class UseCase03View extends VerticalLayout {
                 .set("margin-top", "8px");
 
         Slider rotationSlider = new Slider("Rotation", 0, 360);
-        rotationSlider.bind(rectRotationSignal);
+        rotationSlider.bindValue(mapIntegerToDoubleSignal(rectRotationSignal));
         rotationSlider.setWidthFull();
 
         fields.add(positionLabel, xSlider, ySlider, sizeLabel, widthSlider, heightSlider,
@@ -397,11 +373,11 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500");
 
         Slider cxSlider = new Slider("Center X", 0, 500);
-        cxSlider.bind(starCxSignal);
+        cxSlider.bindValue(mapIntegerToDoubleSignal(starCxSignal));
         cxSlider.setWidthFull();
 
         Slider cySlider = new Slider("Center Y", 0, 500);
-        cySlider.bind(starCySignal);
+        cySlider.bindValue(mapIntegerToDoubleSignal(starCySignal));
         cySlider.setWidthFull();
 
         // Shape section
@@ -412,11 +388,11 @@ public class UseCase03View extends VerticalLayout {
                 .set("margin-top", "8px");
 
         Slider pointsSlider = new Slider("Points", 3, 10);
-        pointsSlider.bind(starPointsSignal);
+        pointsSlider.bindValue(mapIntegerToDoubleSignal(starPointsSignal));
         pointsSlider.setWidthFull();
 
         Slider sizeSlider = new Slider("Size", 30, 80);
-        sizeSlider.bind(starSizeSignal);
+        sizeSlider.bindValue(mapIntegerToDoubleSignal(starSizeSignal));
         sizeSlider.setWidthFull();
 
         // Appearance section
@@ -446,7 +422,7 @@ public class UseCase03View extends VerticalLayout {
                 .set("margin-top", "8px");
 
         Slider rotationSlider = new Slider("Rotation", 0, 360);
-        rotationSlider.bind(starRotationSignal);
+        rotationSlider.bindValue(mapIntegerToDoubleSignal(starRotationSignal));
         rotationSlider.setWidthFull();
 
         fields.add(positionLabel, cxSlider, cySlider, shapeLabel, pointsSlider, sizeSlider,
@@ -550,4 +526,9 @@ public class UseCase03View extends VerticalLayout {
         starStrokeWidthSignal.value(2);
         starOpacitySignal.value(1.0);
     }
+
+    private WritableSignal<Double> mapIntegerToDoubleSignal(WritableSignal<Integer> integerSignal) {
+        return integerSignal.map(Integer::doubleValue, (Integer oldValue, Double newValue) -> newValue.intValue());
+    }
+
 }
