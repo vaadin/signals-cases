@@ -1,10 +1,10 @@
 package com.example.usecase15;
 
+import com.example.views.MainLayout;
+
 import jakarta.annotation.security.PermitAll;
 
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -75,8 +75,6 @@ public class UseCase15View extends VerticalLayout {
             new Product("15", "Bookshelf", "Furniture", 129.99));
 
     private final ValueSignal<String> searchQuerySignal = new ValueSignal<>("");
-    private final ValueSignal<String> debouncedQuerySignal = new ValueSignal<>(
-            "");
     private final ValueSignal<Boolean> isSearchingSignal = new ValueSignal<>(
             false);
     private final ValueSignal<List<Product>> searchResultsSignal = new ValueSignal<>(
@@ -108,10 +106,8 @@ public class UseCase15View extends VerticalLayout {
         searchField.setValueChangeTimeout(300);
 
         searchField.bindValue(searchQuerySignal);
-        searchField.addValueChangeListener(event -> {
-            String query = event.getValue();
-            debouncedQuerySignal.value(query);
-            performSearch(query);
+        searchField.addValueChangeListener(e -> {
+            performSearch(searchQuerySignal.value());
         });
 
         // Search stats
@@ -135,7 +131,7 @@ public class UseCase15View extends VerticalLayout {
         Span debouncedLabel = new Span("Debounced value (300ms): ");
         debouncedLabel.getStyle().set("color",
                 "var(--lumo-secondary-text-color)");
-        Span debouncedValue = new Span(debouncedQuerySignal
+        Span debouncedValue = new Span(searchQuerySignal
                 .map(q -> q.isEmpty() ? "(empty)" : "\"" + q + "\""));
         debouncedValue.getStyle().set("font-family", "monospace")
                 .set("font-weight", "bold")
@@ -169,7 +165,7 @@ public class UseCase15View extends VerticalLayout {
 
         // Results
         Signal<String> resultsTitleSignal = searchResultsSignal.map(results -> {
-            if (results.isEmpty() && !debouncedQuerySignal.value().isEmpty()) {
+            if (results.isEmpty() && !searchQuerySignal.peek().isEmpty()) {
                 return "No results found";
             } else if (!results.isEmpty()) {
                 return results.size() + " result"
@@ -200,7 +196,7 @@ public class UseCase15View extends VerticalLayout {
                     nameDiv.getStyle().set("font-weight", "bold");
 
                     // Highlight matching text
-                    String query = debouncedQuerySignal.value();
+                    String query = searchQuerySignal.peek();
                     nameDiv.getElement().setProperty("innerHTML",
                             highlightMatch(product.name(), query));
 
