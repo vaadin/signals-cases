@@ -21,8 +21,8 @@ import com.vaadin.flow.data.binder.BinderValidationStatus;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.local.ValueSignal;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-09", layout = MainLayout.class)
 @PageTitle("Use Case 9: Form with Binder Integration and Signal Validation")
@@ -82,19 +82,21 @@ public class UseCase09View extends VerticalLayout {
                         "Username must be at least 3 characters")
                 .bind("username");
         binder.forField(emailField)
-                .withValidator(value -> value != null && value.contains("@") && value.contains("."),
+                .withValidator(
+                        value -> value != null && value.contains("@")
+                                && value.contains("."),
                         "Please enter a valid email address")
                 .bind("email");
 
-        Binder.Binding<UserRegistration, String> pwBinding = binder.forField(passwordField)
+        Binder.Binding<UserRegistration, String> pwBinding = binder
+                .forField(passwordField)
                 .withValidator(value -> value != null && value.length() >= 8,
                         "Password must be at least 8 characters")
                 .bind("password");
         // cross-field validation using Binder.Binding.value()
-        binder.forField(confirmPasswordField)
-                .withValidator(value -> value != null && value.equals(pwBinding.value()),
-                        "Passwords do not match")
-                .bind("confirmPassword");
+        binder.forField(confirmPasswordField).withValidator(
+                value -> value != null && value.equals(pwBinding.value()),
+                "Passwords do not match").bind("confirmPassword");
 
         binder.forField(accountTypeSelect).bind("accountType");
         // another cross-field validation, this one uses signals directly
@@ -125,7 +127,8 @@ public class UseCase09View extends VerticalLayout {
                         "Please fix validation errors before submitting.");
             }
         });
-        submitButton.bindEnabled(binder.getValidationStatus().map(BinderValidationStatus::isOk));
+        submitButton.bindEnabled(
+                binder.getValidationStatus().map(BinderValidationStatus::isOk));
 
         // Form status
         Div statusDiv = new Div();
@@ -133,12 +136,10 @@ public class UseCase09View extends VerticalLayout {
         statusLabel.bindText(binder.getValidationStatus()
                 .map(status -> status.isOk() ? "Form is valid - Ready to submit"
                         : "Please complete all required fields correctly"));
-        statusLabel.getStyle().bind("color",
-                binder.getValidationStatus().map(
-                        status -> status.isOk() ? "green" : "orange"));
-        statusLabel.getStyle().bind("font-weight",
-                binder.getValidationStatus().map(
-                        status -> status.isOk() ? "bold" : "normal"));
+        statusLabel.getStyle().bind("color", binder.getValidationStatus()
+                .map(status -> status.isOk() ? "green" : "orange"));
+        statusLabel.getStyle().bind("font-weight", binder.getValidationStatus()
+                .map(status -> status.isOk() ? "bold" : "normal"));
         statusDiv.add(statusLabel);
 
         add(title, description, usernameField, emailField, passwordField,

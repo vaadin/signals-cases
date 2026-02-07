@@ -2,12 +2,11 @@ package com.example.views;
 
 import jakarta.annotation.security.PermitAll;
 
-import java.util.stream.Collectors;
-
+import com.example.preferences.UserPreferences;
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
-import com.example.preferences.UserPreferences;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
@@ -27,11 +26,10 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.server.VaadinServletRequest;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 
 @PageTitle("Signal API Use Cases")
@@ -74,22 +72,23 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         activeUsersDisplay.getStyle().set("margin-left", "auto")
                 .set("margin-right", "1em");
 
-        Span activeUsersLabel = new Span(userSessionRegistry.getDisplayNamesSignal()
-                .map(displayNames -> displayNames.isEmpty() ? ""
-                        : "👥 " + displayNames.size() + " online:"));
-        activeUsersLabel.getStyle().set("color",
-                "var(--lumo-secondary-text-color)")
+        Span activeUsersLabel = new Span(
+                userSessionRegistry.getDisplayNamesSignal()
+                        .map(displayNames -> displayNames.isEmpty() ? ""
+                                : "👥 " + displayNames.size() + " online:"));
+        activeUsersLabel.getStyle()
+                .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-size", "var(--lumo-font-size-s)");
 
         com.vaadin.flow.component.html.Div avatarsContainer = new com.vaadin.flow.component.html.Div();
         avatarsContainer.getStyle().set("display", "flex").set("gap", "0.25em");
 
         com.example.MissingAPI.bindChildren(avatarsContainer,
-                com.vaadin.signals.Signal.computed(() -> {
+                com.vaadin.flow.signals.Signal.computed(() -> {
                     var users = userSessionRegistry.getActiveUsersSignal()
                             .value();
-                    var displayNames = userSessionRegistry.getDisplayNamesSignal()
-                            .value();
+                    var displayNames = userSessionRegistry
+                            .getDisplayNamesSignal().value();
 
                     java.util.List<Avatar> avatars = new java.util.ArrayList<>();
                     for (int i = 0; i < users.size(); i++) {
@@ -118,25 +117,27 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         nicknameField.addValueChangeListener(event -> {
             if (currentUser != null && sessionId != null) {
                 String nickname = event.getValue();
-                userSessionRegistry.setNickname(currentUser, sessionId, nickname);
+                userSessionRegistry.setNickname(currentUser, sessionId,
+                        nickname);
             }
         });
 
         // Current user display with avatar
         HorizontalLayout userDisplay = new HorizontalLayout();
         userDisplay.setSpacing(true);
-        userDisplay.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
+        userDisplay.setAlignItems(
+                com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
         userDisplay.getStyle().set("margin-right", "1em");
 
         Avatar userAvatar = new Avatar();
-        userAvatar.getElement().bindProperty("name",
-                currentUserSignal.getUserSignal().map(user -> user.isAuthenticated()
-                        ? user.getUsername()
-                        : ""));
+        userAvatar.getElement().bindProperty("name", currentUserSignal
+                .getUserSignal()
+                .map(user -> user.isAuthenticated() ? user.getUsername() : ""));
         userAvatar.getElement().bindProperty("img",
-                currentUserSignal.getUserSignal().map(user -> user.isAuthenticated()
-                        ? getProfilePicturePath(user.getUsername())
-                        : ""));
+                currentUserSignal.getUserSignal()
+                        .map(user -> user.isAuthenticated()
+                                ? getProfilePicturePath(user.getUsername())
+                                : ""));
         userAvatar.bindVisible(currentUserSignal.getUserSignal()
                 .map(user -> user.isAuthenticated()));
 
@@ -162,27 +163,22 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
         // Fixed-position source code link overlay
         Div sourceCodeContainer = new Div();
-        sourceCodeContainer.getStyle()
-                .set("position", "fixed")
-                .set("top", "calc(var(--vaadin-app-layout-navbar-offset-top) + 0.5em)")
-                .set("right", "1em")
-                .set("z-index", "100")
+        sourceCodeContainer.getStyle().set("position", "fixed").set("top",
+                "calc(var(--vaadin-app-layout-navbar-offset-top) + 0.5em)")
+                .set("right", "1em").set("z-index", "100")
                 .set("pointer-events", "auto");
 
         Icon codeIcon = VaadinIcon.CODE.create();
         codeIcon.setSize("16px");
-        codeIcon.getStyle()
-                .set("color", "var(--lumo-secondary-text-color)")
+        codeIcon.getStyle().set("color", "var(--lumo-secondary-text-color)")
                 .set("margin-right", "0.5em");
 
         sourceCodeLink = new Anchor("", "View source");
         sourceCodeLink.setTarget("_blank");
-        sourceCodeLink.getStyle()
-                .set("display", "inline-flex")
+        sourceCodeLink.getStyle().set("display", "inline-flex")
                 .set("align-items", "center")
                 .set("background-color", "rgba(255, 255, 255, 0.95)")
-                .set("padding", "0.5em 0.75em")
-                .set("border-radius", "4px")
+                .set("padding", "0.5em 0.75em").set("border-radius", "4px")
                 .set("box-shadow", "0 2px 4px rgba(0, 0, 0, 0.1)")
                 .set("color", "var(--lumo-primary-text-color)")
                 .set("text-decoration", "none")
@@ -190,11 +186,13 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
                 .set("transition", "box-shadow 0.2s");
 
         sourceCodeLink.getElement().addEventListener("mouseenter", e -> {
-            sourceCodeLink.getStyle().set("box-shadow", "0 4px 8px rgba(0, 0, 0, 0.15)");
+            sourceCodeLink.getStyle().set("box-shadow",
+                    "0 4px 8px rgba(0, 0, 0, 0.15)");
         }).addEventData("event.preventDefault");
 
         sourceCodeLink.getElement().addEventListener("mouseleave", e -> {
-            sourceCodeLink.getStyle().set("box-shadow", "0 2px 4px rgba(0, 0, 0, 0.1)");
+            sourceCodeLink.getStyle().set("box-shadow",
+                    "0 2px 4px rgba(0, 0, 0, 0.1)");
         }).addEventData("event.preventDefault");
 
         Span linkContent = new Span(codeIcon);
@@ -212,7 +210,8 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         addToDrawer(nav);
 
         // Apply session-scoped background color reactively to the whole layout
-        getStyle().bind("background-color", userPreferences.backgroundColorSignal());
+        getStyle().bind("background-color",
+                userPreferences.backgroundColorSignal());
     }
 
     @Override
@@ -222,22 +221,20 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
         if (currentUser != null && sessionId != null) {
             // Load current nickname if exists
-            String currentNickname = userSessionRegistry.getNickname(currentUser,
-                    sessionId);
+            String currentNickname = userSessionRegistry
+                    .getNickname(currentUser, sessionId);
             if (currentNickname != null) {
                 nicknameField.setValue(currentNickname);
             }
         }
 
         // Set up Page Visibility API listener to track tab activity
-        getElement().executeJs(
-                "const updateVisibility = () => {" +
-                "  const isVisible = document.visibilityState === 'visible';" +
-                "  $0.$server.onVisibilityChange(isVisible);" +
-                "};" +
-                "document.addEventListener('visibilitychange', updateVisibility);" +
-                "updateVisibility();" // Report initial state
-        , getElement());
+        getElement().executeJs("const updateVisibility = () => {"
+                + "  const isVisible = document.visibilityState === 'visible';"
+                + "  $0.$server.onVisibilityChange(isVisible);" + "};"
+                + "document.addEventListener('visibilitychange', updateVisibility);"
+                + "updateVisibility();" // Report initial state
+                , getElement());
     }
 
     @Override
@@ -252,12 +249,14 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
     /**
      * Called from JavaScript when the tab visibility changes.
      *
-     * @param isVisible true if the tab is visible, false if hidden
+     * @param isVisible
+     *            true if the tab is visible, false if hidden
      */
     @ClientCallable
     public void onVisibilityChange(boolean isVisible) {
         if (currentUser != null && sessionId != null) {
-            userSessionRegistry.updateTabActivity(currentUser, sessionId, isVisible);
+            userSessionRegistry.updateTabActivity(currentUser, sessionId,
+                    isVisible);
         }
     }
 
@@ -268,7 +267,8 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
             sessionId = SessionIdHelper.getCurrentSessionId();
         }
 
-        // Register user with current route (or update route if already registered)
+        // Register user with current route (or update route if already
+        // registered)
         if (currentUser != null && sessionId != null) {
             String viewRoute = event.getLocation().getPath();
             userSessionRegistry.registerUser(currentUser, sessionId, viewRoute);
@@ -298,20 +298,21 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
     }
 
     /**
-     * Get the profile picture path for a username.
-     * Images are stored in src/main/resources/META-INF/resources/profile-pictures/
+     * Get the profile picture path for a username. Images are stored in
+     * src/main/resources/META-INF/resources/profile-pictures/
      */
     public static String getProfilePicturePath(String username) {
         if (username == null) {
             return "";
         }
-        // Map username to profile picture (images are in META-INF/resources/profile-pictures)
+        // Map username to profile picture (images are in
+        // META-INF/resources/profile-pictures)
         return switch (username.toLowerCase()) {
-            case "admin" -> "/profile-pictures/admin.png";
-            case "editor" -> "/profile-pictures/editor.png";
-            case "viewer" -> "/profile-pictures/viewer.png";
-            case "superadmin" -> "/profile-pictures/superadmin.png";
-            default -> ""; // No image for unknown users
+        case "admin" -> "/profile-pictures/admin.png";
+        case "editor" -> "/profile-pictures/editor.png";
+        case "viewer" -> "/profile-pictures/viewer.png";
+        case "superadmin" -> "/profile-pictures/superadmin.png";
+        default -> ""; // No image for unknown users
         };
     }
 }

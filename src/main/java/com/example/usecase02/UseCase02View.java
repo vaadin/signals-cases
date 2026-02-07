@@ -5,6 +5,7 @@ import jakarta.annotation.security.PermitAll;
 import java.util.List;
 
 import com.example.views.MainLayout;
+
 import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -21,8 +22,8 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.local.ValueSignal;
-import com.vaadin.signals.WritableSignal;
+import com.vaadin.flow.signals.WritableSignal;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-02", layout = MainLayout.class)
 @PageTitle("Use Case 2: Progressive Disclosure with Nested Conditions")

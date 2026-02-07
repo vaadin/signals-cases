@@ -1,21 +1,23 @@
 package com.example.usecase20;
 
+import jakarta.annotation.security.PermitAll;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import com.example.preferences.UserPreferences;
 import com.example.views.MainLayout;
+
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.WritableSignal;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
-import jakarta.annotation.security.PermitAll;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
+import com.vaadin.flow.signals.WritableSignal;
 
 @Route(value = "use-case-20", layout = MainLayout.class)
 @PageTitle("Use Case 20: Session-scoped User Preferences")
@@ -43,39 +45,36 @@ public class UseCase20View extends VerticalLayout {
         H2 title = new H2("Use Case 20: Session-scoped User Preferences");
 
         Paragraph description = new Paragraph(
-                "Choose a background color for your session. The selected color is stored " +
-                "in a session-scoped state and applied across all views using this layout. " +
-                "Other users keep their own color. Changes are reactive without reload.");
+                "Choose a background color for your session. The selected color is stored "
+                        + "in a session-scoped state and applied across all views using this layout. "
+                        + "Other users keep their own color. Changes are reactive without reload.");
 
-        // Local signal mirroring the session-scoped preference for binding convenience
-        WritableSignal<String> colorSignal = preferences.backgroundColorSignal();
+        // Local signal mirroring the session-scoped preference for binding
+        // convenience
+        WritableSignal<String> colorSignal = preferences
+                .backgroundColorSignal();
 
         // Color selection control
-        RadioButtonGroup<String> colorPicker = new RadioButtonGroup<>("Background Color");
+        RadioButtonGroup<String> colorPicker = new RadioButtonGroup<>(
+                "Background Color");
         colorPicker.setItems(PRESET_COLORS.values());
         colorPicker.setRenderer(new ComponentRenderer<>(item -> {
             String label = PRESET_COLORS.entrySet().stream()
                     .filter(e -> e.getValue().equals(item))
-                    .map(Map.Entry::getKey)
-                    .findFirst().orElse(item);
+                    .map(Map.Entry::getKey).findFirst().orElse(item);
             Div tile = new Div();
-            tile.getStyle()
-                .set("background-color", item)
-                .set("padding", "0.5rem 0.75rem")
-                .set("border-radius", "8px")
-                .set("border", "1px solid var(--lumo-contrast-20pct)")
-                .set("min-width", "180px")
-                .set("min-height", "40px")
-                .set("display", "flex")
-                .set("align-items", "center")
-                .set("justify-content", "center")
-                .set("box-sizing", "border-box");
+            tile.getStyle().set("background-color", item)
+                    .set("padding", "0.5rem 0.75rem")
+                    .set("border-radius", "8px")
+                    .set("border", "1px solid var(--lumo-contrast-20pct)")
+                    .set("min-width", "180px").set("min-height", "40px")
+                    .set("display", "flex").set("align-items", "center")
+                    .set("justify-content", "center")
+                    .set("box-sizing", "border-box");
             String textColor = chooseTextColor(item);
             Paragraph text = new Paragraph(label);
-            text.getStyle()
-                .set("margin", "0")
-                .set("font-weight", "500")
-                .set("color", textColor);
+            text.getStyle().set("margin", "0").set("font-weight", "500")
+                    .set("color", textColor);
             tile.add(text);
             return tile;
         }));

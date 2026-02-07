@@ -1,10 +1,10 @@
 package com.example.muc06;
 
-import org.springframework.stereotype.Component;
-
 import jakarta.annotation.PostConstruct;
 
-import com.vaadin.signals.shared.SharedListSignal;
+import org.springframework.stereotype.Component;
+
+import com.vaadin.flow.signals.shared.SharedListSignal;
 
 /**
  * Application-scoped signals for MUC06: Shared Task List
@@ -16,7 +16,8 @@ public class MUC06Signals {
             java.time.LocalDate dueDate) {
     }
 
-    private final SharedListSignal<Task> tasksSignal = new SharedListSignal<>(Task.class);
+    private final SharedListSignal<Task> tasksSignal = new SharedListSignal<>(
+            Task.class);
 
     public SharedListSignal<Task> getTasksSignal() {
         return tasksSignal;

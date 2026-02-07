@@ -1,10 +1,10 @@
 package com.example.listeners;
 
-import org.springframework.stereotype.Component;
-
 import com.example.security.SecurityService;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
+import org.springframework.stereotype.Component;
+
 import com.vaadin.flow.server.HandlerHelper;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinRequest;
@@ -15,19 +15,16 @@ import com.vaadin.flow.server.VaadinSession;
 
 /**
  * Global interceptor that tracks all user interactions by intercepting UIDL
- * requests. UIDL requests represent all user interactions including:
- * - Button clicks
- * - Text field input
- * - Form submissions
- * - Component interactions
- * - Navigation events
+ * requests. UIDL requests represent all user interactions including: - Button
+ * clicks - Text field input - Form submissions - Component interactions -
+ * Navigation events
  *
  * This interceptor automatically updates the last interaction time in the
  * UserSessionRegistry for active sessions.
  *
  * Uses VaadinRequestInterceptor (since Flow 24.2) which is specifically
- * designed for aspect-like request observation without interfering with
- * request processing.
+ * designed for aspect-like request observation without interfering with request
+ * processing.
  */
 @Component
 public class UserInteractionTracker implements VaadinServiceInitListener {

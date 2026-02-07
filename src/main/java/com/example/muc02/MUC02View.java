@@ -1,35 +1,29 @@
 package com.example.muc02;
 
-import com.example.views.ActiveUsersDisplay;
-import com.example.views.MainLayout;
-
 import jakarta.annotation.security.PermitAll;
-
-import java.util.Map;
 
 import com.example.MissingAPI;
 import com.example.security.CurrentUserSignal;
-import com.example.muc02.MUC02Signals;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
+import com.example.views.ActiveUsersDisplay;
+import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.shared.SharedValueSignal;
-import com.vaadin.signals.WritableSignal;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.WritableSignal;
+import com.vaadin.flow.signals.shared.SharedValueSignal;
 
 /**
  * Multi-User Case 2: Collaborative Cursor Positions
@@ -142,7 +136,8 @@ public class MUC02View extends VerticalLayout {
                 String displayName = displayNameMap.getOrDefault(sessionKey,
                         "[" + sessionKey + "]");
 
-                // Extract username from sessionKey (format: "username:sessionId")
+                // Extract username from sessionKey (format:
+                // "username:sessionId")
                 String username = sessionKey.split(":")[0];
 
                 HorizontalLayout userItem = new HorizontalLayout();
@@ -153,12 +148,12 @@ public class MUC02View extends VerticalLayout {
                 userItem.getStyle().set("margin-bottom", "0.5em");
 
                 // Avatar
-                Image avatar = new Image(MainLayout.getProfilePicturePath(username),
-                        "");
+                Image avatar = new Image(
+                        MainLayout.getProfilePicturePath(username), "");
                 avatar.setWidth("32px");
                 avatar.setHeight("32px");
-                avatar.getStyle().set("border-radius", "50%")
-                        .set("object-fit", "cover");
+                avatar.getStyle().set("border-radius", "50%").set("object-fit",
+                        "cover");
 
                 // User label
                 Div userLabel = new Div();
@@ -188,16 +183,16 @@ public class MUC02View extends VerticalLayout {
                         + "real-time collaborative awareness without complex synchronization code. "
                         + "With Vaadin Push, updates propagate automatically to all connected clients."));
 
-        add(title, description, activeSessionsBox, canvas, usersTitle, usersList,
-                infoBox);
+        add(title, description, activeSessionsBox, canvas, usersTitle,
+                usersList, infoBox);
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         this.sessionId = SessionIdHelper.getCurrentSessionId();
-        this.myCursorSignal = muc02Signals
-                .getCursorSignalForUser(currentUser, sessionId);
+        this.myCursorSignal = muc02Signals.getCursorSignalForUser(currentUser,
+                sessionId);
     }
 
     @Override
@@ -221,18 +216,18 @@ public class MUC02View extends VerticalLayout {
                 displayNameMap.put(sessionKey, displayNames.get(i));
             }
 
-            return cursors.entrySet().stream()
-                    .filter(entry -> sessionId == null
-                            || !entry.getKey().equals(currentUser + ":" + sessionId))
+            return cursors.entrySet().stream().filter(entry -> sessionId == null
+                    || !entry.getKey().equals(currentUser + ":" + sessionId))
                     .map(entry -> {
                         String sessionKey = entry.getKey();
                         SharedValueSignal<MUC02Signals.CursorPosition> signal = entry
                                 .getValue();
 
-                        // Get display name from mapping (fallback to full sessionKey
+                        // Get display name from mapping (fallback to full
+                        // sessionKey
                         // for debugging)
-                        String displayName = displayNameMap.getOrDefault(sessionKey,
-                                "[" + sessionKey + "]");
+                        String displayName = displayNameMap.getOrDefault(
+                                sessionKey, "[" + sessionKey + "]");
 
                         Div cursorIndicator = new Div();
                         cursorIndicator.getStyle().set("position", "absolute")
@@ -246,10 +241,10 @@ public class MUC02View extends VerticalLayout {
                                 .set("z-index", "1000");
 
                         // Bind position (with null guards)
-                        cursorIndicator.getStyle().bind("left", signal
-                                .map(pos -> pos != null ? pos.x() + "px" : "0px"));
-                        cursorIndicator.getStyle().bind("top", signal
-                                .map(pos -> pos != null ? pos.y() + "px" : "0px"));
+                        cursorIndicator.getStyle().bind("left", signal.map(
+                                pos -> pos != null ? pos.x() + "px" : "0px"));
+                        cursorIndicator.getStyle().bind("top", signal.map(
+                                pos -> pos != null ? pos.y() + "px" : "0px"));
 
                         // Label with display name
                         Div label = new Div();
@@ -257,10 +252,8 @@ public class MUC02View extends VerticalLayout {
                         label.getStyle().set("position", "absolute")
                                 .set("top", "25px").set("left", "0")
                                 .set("white-space", "nowrap")
-                                .set("background-color",
-                                        "rgba(0, 0, 0, 0.7)")
-                                .set("color", "white")
-                                .set("padding", "2px 6px")
+                                .set("background-color", "rgba(0, 0, 0, 0.7)")
+                                .set("color", "white").set("padding", "2px 6px")
                                 .set("border-radius", "3px")
                                 .set("font-size", "0.75em");
 

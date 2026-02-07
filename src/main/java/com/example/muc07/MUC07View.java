@@ -1,17 +1,16 @@
 package com.example.muc07;
 
-import com.example.usecase18.AbstractTaskChatView;
-import com.example.views.ActiveUsersDisplay;
-import com.example.views.MainLayout;
-
 import jakarta.annotation.security.PermitAll;
 
 import java.util.UUID;
 
 import com.example.security.CurrentUserSignal;
-import com.example.usecase18.TaskLLMService;
-import com.example.muc07.MUC07Signals;
 import com.example.signals.UserSessionRegistry;
+import com.example.usecase18.AbstractTaskChatView;
+import com.example.usecase18.TaskLLMService;
+import com.example.views.ActiveUsersDisplay;
+import com.example.views.MainLayout;
+
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -23,29 +22,29 @@ import com.vaadin.flow.router.Route;
 public class MUC07View extends AbstractTaskChatView {
 
     public MUC07View(CurrentUserSignal currentUserSignal,
-                     MUC07Signals muc07Signals,
-                     UserSessionRegistry userSessionRegistry,
-                     TaskLLMService taskLLMService) {
+            MUC07Signals muc07Signals, UserSessionRegistry userSessionRegistry,
+            TaskLLMService taskLLMService) {
 
         // Call super with SHARED signals - must be first statement
-        super(
-            muc07Signals.getLlmTasksSignal(),           // Shared task signal
-            muc07Signals.getLlmChatMessagesSignal(),    // Shared chat signal
-            taskLLMService,
-            getUserConversationId(currentUserSignal),           // Per-user conversation ID
-            currentUserSignal,                                  // Current user for avatar/name
-            userSessionRegistry                                 // For display name lookup
+        super(muc07Signals.getLlmTasksSignal(), // Shared task signal
+                muc07Signals.getLlmChatMessagesSignal(), // Shared chat signal
+                taskLLMService, getUserConversationId(currentUserSignal), // Per-user
+                                                                          // conversation
+                                                                          // ID
+                currentUserSignal, // Current user for avatar/name
+                userSessionRegistry // For display name lookup
         );
 
         // Add active users display
         ActiveUsersDisplay activeUsersDisplay = new ActiveUsersDisplay(
-            userSessionRegistry, "Active on this view", "muc-07", true
-        );
-        addComponentAsFirst(activeUsersDisplay);  // Add before chat panel
+                userSessionRegistry, "Active on this view", "muc-07", true);
+        addComponentAsFirst(activeUsersDisplay); // Add before chat panel
     }
 
-    private static String getUserConversationId(CurrentUserSignal currentUserSignal) {
-        CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal().value();
+    private static String getUserConversationId(
+            CurrentUserSignal currentUserSignal) {
+        CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
+                .value();
         if (userInfo == null || !userInfo.isAuthenticated()) {
             throw new IllegalStateException("User must be authenticated");
         }

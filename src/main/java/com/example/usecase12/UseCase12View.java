@@ -1,10 +1,9 @@
 package com.example.usecase12;
 
-import com.example.views.MainLayout;
-
 import jakarta.annotation.security.PermitAll;
 
 import com.example.MissingAPI;
+import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.UI;
@@ -16,9 +15,9 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.local.ValueSignal;
-import com.vaadin.signals.WritableSignal;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.WritableSignal;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
  * Use Case 12: Dynamic View Title
