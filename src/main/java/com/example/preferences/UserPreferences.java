@@ -11,16 +11,11 @@ import com.vaadin.flow.signals.local.ValueSignal;
 /**
  * Session-scoped user preference state.
  *
-<<<<<<< flow-server-signals
- * Requirements: - Session scoped lifecycle per user session - Holds a Signal
- * with the selected background color - Injectable into views/layouts
-=======
  * Requirements:
  * - Session scoped lifecycle per user session
  * - Holds a Signal with the selected background color
  * - Holds a Signal with the selected locale for i18n
  * - Injectable into views/layouts
->>>>>>> main
  */
 @Component
 @SessionScope
