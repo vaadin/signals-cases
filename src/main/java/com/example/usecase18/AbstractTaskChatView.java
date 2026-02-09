@@ -329,53 +329,68 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
     }
 
     private void openEditDialog(Task task) {
+        // Find the signal for this task
+        var taskSignalOpt = tasksSignal.value().stream()
+                .filter(sig -> sig.value().id().equals(task.id()))
+                .findFirst();
+
+        if (taskSignalOpt.isEmpty()) {
+            return;
+        }
+
+        var taskSignal = taskSignalOpt.get();
+
         Dialog dialog = new Dialog();
         dialog.setHeaderTitle("Edit Task");
         dialog.setWidth("500px");
 
         FormLayout formLayout = new FormLayout();
 
+        // Create two-way mapped signals for each field
+        WritableSignal<String> titleSignal = taskSignal.map(
+                Task::title,
+                Task::withTitle
+        );
+        WritableSignal<String> descriptionSignal = taskSignal.map(
+                Task::description,
+                Task::withDescription
+        );
+        WritableSignal<Task.TaskStatus> statusSignal = taskSignal.map(
+                Task::status,
+                Task::withStatus
+        );
+        WritableSignal<LocalDate> dueDateSignal = taskSignal.map(
+                Task::dueDate,
+                Task::withDueDate
+        );
+
         TextField titleField = new TextField("Title");
-        titleField.setValue(task.title());
         titleField.setWidthFull();
+        titleField.bindValue(titleSignal);
 
         TextArea descriptionField = new TextArea("Description");
-        descriptionField.setValue(task.description());
         descriptionField.setWidthFull();
         descriptionField.setMaxHeight("100px");
+        descriptionField.bindValue(descriptionSignal);
 
         ComboBox<Task.TaskStatus> statusCombo = new ComboBox<>("Status");
         statusCombo.setItems(Task.TaskStatus.values());
-        statusCombo.setValue(task.status());
         statusCombo.setWidthFull();
+        statusCombo.bindValue(statusSignal);
 
         DatePicker dueDatePicker = new DatePicker("Due Date");
-        dueDatePicker.setValue(task.dueDate());
         dueDatePicker.setWidthFull();
+        dueDatePicker.bindValue(dueDateSignal);
 
         formLayout.add(titleField, descriptionField, statusCombo,
                 dueDatePicker);
 
-        Button saveButton = new Button("Save", e -> {
-            // Find the signal for this task and update it
-            tasksSignal.value().stream()
-                    .filter(sig -> sig.value().id().equals(task.id()))
-                    .findFirst().ifPresent(sig -> {
-                        Task updatedTask = new Task(task.id(),
-                                titleField.getValue(),
-                                descriptionField.getValue(),
-                                statusCombo.getValue(),
-                                dueDatePicker.getValue());
-                        sig.value(updatedTask);
-                    });
-            dialog.close();
-        });
-        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-
-        Button cancelButton = new Button("Cancel", e -> dialog.close());
+        // Changes are saved automatically via two-way binding
+        Button closeButton = new Button("Close", e -> dialog.close());
+        closeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         dialog.add(formLayout);
-        dialog.getFooter().add(cancelButton, saveButton);
+        dialog.getFooter().add(closeButton);
         dialog.open();
     }
 

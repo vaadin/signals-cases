@@ -9,6 +9,7 @@ import java.util.List;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.ComponentEffect;
+import com.vaadin.signals.WritableSignal;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
@@ -249,22 +250,25 @@ public class UseCase06View extends VerticalLayout {
         nameLabel.getStyle().set("flex-grow", "1").set("font-weight", "500");
 
         var quantityField = new IntegerField();
-        quantityField.setValue(item.quantity());
         quantityField.setMin(1);
         quantityField.setMax(99);
         quantityField.setWidth("120px");
         quantityField.setStepButtonsVisible(true);
+
+        // Two-way mapped signal for quantity
+        WritableSignal<Integer> quantitySignal = itemSignal.map(
+                CartItem::quantity,
+                CartItem::withQuantity
+        );
+        quantityField.bindValue(quantitySignal);
+
+        // Handle removal when quantity drops below 1
         quantityField.addValueChangeListener(e -> {
             var value = e.getValue();
-            updateQuantity(itemSignal, cartItemsSignal,
-                    value == null ? 0 : value);
+            if (value == null || value < 1) {
+                cartItemsSignal.remove(itemSignal);
+            }
         });
-        ComponentEffect.bind(quantityField, itemSignal.map(CartItem::quantity),
-                (field, value) -> {
-                    if (value != null && !value.equals(field.getValue())) {
-                        field.setValue(value);
-                    }
-                });
 
         var itemTotalLabel = new Span();
         itemTotalLabel.bindText(Signal.computed(() -> {
@@ -293,8 +297,8 @@ public class UseCase06View extends VerticalLayout {
         cartItemsSignal.value().stream().filter(
                 signal -> signal.value().product().id().equals(product.id()))
                 .findFirst().ifPresentOrElse(
-                        existing -> updateQuantity(existing, cartItemsSignal,
-                                existing.value().quantity() + 1),
+                        existing -> existing.value(
+                                existing.value().withQuantity(existing.value().quantity() + 1)),
                         () -> cartItemsSignal
                                 .insertLast(new CartItem(product, 1)));
     }
@@ -316,14 +320,4 @@ public class UseCase06View extends VerticalLayout {
         };
     }
 
-    private void updateQuantity(ValueSignal<CartItem> itemSignal,
-            ListSignal<CartItem> cartItemsSignal, int quantity) {
-        if (quantity < 1) {
-            cartItemsSignal.remove(itemSignal);
-            return;
-        }
-
-        var current = itemSignal.value();
-        itemSignal.value(new CartItem(current.product(), quantity));
-    }
 }
