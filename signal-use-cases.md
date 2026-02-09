@@ -305,7 +305,7 @@ quantityField.bindValue(quantitySignal);
 
 ---
 
-### UC 21: Two-Way Mapped Signals
+### UC 22: Two-Way Mapped Signals
 
 **Description**: Comprehensive demonstration of the `WritableSignal.map(getter, merger)` API for two-way computed signals. Shows how to bind form fields directly to immutable record properties with automatic bidirectional synchronization.
 
@@ -316,7 +316,7 @@ quantityField.bindValue(quantitySignal);
 - **Immutable records** - Uses `with*` methods to create updated records
 - **Single source of truth** - One signal holds the entire state
 
-**Route**: `/use-case-21`
+**Route**: `/use-case-22`
 
 **Core Pattern:**
 ```java
@@ -451,7 +451,7 @@ cityField.bindValue(citySignal);
 - `Signal.create()` / `new ValueSignal<>()` - Creating writable signals
 - `signal.value()` - Getting/setting signal values
 - `signal.map()` - Transforming signal values (one-way)
-- `WritableSignal.map(getter, merger)` - **Two-way mapped signals** (see UC06, UC21)
+- `WritableSignal.map(getter, merger)` - **Two-way mapped signals** (see UC06, UC22)
 - Computed signals combining multiple sources
 
 ### Component Bindings
@@ -466,7 +466,7 @@ cityField.bindValue(citySignal);
 - `bindHelperText()` - Field feedback text
 
 ### Advanced Patterns
-- **Two-way mapped signals** - Bidirectional field-to-record binding (UC06, UC21)
+- **Two-way mapped signals** - Bidirectional field-to-record binding (UC06, UC22)
 - Application-scoped signals (Spring @Component)
 - Browser event integration (window resize)
 - Spring Security integration
@@ -509,7 +509,7 @@ Multi-user use cases (MUC01-04, MUC06-07) share signals across sessions:
 ## Recent Changes
 
 **2026-02-02 Update:**
-- Added UC21 (Two-Way Mapped Signals) - dedicated demonstration of `WritableSignal.map(getter, merger)` API
+- Added UC22 (Two-Way Mapped Signals) - dedicated demonstration of `WritableSignal.map(getter, merger)` API
 - Updated UC06 documentation to highlight its use of two-way mapped signals
 - Documented the two-way mapped signals pattern in Signal API Features section
 

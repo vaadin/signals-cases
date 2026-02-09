@@ -1,4 +1,4 @@
-package com.example.usecase21;
+package com.example.usecase22;
 
 public record Person(String firstName, String lastName, String email, int age, Address address) {
 

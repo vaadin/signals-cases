@@ -1,4 +1,4 @@
-package com.example.usecase21;
+package com.example.usecase22;
 
 import jakarta.annotation.security.PermitAll;
 
@@ -20,17 +20,17 @@ import com.vaadin.signals.Signal;
 import com.vaadin.signals.WritableSignal;
 import com.vaadin.signals.local.ValueSignal;
 
-@Route(value = "use-case-21", layout = MainLayout.class)
-@PageTitle("Use Case 21: Two-Way Mapped Signals")
-@Menu(order = 21, title = "UC 21: Two-Way Mapped Signals")
+@Route(value = "use-case-22", layout = MainLayout.class)
+@PageTitle("Use Case 22: Two-Way Mapped Signals")
+@Menu(order = 22, title = "UC 22: Two-Way Mapped Signals")
 @PermitAll
-public class UseCase21View extends VerticalLayout {
+public class UseCase22View extends VerticalLayout {
 
-    public UseCase21View() {
+    public UseCase22View() {
         setSpacing(true);
         setPadding(true);
 
-        var title = new H2("Use Case 21: Two-Way Mapped Signals");
+        var title = new H2("Use Case 22: Two-Way Mapped Signals");
 
         var description = new Paragraph(
                 "This use case demonstrates the WritableSignal.map(getter, merger) API for two-way computed signals. "

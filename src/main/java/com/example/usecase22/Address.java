@@ -1,4 +1,4 @@
-package com.example.usecase21;
+package com.example.usecase22;
 
 public record Address(String street, String city, String zipCode, String country) {
 
