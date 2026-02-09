@@ -1,7 +1,5 @@
 package com.example.usecase15;
 
-import com.example.views.MainLayout;
-
 import jakarta.annotation.security.PermitAll;
 
 import java.util.List;
@@ -265,7 +263,7 @@ public class UseCase15View extends VerticalLayout {
 
         // Set searching state
         isSearchingSignal.value(true);
-        searchCountSignal.value(searchCountSignal.value() + 1);
+        searchCountSignal.value(searchCountSignal.peek() + 1);
 
         // Simulate async search with delay
         CompletableFuture<Void> searchFuture = CompletableFuture
