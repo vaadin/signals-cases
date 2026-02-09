@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.SessionScope;
 
 import com.example.preferences.UserPreferences;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.WritableSignal;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.WritableSignal;
 
 /**
  * Session-scoped service that bridges ResourceBundle and Signals for reactive i18n.

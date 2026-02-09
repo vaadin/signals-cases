@@ -20,7 +20,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 @Route(value = "use-case-21", layout = MainLayout.class)
 @PageTitle("Use Case 21: Signals-Based i18n")
