@@ -7,7 +7,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import com.example.MissingAPI;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -178,8 +177,12 @@ public class UseCase15View extends VerticalLayout {
                 .set("flex-direction", "column").set("gap", "0.5em")
                 .set("margin-top", "1em");
 
-        MissingAPI.bindComponentChildren(resultsContainer, searchResultsSignal,
-                product -> {
+        Signal<List<ValueSignal<Product>>> resultSignals = searchResultsSignal
+                .map(list -> list.stream()
+                .map(ValueSignal::new).toList());
+        resultsContainer.bindChildren(resultSignals,
+                signal -> {
+                    Product product = signal.value();
                     Div card = new Div();
                     card.getStyle().set("background-color", "#ffffff")
                             .set("border",
