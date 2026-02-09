@@ -2,14 +2,11 @@ package com.example.views;
 
 import jakarta.annotation.security.PermitAll;
 
-<<<<<<< flow-server-signals
-import com.example.preferences.UserPreferences;
-=======
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
->>>>>>> main
+import com.example.preferences.UserPreferences;
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
