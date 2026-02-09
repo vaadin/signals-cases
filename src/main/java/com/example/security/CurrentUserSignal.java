@@ -5,10 +5,10 @@ import java.util.Set;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import com.vaadin.flow.signals.WritableSignal;
+import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.spring.security.AuthenticationContext;
-import com.vaadin.signals.local.ValueSignal;
-import com.vaadin.signals.WritableSignal;
 
 /**
  * Session-scoped signal holding the current authenticated user information.

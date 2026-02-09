@@ -7,12 +7,12 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.tabs.Tabs;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.WritableSignal;
-import com.vaadin.signals.local.ListSignal;
-import com.vaadin.signals.local.ValueSignal;
-import com.vaadin.signals.shared.SharedListSignal;
-import com.vaadin.signals.shared.SharedValueSignal;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.WritableSignal;
+import com.vaadin.flow.signals.local.ListSignal;
+import com.vaadin.flow.signals.local.ValueSignal;
+import com.vaadin.flow.signals.shared.SharedListSignal;
+import com.vaadin.flow.signals.shared.SharedValueSignal;
 
 /**
  * Temporary helper class providing static methods for Signal-based component
@@ -38,19 +38,21 @@ public class MissingAPI {
      * individual ValueSignals within the ListSignal by reading each one, so the
      * Grid updates when any item changes.
      */
-    public static <T> void bindItems(Grid<T> grid, SharedListSignal<T> listSignal) {
+    public static <T> void bindItems(Grid<T> grid,
+            SharedListSignal<T> listSignal) {
         ComponentEffect.effect(grid, () -> {
             List<SharedValueSignal<T>> signals = listSignal.value();
             // Read each individual signal to register dependency
-            List<T> items = signals.stream().map(SharedValueSignal::value).toList();
+            List<T> items = signals.stream().map(SharedValueSignal::value)
+                    .toList();
             grid.setItems(items);
         });
     }
 
     /**
      * Binds a Grid's items to a local ListSignal. Registers dependencies on all
-     * individual ValueSignals within the ListSignal by reading each one, so
-     * the Grid updates when any item changes.
+     * individual ValueSignals within the ListSignal by reading each one, so the
+     * Grid updates when any item changes.
      */
     public static <T> void bindItems(Grid<T> grid, ListSignal<T> listSignal) {
         ComponentEffect.effect(grid, () -> {
@@ -142,8 +144,8 @@ public class MissingAPI {
     }
 
     /**
-     * Synchronizes the selected index between a Tabs component and
-     * a writable signal.
+     * Synchronizes the selected index between a Tabs component and a writable
+     * signal.
      * <p>
      * This method establishes bidirectional binding between a {@code Tabs}
      * instance and a writable integer signal. Changes to the selected tab in
@@ -151,14 +153,15 @@ public class MissingAPI {
      * will update the selected tab in the UI.
      *
      * @param tabs
-     *              The Tabs component whose selected index should be
-     *              synchronized with the signal. Must not be {@code null}.
+     *            The Tabs component whose selected index should be synchronized
+     *            with the signal. Must not be {@code null}.
      * @param numberSignal
-     *              A writable integer signal that will receive the current
-     *              selected index of the Tabs and can also update it. Must not
-     *              be {@code null}.
+     *            A writable integer signal that will receive the current
+     *            selected index of the Tabs and can also update it. Must not be
+     *            {@code null}.
      */
-    public static void tabsSyncSelectedIndex(Tabs tabs, WritableSignal<Integer> numberSignal) {
+    public static void tabsSyncSelectedIndex(Tabs tabs,
+            WritableSignal<Integer> numberSignal) {
         ComponentEffect.bind(tabs, numberSignal, Tabs::setSelectedIndex);
         tabs.addSelectedChangeListener(event -> {
             numberSignal.value(event.getSource().getSelectedIndex());

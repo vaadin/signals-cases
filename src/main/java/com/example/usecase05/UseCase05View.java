@@ -15,8 +15,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.local.ValueSignal;
-import com.vaadin.signals.WritableSignal;
+import com.vaadin.flow.signals.WritableSignal;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-05", layout = MainLayout.class)
 @PageTitle("Use Case 5: Cascading Location Selector")

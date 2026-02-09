@@ -9,15 +9,15 @@ import org.springframework.stereotype.Service;
  * Service for generating analytics reports asynchronously.
  *
  * Demonstrates proper Spring Boot async service pattern with @Async annotation.
- * In a real application, this would connect to databases, external APIs, or perform
- * complex calculations to generate reports.
+ * In a real application, this would connect to databases, external APIs, or
+ * perform complex calculations to generate reports.
  */
 @Service
 public class AnalyticsService {
 
     /**
-     * Represents raw analytics data fetched from data sources.
-     * This simulates the result of querying databases, APIs, or data warehouses.
+     * Represents raw analytics data fetched from data sources. This simulates
+     * the result of querying databases, APIs, or data warehouses.
      */
     public static class RawAnalyticsData {
         private final int totalSales;
@@ -25,7 +25,8 @@ public class AnalyticsService {
         private final int totalVisitors;
         private final int conversions;
 
-        public RawAnalyticsData(int totalSales, int orderCount, int totalVisitors, int conversions) {
+        public RawAnalyticsData(int totalSales, int orderCount,
+                int totalVisitors, int conversions) {
             this.totalSales = totalSales;
             this.orderCount = orderCount;
             this.totalVisitors = totalVisitors;
@@ -60,7 +61,8 @@ public class AnalyticsService {
         private int activeUsers;
 
         // Sentinel value for empty report
-        private static final AnalyticsReport EMPTY = new AnalyticsReport("", 0, 0, 0.0, 0);
+        private static final AnalyticsReport EMPTY = new AnalyticsReport("", 0,
+                0, 0.0, 0);
 
         public AnalyticsReport() {
         }
@@ -126,17 +128,20 @@ public class AnalyticsService {
     /**
      * Fetches relevant data for analytics report generation (Step 1).
      *
-     * The @Async annotation causes Spring to execute this method in a separate thread
-     * from a configured thread pool. This simulates fetching raw data from databases,
-     * APIs, or data warehouses before processing.
+     * The @Async annotation causes Spring to execute this method in a separate
+     * thread from a configured thread pool. This simulates fetching raw data
+     * from databases, APIs, or data warehouses before processing.
      *
-     * @param simulateError If true, simulates a service failure
+     * @param simulateError
+     *            If true, simulates a service failure
      * @return CompletableFuture containing the raw analytics data
      */
     @Async
-    public CompletableFuture<RawAnalyticsData> fetchReportData(boolean simulateError) {
+    public CompletableFuture<RawAnalyticsData> fetchReportData(
+            boolean simulateError) {
         try {
-            // Simulate data fetching: database queries, API calls, data warehouse access
+            // Simulate data fetching: database queries, API calls, data
+            // warehouse access
             Thread.sleep(2000);
 
             if (simulateError) {
@@ -148,11 +153,15 @@ public class AnalyticsService {
             // - External API calls
             // - Data warehouse aggregations
             // - Real-time data streams
-            RawAnalyticsData rawData = new RawAnalyticsData(
-                    1_234_567,    // Total sales amount from orders table
-                    15_432,       // Order count from orders table
-                    260_784,      // Total visitors from analytics
-                    8_921         // Conversion events from tracking
+            RawAnalyticsData rawData = new RawAnalyticsData(1_234_567, // Total
+                                                                       // sales
+                                                                       // amount
+                                                                       // from
+                                                                       // orders
+                                                                       // table
+                    15_432, // Order count from orders table
+                    260_784, // Total visitors from analytics
+                    8_921 // Conversion events from tracking
             );
 
             return CompletableFuture.completedFuture(rawData);
@@ -166,23 +175,27 @@ public class AnalyticsService {
     /**
      * Generates an analytics report from fetched data (Step 2).
      *
-     * The @Async annotation causes Spring to execute this method in a separate thread
-     * from a configured thread pool. This is the proper way to handle long-running
-     * operations in Spring Boot applications.
+     * The @Async annotation causes Spring to execute this method in a separate
+     * thread from a configured thread pool. This is the proper way to handle
+     * long-running operations in Spring Boot applications.
      *
-     * @param rawData The raw data fetched in step 1
-     * @param simulateError If true, simulates a service failure
+     * @param rawData
+     *            The raw data fetched in step 1
+     * @param simulateError
+     *            If true, simulates a service failure
      * @return CompletableFuture containing the generated report
      */
     @Async
-    public CompletableFuture<AnalyticsReport> generateReportFromData(RawAnalyticsData rawData,
-            boolean simulateError) {
+    public CompletableFuture<AnalyticsReport> generateReportFromData(
+            RawAnalyticsData rawData, boolean simulateError) {
         try {
-            // Simulate heavy processing: complex calculations, aggregations, transformations
+            // Simulate heavy processing: complex calculations, aggregations,
+            // transformations
             Thread.sleep(2000);
 
             if (simulateError) {
-                throw new RuntimeException("Failed to generate analytics report");
+                throw new RuntimeException(
+                        "Failed to generate analytics report");
             }
 
             // In a real application, this would:
@@ -190,15 +203,12 @@ public class AnalyticsService {
             // - Calculate metrics and aggregations (conversion rate, etc.)
             // - Apply business logic and transformations
             // - Format results for presentation
-            double conversionRate = (rawData.getConversions() * 100.0) / rawData.getTotalVisitors();
+            double conversionRate = (rawData.getConversions() * 100.0)
+                    / rawData.getTotalVisitors();
 
-            AnalyticsReport report = new AnalyticsReport(
-                    "Q4 2025",
-                    rawData.getTotalSales(),
-                    rawData.getOrderCount(),
-                    conversionRate,
-                    rawData.getConversions()
-            );
+            AnalyticsReport report = new AnalyticsReport("Q4 2025",
+                    rawData.getTotalSales(), rawData.getOrderCount(),
+                    conversionRate, rawData.getConversions());
 
             return CompletableFuture.completedFuture(report);
 

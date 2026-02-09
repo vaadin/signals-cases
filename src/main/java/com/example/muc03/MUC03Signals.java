@@ -2,9 +2,9 @@ package com.example.muc03;
 
 import org.springframework.stereotype.Component;
 
-import com.vaadin.signals.shared.SharedMapSignal;
-import com.vaadin.signals.shared.SharedValueSignal;
-import com.vaadin.signals.WritableSignal;
+import com.vaadin.flow.signals.WritableSignal;
+import com.vaadin.flow.signals.shared.SharedMapSignal;
+import com.vaadin.flow.signals.shared.SharedValueSignal;
 
 /**
  * Application-scoped signals for MUC03: Click Game

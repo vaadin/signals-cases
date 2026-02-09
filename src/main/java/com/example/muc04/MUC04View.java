@@ -1,19 +1,15 @@
 package com.example.muc04;
 
-import com.example.views.ActiveUsersDisplay;
-import com.example.views.MainLayout;
-
 import jakarta.annotation.security.PermitAll;
 
 import com.example.MissingAPI;
 import com.example.security.CurrentUserSignal;
-import com.example.muc04.MUC04Signals;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
+import com.example.views.ActiveUsersDisplay;
+import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -27,7 +23,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Multi-User Case 4: Collaborative Form Editing with Locking
@@ -97,21 +93,19 @@ public class MUC04View extends VerticalLayout {
                 .set("padding", "1em").set("border-radius", "4px");
 
         MissingAPI.bindChildren(editorsDiv,
-                muc04Signals.getFieldLocksSignal()
-                        .map(locks -> {
-                            if (locks.isEmpty()) {
-                                HorizontalLayout msg = new HorizontalLayout();
-                                Span msgText = new Span(
-                                        "No fields are currently being edited");
-                                msgText.getStyle().set("font-style", "italic");
-                                msg.add(msgText);
-                                return java.util.List.of(msg);
-                            }
+                muc04Signals.getFieldLocksSignal().map(locks -> {
+                    if (locks.isEmpty()) {
+                        HorizontalLayout msg = new HorizontalLayout();
+                        Span msgText = new Span(
+                                "No fields are currently being edited");
+                        msgText.getStyle().set("font-style", "italic");
+                        msg.add(msgText);
+                        return java.util.List.of(msg);
+                    }
 
-                            return locks.entrySet().stream().map(entry -> {
+                    return locks.entrySet().stream().map(entry -> {
                         String fieldLabel = formatFieldName(entry.getKey());
-                        MUC04Signals.FieldLock lock = entry.getValue()
-                                .value();
+                        MUC04Signals.FieldLock lock = entry.getValue().value();
                         boolean isCurrentSession = sessionId != null
                                 && lock.username().equals(currentUser)
                                 && lock.sessionId().equals(sessionId);
@@ -127,18 +121,16 @@ public class MUC04View extends VerticalLayout {
                                 .set("border-radius", "4px");
 
                         // Avatar
-                        Image avatar = new Image(
-                                MainLayout.getProfilePicturePath(lock.username()),
-                                "");
+                        Image avatar = new Image(MainLayout
+                                .getProfilePicturePath(lock.username()), "");
                         avatar.setWidth("32px");
                         avatar.setHeight("32px");
                         avatar.getStyle().set("border-radius", "50%")
                                 .set("object-fit", "cover");
 
                         // Field and user info
-                        Span label = new Span(
-                                String.format("🔒 %s: %s", fieldLabel,
-                                        lock.username()));
+                        Span label = new Span(String.format("🔒 %s: %s",
+                                fieldLabel, lock.username()));
 
                         item.add(avatar, label);
                         return item;
@@ -186,7 +178,7 @@ public class MUC04View extends VerticalLayout {
     }
 
     private TextField createLockedField(String fieldName, String label,
-            com.vaadin.signals.WritableSignal<String> signal) {
+            com.vaadin.flow.signals.WritableSignal<String> signal) {
         TextField field = new TextField(label);
         field.setWidthFull();
 
@@ -196,23 +188,21 @@ public class MUC04View extends VerticalLayout {
         // Lock field when focused
         field.addFocusListener(event -> {
             if (sessionId != null) {
-                muc04Signals.lockField(fieldName, currentUser,
-                        sessionId);
+                muc04Signals.lockField(fieldName, currentUser, sessionId);
             }
         });
 
         // Unlock when blurred
         field.addBlurListener(event -> {
             if (sessionId != null) {
-                muc04Signals.unlockField(fieldName, currentUser,
-                        sessionId);
+                muc04Signals.unlockField(fieldName, currentUser, sessionId);
             }
         });
 
         // Show who is editing
-        Signal<String> helperTextSignal = muc04Signals
-                .getFieldLocksSignal().map(locks -> {
-                    com.vaadin.signals.shared.SharedValueSignal<MUC04Signals.FieldLock> lockSignal = locks
+        Signal<String> helperTextSignal = muc04Signals.getFieldLocksSignal()
+                .map(locks -> {
+                    com.vaadin.flow.signals.shared.SharedValueSignal<MUC04Signals.FieldLock> lockSignal = locks
                             .get(fieldName);
                     if (lockSignal == null) {
                         return "Available to edit";
@@ -232,9 +222,9 @@ public class MUC04View extends VerticalLayout {
         field.getElement().bindProperty("helperText", helperTextSignal);
 
         // Disable if locked by another user
-        Signal<Boolean> enabledSignal = muc04Signals
-                .getFieldLocksSignal().map(locks -> {
-                    com.vaadin.signals.shared.SharedValueSignal<MUC04Signals.FieldLock> lockSignal = locks
+        Signal<Boolean> enabledSignal = muc04Signals.getFieldLocksSignal()
+                .map(locks -> {
+                    com.vaadin.flow.signals.shared.SharedValueSignal<MUC04Signals.FieldLock> lockSignal = locks
                             .get(fieldName);
                     if (lockSignal == null) {
                         return true;

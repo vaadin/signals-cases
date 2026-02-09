@@ -2,8 +2,8 @@ package com.example.signals;
 
 import org.springframework.stereotype.Component;
 
-import com.vaadin.signals.shared.SharedListSignal;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.shared.SharedListSignal;
 
 /**
  * Application-scoped registry of currently logged-in users. Provides a reactive
@@ -82,7 +82,8 @@ public class UserSessionRegistry {
     /**
      * Register a user as active with a specific session ID and initial route.
      */
-    public void registerUser(String username, String sessionId, String initialRoute) {
+    public void registerUser(String username, String sessionId,
+            String initialRoute) {
         if (username == null || sessionId == null) {
             throw new IllegalArgumentException(
                     "Username and sessionId cannot be null");
@@ -90,12 +91,13 @@ public class UserSessionRegistry {
 
         // Check using composite key
         String compositeKey = username + ":" + sessionId;
-        boolean exists = activeUsersSignal.value().stream().anyMatch(
-                userSignal -> compositeKey.equals(
-                        userSignal.value().getCompositeKey()));
+        boolean exists = activeUsersSignal.value().stream()
+                .anyMatch(userSignal -> compositeKey
+                        .equals(userSignal.value().getCompositeKey()));
 
         if (!exists) {
-            activeUsersSignal.insertLast(new UserInfo(username, sessionId, initialRoute, null));
+            activeUsersSignal.insertLast(
+                    new UserInfo(username, sessionId, initialRoute, null));
         } else if (initialRoute != null) {
             // User already registered, just update the route
             updateUserView(username, sessionId, initialRoute);
@@ -113,8 +115,8 @@ public class UserSessionRegistry {
 
         String compositeKey = username + ":" + sessionId;
         activeUsersSignal.value().stream()
-                .filter(userSignal -> compositeKey.equals(
-                        userSignal.value().getCompositeKey()))
+                .filter(userSignal -> compositeKey
+                        .equals(userSignal.value().getCompositeKey()))
                 .findFirst().ifPresent(activeUsersSignal::remove);
     }
 
@@ -147,23 +149,24 @@ public class UserSessionRegistry {
         }
 
         String compositeKey = username + ":" + sessionId;
-        return activeUsersSignal.value().stream().anyMatch(
-                userSignal -> compositeKey.equals(
-                        userSignal.value().getCompositeKey()));
+        return activeUsersSignal.value().stream()
+                .anyMatch(userSignal -> compositeKey
+                        .equals(userSignal.value().getCompositeKey()));
     }
 
     /**
      * Set a custom nickname for a user session.
      */
-    public void setNickname(String username, String sessionId, String nickname) {
+    public void setNickname(String username, String sessionId,
+            String nickname) {
         String compositeKey = username + ":" + sessionId;
         String trimmedNickname = (nickname == null || nickname.trim().isEmpty())
                 ? null
                 : nickname.trim();
 
         activeUsersSignal.value().stream()
-                .filter(userSignal -> compositeKey.equals(
-                        userSignal.value().getCompositeKey()))
+                .filter(userSignal -> compositeKey
+                        .equals(userSignal.value().getCompositeKey()))
                 .findFirst().ifPresent(userSignal -> {
                     UserInfo oldInfo = userSignal.value();
                     userSignal.value(oldInfo.withNickname(trimmedNickname));
@@ -176,8 +179,8 @@ public class UserSessionRegistry {
     public String getNickname(String username, String sessionId) {
         String compositeKey = username + ":" + sessionId;
         return activeUsersSignal.value().stream()
-                .filter(userSignal -> compositeKey.equals(
-                        userSignal.value().getCompositeKey()))
+                .filter(userSignal -> compositeKey
+                        .equals(userSignal.value().getCompositeKey()))
                 .findFirst().map(userSignal -> userSignal.value().nickname())
                 .orElse(null);
     }
@@ -191,8 +194,8 @@ public class UserSessionRegistry {
 
         // Find the user and update their view
         activeUsersSignal.value().stream()
-                .filter(userSignal -> compositeKey.equals(
-                        userSignal.value().getCompositeKey()))
+                .filter(userSignal -> compositeKey
+                        .equals(userSignal.value().getCompositeKey()))
                 .findFirst().ifPresent(userSignal -> {
                     UserInfo oldInfo = userSignal.value();
                     userSignal.value(oldInfo.withCurrentView(viewRoute));
@@ -222,17 +225,20 @@ public class UserSessionRegistry {
     /**
      * Update the tab activity state for a user session.
      *
-     * @param username  the username
-     * @param sessionId the session ID
-     * @param isActive  true if the tab is visible/active, false otherwise
+     * @param username
+     *            the username
+     * @param sessionId
+     *            the session ID
+     * @param isActive
+     *            true if the tab is visible/active, false otherwise
      */
     public void updateTabActivity(String username, String sessionId,
             boolean isActive) {
         String compositeKey = username + ":" + sessionId;
 
         activeUsersSignal.value().stream()
-                .filter(userSignal -> compositeKey.equals(
-                        userSignal.value().getCompositeKey()))
+                .filter(userSignal -> compositeKey
+                        .equals(userSignal.value().getCompositeKey()))
                 .findFirst().ifPresent(userSignal -> {
                     UserInfo oldInfo = userSignal.value();
                     userSignal.value(oldInfo.withTabActive(isActive));
@@ -242,19 +248,21 @@ public class UserSessionRegistry {
     /**
      * Update the last interaction time for a user session to the current time.
      *
-     * @param username  the username
-     * @param sessionId the session ID
+     * @param username
+     *            the username
+     * @param sessionId
+     *            the session ID
      */
     public void updateLastInteraction(String username, String sessionId) {
         String compositeKey = username + ":" + sessionId;
 
         activeUsersSignal.value().stream()
-                .filter(userSignal -> compositeKey.equals(
-                        userSignal.value().getCompositeKey()))
+                .filter(userSignal -> compositeKey
+                        .equals(userSignal.value().getCompositeKey()))
                 .findFirst().ifPresent(userSignal -> {
                     UserInfo oldInfo = userSignal.value();
-                    userSignal.value(
-                            oldInfo.withLastInteractionTime(System.currentTimeMillis()));
+                    userSignal.value(oldInfo.withLastInteractionTime(
+                            System.currentTimeMillis()));
                 });
     }
 

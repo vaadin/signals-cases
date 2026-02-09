@@ -33,19 +33,17 @@ public class InvoiceService {
 
     private List<Invoice> loadInitialInvoices() {
         // Stub implementation - returns mock data
-        return List.of(
-                new Invoice("INV-" + invoiceIdCounter++, "Acme Corp",
-                        LocalDate.of(2025, 1, 15),
-                        new BigDecimal("1250.00"), "Paid"),
+        return List.of(new Invoice("INV-" + invoiceIdCounter++, "Acme Corp",
+                LocalDate.of(2025, 1, 15), new BigDecimal("1250.00"), "Paid"),
                 new Invoice("INV-" + invoiceIdCounter++, "TechStart Inc",
-                        LocalDate.of(2025, 1, 16),
-                        new BigDecimal("3400.50"), "Pending"),
+                        LocalDate.of(2025, 1, 16), new BigDecimal("3400.50"),
+                        "Pending"),
                 new Invoice("INV-" + invoiceIdCounter++, "Global Solutions",
                         LocalDate.of(2025, 1, 17), new BigDecimal("890.00"),
                         "Paid"),
                 new Invoice("INV-" + invoiceIdCounter++, "Beta Corp",
-                        LocalDate.of(2025, 1, 18),
-                        new BigDecimal("2100.75"), "Overdue"));
+                        LocalDate.of(2025, 1, 18), new BigDecimal("2100.75"),
+                        "Overdue"));
     }
 
     private InvoiceDetails loadInitialInvoiceDetails(String invoiceId) {
@@ -56,20 +54,18 @@ public class InvoiceService {
         return switch (invoiceId) {
         case "INV-1" -> new InvoiceDetails(invoice, "contact@acmecorp.com",
                 "123 Main St, New York, NY 10001",
-                List.of(new LineItem(lineItemIdCounter++,
-                        "Software License", 5, new BigDecimal("200.00"),
-                        new BigDecimal("1000.00")),
-                        new LineItem(lineItemIdCounter++, "Support Package",
-                                1, new BigDecimal("250.00"),
+                List.of(new LineItem(lineItemIdCounter++, "Software License", 5,
+                        new BigDecimal("200.00"), new BigDecimal("1000.00")),
+                        new LineItem(lineItemIdCounter++, "Support Package", 1,
+                                new BigDecimal("250.00"),
                                 new BigDecimal("250.00"))),
                 "Paid on 2025-01-20");
         case "INV-2" -> new InvoiceDetails(invoice, "info@techstart.com",
                 "456 Tech Ave, San Francisco, CA 94102",
-                List.of(new LineItem(lineItemIdCounter++,
-                        "Enterprise License", 10, new BigDecimal("300.00"),
+                List.of(new LineItem(lineItemIdCounter++, "Enterprise License",
+                        10, new BigDecimal("300.00"),
                         new BigDecimal("3000.00")),
-                        new LineItem(lineItemIdCounter++,
-                                "Training Session", 2,
+                        new LineItem(lineItemIdCounter++, "Training Session", 2,
                                 new BigDecimal("200.00"),
                                 new BigDecimal("400.00")),
                         new LineItem(lineItemIdCounter++, "Setup Fee", 1,
@@ -79,20 +75,19 @@ public class InvoiceService {
         case "INV-3" -> new InvoiceDetails(invoice,
                 "billing@globalsolutions.com",
                 "789 Business Blvd, Boston, MA 02108",
-                List.of(new LineItem(lineItemIdCounter++,
-                        "Consulting Hours", 8, new BigDecimal("100.00"),
-                        new BigDecimal("800.00")),
-                        new LineItem(lineItemIdCounter++, "Travel Expenses",
-                                1, new BigDecimal("90.00"),
+                List.of(new LineItem(lineItemIdCounter++, "Consulting Hours", 8,
+                        new BigDecimal("100.00"), new BigDecimal("800.00")),
+                        new LineItem(lineItemIdCounter++, "Travel Expenses", 1,
+                                new BigDecimal("90.00"),
                                 new BigDecimal("90.00"))),
                 "Paid on 2025-01-25");
         case "INV-4" -> new InvoiceDetails(invoice, "accounts@betacorp.com",
                 "321 Commerce St, Chicago, IL 60601",
-                List.of(new LineItem(lineItemIdCounter++,
-                        "Annual Subscription", 1, new BigDecimal("2000.00"),
+                List.of(new LineItem(lineItemIdCounter++, "Annual Subscription",
+                        1, new BigDecimal("2000.00"),
                         new BigDecimal("2000.00")),
-                        new LineItem(lineItemIdCounter++, "Extra Storage",
-                                1, new BigDecimal("100.75"),
+                        new LineItem(lineItemIdCounter++, "Extra Storage", 1,
+                                new BigDecimal("100.75"),
                                 new BigDecimal("100.75"))),
                 "OVERDUE - Payment was due 2025-01-31");
         default -> null;
@@ -103,8 +98,7 @@ public class InvoiceService {
         var invoice = new Invoice("INV-" + invoiceIdCounter++, "",
                 LocalDate.now(), BigDecimal.ZERO, "");
         invoices.add(invoice);
-        invoiceDetails
-                .add(new InvoiceDetails(invoice, "", "", List.of(), ""));
+        invoiceDetails.add(new InvoiceDetails(invoice, "", "", List.of(), ""));
         return invoice;
     }
 
@@ -142,10 +136,9 @@ public class InvoiceService {
         });
         invoiceDetails.replaceAll(details -> {
             if (details.getInvoice().getId().equals(invoice.getId())) {
-                return new InvoiceDetails(invoice,
-                        details.getCustomerEmail(),
-                        details.getCustomerAddress(),
-                        details.getLineItems(), details.getPaymentStatus());
+                return new InvoiceDetails(invoice, details.getCustomerEmail(),
+                        details.getCustomerAddress(), details.getLineItems(),
+                        details.getPaymentStatus());
             }
             return details;
         });
@@ -161,23 +154,21 @@ public class InvoiceService {
         });
     }
 
-    public InvoiceDetails updateLineItem(Invoice invoice,
-            LineItem lineItem) {
+    public InvoiceDetails updateLineItem(Invoice invoice, LineItem lineItem) {
         invoiceDetails.replaceAll(oldDetails -> {
             if (oldDetails.getInvoice().getId().equals(invoice.getId())) {
                 List<LineItem> lineItems = new ArrayList<>(
                         oldDetails.getLineItems());
                 lineItems.replaceAll(li -> {
                     if (li.getId() == lineItem.getId()) {
-                        lineItem.setTotal(
-                                lineItem.getUnitPrice().multiply(BigDecimal
-                                        .valueOf(lineItem.getQuantity())));
+                        lineItem.setTotal(lineItem.getUnitPrice().multiply(
+                                BigDecimal.valueOf(lineItem.getQuantity())));
                         return lineItem;
                     }
                     return li;
                 });
-                oldDetails.setLineItems(
-                        Collections.unmodifiableList(lineItems));
+                oldDetails
+                        .setLineItems(Collections.unmodifiableList(lineItems));
                 return oldDetails;
             }
             return oldDetails;
@@ -192,8 +183,8 @@ public class InvoiceService {
         BigDecimal newTotal = invoiceDetails.stream()
                 .filter(details -> details.getInvoice().getId()
                         .equals(invoice.getId()))
-                .findFirst().map(InvoiceDetails::getLineItems)
-                .orElse(List.of()).stream().map(LineItem::getTotal)
+                .findFirst().map(InvoiceDetails::getLineItems).orElse(List.of())
+                .stream().map(LineItem::getTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         invoice.setTotal(newTotal);
         updateInvoice(invoice);
