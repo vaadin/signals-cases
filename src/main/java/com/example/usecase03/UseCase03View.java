@@ -2,29 +2,28 @@ package com.example.usecase03;
 
 import jakarta.annotation.security.PermitAll;
 
+import com.example.MissingAPI;
 import com.example.components.Slider;
 import com.example.views.MainLayout;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.local.ValueSignal;
-import com.vaadin.signals.WritableSignal;
-import com.vaadin.flow.component.ComponentEffect;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.WritableSignal;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-03", layout = MainLayout.class)
 @PageTitle("Use Case 3: Interactive SVG Shape Editor")
@@ -35,28 +34,44 @@ public class UseCase03View extends VerticalLayout {
     // Rectangle signals (green) - top left position
     private final WritableSignal<Integer> rectXSignal = new ValueSignal<>(100);
     private final WritableSignal<Integer> rectYSignal = new ValueSignal<>(50);
-    private final WritableSignal<Integer> rectWidthSignal = new ValueSignal<>(150);
-    private final WritableSignal<Integer> rectHeightSignal = new ValueSignal<>(80);
-    private final WritableSignal<Integer> rectCornerRadiusSignal = new ValueSignal<>(10);
-    private final WritableSignal<String> rectFillSignal = new ValueSignal<>("#10b981");
-    private final WritableSignal<String> rectStrokeSignal = new ValueSignal<>("#059669");
-    private final WritableSignal<Integer> rectStrokeWidthSignal = new ValueSignal<>(2);
-    private final WritableSignal<Double> rectOpacitySignal = new ValueSignal<>(1.0);
-    private final WritableSignal<Integer> rectRotationSignal = new ValueSignal<>(0);
+    private final WritableSignal<Integer> rectWidthSignal = new ValueSignal<>(
+            150);
+    private final WritableSignal<Integer> rectHeightSignal = new ValueSignal<>(
+            80);
+    private final WritableSignal<Integer> rectCornerRadiusSignal = new ValueSignal<>(
+            10);
+    private final WritableSignal<String> rectFillSignal = new ValueSignal<>(
+            "#10b981");
+    private final WritableSignal<String> rectStrokeSignal = new ValueSignal<>(
+            "#059669");
+    private final WritableSignal<Integer> rectStrokeWidthSignal = new ValueSignal<>(
+            2);
+    private final WritableSignal<Double> rectOpacitySignal = new ValueSignal<>(
+            1.0);
+    private final WritableSignal<Integer> rectRotationSignal = new ValueSignal<>(
+            0);
 
     // Star signals (orange) - below rectangle
-    private final WritableSignal<Integer> starPointsSignal = new ValueSignal<>(5);
-    private final WritableSignal<Integer> starSizeSignal = new ValueSignal<>(50);
+    private final WritableSignal<Integer> starPointsSignal = new ValueSignal<>(
+            5);
+    private final WritableSignal<Integer> starSizeSignal = new ValueSignal<>(
+            50);
     private final WritableSignal<Integer> starCxSignal = new ValueSignal<>(175);
     private final WritableSignal<Integer> starCySignal = new ValueSignal<>(300);
-    private final WritableSignal<Integer> starRotationSignal = new ValueSignal<>(0);
-    private final WritableSignal<String> starFillSignal = new ValueSignal<>("#f59e0b");
-    private final WritableSignal<String> starStrokeSignal = new ValueSignal<>("#d97706");
-    private final WritableSignal<Integer> starStrokeWidthSignal = new ValueSignal<>(2);
-    private final WritableSignal<Double> starOpacitySignal = new ValueSignal<>(1.0);
+    private final WritableSignal<Integer> starRotationSignal = new ValueSignal<>(
+            0);
+    private final WritableSignal<String> starFillSignal = new ValueSignal<>(
+            "#f59e0b");
+    private final WritableSignal<String> starStrokeSignal = new ValueSignal<>(
+            "#d97706");
+    private final WritableSignal<Integer> starStrokeWidthSignal = new ValueSignal<>(
+            2);
+    private final WritableSignal<Double> starOpacitySignal = new ValueSignal<>(
+            1.0);
 
     // Selected shape tracking
-    private final WritableSignal<String> selectedShapeSignal = new ValueSignal<>("rectangle");
+    private final WritableSignal<Integer> selectedShapeSignal = new ValueSignal<>(
+            0);
 
     private Element rectElement;
     private Element starElement;
@@ -101,50 +116,30 @@ public class UseCase03View extends VerticalLayout {
         panel.setPadding(false);
 
         // Shape selector tabs
-        Tab rectangleTab = new Tab("🟢 Rectangle");
-        Tab starTab = new Tab("🟠 Star");
+        Tab rectangleTab = new Tab("\uD83D\uDFE9 Rectangle");
+        Tab starTab = new Tab("⭐\uFE0F Star");
 
         Tabs shapeTabs = new Tabs(rectangleTab, starTab);
+        MissingAPI.tabsSyncSelectedIndex(shapeTabs, selectedShapeSignal);
         shapeTabs.setWidthFull();
 
         // Controls container that shows only the selected shape's controls
         Div controlsContainer = new Div();
         controlsContainer.setWidthFull();
 
+        // Show/hide controls based on selected shape
+
         // Rectangle controls
         Div rectangleControls = createRectangleControls();
+        rectangleControls.bindVisible(
+                selectedShapeSignal.map(Integer.valueOf(0)::equals));
 
         // Star controls
         Div starControls = createStarControls();
-
-        // Show/hide controls based on selected shape
-        ComponentEffect.effect(this, () -> {
-            String selected = selectedShapeSignal.value();
-            rectangleControls.setVisible("rectangle".equals(selected));
-            starControls.setVisible("star".equals(selected));
-        });
+        starControls.bindVisible(
+                selectedShapeSignal.map(Integer.valueOf(1)::equals));
 
         controlsContainer.add(rectangleControls, starControls);
-
-        // Sync tabs with signal
-        shapeTabs.addSelectedChangeListener(event -> {
-            Tab selectedTab = event.getSelectedTab();
-            if (selectedTab == rectangleTab) {
-                selectedShapeSignal.value("rectangle");
-            } else if (selectedTab == starTab) {
-                selectedShapeSignal.value("star");
-            }
-        });
-
-        // Sync signal with tabs (for when shape is selected by clicking)
-        ComponentEffect.effect(this, () -> {
-            String selected = selectedShapeSignal.value();
-            if ("rectangle".equals(selected)) {
-                shapeTabs.setSelectedTab(rectangleTab);
-            } else if ("star".equals(selected)) {
-                shapeTabs.setSelectedTab(starTab);
-            }
-        });
 
         // Reset button
         Button resetButton = new Button("Reset to Defaults", e -> resetAll());
@@ -159,8 +154,7 @@ public class UseCase03View extends VerticalLayout {
         Div container = new Div();
         container.getStyle()
                 .set("border", "2px solid var(--lumo-contrast-10pct)")
-                .set("padding", "20px")
-                .set("background", "white")
+                .set("padding", "20px").set("background", "white")
                 .set("border-radius", "8px")
                 .set("box-shadow", "0 2px 8px rgba(0,0,0,0.1)");
 
@@ -169,9 +163,7 @@ public class UseCase03View extends VerticalLayout {
         svg.setAttribute("width", "100%");
         svg.setAttribute("height", "500");
         svg.setAttribute("style", "max-width: 100%;");
-        svg.getStyle()
-                .set("background", "#fafafa")
-                .set("border-radius", "4px");
+        svg.getStyle().set("background", "#fafafa").set("border-radius", "4px");
 
         // Add background grid for reference
         Element defs = new Element("defs");
@@ -206,11 +198,11 @@ public class UseCase03View extends VerticalLayout {
 
         // Add click handlers to select shapes
         rectElement.addEventListener("click", e -> {
-            selectedShapeSignal.value("rectangle");
+            selectedShapeSignal.value(0);
         });
 
         starElement.addEventListener("click", e -> {
-            selectedShapeSignal.value("star");
+            selectedShapeSignal.value(1);
         });
 
         // Add cursor pointer style for shapes
@@ -236,7 +228,8 @@ public class UseCase03View extends VerticalLayout {
         // Stroke width increases when selected
         Signal<String> rectStrokeWidthComputed = Signal.computed(() -> {
             int baseWidth = rectStrokeWidthSignal.value();
-            boolean isSelected = "rectangle".equals(selectedShapeSignal.value());
+            boolean isSelected = "rectangle"
+                    .equals(selectedShapeSignal.value());
             return String.valueOf(isSelected ? baseWidth + 2 : baseWidth);
         });
         rect.bindAttribute("stroke-width", rectStrokeWidthComputed);
@@ -252,7 +245,8 @@ public class UseCase03View extends VerticalLayout {
             int centerX = x + w / 2;
             int centerY = y + h / 2;
             int rotation = rectRotationSignal.value();
-            return String.format("rotate(%d %d %d)", rotation, centerX, centerY);
+            return String.format("rotate(%d %d %d)", rotation, centerX,
+                    centerY);
         });
         rect.bindAttribute("transform", rectTransformSignal);
 
@@ -284,19 +278,23 @@ public class UseCase03View extends VerticalLayout {
         });
         polygon.bindAttribute("stroke-width", starStrokeWidthComputed);
 
-        polygon.bindAttribute("opacity", starOpacitySignal.map(String::valueOf));
+        polygon.bindAttribute("opacity",
+                starOpacitySignal.map(String::valueOf));
 
         // Computed transform: translate to position, then rotate
         Signal<String> starTransformSignal = Signal.computed(() -> {
             int rotation = starRotationSignal.value();
             int cx = starCxSignal.value();
             int cy = starCySignal.value();
-            // Since points are centered at (0,0), translate to position then rotate
-            return String.format("translate(%d %d) rotate(%d)", cx, cy, rotation);
+            // Since points are centered at (0,0), translate to position then
+            // rotate
+            return String.format("translate(%d %d) rotate(%d)", cx, cy,
+                    rotation);
         });
         polygon.bindAttribute("transform", starTransformSignal);
 
-        polygon.setAttribute("filter", "drop-shadow(2px 2px 4px rgba(0,0,0,0.2))");
+        polygon.setAttribute("filter",
+                "drop-shadow(2px 2px 4px rgba(0,0,0,0.2))");
 
         return polygon;
     }
@@ -317,38 +315,37 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500");
 
         Slider xSlider = new Slider("X", 0, 500);
-        xSlider.bind(rectXSignal);
+        xSlider.bindValue(mapIntegerToDoubleSignal(rectXSignal));
         xSlider.setWidthFull();
 
         Slider ySlider = new Slider("Y", 0, 500);
-        ySlider.bind(rectYSignal);
+        ySlider.bindValue(mapIntegerToDoubleSignal(rectYSignal));
         ySlider.setWidthFull();
 
         // Size section
         Span sizeLabel = new Span("Size");
         sizeLabel.getStyle().set("font-size", "var(--lumo-font-size-s)")
                 .set("color", "var(--lumo-secondary-text-color)")
-                .set("font-weight", "500")
-                .set("margin-top", "8px");
+                .set("font-weight", "500").set("margin-top", "8px");
 
         Slider widthSlider = new Slider("Width", 50, 250);
-        widthSlider.bind(rectWidthSignal);
+        widthSlider.bindValue(mapIntegerToDoubleSignal(rectWidthSignal));
         widthSlider.setWidthFull();
 
         Slider heightSlider = new Slider("Height", 30, 150);
-        heightSlider.bind(rectHeightSignal);
+        heightSlider.bindValue(mapIntegerToDoubleSignal(rectHeightSignal));
         heightSlider.setWidthFull();
 
         Slider cornerRadiusSlider = new Slider("Corner Radius", 0, 50);
-        cornerRadiusSlider.bind(rectCornerRadiusSignal);
+        cornerRadiusSlider
+                .bindValue(mapIntegerToDoubleSignal(rectCornerRadiusSignal));
         cornerRadiusSlider.setWidthFull();
 
         // Appearance section
         Span appearanceLabel = new Span("Appearance");
         appearanceLabel.getStyle().set("font-size", "var(--lumo-font-size-s)")
                 .set("color", "var(--lumo-secondary-text-color)")
-                .set("font-weight", "500")
-                .set("margin-top", "8px");
+                .set("font-weight", "500").set("margin-top", "8px");
 
         ComboBox<String> fillColorField = createColorPicker("Fill");
         fillColorField.bindValue(rectFillSignal);
@@ -366,16 +363,16 @@ public class UseCase03View extends VerticalLayout {
         Span transformLabel = new Span("Transform");
         transformLabel.getStyle().set("font-size", "var(--lumo-font-size-s)")
                 .set("color", "var(--lumo-secondary-text-color)")
-                .set("font-weight", "500")
-                .set("margin-top", "8px");
+                .set("font-weight", "500").set("margin-top", "8px");
 
         Slider rotationSlider = new Slider("Rotation", 0, 360);
-        rotationSlider.bind(rectRotationSignal);
+        rotationSlider.bindValue(mapIntegerToDoubleSignal(rectRotationSignal));
         rotationSlider.setWidthFull();
 
-        fields.add(positionLabel, xSlider, ySlider, sizeLabel, widthSlider, heightSlider,
-                cornerRadiusSlider, appearanceLabel, fillColorField, strokeColorField, opacitySlider,
-                transformLabel, rotationSlider);
+        fields.add(positionLabel, xSlider, ySlider, sizeLabel, widthSlider,
+                heightSlider, cornerRadiusSlider, appearanceLabel,
+                fillColorField, strokeColorField, opacitySlider, transformLabel,
+                rotationSlider);
 
         section.add(fields);
         return section;
@@ -397,34 +394,32 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500");
 
         Slider cxSlider = new Slider("Center X", 0, 500);
-        cxSlider.bind(starCxSignal);
+        cxSlider.bindValue(mapIntegerToDoubleSignal(starCxSignal));
         cxSlider.setWidthFull();
 
         Slider cySlider = new Slider("Center Y", 0, 500);
-        cySlider.bind(starCySignal);
+        cySlider.bindValue(mapIntegerToDoubleSignal(starCySignal));
         cySlider.setWidthFull();
 
         // Shape section
         Span shapeLabel = new Span("Shape");
         shapeLabel.getStyle().set("font-size", "var(--lumo-font-size-s)")
                 .set("color", "var(--lumo-secondary-text-color)")
-                .set("font-weight", "500")
-                .set("margin-top", "8px");
+                .set("font-weight", "500").set("margin-top", "8px");
 
         Slider pointsSlider = new Slider("Points", 3, 10);
-        pointsSlider.bind(starPointsSignal);
+        pointsSlider.bindValue(mapIntegerToDoubleSignal(starPointsSignal));
         pointsSlider.setWidthFull();
 
         Slider sizeSlider = new Slider("Size", 30, 80);
-        sizeSlider.bind(starSizeSignal);
+        sizeSlider.bindValue(mapIntegerToDoubleSignal(starSizeSignal));
         sizeSlider.setWidthFull();
 
         // Appearance section
         Span appearanceLabel = new Span("Appearance");
         appearanceLabel.getStyle().set("font-size", "var(--lumo-font-size-s)")
                 .set("color", "var(--lumo-secondary-text-color)")
-                .set("font-weight", "500")
-                .set("margin-top", "8px");
+                .set("font-weight", "500").set("margin-top", "8px");
 
         ComboBox<String> fillColorField = createColorPicker("Fill");
         fillColorField.bindValue(starFillSignal);
@@ -442,15 +437,15 @@ public class UseCase03View extends VerticalLayout {
         Span transformLabel = new Span("Transform");
         transformLabel.getStyle().set("font-size", "var(--lumo-font-size-s)")
                 .set("color", "var(--lumo-secondary-text-color)")
-                .set("font-weight", "500")
-                .set("margin-top", "8px");
+                .set("font-weight", "500").set("margin-top", "8px");
 
         Slider rotationSlider = new Slider("Rotation", 0, 360);
-        rotationSlider.bind(starRotationSignal);
+        rotationSlider.bindValue(mapIntegerToDoubleSignal(starRotationSignal));
         rotationSlider.setWidthFull();
 
-        fields.add(positionLabel, cxSlider, cySlider, shapeLabel, pointsSlider, sizeSlider,
-                appearanceLabel, fillColorField, strokeColorField, opacitySlider, transformLabel, rotationSlider);
+        fields.add(positionLabel, cxSlider, cySlider, shapeLabel, pointsSlider,
+                sizeSlider, appearanceLabel, fillColorField, strokeColorField,
+                opacitySlider, transformLabel, rotationSlider);
 
         section.add(fields);
         return section;
@@ -461,8 +456,7 @@ public class UseCase03View extends VerticalLayout {
      */
     private ComboBox<String> createColorPicker(String label) {
         ComboBox<String> combo = new ComboBox<>(label);
-        combo.setItems(
-                "#3b82f6", // Blue
+        combo.setItems("#3b82f6", // Blue
                 "#ef4444", // Red
                 "#10b981", // Green
                 "#f59e0b", // Orange
@@ -471,29 +465,29 @@ public class UseCase03View extends VerticalLayout {
                 "#14b8a6", // Teal
                 "#f97316", // Deep Orange
                 "#6366f1", // Indigo
-                "#84cc16"  // Lime
+                "#84cc16" // Lime
         );
 
         // Custom renderer to show color swatch
-        combo.setRenderer(new com.vaadin.flow.data.renderer.ComponentRenderer<>(color -> {
-            HorizontalLayout layout = new HorizontalLayout();
-            layout.setAlignItems(HorizontalLayout.Alignment.CENTER);
-            layout.setSpacing(true);
+        combo.setRenderer(
+                new com.vaadin.flow.data.renderer.ComponentRenderer<>(color -> {
+                    HorizontalLayout layout = new HorizontalLayout();
+                    layout.setAlignItems(HorizontalLayout.Alignment.CENTER);
+                    layout.setSpacing(true);
 
-            Div swatch = new Div();
-            swatch.getStyle()
-                    .set("width", "20px")
-                    .set("height", "20px")
-                    .set("background-color", color)
-                    .set("border", "1px solid var(--lumo-contrast-20pct)")
-                    .set("border-radius", "4px");
+                    Div swatch = new Div();
+                    swatch.getStyle().set("width", "20px").set("height", "20px")
+                            .set("background-color", color)
+                            .set("border",
+                                    "1px solid var(--lumo-contrast-20pct)")
+                            .set("border-radius", "4px");
 
-            Span text = new Span(color);
-            text.getStyle().set("font-size", "var(--lumo-font-size-s)");
+                    Span text = new Span(color);
+                    text.getStyle().set("font-size", "var(--lumo-font-size-s)");
 
-            layout.add(swatch, text);
-            return layout;
-        }));
+                    layout.add(swatch, text);
+                    return layout;
+                }));
 
         return combo;
     }
@@ -501,10 +495,14 @@ public class UseCase03View extends VerticalLayout {
     /**
      * Generate SVG polygon points for a star shape.
      *
-     * @param numPoints Number of points on the star (3-10)
-     * @param size Outer radius of the star
-     * @param cx Center X coordinate
-     * @param cy Center Y coordinate
+     * @param numPoints
+     *            Number of points on the star (3-10)
+     * @param size
+     *            Outer radius of the star
+     * @param cx
+     *            Center X coordinate
+     * @param cy
+     *            Center Y coordinate
      * @return SVG points attribute string
      */
     private String generateStarPoints(int numPoints, int size, int cx, int cy) {
@@ -550,4 +548,11 @@ public class UseCase03View extends VerticalLayout {
         starStrokeWidthSignal.value(2);
         starOpacitySignal.value(1.0);
     }
+
+    private WritableSignal<Double> mapIntegerToDoubleSignal(
+            WritableSignal<Integer> integerSignal) {
+        return integerSignal.map(Integer::doubleValue,
+                (Integer oldValue, Double newValue) -> newValue.intValue());
+    }
+
 }

@@ -1,8 +1,8 @@
 package com.example.usecase11;
 
-import com.example.views.MainLayout;
-
 import jakarta.annotation.security.PermitAll;
+
+import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -16,23 +16,22 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.local.ValueSignal;
-import com.vaadin.signals.WritableSignal;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.WritableSignal;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
  * Use Case 11: Responsive Layout with Container Size Signal
  *
- * Demonstrates responsive content inside a resizable container using a split panel.
- * The content adapts to the available width as you drag the splitter, showing
- * how components can be responsive within any container, not just the window.
+ * Demonstrates responsive content inside a resizable container using a split
+ * panel. The content adapts to the available width as you drag the splitter,
+ * showing how components can be responsive within any container, not just the
+ * window.
  *
- * Key Patterns:
- * - ResizeObserver for container size tracking
- * - Signal from container resize events
- * - Computed signals for breakpoint detection
- * - Responsive component visibility and layout within a fixed container
- * - Split panel with draggable divider
+ * Key Patterns: - ResizeObserver for container size tracking - Signal from
+ * container resize events - Computed signals for breakpoint detection -
+ * Responsive component visibility and layout within a fixed container - Split
+ * panel with draggable divider
  */
 @Route(value = "use-case-11", layout = MainLayout.class)
 @PageTitle("Use Case 11: Responsive Layout")
@@ -84,7 +83,8 @@ public class UseCase11View extends VerticalLayout {
         setPadding(true);
         setSizeFull();
 
-        H2 title = new H2("Use Case 11: Responsive Content in Resizable Container");
+        H2 title = new H2(
+                "Use Case 11: Responsive Content in Resizable Container");
 
         Paragraph description = new Paragraph(
                 "This use case demonstrates responsive content inside a resizable container. "
@@ -95,7 +95,8 @@ public class UseCase11View extends VerticalLayout {
         // Create split layout
         SplitLayout splitLayout = new SplitLayout();
         splitLayout.setSizeFull();
-        splitLayout.setSplitterPosition(60); // Start at 60% for the primary content
+        splitLayout.setSplitterPosition(60); // Start at 60% for the primary
+                                             // content
 
         // Left side: Static info panel
         Div infoPanel = createInfoPanel();
@@ -108,61 +109,61 @@ public class UseCase11View extends VerticalLayout {
 
         // Info box
         Div tipBox = new Div();
-        tipBox.getStyle()
-                .set("background-color", "#e0f7fa")
-                .set("padding", "1em")
-                .set("border-radius", "4px")
-                .set("margin-bottom", "1em")
-                .set("font-style", "italic");
+        tipBox.getStyle().set("background-color", "#e0f7fa")
+                .set("padding", "1em").set("border-radius", "4px")
+                .set("margin-bottom", "1em").set("font-style", "italic");
         tipBox.add(new Paragraph(
-                "💡 Drag the splitter to resize the content area. " +
-                "The responsive content will adapt to different widths, " +
-                "showing mobile layout (< 400px), tablet layout (400-700px), or desktop layout (≥ 700px). " +
-                "This demonstrates container queries with Signals using ResizeObserver."));
+                "💡 Drag the splitter to resize the content area. "
+                        + "The responsive content will adapt to different widths, "
+                        + "showing mobile layout (< 400px), tablet layout (400-700px), or desktop layout (≥ 700px). "
+                        + "This demonstrates container queries with Signals using ResizeObserver."));
 
         add(title, description, tipBox, splitLayout);
     }
 
     private Div createInfoPanel() {
         Div panel = new Div();
-        panel.getStyle()
-                .set("padding", "1em")
-                .set("background-color", "#f5f5f5")
-                .set("height", "100%")
+        panel.getStyle().set("padding", "1em")
+                .set("background-color", "#f5f5f5").set("height", "100%")
                 .set("overflow-y", "auto");
 
         H3 title = new H3("Info Panel");
         title.getStyle().set("margin-top", "0");
 
         Paragraph info = new Paragraph(
-                "This is a static side panel. The main content on the left adapts " +
-                "to its container size as you drag the splitter.");
+                "This is a static side panel. The main content on the left adapts "
+                        + "to its container size as you drag the splitter.");
 
         H3 statsTitle = new H3("Current Size");
 
         // Container size display
         Div sizeDisplay = new Div();
-        sizeDisplay.getStyle()
-                .set("background-color", "#ffffff")
-                .set("padding", "1em")
-                .set("border-radius", "4px")
+        sizeDisplay.getStyle().set("background-color", "#ffffff")
+                .set("padding", "1em").set("border-radius", "4px")
                 .set("margin", "1em 0");
 
         Paragraph widthPara = new Paragraph();
-        widthPara.getStyle().set("font-family", "monospace").set("margin", "0.25em 0");
-        Signal<String> widthText = containerSizeSignal.map(size -> "Width: " + size.getWidth() + "px");
+        widthPara.getStyle().set("font-family", "monospace").set("margin",
+                "0.25em 0");
+        Signal<String> widthText = containerSizeSignal
+                .map(size -> "Width: " + size.getWidth() + "px");
         widthPara.bindText(widthText);
 
         Paragraph heightPara = new Paragraph();
-        heightPara.getStyle().set("font-family", "monospace").set("margin", "0.25em 0");
-        Signal<String> heightText = containerSizeSignal.map(size -> "Height: " + size.getHeight() + "px");
+        heightPara.getStyle().set("font-family", "monospace").set("margin",
+                "0.25em 0");
+        Signal<String> heightText = containerSizeSignal
+                .map(size -> "Height: " + size.getHeight() + "px");
         heightPara.bindText(heightText);
 
         Paragraph breakpointPara = new Paragraph();
-        breakpointPara.getStyle().set("font-weight", "bold").set("margin", "0.5em 0 0 0");
+        breakpointPara.getStyle().set("font-weight", "bold").set("margin",
+                "0.5em 0 0 0");
         Signal<String> breakpointText = containerSizeSignal.map(size -> {
-            if (size.isSmall()) return "📱 Small (< 400px)";
-            if (size.isMedium()) return "💻 Medium (400-700px)";
+            if (size.isSmall())
+                return "📱 Small (< 400px)";
+            if (size.isMedium())
+                return "💻 Medium (400-700px)";
             return "🖥️ Large (≥ 700px)";
         });
         breakpointPara.bindText(breakpointText);
@@ -175,44 +176,42 @@ public class UseCase11View extends VerticalLayout {
 
     private Div createResponsiveContent() {
         Div container = new Div();
-        container.getStyle()
-                .set("padding", "1em")
-                .set("height", "100%")
-                .set("overflow-y", "auto")
-                .set("background-color", "#ffffff");
+        container.getStyle().set("padding", "1em").set("height", "100%")
+                .set("overflow-y", "auto").set("background-color", "#ffffff");
 
         // Small width content
-        Div smallContent = createSection(
-                "📱 Small Width Layout",
-                "This is the mobile view (width < 400px). Navigation is stacked vertically, " +
-                "and complex UI elements are simplified or hidden.",
+        Div smallContent = createSection("📱 Small Width Layout",
+                "This is the mobile view (width < 400px). Navigation is stacked vertically, "
+                        + "and complex UI elements are simplified or hidden.",
                 "#fff3e0");
-        Signal<Boolean> isSmall = containerSizeSignal.map(ContainerSize::isSmall);
+        Signal<Boolean> isSmall = containerSizeSignal
+                .map(ContainerSize::isSmall);
         smallContent.bindVisible(isSmall);
 
         // Medium width content
-        Div mediumContent = createSection(
-                "💻 Medium Width Layout",
-                "This is the tablet view (400px ≤ width < 700px). Navigation can be horizontal, " +
-                "and more content is visible with a balanced layout.",
+        Div mediumContent = createSection("💻 Medium Width Layout",
+                "This is the tablet view (400px ≤ width < 700px). Navigation can be horizontal, "
+                        + "and more content is visible with a balanced layout.",
                 "#f3e5f5");
-        Signal<Boolean> isMedium = containerSizeSignal.map(ContainerSize::isMedium);
+        Signal<Boolean> isMedium = containerSizeSignal
+                .map(ContainerSize::isMedium);
         mediumContent.bindVisible(isMedium);
 
         // Large width content
-        Div largeContent = createSection(
-                "🖥️ Large Width Layout",
-                "This is the desktop view (width ≥ 700px). All features are visible, " +
-                "with multi-column layouts and detailed information.",
+        Div largeContent = createSection("🖥️ Large Width Layout",
+                "This is the desktop view (width ≥ 700px). All features are visible, "
+                        + "with multi-column layouts and detailed information.",
                 "#e8f5e9");
-        Signal<Boolean> isLarge = containerSizeSignal.map(ContainerSize::isLarge);
+        Signal<Boolean> isLarge = containerSizeSignal
+                .map(ContainerSize::isLarge);
         largeContent.bindVisible(isLarge);
 
         // Responsive card grid
         H3 cardGridTitle = new H3("Responsive Card Grid");
         Component cardGrid = createResponsiveCardGrid();
 
-        container.add(smallContent, mediumContent, largeContent, cardGridTitle, cardGrid);
+        container.add(smallContent, mediumContent, largeContent, cardGridTitle,
+                cardGrid);
         return container;
     }
 
@@ -240,20 +239,19 @@ public class UseCase11View extends VerticalLayout {
         // Create sample cards
         for (int i = 1; i <= 6; i++) {
             Div card = new Div();
-            card.getStyle()
-                    .set("background-color", "#f9f9f9")
+            card.getStyle().set("background-color", "#f9f9f9")
                     .set("border", "1px solid #e0e0e0")
-                    .set("border-radius", "4px")
-                    .set("padding", "1em")
-                    .set("margin", "0.5em")
-                    .set("flex", "1 1 150px")
+                    .set("border-radius", "4px").set("padding", "1em")
+                    .set("margin", "0.5em").set("flex", "1 1 150px")
                     .set("min-width", "120px");
 
             H3 cardTitle = new H3("Card " + i);
-            cardTitle.getStyle().set("margin", "0 0 0.5em 0").set("font-size", "1em");
+            cardTitle.getStyle().set("margin", "0 0 0.5em 0").set("font-size",
+                    "1em");
 
             Paragraph cardContent = new Paragraph("Content item " + i);
-            cardContent.getStyle().set("margin", "0").set("font-size", "0.875em");
+            cardContent.getStyle().set("margin", "0").set("font-size",
+                    "0.875em");
 
             card.add(cardTitle, cardContent);
             gridContainer.add(card);

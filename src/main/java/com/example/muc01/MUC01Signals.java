@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter;
 
 import org.springframework.stereotype.Component;
 
-import com.vaadin.signals.shared.SharedListSignal;
+import com.vaadin.flow.signals.shared.SharedListSignal;
 
 /**
  * Application-scoped signals for MUC01: Shared Chat

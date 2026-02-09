@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.example.views.MainLayout;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.Focusable;
@@ -31,9 +32,9 @@ import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.local.ListSignal;
-import com.vaadin.signals.local.ValueSignal;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.local.ListSignal;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 import static com.example.usecase07.InvoiceService.EMPTY_DETAILS;
 import static com.example.usecase07.InvoiceService.EMPTY_INVOICE;

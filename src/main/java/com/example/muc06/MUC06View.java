@@ -1,8 +1,5 @@
 package com.example.muc06;
 
-import com.example.views.ActiveUsersDisplay;
-import com.example.views.MainLayout;
-
 import jakarta.annotation.security.PermitAll;
 
 import java.time.LocalDate;
@@ -10,13 +7,10 @@ import java.util.UUID;
 
 import com.example.MissingAPI;
 import com.example.security.CurrentUserSignal;
-import com.example.muc06.MUC06Signals;
-import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
+import com.example.views.ActiveUsersDisplay;
+import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -34,9 +28,9 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.shared.SharedListSignal;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.shared.SharedValueSignal;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.shared.SharedListSignal;
+import com.vaadin.flow.signals.shared.SharedValueSignal;
 
 /**
  * Multi-User Case 6: Shared Task List with Inline Editing
@@ -93,8 +87,9 @@ public class MUC06View extends VerticalLayout {
 
         // Computed signals for statistics
         Signal<Integer> totalSignal = tasksSignal.map(list -> list.size());
-        Signal<Integer> completedSignal = Signal.computed(() -> (int) tasksSignal
-                .value().stream().filter(t -> t.value().completed()).count());
+        Signal<Integer> completedSignal = Signal
+                .computed(() -> (int) tasksSignal.value().stream()
+                        .filter(t -> t.value().completed()).count());
         Signal<Integer> pendingSignal = Signal
                 .computed(() -> totalSignal.value() - completedSignal.value());
 
@@ -134,17 +129,15 @@ public class MUC06View extends VerticalLayout {
                 .set("margin-bottom", "1em");
 
         MissingAPI.bindChildren(tasksContainer,
-                tasksSignal
-                        .map(taskSignals -> taskSignals.stream()
-                                .map(taskSignal -> createTaskRow(taskSignal,
-                                        tasksSignal))
-                                .toList()));
+                tasksSignal.map(taskSignals -> taskSignals.stream().map(
+                        taskSignal -> createTaskRow(taskSignal, tasksSignal))
+                        .toList()));
 
         // Add task button
         Button addButton = new Button("Add Task", event -> {
             String id = "task-" + UUID.randomUUID().toString();
-            MUC06Signals.Task newTask = new MUC06Signals.Task(
-                    id, "", false, LocalDate.now());
+            MUC06Signals.Task newTask = new MUC06Signals.Task(id, "", false,
+                    LocalDate.now());
             tasksSignal.insertLast(newTask);
         });
         addButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -190,8 +183,8 @@ public class MUC06View extends VerticalLayout {
         titleField.setWidth("400px");
         titleField.addValueChangeListener(e -> {
             MUC06Signals.Task current = taskSignal.value();
-            taskSignal.value(new MUC06Signals.Task(current.id(),
-                    e.getValue(), current.completed(), current.dueDate()));
+            taskSignal.value(new MUC06Signals.Task(current.id(), e.getValue(),
+                    current.completed(), current.dueDate()));
         });
 
         // Add strikethrough styling for completed tasks

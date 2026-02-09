@@ -9,19 +9,24 @@ import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Service;
 
 /**
- * Service containing @Tool annotated methods for LLM to manage tasks.
- * Uses Spring AI 2.0's ToolContext to access view-local state.
+ * Service containing @Tool annotated methods for LLM to manage tasks. Uses
+ * Spring AI 2.0's ToolContext to access view-local state.
  */
 @Service
 public class TaskToolsService {
 
-    private static final Logger logger = LoggerFactory.getLogger(TaskToolsService.class);
+    private static final Logger logger = LoggerFactory
+            .getLogger(TaskToolsService.class);
 
     @Tool(description = "Add a new task with title, description, and optional due date (format: YYYY-MM-DD)")
-    public String addTask(String title, String description, String dueDate, ToolContext toolContext) {
-        logger.info("🔧 Tool called: addTask(title={}, description={}, dueDate={})", title, description, dueDate);
+    public String addTask(String title, String description, String dueDate,
+            ToolContext toolContext) {
+        logger.info(
+                "🔧 Tool called: addTask(title={}, description={}, dueDate={})",
+                title, description, dueDate);
 
-        TaskContext context = (TaskContext) toolContext.getContext().get("taskContext");
+        TaskContext context = (TaskContext) toolContext.getContext()
+                .get("taskContext");
         if (context == null) {
             return "Error: Task context not available";
         }
@@ -44,7 +49,8 @@ public class TaskToolsService {
     public String removeTask(String taskId, ToolContext toolContext) {
         logger.info("🔧 Tool called: removeTask(taskId={})", taskId);
 
-        TaskContext context = (TaskContext) toolContext.getContext().get("taskContext");
+        TaskContext context = (TaskContext) toolContext.getContext()
+                .get("taskContext");
         if (context == null) {
             return "Error: Task context not available";
         }
@@ -55,10 +61,14 @@ public class TaskToolsService {
     }
 
     @Tool(description = "Update a task's title and/or description by its ID")
-    public String updateTask(String taskId, String title, String description, ToolContext toolContext) {
-        logger.info("🔧 Tool called: updateTask(taskId={}, title={}, description={})", taskId, title, description);
+    public String updateTask(String taskId, String title, String description,
+            ToolContext toolContext) {
+        logger.info(
+                "🔧 Tool called: updateTask(taskId={}, title={}, description={})",
+                taskId, title, description);
 
-        TaskContext context = (TaskContext) toolContext.getContext().get("taskContext");
+        TaskContext context = (TaskContext) toolContext.getContext()
+                .get("taskContext");
         if (context == null) {
             return "Error: Task context not available";
         }
@@ -69,16 +79,20 @@ public class TaskToolsService {
     }
 
     @Tool(description = "Change a task's status by its ID. Use DONE to mark as completed, TODO to reopen a task, or IN_PROGRESS for tasks being worked on.")
-    public String changeStatus(String taskId, String status, ToolContext toolContext) {
-        logger.info("🔧 Tool called: changeStatus(taskId={}, status={})", taskId, status);
+    public String changeStatus(String taskId, String status,
+            ToolContext toolContext) {
+        logger.info("🔧 Tool called: changeStatus(taskId={}, status={})",
+                taskId, status);
 
-        TaskContext context = (TaskContext) toolContext.getContext().get("taskContext");
+        TaskContext context = (TaskContext) toolContext.getContext()
+                .get("taskContext");
         if (context == null) {
             return "Error: Task context not available";
         }
 
         try {
-            Task.TaskStatus taskStatus = Task.TaskStatus.valueOf(status.toUpperCase());
+            Task.TaskStatus taskStatus = Task.TaskStatus
+                    .valueOf(status.toUpperCase());
             context.changeStatus(taskId, taskStatus);
             logger.info("✅ Task status changed to {}", taskStatus);
             return "Task status changed to " + taskStatus;
@@ -88,10 +102,13 @@ public class TaskToolsService {
     }
 
     @Tool(description = "Update a task's due date by its ID. Date format: YYYY-MM-DD")
-    public String updateDueDate(String taskId, String dueDate, ToolContext toolContext) {
-        logger.info("🔧 Tool called: updateDueDate(taskId={}, dueDate={})", taskId, dueDate);
+    public String updateDueDate(String taskId, String dueDate,
+            ToolContext toolContext) {
+        logger.info("🔧 Tool called: updateDueDate(taskId={}, dueDate={})",
+                taskId, dueDate);
 
-        TaskContext context = (TaskContext) toolContext.getContext().get("taskContext");
+        TaskContext context = (TaskContext) toolContext.getContext()
+                .get("taskContext");
         if (context == null) {
             return "Error: Task context not available";
         }
@@ -110,7 +127,8 @@ public class TaskToolsService {
     public String listTasks(ToolContext toolContext) {
         logger.info("🔧 Tool called: listTasks()");
 
-        TaskContext context = (TaskContext) toolContext.getContext().get("taskContext");
+        TaskContext context = (TaskContext) toolContext.getContext()
+                .get("taskContext");
         if (context == null) {
             return "Error: Task context not available";
         }
@@ -121,8 +139,10 @@ public class TaskToolsService {
         }
 
         String result = tasks.stream()
-                .map(task -> String.format("- [%s] %s (Status: %s, Due: %s)\n  Description: %s",
-                        task.id(), task.title(), task.status(), task.dueDate(), task.description()))
+                .map(task -> String.format(
+                        "- [%s] %s (Status: %s, Due: %s)\n  Description: %s",
+                        task.id(), task.title(), task.status(), task.dueDate(),
+                        task.description()))
                 .reduce((a, b) -> a + "\n\n" + b).orElse("");
 
         logger.info("✅ Listed {} tasks", tasks.size());

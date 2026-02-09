@@ -1,8 +1,11 @@
 package com.example.usecase08;
 
-import java.util.List;
-import com.example.views.MainLayout;
 import jakarta.annotation.security.PermitAll;
+
+import java.util.List;
+
+import com.example.views.MainLayout;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
@@ -18,10 +21,9 @@ import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.local.ValueSignal;
-import com.vaadin.signals.WritableSignal;
-import com.vaadin.signals.function.SignalMapper;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.function.SignalMapper;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-08", layout = MainLayout.class)
 @PageTitle("Use Case 8: Multi-Step Wizard with Validation")
@@ -133,20 +135,26 @@ public class UseCase08View extends VerticalLayout {
                 currentStepSignal.map(step -> step == Step.REVIEW));
 
         Signal<Boolean> step1ValidSignal = Signal.computed(() -> {
-            boolean firstNameValid = firstNameSignal.map(isValid(firstNameField)).value();
-            boolean lastNameValid = lastNameSignal.map(isValid(lastNameField)).value();
+            boolean firstNameValid = firstNameSignal
+                    .map(isValid(firstNameField)).value();
+            boolean lastNameValid = lastNameSignal.map(isValid(lastNameField))
+                    .value();
             boolean emailValid = emailSignal.map(isValid(emailField)).value();
             return firstNameValid && lastNameValid && emailValid;
         });
 
         Signal<Boolean> step2ValidSignal = Signal.computed(() -> {
-            boolean companyNameValid = companyNameSignal.map(isValid(companyNameField)).value();
-            boolean companySizeValid = companySizeSignal.map(isValid(companySizeSelect)).value();
-            boolean industryValid = industrySignal.map(isValid(industrySelect)).value();
+            boolean companyNameValid = companyNameSignal
+                    .map(isValid(companyNameField)).value();
+            boolean companySizeValid = companySizeSignal
+                    .map(isValid(companySizeSelect)).value();
+            boolean industryValid = industrySignal.map(isValid(industrySelect))
+                    .value();
             return companyNameValid && companySizeValid && industryValid;
         });
 
-        Signal<Boolean> step3ValidSignal = Signal.computed(() -> planSignal.map(isValid(planSelect)).value());
+        Signal<Boolean> step3ValidSignal = Signal
+                .computed(() -> planSignal.map(isValid(planSelect)).value());
 
         // Navigation buttons
         HorizontalLayout navigationLayout = new HorizontalLayout();

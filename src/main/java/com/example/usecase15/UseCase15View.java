@@ -1,7 +1,5 @@
 package com.example.usecase15;
 
-import com.example.views.MainLayout;
-
 import jakarta.annotation.security.PermitAll;
 
 import java.util.List;
@@ -12,6 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import com.example.MissingAPI;
+import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -27,9 +26,9 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.WritableSignal;
-import com.vaadin.signals.local.ValueSignal;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.WritableSignal;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
  * Use Case 15: Debounced Search
@@ -182,44 +181,40 @@ public class UseCase15View extends VerticalLayout {
                 .set("flex-direction", "column").set("gap", "0.5em")
                 .set("margin-top", "1em");
 
-        MissingAPI
-                .bindComponentChildren(resultsContainer,
-                        searchResultsSignal,
-                        product -> {
-                            Div card = new Div();
-                            card.getStyle().set("background-color", "#ffffff")
-                                    .set("border",
-                                            "1px solid var(--lumo-contrast-20pct)")
-                                    .set("border-radius", "4px")
-                                    .set("padding", "1em")
-                                    .set("display", "flex")
-                                    .set("justify-content", "space-between")
-                                    .set("align-items", "center");
+        MissingAPI.bindComponentChildren(resultsContainer, searchResultsSignal,
+                product -> {
+                    Div card = new Div();
+                    card.getStyle().set("background-color", "#ffffff")
+                            .set("border",
+                                    "1px solid var(--lumo-contrast-20pct)")
+                            .set("border-radius", "4px").set("padding", "1em")
+                            .set("display", "flex")
+                            .set("justify-content", "space-between")
+                            .set("align-items", "center");
 
-                            Div leftSide = new Div();
-                            Div nameDiv = new Div();
-                            nameDiv.getStyle().set("font-weight", "bold");
+                    Div leftSide = new Div();
+                    Div nameDiv = new Div();
+                    nameDiv.getStyle().set("font-weight", "bold");
 
-                            // Highlight matching text
-                            String query = debouncedQuerySignal.value();
-                            nameDiv.getElement().setProperty("innerHTML",
-                                    highlightMatch(product.name(), query));
+                    // Highlight matching text
+                    String query = debouncedQuerySignal.value();
+                    nameDiv.getElement().setProperty("innerHTML",
+                            highlightMatch(product.name(), query));
 
-                            Div categoryDiv = new Div(product.category());
-                            categoryDiv.getStyle().set("font-size", "0.9em")
-                                    .set("color",
-                                            "var(--lumo-secondary-text-color)");
+                    Div categoryDiv = new Div(product.category());
+                    categoryDiv.getStyle().set("font-size", "0.9em")
+                            .set("color", "var(--lumo-secondary-text-color)");
 
-                            leftSide.add(nameDiv, categoryDiv);
+                    leftSide.add(nameDiv, categoryDiv);
 
-                            Div priceDiv = new Div("$"
-                                    + String.format("%.2f", product.price()));
-                            priceDiv.getStyle().set("font-weight", "bold")
-                                    .set("color", "var(--lumo-primary-color)");
+                    Div priceDiv = new Div(
+                            "$" + String.format("%.2f", product.price()));
+                    priceDiv.getStyle().set("font-weight", "bold").set("color",
+                            "var(--lumo-primary-color)");
 
-                            card.add(leftSide, priceDiv);
-                            return card;
-                        });
+                    card.add(leftSide, priceDiv);
+                    return card;
+                });
 
         // Info box
         Div infoBox = new Div();

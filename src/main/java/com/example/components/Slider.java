@@ -13,7 +13,8 @@ import com.vaadin.flow.dom.Element;
  * Supports both integer and decimal values.
  */
 @Tag("div")
-public class Slider extends AbstractSinglePropertyField<Slider, Double> implements HasSize {
+public class Slider extends AbstractSinglePropertyField<Slider, Double>
+        implements HasSize {
 
     private final Span labelSpan;
     private final Span valueSpan;
@@ -51,17 +52,16 @@ public class Slider extends AbstractSinglePropertyField<Slider, Double> implemen
         // Header with label and value
         HorizontalLayout header = new HorizontalLayout();
         header.setWidthFull();
-        header.setJustifyContentMode(HorizontalLayout.JustifyContentMode.BETWEEN);
+        header.setJustifyContentMode(
+                HorizontalLayout.JustifyContentMode.BETWEEN);
         header.getStyle().set("margin-bottom", "4px");
 
         labelSpan = new Span(label);
-        labelSpan.getStyle()
-                .set("font-size", "var(--lumo-font-size-s)")
+        labelSpan.getStyle().set("font-size", "var(--lumo-font-size-s)")
                 .set("font-weight", "500");
 
         valueSpan = new Span(formatValue(getValue()));
-        valueSpan.getStyle()
-                .set("font-size", "var(--lumo-font-size-s)")
+        valueSpan.getStyle().set("font-size", "var(--lumo-font-size-s)")
                 .set("color", "var(--lumo-secondary-text-color)");
 
         header.add(labelSpan, valueSpan);
@@ -73,9 +73,7 @@ public class Slider extends AbstractSinglePropertyField<Slider, Double> implemen
         rangeInput.setAttribute("max", String.valueOf(max));
         rangeInput.setAttribute("step", String.valueOf(step));
         rangeInput.setAttribute("value", String.valueOf(getValue()));
-        rangeInput.getStyle()
-                .set("width", "100%")
-                .set("cursor", "pointer");
+        rangeInput.getStyle().set("width", "100%").set("cursor", "pointer");
 
         // Listen to input events
         rangeInput.addEventListener("input", e -> {
@@ -102,7 +100,8 @@ public class Slider extends AbstractSinglePropertyField<Slider, Double> implemen
     @Override
     protected void setPresentationValue(Double newPresentationValue) {
         if (newPresentationValue != null) {
-            rangeInput.setAttribute("value", String.valueOf(newPresentationValue));
+            rangeInput.setAttribute("value",
+                    String.valueOf(newPresentationValue));
             valueSpan.setText(formatValue(newPresentationValue));
         }
     }
@@ -159,16 +158,18 @@ public class Slider extends AbstractSinglePropertyField<Slider, Double> implemen
     }
 
     /**
-     * Bind this slider to an Integer signal with automatic conversion.
-     * Uses a different method name to avoid type erasure clash with bindValue(WritableSignal<Double>).
+     * Bind this slider to an Integer signal with automatic conversion. Uses a
+     * different method name to avoid type erasure clash with
+     * bindValue(WritableSignal<Double>).
      */
-    public void bind(com.vaadin.signals.WritableSignal<Integer> signal) {
+    public void bind(com.vaadin.flow.signals.WritableSignal<Integer> signal) {
         // Initialize slider with current signal value
         setValue(signal.value().doubleValue());
 
         // Update signal when slider changes
         addValueChangeListener(e -> {
-            if (!e.isFromClient()) return; // Avoid feedback loop
+            if (!e.isFromClient())
+                return; // Avoid feedback loop
             signal.value(e.getValue().intValue());
         });
 

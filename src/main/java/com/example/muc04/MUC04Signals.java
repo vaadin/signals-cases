@@ -2,9 +2,9 @@ package com.example.muc04;
 
 import org.springframework.stereotype.Component;
 
-import com.vaadin.signals.shared.SharedMapSignal;
-import com.vaadin.signals.shared.SharedValueSignal;
-import com.vaadin.signals.WritableSignal;
+import com.vaadin.flow.signals.WritableSignal;
+import com.vaadin.flow.signals.shared.SharedMapSignal;
+import com.vaadin.flow.signals.shared.SharedValueSignal;
 
 /**
  * Application-scoped signals for MUC04: Form Locking
@@ -17,8 +17,10 @@ public class MUC04Signals {
 
     private final WritableSignal<String> companyNameSignal = new SharedValueSignal<>(
             "");
-    private final WritableSignal<String> addressSignal = new SharedValueSignal<>("");
-    private final WritableSignal<String> phoneSignal = new SharedValueSignal<>("");
+    private final WritableSignal<String> addressSignal = new SharedValueSignal<>(
+            "");
+    private final WritableSignal<String> phoneSignal = new SharedValueSignal<>(
+            "");
     // MapSignal where key is fieldName and value is FieldLock
     private final SharedMapSignal<FieldLock> fieldLocksSignal = new SharedMapSignal<>(
             FieldLock.class);

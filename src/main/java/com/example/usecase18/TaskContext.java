@@ -4,8 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Interface for tool functions to access view-local task state.
- * The view provides an implementation that modifies the ListSignal.
+ * Interface for tool functions to access view-local task state. The view
+ * provides an implementation that modifies the ListSignal.
  */
 public interface TaskContext {
 

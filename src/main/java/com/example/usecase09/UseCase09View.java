@@ -2,7 +2,6 @@ package com.example.usecase09;
 
 import jakarta.annotation.security.PermitAll;
 
-import com.example.MissingAPI;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -18,12 +17,12 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.BinderValidationStatus;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.local.ValueSignal;
-import com.vaadin.signals.WritableSignal;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-09", layout = MainLayout.class)
 @PageTitle("Use Case 9: Form with Binder Integration and Signal Validation")
@@ -55,29 +54,14 @@ public class UseCase09View extends VerticalLayout {
                 "Confirm Password");
         ComboBox<AccountType> accountTypeSelect = new ComboBox<>("Account Type",
                 AccountType.values());
-        accountTypeSelect.setValue(AccountType.PERSONAL);
         IntegerField ageField = new IntegerField("Age");
-        ageField.setValue(0);
 
-        Signal<String> usernameSignal = MissingAPI.binderBind(binder,
-                usernameField, "username");
-        Signal<String> emailSignal = MissingAPI.binderBind(binder, emailField,
-                "email");
-        Signal<String> passwordSignal = MissingAPI.binderBind(binder,
-                passwordField, "password");
-        Signal<String> confirmPasswordSignal = MissingAPI.binderBind(binder,
-                confirmPasswordField, "confirmPassword");
-        Signal<AccountType> accountTypeSignal = MissingAPI.binderBind(binder,
-                accountTypeSelect, "accountType");
-        Signal<Integer> ageSignal = MissingAPI.binderBind(binder, ageField,
-                "age");
+        ValueSignal<AccountType> accountTypeSignal = new ValueSignal<>(
+                AccountType.PERSONAL);
+        ValueSignal<Integer> ageSignal = new ValueSignal<>(0);
 
-        // Validation signals
-        Signal<Boolean> passwordsMatchSignal = Signal.computed(() -> {
-            String password = passwordSignal.value();
-            String confirmPassword = confirmPasswordSignal.value();
-            return password != null && password.equals(confirmPassword);
-        });
+        accountTypeSelect.bindValue(accountTypeSignal);
+        ageField.bindValue(ageSignal);
 
         Signal<Boolean> ageValidSignal = Signal.computed(() -> {
             Integer age = ageSignal.value();
@@ -92,40 +76,30 @@ public class UseCase09View extends VerticalLayout {
             return age >= 13;
         });
 
-        WritableSignal<Boolean> formValidSignal = new ValueSignal<>(false);
-
-        // cross-field validation effects
-        MissingAPI.binderValidateInEffect(binder, confirmPasswordField,
-                "confirmPassword", passwordsMatchSignal);
-        MissingAPI.binderValidateInEffect(binder, ageField, "age",
-                accountTypeSignal);
-
         // binder bindings
         binder.forField(usernameField)
-                .withValidator(value -> {
-                            String username = usernameSignal.value();
-                            return username != null && username.length() >= 3;
-                        },
+                .withValidator(value -> value != null && value.length() >= 3,
                         "Username must be at least 3 characters")
                 .bind("username");
         binder.forField(emailField)
-                .withValidator(value -> {
-                            String email = emailSignal.value();
-                            return email != null && email.contains("@") && email.contains(".");
-                        },
+                .withValidator(
+                        value -> value != null && value.contains("@")
+                                && value.contains("."),
                         "Please enter a valid email address")
                 .bind("email");
-        binder.forField(passwordField)
-                .withValidator(value -> {
-                            String password = passwordSignal.value();
-                            return password != null && password.length() >= 8;
-                        },
+
+        Binder.Binding<UserRegistration, String> pwBinding = binder
+                .forField(passwordField)
+                .withValidator(value -> value != null && value.length() >= 8,
                         "Password must be at least 8 characters")
                 .bind("password");
-        binder.forField(confirmPasswordField)
-                .withValidator(value -> passwordsMatchSignal.value(),
-                        "Passwords do not match")
-                .bind("confirmPassword");
+        // cross-field validation using Binder.Binding.value()
+        binder.forField(confirmPasswordField).withValidator(
+                value -> value != null && value.equals(pwBinding.value()),
+                "Passwords do not match").bind("confirmPassword");
+
+        binder.forField(accountTypeSelect).bind("accountType");
+        // another cross-field validation, this one uses signals directly
         binder.forField(ageField)
                 .withValidator(value -> ageValidSignal.value(), value -> {
                     AccountType accountType = accountTypeSignal.value();
@@ -134,10 +108,6 @@ public class UseCase09View extends VerticalLayout {
                     }
                     return "Personal accounts require age 13 or older";
                 }).bind("age");
-
-        binder.addStatusChangeListener(event -> {
-            formValidSignal.value(event.getBinder().isValid());
-        });
 
         binder.readBean(
                 new UserRegistration("", "", "", "", AccountType.PERSONAL, 0));
@@ -157,18 +127,19 @@ public class UseCase09View extends VerticalLayout {
                         "Please fix validation errors before submitting.");
             }
         });
-        submitButton.bindEnabled(formValidSignal);
+        submitButton.bindEnabled(
+                binder.getValidationStatus().map(BinderValidationStatus::isOk));
 
         // Form status
         Div statusDiv = new Div();
         Span statusLabel = new Span();
-        statusLabel.bindText(formValidSignal
-                .map(valid -> valid ? "Form is valid - Ready to submit"
+        statusLabel.bindText(binder.getValidationStatus()
+                .map(status -> status.isOk() ? "Form is valid - Ready to submit"
                         : "Please complete all required fields correctly"));
-        statusLabel.getStyle().bind("color",
-                formValidSignal.map(valid -> valid ? "green" : "orange"));
-        statusLabel.getStyle().bind("font-weight",
-                formValidSignal.map(valid -> valid ? "bold" : "normal"));
+        statusLabel.getStyle().bind("color", binder.getValidationStatus()
+                .map(status -> status.isOk() ? "green" : "orange"));
+        statusLabel.getStyle().bind("font-weight", binder.getValidationStatus()
+                .map(status -> status.isOk() ? "bold" : "normal"));
         statusDiv.add(statusLabel);
 
         add(title, description, usernameField, emailField, passwordField,

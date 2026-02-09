@@ -18,21 +18,26 @@ import org.springframework.stereotype.Service;
 public class DataLoadingService {
 
     private static final Random RANDOM = new Random();
-    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter
+            .ofPattern("HH:mm:ss");
 
     /**
      * Loads data asynchronously with a simulated delay.
      *
-     * The @Async annotation causes Spring to execute this method in a separate thread
-     * from a configured thread pool, enabling true parallel execution.
+     * The @Async annotation causes Spring to execute this method in a separate
+     * thread from a configured thread pool, enabling true parallel execution.
      *
-     * @param id Unique identifier for the data item
-     * @param delayMs Simulated loading delay in milliseconds
-     * @param shouldSimulateErrors If true, has ~30% chance to fail
+     * @param id
+     *            Unique identifier for the data item
+     * @param delayMs
+     *            Simulated loading delay in milliseconds
+     * @param shouldSimulateErrors
+     *            If true, has ~30% chance to fail
      * @return CompletableFuture containing the loaded data
      */
     @Async
-    public CompletableFuture<String> loadDataAsync(String id, int delayMs, boolean shouldSimulateErrors) {
+    public CompletableFuture<String> loadDataAsync(String id, int delayMs,
+            boolean shouldSimulateErrors) {
         try {
             // Simulate data loading delay (e.g., database query, API call)
             Thread.sleep(delayMs);
@@ -45,16 +50,10 @@ public class DataLoadingService {
             // Generate mock data with timestamp
             String timestamp = LocalDateTime.now().format(TIME_FORMATTER);
             String data = String.format(
-                "Data loaded successfully!\n" +
-                "Time: %s\n" +
-                "Duration: %dms\n" +
-                "Sample values: %d, %d, %d",
-                timestamp,
-                delayMs,
-                RANDOM.nextInt(100),
-                RANDOM.nextInt(100),
-                RANDOM.nextInt(100)
-            );
+                    "Data loaded successfully!\n" + "Time: %s\n"
+                            + "Duration: %dms\n" + "Sample values: %d, %d, %d",
+                    timestamp, delayMs, RANDOM.nextInt(100),
+                    RANDOM.nextInt(100), RANDOM.nextInt(100));
 
             return CompletableFuture.completedFuture(data);
 

@@ -4,15 +4,15 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinSession;
 
 /**
- * Helper class for generating globally unique session identifiers.
- * Combines VaadinSession ID (HTTP session) with UI ID to ensure uniqueness
- * across all browser tabs and sessions.
+ * Helper class for generating globally unique session identifiers. Combines
+ * VaadinSession ID (HTTP session) with UI ID to ensure uniqueness across all
+ * browser tabs and sessions.
  */
 public class SessionIdHelper {
 
     /**
-     * Get the current globally unique session ID.
-     * Format: {vaadinSessionId}:{uiId}
+     * Get the current globally unique session ID. Format:
+     * {vaadinSessionId}:{uiId}
      *
      * @return unique session identifier for the current UI instance
      */

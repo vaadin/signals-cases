@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 
 import com.example.MissingAPI;
 import com.example.views.MainLayout;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
@@ -17,9 +18,9 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.local.ValueSignal;
-import com.vaadin.signals.WritableSignal;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.WritableSignal;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-01", layout = MainLayout.class)
 @PageTitle("Use Case 1: Dynamic Button State")
@@ -89,8 +90,9 @@ public class UseCase01View extends VerticalLayout {
         Button submitButton = new Button();
 
         // Bind enabled state: enabled when valid AND not submitting
-        submitButton.bindEnabled(Signal.computed(() -> isValidSignal.value()
-                && (submissionStateSignal.value() != SubmissionState.SUBMITTING)));
+        submitButton.bindEnabled(Signal
+                .computed(() -> isValidSignal.value() && (submissionStateSignal
+                        .value() != SubmissionState.SUBMITTING)));
 
         // Bind button text based on submission state
         submitButton
@@ -102,8 +104,8 @@ public class UseCase01View extends VerticalLayout {
                 }));
 
         // Bind theme variant
-        submitButton.bindThemeName("success", submissionStateSignal
-                .map(SubmissionState.SUCCESS::equals));
+        submitButton.bindThemeName("success",
+                submissionStateSignal.map(SubmissionState.SUCCESS::equals));
         submitButton.bindThemeName("primary", submissionStateSignal
                 .map(state -> state != SubmissionState.SUCCESS));
 
@@ -117,8 +119,8 @@ public class UseCase01View extends VerticalLayout {
 
                     // Show success notification and reset form
                     getUI().ifPresent(ui -> ui.access(() -> {
-                        Notification notification = Notification.show(
-                                "Account created successfully!");
+                        Notification notification = Notification
+                                .show("Account created successfully!");
                         notification.addThemeVariants(
                                 NotificationVariant.LUMO_SUCCESS);
                         notification.setDuration(3000);

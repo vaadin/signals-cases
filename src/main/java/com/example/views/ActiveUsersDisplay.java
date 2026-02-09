@@ -7,19 +7,20 @@ import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.signals.Signal;
+import com.vaadin.flow.signals.Signal;
 
 /**
- * Reusable component for displaying active users/sessions.
- * Shows a count and comma-separated list of display names.
+ * Reusable component for displaying active users/sessions. Shows a count and
+ * comma-separated list of display names.
  */
 public class ActiveUsersDisplay extends Div {
 
     /**
-     * Creates an active users display showing all users with default styling and
-     * "Active sessions" label.
+     * Creates an active users display showing all users with default styling
+     * and "Active sessions" label.
      *
-     * @param userSessionRegistry the registry to get user data from
+     * @param userSessionRegistry
+     *            the registry to get user data from
      */
     public ActiveUsersDisplay(UserSessionRegistry userSessionRegistry) {
         this(userSessionRegistry, "Active sessions", null, false);
@@ -28,8 +29,10 @@ public class ActiveUsersDisplay extends Div {
     /**
      * Creates an active users display filtered to a specific view route.
      *
-     * @param userSessionRegistry the registry to get user data from
-     * @param viewRoute the view route to filter by (e.g., "muc-01")
+     * @param userSessionRegistry
+     *            the registry to get user data from
+     * @param viewRoute
+     *            the view route to filter by (e.g., "muc-01")
      */
     public ActiveUsersDisplay(UserSessionRegistry userSessionRegistry,
             String viewRoute) {
@@ -37,13 +40,16 @@ public class ActiveUsersDisplay extends Div {
     }
 
     /**
-     * Creates an active users display with custom label text and optional accent
-     * border.
+     * Creates an active users display with custom label text and optional
+     * accent border.
      *
-     * @param userSessionRegistry the registry to get user data from
-     * @param labelText the text to show before the count (e.g., "Active users",
+     * @param userSessionRegistry
+     *            the registry to get user data from
+     * @param labelText
+     *            the text to show before the count (e.g., "Active users",
      *            "Active sessions")
-     * @param showAccentBorder if true, shows a colored left border
+     * @param showAccentBorder
+     *            if true, shows a colored left border
      */
     public ActiveUsersDisplay(UserSessionRegistry userSessionRegistry,
             String labelText, boolean showAccentBorder) {
@@ -53,11 +59,15 @@ public class ActiveUsersDisplay extends Div {
     /**
      * Creates an active users display with all customization options.
      *
-     * @param userSessionRegistry the registry to get user data from
-     * @param labelText the text to show before the count (e.g., "Active users",
+     * @param userSessionRegistry
+     *            the registry to get user data from
+     * @param labelText
+     *            the text to show before the count (e.g., "Active users",
      *            "Active sessions")
-     * @param viewRoute the view route to filter by, or null for all users
-     * @param showAccentBorder if true, shows a colored left border
+     * @param viewRoute
+     *            the view route to filter by, or null for all users
+     * @param showAccentBorder
+     *            if true, shows a colored left border
      */
     public ActiveUsersDisplay(UserSessionRegistry userSessionRegistry,
             String labelText, String viewRoute, boolean showAccentBorder) {
@@ -83,9 +93,8 @@ public class ActiveUsersDisplay extends Div {
                 : userSessionRegistry.getDisplayNamesSignal();
 
         // Title with count
-        Span title = new Span(displayNamesSignal
-                .map(displayNames -> "👥 " + labelText + ": "
-                        + displayNames.size()));
+        Span title = new Span(displayNamesSignal.map(displayNames -> "👥 "
+                + labelText + ": " + displayNames.size()));
         title.getStyle().set("font-weight", "500");
 
         // Bind user avatars and names
@@ -121,10 +130,12 @@ public class ActiveUsersDisplay extends Div {
 
                 // Avatar (default 40x40 size)
                 Avatar avatar = new Avatar(displayName);
-                avatar.setImage(MainLayout.getProfilePicturePath(user.username()));
+                avatar.setImage(
+                        MainLayout.getProfilePicturePath(user.username()));
 
                 Span nameLabel = new Span(displayName);
-                nameLabel.getStyle().set("font-size", "var(--lumo-font-size-s)");
+                nameLabel.getStyle().set("font-size",
+                        "var(--lumo-font-size-s)");
 
                 userItem.add(avatar, nameLabel);
                 return userItem;

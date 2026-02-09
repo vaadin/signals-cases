@@ -1,7 +1,5 @@
 package com.example.usecase18;
 
-import com.example.views.MainLayout;
-
 import jakarta.annotation.security.PermitAll;
 
 import java.time.LocalDate;
@@ -9,10 +7,12 @@ import java.util.UUID;
 
 import com.example.security.CurrentUserSignal;
 import com.example.signals.UserSessionRegistry;
+import com.example.views.MainLayout;
+
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.shared.SharedListSignal;
+import com.vaadin.flow.signals.shared.SharedListSignal;
 
 @Route(value = "use-case-18", layout = MainLayout.class)
 @PageTitle("Use Case 18: LLM-Powered Task List")
@@ -21,27 +21,29 @@ import com.vaadin.signals.shared.SharedListSignal;
 public class UseCase18View extends AbstractTaskChatView {
 
     public UseCase18View(TaskLLMService taskLLMService,
-                          CurrentUserSignal currentUserSignal,
-                          UserSessionRegistry userSessionRegistry) {
-        super(
-            new SharedListSignal<>(Task.class),                    // View-local task signal
-            new SharedListSignal<>(ChatMessageData.class),         // View-local chat signal
-            taskLLMService,
-            UUID.randomUUID().toString(),                    // Per-instance conversation ID
-            currentUserSignal,                                // Current user for avatar/name
-            userSessionRegistry                               // For display name lookup
+            CurrentUserSignal currentUserSignal,
+            UserSessionRegistry userSessionRegistry) {
+        super(new SharedListSignal<>(Task.class), // View-local task signal
+                new SharedListSignal<>(ChatMessageData.class), // View-local
+                                                               // chat signal
+                taskLLMService, UUID.randomUUID().toString(), // Per-instance
+                                                              // conversation ID
+                currentUserSignal, // Current user for avatar/name
+                userSessionRegistry // For display name lookup
         );
 
         // Initialize sample tasks for single-user view
-        tasksSignal.insertLast(Task.create("Review pull requests",
-            "Review and merge pending pull requests")
-            .withDueDate(LocalDate.now().plusDays(2)));
-        tasksSignal.insertLast(Task.create("Write unit tests",
-            "Add unit tests for new features")
-            .withStatus(Task.TaskStatus.IN_PROGRESS)
-            .withDueDate(LocalDate.now().plusDays(5)));
-        tasksSignal.insertLast(Task.create("Deploy to staging",
-            "Deploy latest changes to staging environment")
-            .withDueDate(LocalDate.now().plusDays(7)));
+        tasksSignal.insertLast(Task
+                .create("Review pull requests",
+                        "Review and merge pending pull requests")
+                .withDueDate(LocalDate.now().plusDays(2)));
+        tasksSignal.insertLast(Task
+                .create("Write unit tests", "Add unit tests for new features")
+                .withStatus(Task.TaskStatus.IN_PROGRESS)
+                .withDueDate(LocalDate.now().plusDays(5)));
+        tasksSignal.insertLast(Task
+                .create("Deploy to staging",
+                        "Deploy latest changes to staging environment")
+                .withDueDate(LocalDate.now().plusDays(7)));
     }
 }
