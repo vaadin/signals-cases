@@ -7,7 +7,7 @@ import java.util.ResourceBundle;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.SessionScope;
 
-import com.example.preferences.UserPreferences;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.WritableSignal;
 
@@ -23,12 +23,6 @@ public class TranslationService {
 
     private static final String BUNDLE_NAME = "i18n.messages";
 
-    private final WritableSignal<Locale> localeSignal;
-
-    public TranslationService(UserPreferences userPreferences) {
-        this.localeSignal = userPreferences.localeSignal();
-    }
-
     /**
      * Returns a computed signal that provides the translated string for the given key.
      * The signal automatically recomputes when the locale changes.
@@ -38,7 +32,7 @@ public class TranslationService {
      */
     public Signal<String> t(String key) {
         return Signal.computed(() -> {
-            Locale locale = localeSignal.value();
+            Locale locale = UI.getCurrent().localeSignal().value();
             try {
                 ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
                 if (bundle.containsKey(key)) {
@@ -55,6 +49,6 @@ public class TranslationService {
      * Returns the current locale signal for direct access.
      */
     public WritableSignal<Locale> getLocaleSignal() {
-        return localeSignal;
+        return UI.getCurrent().localeSignal();
     }
 }

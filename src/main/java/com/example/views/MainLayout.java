@@ -12,6 +12,7 @@ import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.DetachEvent;
@@ -139,8 +140,8 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         localeSelector.setWidth("100px");
         localeSelector.getStyle().set("margin-right", "1em");
 
-        // Initialize selected value from user preferences
-        Locale currentLocale = userPreferences.localeSignal().value();
+        // Initialize selected value from UI locale signal
+        Locale currentLocale = UI.getCurrent().localeSignal().value();
         String initialSelection = localeMap.entrySet().stream()
                 .filter(e -> e.getValue().getLanguage().equals(currentLocale.getLanguage()))
                 .map(Map.Entry::getKey)
@@ -152,7 +153,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         localeSelector.addValueChangeListener(event -> {
             Locale selectedLocale = localeMap.get(event.getValue());
             if (selectedLocale != null) {
-                userPreferences.localeSignal().value(selectedLocale);
+                UI.getCurrent().localeSignal().value(selectedLocale);
             }
         });
 

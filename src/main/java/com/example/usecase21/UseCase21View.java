@@ -6,6 +6,7 @@ import java.util.Locale;
 
 import com.example.views.MainLayout;
 import com.vaadin.flow.component.ComponentEffect;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
@@ -152,7 +153,7 @@ public class UseCase21View extends VerticalLayout {
 
         Span languageValue = new Span();
         Signal<String> languageNameSignal = Signal.computed(() -> {
-            Locale locale = t.getLocaleSignal().value();
+            Locale locale = UI.getCurrent().localeSignal().value();
             return locale.getDisplayLanguage(locale);
         });
         languageValue.bindText(languageNameSignal);
@@ -169,7 +170,7 @@ public class UseCase21View extends VerticalLayout {
         localeLabel.getStyle().set("font-weight", "bold");
 
         Span localeValue = new Span();
-        localeValue.bindText(t.getLocaleSignal().map(Locale::toLanguageTag));
+        localeValue.bindText(UI.getCurrent().localeSignal().map(Locale::toLanguageTag));
         localeValue.getStyle()
                 .set("font-family", "monospace")
                 .set("background-color", "var(--lumo-contrast-10pct)")
