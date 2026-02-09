@@ -321,6 +321,21 @@ quantityField.bindValue(quantitySignal);
 
 ---
 
+### UC 21: Signals-Based i18n
+
+**Description**: Reactive internationalization using signals and Java ResourceBundles. A session-scoped `TranslationService` returns computed signals that automatically recompute translated strings when the UI locale changes. All text — headings, paragraphs, form labels, placeholders, and buttons — updates instantly without page reload.
+
+**Key Patterns**:
+- **Reactive translations** - `TranslationService.t(key)` returns a `Signal<String>` backed by `ResourceBundle`
+- **Locale signal** - `UI.getCurrent().localeSignal()` as the reactive locale source
+- **bindText()** - Binding translated signals to headings, paragraphs, spans, and buttons
+- **ComponentEffect.bind()** - Reactively updating non-text properties (labels, placeholders) on form fields
+- **Session-scoped service** - Spring `@SessionScope` translation service per user session
+
+**Route**: `/use-case-21`
+
+---
+
 ### UC 22: Two-Way Mapped Signals
 
 **Description**: Comprehensive demonstration of the `WritableSignal.map(getter, merger)` API for two-way computed signals. Shows how to bind form fields directly to immutable record properties with automatic bidirectional synchronization.
