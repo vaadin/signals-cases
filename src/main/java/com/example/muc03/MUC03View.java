@@ -1,21 +1,18 @@
 package com.example.muc03;
 
-import com.example.views.ActiveUsersDisplay;
-import com.example.views.MainLayout;
-
 import jakarta.annotation.security.PermitAll;
 
 import java.util.Random;
 
 import com.example.MissingAPI;
 import com.example.security.CurrentUserSignal;
-import com.example.muc03.MUC03Signals;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
+import com.example.views.ActiveUsersDisplay;
+import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -85,9 +82,8 @@ public class MUC03View extends VerticalLayout {
         Div clicksStatus = new Div();
         clicksStatus.getStyle().set("font-size", "1em").set("color",
                 "var(--lumo-secondary-text-color)");
-        clicksStatus.bindText(muc03Signals.getClicksRemainingSignal()
-                .map(clicks -> clicks > 0 ? "Targets remaining: " + clicks
-                        : ""));
+        clicksStatus.bindText(muc03Signals.getClicksRemainingSignal().map(
+                clicks -> clicks > 0 ? "Targets remaining: " + clicks : ""));
 
         // Game area
         Div gameArea = new Div();
@@ -111,10 +107,10 @@ public class MUC03View extends VerticalLayout {
                 .map(clicks -> "CLICK ME! (" + clicks + ")"));
 
         targetButton.bindVisible(muc03Signals.getButtonVisibleSignal());
-        targetButton.getStyle().bind("left", muc03Signals
-                .getButtonLeftSignal().map(left -> left + "px"));
-        targetButton.getStyle().bind("top", muc03Signals
-                .getButtonTopSignal().map(top -> top + "px"));
+        targetButton.getStyle().bind("left",
+                muc03Signals.getButtonLeftSignal().map(left -> left + "px"));
+        targetButton.getStyle().bind("top",
+                muc03Signals.getButtonTopSignal().map(top -> top + "px"));
 
         gameArea.add(targetButton);
 
@@ -147,13 +143,12 @@ public class MUC03View extends VerticalLayout {
 
         // Bind leaderboard display
         MissingAPI.bindChildren(leaderboardDiv,
-                com.vaadin.signals.Signal.computed(() -> {
-                    var scores = muc03Signals.getLeaderboardSignal()
-                            .value();
+                com.vaadin.flow.signals.Signal.computed(() -> {
+                    var scores = muc03Signals.getLeaderboardSignal().value();
                     var users = userSessionRegistry.getActiveUsersSignal()
                             .value();
-                    var displayNames = userSessionRegistry.getDisplayNamesSignal()
-                            .value();
+                    var displayNames = userSessionRegistry
+                            .getDisplayNamesSignal().value();
 
                     // Build mapping from sessionKey to display name
                     java.util.Map<String, String> displayNameMap = new java.util.HashMap<>();
@@ -177,7 +172,8 @@ public class MUC03View extends VerticalLayout {
                                         && sessionKey.equals(
                                                 currentUser + ":" + sessionId);
 
-                                // Extract username from sessionKey (format: "username:sessionId")
+                                // Extract username from sessionKey (format:
+                                // "username:sessionId")
                                 String username = sessionKey.split(":")[0];
 
                                 HorizontalLayout item = new HorizontalLayout();
@@ -194,17 +190,16 @@ public class MUC03View extends VerticalLayout {
                                                         : "normal");
 
                                 // Avatar
-                                Image avatar = new Image(
-                                        MainLayout.getProfilePicturePath(username),
-                                        "");
+                                Image avatar = new Image(MainLayout
+                                        .getProfilePicturePath(username), "");
                                 avatar.setWidth("32px");
                                 avatar.setHeight("32px");
                                 avatar.getStyle().set("border-radius", "50%")
                                         .set("object-fit", "cover");
 
                                 // Name and score
-                                Span nameLabel = new Span(String.format("%s: %d points",
-                                        displayName, score));
+                                Span nameLabel = new Span(String.format(
+                                        "%s: %d points", displayName, score));
 
                                 item.add(avatar, nameLabel);
                                 return item;

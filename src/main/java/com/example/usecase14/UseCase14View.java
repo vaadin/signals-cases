@@ -1,15 +1,10 @@
 package com.example.usecase14;
 
-import com.example.views.MainLayout;
-
 import jakarta.annotation.security.PermitAll;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
-import com.example.MissingAPI;
 import com.example.service.AnalyticsService;
 import com.example.service.AnalyticsService.AnalyticsReport;
+import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
@@ -22,36 +17,30 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.local.ValueSignal;
-import com.vaadin.signals.WritableSignal;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.WritableSignal;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
  * Use Case 14: Async Data Loading with States
  *
- * Demonstrates async operations with loading/success/error states using analytics
- * report generation as a realistic heavy operation example:
- * - Spring Boot @Async service for background processing
- * - Signal with LoadingState (Loading/Success/Error states)
- * - Loading spinner while processing data
- * - Display analytics dashboard on success
- * - Error message with retry button
- * - Proper separation of concerns (View → Service)
+ * Demonstrates async operations with loading/success/error states using
+ * analytics report generation as a realistic heavy operation example: - Spring
+ * Boot @Async service for background processing - Signal with LoadingState
+ * (Loading/Success/Error states) - Loading spinner while processing data -
+ * Display analytics dashboard on success - Error message with retry button -
+ * Proper separation of concerns (View → Service)
  *
- * Key Patterns:
- * - Spring @Async service integration
- * - CompletableFuture for async operations
- * - Async signal updates with UI thread synchronization
- * - Loading state representation
- * - Error handling with retry
- * - Dashboard-style data visualization
+ * Key Patterns: - Spring @Async service integration - CompletableFuture for
+ * async operations - Async signal updates with UI thread synchronization -
+ * Loading state representation - Error handling with retry - Dashboard-style
+ * data visualization
  */
 @Route(value = "use-case-14", layout = MainLayout.class)
 @PageTitle("Use Case 14: Async Data Loading")
@@ -72,7 +61,8 @@ public class UseCase14View extends VerticalLayout {
     private final WritableSignal<Boolean> shouldFailSignal = new ValueSignal<>(
             false);
 
-    private final WritableSignal<String> loadingMessageSignal = new ValueSignal<>("");
+    private final WritableSignal<String> loadingMessageSignal = new ValueSignal<>(
+            "");
 
     public UseCase14View(AnalyticsService analyticsService) {
         this.analyticsService = analyticsService;
@@ -91,7 +81,8 @@ public class UseCase14View extends VerticalLayout {
         HorizontalLayout controls = new HorizontalLayout();
         controls.setSpacing(true);
 
-        Button loadButton = new Button("Generate Analytics Report", event -> loadReport());
+        Button loadButton = new Button("Generate Analytics Report",
+                event -> loadReport());
         loadButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         // Disable load button while loading
@@ -124,7 +115,8 @@ public class UseCase14View extends VerticalLayout {
         idleMessage.getStyle().set("color", "var(--lumo-secondary-text-color)")
                 .set("font-style", "italic");
         idleContent.add(idleMessage);
-        Signal<Boolean> isIdleSignal = stateSignal.map(state -> state == LoadingState.State.IDLE);
+        Signal<Boolean> isIdleSignal = stateSignal
+                .map(state -> state == LoadingState.State.IDLE);
         idleContent.bindVisible(isIdleSignal);
 
         // Loading state
@@ -158,7 +150,8 @@ public class UseCase14View extends VerticalLayout {
         // Metrics grid
         Div metricsGrid = new Div();
         metricsGrid.getStyle().set("display", "grid")
-                .set("grid-template-columns", "repeat(auto-fit, minmax(200px, 1fr))")
+                .set("grid-template-columns",
+                        "repeat(auto-fit, minmax(200px, 1fr))")
                 .set("gap", "1em").set("margin-top", "1em");
 
         // Create metric cards with signals
@@ -168,8 +161,8 @@ public class UseCase14View extends VerticalLayout {
             }
             return "";
         });
-        Card revenueCard = createMetricCardWithSignal("Total Revenue", revenueSignal,
-                VaadinIcon.DOLLAR, "#4CAF50");
+        Card revenueCard = createMetricCardWithSignal("Total Revenue",
+                revenueSignal, VaadinIcon.DOLLAR, "#4CAF50");
 
         Signal<String> ordersSignal = reportDataSignal.map(report -> {
             if (!report.isEmpty()) {
@@ -177,8 +170,8 @@ public class UseCase14View extends VerticalLayout {
             }
             return "";
         });
-        Card ordersCard = createMetricCardWithSignal("Total Orders", ordersSignal,
-                VaadinIcon.PACKAGE, "#2196F3");
+        Card ordersCard = createMetricCardWithSignal("Total Orders",
+                ordersSignal, VaadinIcon.PACKAGE, "#2196F3");
 
         Signal<String> conversionSignal = reportDataSignal.map(report -> {
             if (!report.isEmpty()) {
@@ -186,8 +179,8 @@ public class UseCase14View extends VerticalLayout {
             }
             return "";
         });
-        Card conversionCard = createMetricCardWithSignal("Conversion Rate", conversionSignal,
-                VaadinIcon.TRENDING_UP, "#FF9800");
+        Card conversionCard = createMetricCardWithSignal("Conversion Rate",
+                conversionSignal, VaadinIcon.TRENDING_UP, "#FF9800");
 
         Signal<String> usersSignalValue = reportDataSignal.map(report -> {
             if (!report.isEmpty()) {
@@ -195,8 +188,8 @@ public class UseCase14View extends VerticalLayout {
             }
             return "";
         });
-        Card usersCard = createMetricCardWithSignal("Active Users", usersSignalValue,
-                VaadinIcon.USERS, "#9C27B0");
+        Card usersCard = createMetricCardWithSignal("Active Users",
+                usersSignalValue, VaadinIcon.USERS, "#9C27B0");
 
         metricsGrid.add(revenueCard, ordersCard, conversionCard, usersCard);
 
@@ -215,11 +208,13 @@ public class UseCase14View extends VerticalLayout {
         errorTitle.getStyle().set("margin-top", "0").set("color",
                 "var(--lumo-error-color)");
 
-        Paragraph errorMessage = new Paragraph("Analytics report generation failed. Please contact the administrator.");
+        Paragraph errorMessage = new Paragraph(
+                "Analytics report generation failed. Please contact the administrator.");
         errorMessage.getStyle().set("margin", "0.5em 0");
 
         errorContent.add(errorTitle, errorMessage);
-        Signal<Boolean> isErrorSignal = stateSignal.map(state -> state == LoadingState.State.ERROR);
+        Signal<Boolean> isErrorSignal = stateSignal
+                .map(state -> state == LoadingState.State.ERROR);
         errorContent.bindVisible(isErrorSignal);
 
         stateBox.add(idleContent, loadingContent, successContent, errorContent);
@@ -241,29 +236,32 @@ public class UseCase14View extends VerticalLayout {
         loadingMessageSignal.value("Fetching relevant data... (1/2)");
 
         // Step 1: Fetch raw data from data sources
-        // The @Async annotation causes Spring to execute this in a separate thread
+        // The @Async annotation causes Spring to execute this in a separate
+        // thread
         analyticsService.fetchReportData(shouldFailSignal.value())
                 .thenCompose(rawData -> {
-                    // Signals are thread-safe - update directly from background thread
+                    // Signals are thread-safe - update directly from background
+                    // thread
                     loadingMessageSignal.value("Generating report... (2/2)");
 
                     // Step 2: Process the fetched data into a report
-                    return analyticsService.generateReportFromData(rawData, shouldFailSignal.value());
-                })
-                .thenAccept(report -> {
-                    // Signals are thread-safe - update directly from background thread
+                    return analyticsService.generateReportFromData(rawData,
+                            shouldFailSignal.value());
+                }).thenAccept(report -> {
+                    // Signals are thread-safe - update directly from background
+                    // thread
                     reportDataSignal.value(report);
                     stateSignal.value(LoadingState.State.SUCCESS);
-                })
-                .exceptionally(error -> {
-                    // Signals are thread-safe - update directly from background thread
+                }).exceptionally(error -> {
+                    // Signals are thread-safe - update directly from background
+                    // thread
                     stateSignal.value(LoadingState.State.ERROR);
                     return null;
                 });
     }
 
-    private Card createMetricCardWithSignal(String label, Signal<String> valueSignal,
-            VaadinIcon iconType, String color) {
+    private Card createMetricCardWithSignal(String label,
+            Signal<String> valueSignal, VaadinIcon iconType, String color) {
         // Create card using Vaadin Card component with proper slots
         Card card = new Card();
 
@@ -275,8 +273,7 @@ public class UseCase14View extends VerticalLayout {
 
         // Use title slot for label
         Span labelSpan = new Span(label);
-        labelSpan.getStyle()
-                .set("font-size", "var(--lumo-font-size-s)")
+        labelSpan.getStyle().set("font-size", "var(--lumo-font-size-s)")
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-weight", "500");
         card.setTitle(labelSpan);
@@ -284,10 +281,8 @@ public class UseCase14View extends VerticalLayout {
         // Main content slot for value display
         Span valueSpan = new Span();
         valueSpan.bindText(valueSignal);
-        valueSpan.getStyle()
-                .set("font-size", "var(--lumo-font-size-xxxl)")
-                .set("font-weight", "bold")
-                .set("color", color)
+        valueSpan.getStyle().set("font-size", "var(--lumo-font-size-xxxl)")
+                .set("font-weight", "bold").set("color", color)
                 .set("line-height", "1");
         card.add(valueSpan);
 

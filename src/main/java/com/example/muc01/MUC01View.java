@@ -1,19 +1,15 @@
 package com.example.muc01;
 
-import com.example.views.ActiveUsersDisplay;
-import com.example.views.MainLayout;
-
 import jakarta.annotation.security.PermitAll;
 
 import com.example.MissingAPI;
 import com.example.security.CurrentUserSignal;
-import com.example.muc01.MUC01Signals;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
+import com.example.views.ActiveUsersDisplay;
+import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -111,9 +107,8 @@ public class MUC01View extends VerticalLayout {
             if (text != null && !text.trim().isEmpty() && sessionId != null) {
                 // Look up current display name
                 String displayName = getCurrentDisplayName();
-                muc01Signals.appendMessage(
-                        new MUC01Signals.Message(currentUser,
-                                displayName, text.trim()));
+                muc01Signals.appendMessage(new MUC01Signals.Message(currentUser,
+                        displayName, text.trim()));
                 messageInput.clear();
             }
         });
@@ -146,7 +141,8 @@ public class MUC01View extends VerticalLayout {
                 messageCount);
 
         add(title, description, activeUsersDisplay, new H3("Messages"),
-                messagesContainer, inputTitle, messageInput, sendLayout, infoBox);
+                messagesContainer, inputTitle, messageInput, sendLayout,
+                infoBox);
     }
 
     @Override
@@ -164,8 +160,8 @@ public class MUC01View extends VerticalLayout {
                 .set("gap", "0.75em");
 
         // Avatar
-        Image avatar = new Image(MainLayout.getProfilePicturePath(message.username()),
-                "");
+        Image avatar = new Image(
+                MainLayout.getProfilePicturePath(message.username()), "");
         avatar.setWidth("40px");
         avatar.setHeight("40px");
         avatar.getStyle().set("border-radius", "50%").set("object-fit", "cover")

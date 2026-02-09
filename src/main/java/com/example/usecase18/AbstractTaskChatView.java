@@ -12,7 +12,6 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -21,7 +20,6 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -32,11 +30,11 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.WritableSignal;
-import com.vaadin.signals.local.ValueSignal;
-import com.vaadin.signals.shared.SharedListSignal;
-import com.vaadin.signals.shared.SharedValueSignal;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.WritableSignal;
+import com.vaadin.flow.signals.local.ValueSignal;
+import com.vaadin.flow.signals.shared.SharedListSignal;
+import com.vaadin.flow.signals.shared.SharedValueSignal;
 
 public abstract class AbstractTaskChatView extends VerticalLayout {
 
@@ -63,14 +61,13 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
     private MessageInput messageInput;
 
     // Signals for UI state
-    private final WritableSignal<Boolean> messageInputEnabledSignal = new ValueSignal<>(true);
+    private final WritableSignal<Boolean> messageInputEnabledSignal = new ValueSignal<>(
+            true);
 
     // Constructor with signal injection
-    protected AbstractTaskChatView(
-            SharedListSignal<Task> tasksSignal,
+    protected AbstractTaskChatView(SharedListSignal<Task> tasksSignal,
             SharedListSignal<ChatMessageData> chatMessagesSignal,
-            TaskLLMService taskLLMService,
-            String conversationId,
+            TaskLLMService taskLLMService, String conversationId,
             CurrentUserSignal currentUserSignal,
             UserSessionRegistry userSessionRegistry) {
 
@@ -87,9 +84,10 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
 
         // Set up computed signals
         totalTasksSignal = tasksSignal.map(list -> list.size());
-        completedTasksSignal = Signal.computed(
-                () -> (int) tasksSignal.value().stream().filter(t -> t.value().isCompleted()).count());
-        pendingTasksSignal = Signal.computed(() -> totalTasksSignal.value() - completedTasksSignal.value());
+        completedTasksSignal = Signal.computed(() -> (int) tasksSignal.value()
+                .stream().filter(t -> t.value().isCompleted()).count());
+        pendingTasksSignal = Signal.computed(
+                () -> totalTasksSignal.value() - completedTasksSignal.value());
 
         // Build UI - Statistics on top, then AI and Grid side by side
         HorizontalLayout statsSection = buildStatisticsSection();
@@ -98,8 +96,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         add(statsSection);
         add(mainPanel);
 
-        setFlexGrow(0, statsSection);  // Don't grow
-        setFlexGrow(1, mainPanel);     // Take remaining space
+        setFlexGrow(0, statsSection); // Don't grow
+        setFlexGrow(1, mainPanel); // Take remaining space
     }
 
     @Override
@@ -109,7 +107,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
     }
 
     private String getCurrentDisplayName() {
-        CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal().value();
+        CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
+                .value();
         if (userInfo == null || !userInfo.isAuthenticated()) {
             return "Anonymous";
         }
@@ -148,8 +147,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         VerticalLayout taskPanel = buildTaskPanel();
 
         mainPanel.add(chatPanel, taskPanel);
-        mainPanel.setFlexGrow(1, chatPanel);   // 50% of horizontal space
-        mainPanel.setFlexGrow(1, taskPanel);   // 50% of horizontal space
+        mainPanel.setFlexGrow(1, chatPanel); // 50% of horizontal space
+        mainPanel.setFlexGrow(1, taskPanel); // 50% of horizontal space
 
         return mainPanel;
     }
@@ -186,7 +185,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
 
         VerticalLayout gridContainer = buildTaskGrid();
 
-        Button addTaskButton = new Button("Add New Task", VaadinIcon.PLUS.create());
+        Button addTaskButton = new Button("Add New Task",
+                VaadinIcon.PLUS.create());
         addTaskButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         addTaskButton.addClickListener(e -> openAddTaskDialog());
 
@@ -201,26 +201,32 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         statsLayout.setWidthFull();
         statsLayout.setSpacing(true);
 
-        Div totalCard = createStatCard("Total", totalTasksSignal, "var(--lumo-primary-color)");
-        Div completedCard = createStatCard("Completed", completedTasksSignal, "var(--lumo-success-color)");
-        Div pendingCard = createStatCard("Pending", pendingTasksSignal, "var(--lumo-contrast-60pct)");
+        Div totalCard = createStatCard("Total", totalTasksSignal,
+                "var(--lumo-primary-color)");
+        Div completedCard = createStatCard("Completed", completedTasksSignal,
+                "var(--lumo-success-color)");
+        Div pendingCard = createStatCard("Pending", pendingTasksSignal,
+                "var(--lumo-contrast-60pct)");
 
         statsLayout.add(totalCard, completedCard, pendingCard);
         return statsLayout;
     }
 
-    private Div createStatCard(String label, Signal<Integer> valueSignal, String color) {
+    private Div createStatCard(String label, Signal<Integer> valueSignal,
+            String color) {
         Div card = new Div();
-        card.getStyle().set("flex", "1").set("background-color", "#f5f5f5").set("padding", "1em")
-                .set("border-radius", "8px").set("text-align", "center");
+        card.getStyle().set("flex", "1").set("background-color", "#f5f5f5")
+                .set("padding", "1em").set("border-radius", "8px")
+                .set("text-align", "center");
 
         Span valueLabel = new Span();
         valueLabel.bindText(valueSignal.map(String::valueOf));
-        valueLabel.getStyle().set("font-size", "2em").set("font-weight", "bold").set("color", color)
-                .set("display", "block");
+        valueLabel.getStyle().set("font-size", "2em").set("font-weight", "bold")
+                .set("color", color).set("display", "block");
 
         Span titleLabel = new Span(label);
-        titleLabel.getStyle().set("color", "var(--lumo-secondary-text-color)").set("font-size", "0.875em");
+        titleLabel.getStyle().set("color", "var(--lumo-secondary-text-color)")
+                .set("font-size", "0.875em");
 
         card.add(valueLabel, titleLabel);
         return card;
@@ -256,7 +262,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
             LocalDate dueDate = dueDatePicker.getValue();
 
             if (title != null && !title.isBlank()) {
-                Task newTask = Task.create(title, description).withDueDate(dueDate);
+                Task newTask = Task.create(title, description)
+                        .withDueDate(dueDate);
                 tasksSignal.insertLast(newTask);
                 dialog.close();
             }
@@ -278,23 +285,30 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         gridContainer.getStyle().set("min-height", "0");
 
         Grid<Task> grid = new Grid<>(Task.class, false);
-        grid.addColumn(Task::title).setHeader("Title").setFlexGrow(2).setAutoWidth(true);
-        grid.addColumn(Task::description).setHeader("Description").setFlexGrow(3);
-        grid.addColumn(Task::status).setHeader("Status").setFlexGrow(1).setAutoWidth(true);
-        grid.addColumn(Task::dueDate).setHeader("Due Date").setFlexGrow(1).setAutoWidth(true);
+        grid.addColumn(Task::title).setHeader("Title").setFlexGrow(2)
+                .setAutoWidth(true);
+        grid.addColumn(Task::description).setHeader("Description")
+                .setFlexGrow(3);
+        grid.addColumn(Task::status).setHeader("Status").setFlexGrow(1)
+                .setAutoWidth(true);
+        grid.addColumn(Task::dueDate).setHeader("Due Date").setFlexGrow(1)
+                .setAutoWidth(true);
 
         grid.addComponentColumn(task -> {
             HorizontalLayout actions = new HorizontalLayout();
             actions.setSpacing(true);
 
             Button editButton = new Button(VaadinIcon.EDIT.create());
-            editButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
+            editButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY,
+                    ButtonVariant.LUMO_SMALL);
             editButton.addClickListener(e -> openEditDialog(task));
 
             Button deleteButton = new Button(VaadinIcon.TRASH.create());
-            deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_SMALL);
+            deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR,
+                    ButtonVariant.LUMO_SMALL);
             deleteButton.addClickListener(e -> {
-                tasksSignal.value().stream().filter(sig -> sig.value().equals(task)).findFirst()
+                tasksSignal.value().stream()
+                        .filter(sig -> sig.value().equals(task)).findFirst()
                         .ifPresent(tasksSignal::remove);
             });
 
@@ -302,9 +316,11 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
             return actions;
         }).setHeader("Actions").setFlexGrow(0).setAutoWidth(true);
 
-        grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES, GridVariant.LUMO_COMPACT);
+        grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES,
+                GridVariant.LUMO_COMPACT);
 
-        // Bind directly to ListSignal - it will register dependencies on all individual ValueSignals
+        // Bind directly to ListSignal - it will register dependencies on all
+        // individual ValueSignals
         MissingAPI.bindItems(grid, tasksSignal);
 
         gridContainer.add(grid);
@@ -366,7 +382,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         dueDatePicker.setWidthFull();
         dueDatePicker.bindValue(dueDateSignal);
 
-        formLayout.add(titleField, descriptionField, statusCombo, dueDatePicker);
+        formLayout.add(titleField, descriptionField, statusCombo,
+                dueDatePicker);
 
         // Changes are saved automatically via two-way binding
         Button closeButton = new Button("Close", e -> dialog.close());
@@ -391,40 +408,42 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         messageList.setMarkdown(true);
 
         // Reactively update message list using ComponentEffect
-        com.vaadin.flow.component.ComponentEffect.bind(messageList, chatMessagesSignal,
-                (msgList, msgSignals) -> {
+        com.vaadin.flow.component.ComponentEffect.bind(messageList,
+                chatMessagesSignal, (msgList, msgSignals) -> {
                     if (msgSignals != null) {
-                        CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal().value();
+                        CurrentUserSignal.UserInfo userInfo = currentUserSignal
+                                .getUserSignal().value();
 
-                        var items = msgSignals.stream()
-                                .map(msgSignal -> {
-                                    ChatMessageData msg = msgSignal.value();
-                                    MessageListItem item = new MessageListItem(
-                                            msg.content().isBlank() ? "_typing..._" : msg.content(),
-                                            msg.timestamp(),
-                                            msg.role()
-                                    );
+                        var items = msgSignals.stream().map(msgSignal -> {
+                            ChatMessageData msg = msgSignal.value();
+                            MessageListItem item = new MessageListItem(
+                                    msg.content().isBlank() ? "_typing..._"
+                                            : msg.content(),
+                                    msg.timestamp(), msg.role());
 
-                                    if (msg.role().equals("You") && userInfo != null && userInfo.isAuthenticated()) {
-                                        item.setUserColorIndex(0);
-                                        String displayName = getCurrentDisplayName();
-                                        String username = userInfo.getUsername();
-                                        if (displayName != null && !displayName.isBlank()) {
-                                            item.setUserName(displayName);
-                                        }
-                                        if (username != null && !username.isBlank()) {
-                                            String userImage = MainLayout.getProfilePicturePath(username);
-                                            if (userImage != null && !userImage.isBlank()) {
-                                                item.setUserImage(userImage);
-                                            }
-                                        }
-                                    } else {
-                                        item.setUserColorIndex(1);
+                            if (msg.role().equals("You") && userInfo != null
+                                    && userInfo.isAuthenticated()) {
+                                item.setUserColorIndex(0);
+                                String displayName = getCurrentDisplayName();
+                                String username = userInfo.getUsername();
+                                if (displayName != null
+                                        && !displayName.isBlank()) {
+                                    item.setUserName(displayName);
+                                }
+                                if (username != null && !username.isBlank()) {
+                                    String userImage = MainLayout
+                                            .getProfilePicturePath(username);
+                                    if (userImage != null
+                                            && !userImage.isBlank()) {
+                                        item.setUserImage(userImage);
                                     }
+                                }
+                            } else {
+                                item.setUserColorIndex(1);
+                            }
 
-                                    return item;
-                                })
-                                .toList();
+                            return item;
+                        }).toList();
                         msgList.setItems(items);
                     }
                 });
@@ -451,13 +470,16 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         messageInputEnabledSignal.value(false);
 
         // Add user message
-        chatMessagesSignal.insertLast(new ChatMessageData("You", userMessage, Instant.now()));
+        chatMessagesSignal.insertLast(
+                new ChatMessageData("You", userMessage, Instant.now()));
 
         // Create assistant message placeholder
         Instant assistantTimestamp = Instant.now();
-        chatMessagesSignal.insertLast(new ChatMessageData("Assistant", "", assistantTimestamp));
+        chatMessagesSignal.insertLast(
+                new ChatMessageData("Assistant", "", assistantTimestamp));
 
-        // Get reference to the last message signal (assistant message) for updates
+        // Get reference to the last message signal (assistant message) for
+        // updates
         var assistantMessageSignal = chatMessagesSignal.value()
                 .get(chatMessagesSignal.value().size() - 1);
 
@@ -465,31 +487,40 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         StringBuilder streamingContent = new StringBuilder();
 
         // Stream responses from LLM with consistent conversation ID for memory
-        taskLLMService.streamMessage(userMessage, createTaskContext(), conversationId).subscribe(token -> {
-            // Append token and update the message in the signal - must be done on UI thread
-            getUI().ifPresent(ui -> ui.access(() -> {
-                streamingContent.append(token);
-                assistantMessageSignal.value(new ChatMessageData("Assistant", streamingContent.toString(), assistantTimestamp));
-            }));
-        }, error -> {
-            // Update with error message - must be done on UI thread
-            getUI().ifPresent(ui -> ui.access(() -> {
-                streamingContent.append("\n\n❌ Error: ").append(error.getMessage());
-                assistantMessageSignal.value(new ChatMessageData("Assistant", streamingContent.toString(), assistantTimestamp));
-                messageInputEnabledSignal.value(true);
-            }));
-        }, () -> {
-            // Streaming complete - re-enable input - must be done on UI thread
-            getUI().ifPresent(ui -> ui.access(() -> {
-                messageInputEnabledSignal.value(true);
-            }));
-        });
+        taskLLMService
+                .streamMessage(userMessage, createTaskContext(), conversationId)
+                .subscribe(token -> {
+                    // Append token and update the message in the signal - must
+                    // be done on UI thread
+                    getUI().ifPresent(ui -> ui.access(() -> {
+                        streamingContent.append(token);
+                        assistantMessageSignal.value(new ChatMessageData(
+                                "Assistant", streamingContent.toString(),
+                                assistantTimestamp));
+                    }));
+                }, error -> {
+                    // Update with error message - must be done on UI thread
+                    getUI().ifPresent(ui -> ui.access(() -> {
+                        streamingContent.append("\n\n❌ Error: ")
+                                .append(error.getMessage());
+                        assistantMessageSignal.value(new ChatMessageData(
+                                "Assistant", streamingContent.toString(),
+                                assistantTimestamp));
+                        messageInputEnabledSignal.value(true);
+                    }));
+                }, () -> {
+                    // Streaming complete - re-enable input - must be done on UI
+                    // thread
+                    getUI().ifPresent(ui -> ui.access(() -> {
+                        messageInputEnabledSignal.value(true);
+                    }));
+                });
     }
 
-    private void updateTaskField(String taskId, java.util.function.Function<Task, Task> updater) {
+    private void updateTaskField(String taskId,
+            java.util.function.Function<Task, Task> updater) {
         tasksSignal.value().stream()
-                .filter(sig -> sig.value().id().equals(taskId))
-                .findFirst()
+                .filter(sig -> sig.value().id().equals(taskId)).findFirst()
                 .ifPresent(sig -> sig.value(updater.apply(sig.value())));
     }
 
@@ -497,7 +528,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         return new TaskContext() {
             @Override
             public java.util.List<Task> getAllTasks() {
-                return tasksSignal.value().stream().map(SharedValueSignal::value).toList();
+                return tasksSignal.value().stream()
+                        .map(SharedValueSignal::value).toList();
             }
 
             @Override
@@ -509,13 +541,14 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
             public void removeTask(String taskId) {
                 tasksSignal.value().stream()
                         .filter(sig -> sig.value().id().equals(taskId))
-                        .findFirst()
-                        .ifPresent(tasksSignal::remove);
+                        .findFirst().ifPresent(tasksSignal::remove);
             }
 
             @Override
-            public void updateTask(String taskId, String title, String description) {
-                updateTaskField(taskId, task -> task.withTitle(title).withDescription(description));
+            public void updateTask(String taskId, String title,
+                    String description) {
+                updateTaskField(taskId, task -> task.withTitle(title)
+                        .withDescription(description));
             }
 
             @Override
@@ -524,7 +557,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
             }
 
             @Override
-            public void updateDueDate(String taskId, java.time.LocalDate dueDate) {
+            public void updateDueDate(String taskId,
+                    java.time.LocalDate dueDate) {
                 updateTaskField(taskId, task -> task.withDueDate(dueDate));
             }
         };

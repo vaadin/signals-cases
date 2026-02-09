@@ -3,15 +3,16 @@ package com.example.usecase18;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public record Task(String id, String title, String description, TaskStatus status, LocalDate dueDate) {
+public record Task(String id, String title, String description,
+        TaskStatus status, LocalDate dueDate) {
 
     public enum TaskStatus {
         TODO, IN_PROGRESS, DONE
     }
 
     public static Task create(String title, String description) {
-        return new Task(UUID.randomUUID().toString(), title, description, TaskStatus.TODO,
-                LocalDate.now().plusDays(7));
+        return new Task(UUID.randomUUID().toString(), title, description,
+                TaskStatus.TODO, LocalDate.now().plusDays(7));
     }
 
     public boolean isCompleted() {

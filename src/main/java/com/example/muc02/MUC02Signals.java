@@ -2,8 +2,8 @@ package com.example.muc02;
 
 import org.springframework.stereotype.Component;
 
-import com.vaadin.signals.shared.SharedMapSignal;
-import com.vaadin.signals.WritableSignal;
+import com.vaadin.flow.signals.WritableSignal;
+import com.vaadin.flow.signals.shared.SharedMapSignal;
 
 /**
  * Application-scoped signals for MUC02: Cursor Positions

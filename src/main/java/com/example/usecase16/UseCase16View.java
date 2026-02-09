@@ -1,7 +1,5 @@
 package com.example.usecase16;
 
-import com.example.views.MainLayout;
-
 import jakarta.annotation.security.PermitAll;
 
 import java.util.List;
@@ -9,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.example.MissingAPI;
+import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Anchor;
@@ -27,9 +26,9 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinServletRequest;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.WritableSignal;
-import com.vaadin.signals.local.ValueSignal;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.WritableSignal;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
  * Use Case 16: Search with URL State (Router Integration)
@@ -221,45 +220,40 @@ public class UseCase16View extends VerticalLayout
                 .set("flex-direction", "column").set("gap", "0.5em")
                 .set("margin-top", "1em");
 
-        MissingAPI
-                .bindComponentChildren(resultsContainer,
-                        filteredArticlesSignal,
-                        article -> {
-                            Div card = new Div();
-                            card.getStyle().set("background-color", "#ffffff")
-                                    .set("border",
-                                            "1px solid var(--lumo-contrast-20pct)")
-                                    .set("border-radius", "4px")
-                                    .set("padding", "1em");
+        MissingAPI.bindComponentChildren(resultsContainer,
+                filteredArticlesSignal, article -> {
+                    Div card = new Div();
+                    card.getStyle().set("background-color", "#ffffff")
+                            .set("border",
+                                    "1px solid var(--lumo-contrast-20pct)")
+                            .set("border-radius", "4px").set("padding", "1em");
 
-                            Div headerDiv = new Div();
-                            headerDiv.getStyle().set("display", "flex")
-                                    .set("justify-content", "space-between")
-                                    .set("align-items", "center")
-                                    .set("margin-bottom", "0.5em");
+                    Div headerDiv = new Div();
+                    headerDiv.getStyle().set("display", "flex")
+                            .set("justify-content", "space-between")
+                            .set("align-items", "center")
+                            .set("margin-bottom", "0.5em");
 
-                            Div titleDiv = new Div(article.getTitle());
-                            titleDiv.getStyle().set("font-weight", "bold")
-                                    .set("font-size", "1.1em");
+                    Div titleDiv = new Div(article.getTitle());
+                    titleDiv.getStyle().set("font-weight", "bold")
+                            .set("font-size", "1.1em");
 
-                            Div categoryBadge = new Div(article.getCategory());
-                            categoryBadge.getStyle()
-                                    .set("background-color", "#e0e0e0")
-                                    .set("padding", "0.25em 0.5em")
-                                    .set("border-radius", "4px")
-                                    .set("font-size", "0.85em");
+                    Div categoryBadge = new Div(article.getCategory());
+                    categoryBadge.getStyle().set("background-color", "#e0e0e0")
+                            .set("padding", "0.25em 0.5em")
+                            .set("border-radius", "4px")
+                            .set("font-size", "0.85em");
 
-                            headerDiv.add(titleDiv, categoryBadge);
+                    headerDiv.add(titleDiv, categoryBadge);
 
-                            Div contentDiv = new Div(article.getContent());
-                            contentDiv.getStyle()
-                                    .set("color",
-                                            "var(--lumo-secondary-text-color)")
-                                    .set("font-size", "0.9em");
+                    Div contentDiv = new Div(article.getContent());
+                    contentDiv.getStyle()
+                            .set("color", "var(--lumo-secondary-text-color)")
+                            .set("font-size", "0.9em");
 
-                            card.add(headerDiv, contentDiv);
-                            return card;
-                        });
+                    card.add(headerDiv, contentDiv);
+                    return card;
+                });
 
         // Info box
         Div infoBox = new Div();

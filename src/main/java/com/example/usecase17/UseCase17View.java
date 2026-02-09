@@ -1,13 +1,12 @@
 package com.example.usecase17;
 
-import com.example.views.MainLayout;
-
 import jakarta.annotation.security.PermitAll;
 
 import java.util.Arrays;
 import java.util.List;
 
 import com.example.MissingAPI;
+import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -22,9 +21,9 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.signals.Signal;
-import com.vaadin.signals.local.ValueSignal;
-import com.vaadin.signals.WritableSignal;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.WritableSignal;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
  * Use Case 17: Custom PC Builder - Complex State Management at Scale
@@ -1058,10 +1057,12 @@ public class UseCase17View extends VerticalLayout {
         perfRating.getStyle().set("display", "block").set("font-size", "1.2em")
                 .set("color", "var(--lumo-primary-color)");
 
-        Span perfGaming = new Span(gamingScoreSignal.map(s -> "Gaming: " + s + "/100"));
+        Span perfGaming = new Span(
+                gamingScoreSignal.map(s -> "Gaming: " + s + "/100"));
         perfGaming.getStyle().set("display", "block").set("font-size", "0.9em");
 
-        Span perfBottleneck = new Span(bottleneckSignal.map(b -> "Bottleneck: " + b));
+        Span perfBottleneck = new Span(
+                bottleneckSignal.map(b -> "Bottleneck: " + b));
         perfBottleneck.getStyle().set("display", "block").set("font-size",
                 "0.9em");
 

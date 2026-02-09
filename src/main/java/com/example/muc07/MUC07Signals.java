@@ -1,12 +1,12 @@
 package com.example.muc07;
 
-import org.springframework.stereotype.Component;
-
 import jakarta.annotation.PostConstruct;
 
-import com.example.usecase18.Task;
 import com.example.usecase18.ChatMessageData;
-import com.vaadin.signals.shared.SharedListSignal;
+import com.example.usecase18.Task;
+import org.springframework.stereotype.Component;
+
+import com.vaadin.flow.signals.shared.SharedListSignal;
 
 /**
  * Application-scoped signals for MUC07: LLM-Powered Shared Task List
@@ -30,10 +30,10 @@ public class MUC07Signals {
     @PostConstruct
     public void initializeSampleLLMTasks() {
         if (llmTasksSignal.value().isEmpty()) {
-            llmTasksSignal.insertLast(
-                    Task.create("Review pull requests",
-                                    "Review and merge pending pull requests")
-                            .withDueDate(java.time.LocalDate.now().plusDays(2)));
+            llmTasksSignal.insertLast(Task
+                    .create("Review pull requests",
+                            "Review and merge pending pull requests")
+                    .withDueDate(java.time.LocalDate.now().plusDays(2)));
             llmTasksSignal.insertLast(Task
                     .create("Write unit tests",
                             "Add unit tests for new features")

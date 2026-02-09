@@ -153,11 +153,11 @@ public class VisaApplicationData {
                 sb.append("H1-B Details:\n");
                 sb.append("  Specialty Occupation: ")
                         .append(h1bSpecialtyOccupation).append("\n");
-                sb.append("  Had H1-B Previously: ")
-                        .append(hasH1BPreviously).append("\n");
+                sb.append("  Had H1-B Previously: ").append(hasH1BPreviously)
+                        .append("\n");
                 if (hasH1BPreviously) {
-                    sb.append("  Previous Employer: ")
-                            .append(previousEmployer).append("\n");
+                    sb.append("  Previous Employer: ").append(previousEmployer)
+                            .append("\n");
                     sb.append("  Previous Petition #: ")
                             .append(previousPetitionNumber).append("\n");
                     sb.append("  Previous Start Date: ")
@@ -169,16 +169,13 @@ public class VisaApplicationData {
                         .append("\n");
                 sb.append("  Years with Company: ")
                         .append(yearsWithParentCompany).append("\n");
-                sb.append("  L1 Category: ").append(l1Category)
-                        .append("\n");
+                sb.append("  L1 Category: ").append(l1Category).append("\n");
             } else if (visaType == VisaType.O1) {
                 sb.append("O1 Details:\n");
                 sb.append("  Field of Extraordinary Ability: ")
                         .append(fieldOfExtraordinaryAbility).append("\n");
-                sb.append("  Major Awards: ").append(majorAwards)
-                        .append("\n");
-                sb.append("  Publications: ").append(publications)
-                        .append("\n");
+                sb.append("  Major Awards: ").append(majorAwards).append("\n");
+                sb.append("  Publications: ").append(publications).append("\n");
             }
         }
 
