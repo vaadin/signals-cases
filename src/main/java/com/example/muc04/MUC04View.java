@@ -2,7 +2,6 @@ package com.example.muc04;
 
 import jakarta.annotation.security.PermitAll;
 
-import com.example.MissingAPI;
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
@@ -45,6 +44,7 @@ public class MUC04View extends VerticalLayout {
     private final MUC04Signals muc04Signals;
     private final UserSessionRegistry userSessionRegistry;
     private String sessionId;
+    private final java.util.IdentityHashMap<com.vaadin.flow.signals.shared.SharedValueSignal<MUC04Signals.FieldLock>, String> lockKeyMap = new java.util.IdentityHashMap<>();
 
     public MUC04View(CurrentUserSignal currentUserSignal,
             MUC04Signals muc04Signals,
@@ -92,22 +92,24 @@ public class MUC04View extends VerticalLayout {
         editorsDiv.getStyle().set("background-color", "#e3f2fd")
                 .set("padding", "1em").set("border-radius", "4px");
 
-        MissingAPI.bindChildren(editorsDiv,
-                muc04Signals.getFieldLocksSignal().map(locks -> {
-                    if (locks.isEmpty()) {
-                        HorizontalLayout msg = new HorizontalLayout();
-                        Span msgText = new Span(
-                                "No fields are currently being edited");
-                        msgText.getStyle().set("font-style", "italic");
-                        msg.add(msgText);
-                        return java.util.List.of(msg);
-                    }
+        // Empty state message
+        Span emptyMsg = new Span("No fields are currently being edited");
+        emptyMsg.getStyle().set("font-style", "italic");
+        emptyMsg.bindVisible(muc04Signals.getFieldLocksSignal()
+                .map(locks -> locks.isEmpty()));
+        editorsDiv.add(emptyMsg);
 
-                    return locks.entrySet().stream()
-                            .map(entry -> createLockItem(entry.getKey(),
-                                    entry.getValue().value()))
-                            .toList();
-                }));
+        // Lock entries container (must be separate since bindChildren
+        // requires exclusive ownership of its children)
+        Div locksContainer = new Div();
+        editorsDiv.add(locksContainer);
+
+        locksContainer
+                .bindChildren(muc04Signals.getFieldLocksSignal().map(locks -> {
+                    lockKeyMap.clear();
+                    locks.forEach((key, signal) -> lockKeyMap.put(signal, key));
+                    return new java.util.ArrayList<>(locks.values());
+                }), this::createLockItem);
 
         // Save button
         Button saveButton = new Button("Save Changes", event -> {
@@ -211,8 +213,27 @@ public class MUC04View extends VerticalLayout {
         return field;
     }
 
-    private HorizontalLayout createLockItem(String fieldName,
-            MUC04Signals.FieldLock lock) {
+    private String formatFieldName(String fieldName) {
+        return switch (fieldName) {
+        case "companyName" -> "Company Name";
+        case "address" -> "Address";
+        case "phone" -> "Phone Number";
+        default -> fieldName;
+        };
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        this.sessionId = SessionIdHelper.getCurrentSessionId();
+    }
+
+    private HorizontalLayout createLockItem(
+            com.vaadin.flow.signals.shared.SharedValueSignal<MUC04Signals.FieldLock> lockSignal) {
+        String fieldName = lockKeyMap.getOrDefault(lockSignal, "");
+        String fieldLabel = formatFieldName(fieldName);
+
+        MUC04Signals.FieldLock lock = lockSignal.value();
         boolean isCurrentSession = sessionId != null
                 && lock.username().equals(currentUser)
                 && lock.sessionId().equals(sessionId);
@@ -233,26 +254,10 @@ public class MUC04View extends VerticalLayout {
         avatar.getStyle().set("border-radius", "50%").set("object-fit",
                 "cover");
 
-        String fieldLabel = formatFieldName(fieldName);
         Span label = new Span(
                 String.format("🔒 %s: %s", fieldLabel, lock.username()));
 
         item.add(avatar, label);
         return item;
-    }
-
-    private String formatFieldName(String fieldName) {
-        return switch (fieldName) {
-        case "companyName" -> "Company Name";
-        case "address" -> "Address";
-        case "phone" -> "Phone Number";
-        default -> fieldName;
-        };
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        this.sessionId = SessionIdHelper.getCurrentSessionId();
     }
 }

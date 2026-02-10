@@ -88,26 +88,23 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         com.vaadin.flow.component.html.Div avatarsContainer = new com.vaadin.flow.component.html.Div();
         avatarsContainer.getStyle().set("display", "flex").set("gap", "0.25em");
 
-        com.example.MissingAPI.bindChildren(avatarsContainer,
-                com.vaadin.flow.signals.Signal.computed(() -> {
+        avatarsContainer.bindChildren(
+                userSessionRegistry.getActiveUsersSignal(), userSignal -> {
+                    var user = userSignal.value();
                     var users = userSessionRegistry.getActiveUsersSignal()
                             .value();
                     var displayNames = userSessionRegistry
                             .getDisplayNamesSignal().value();
+                    int index = users.indexOf(userSignal);
+                    String displayName = index >= 0
+                            && index < displayNames.size()
+                                    ? displayNames.get(index)
+                                    : user.username();
 
-                    java.util.List<Avatar> avatars = new java.util.ArrayList<>();
-                    for (int i = 0; i < users.size(); i++) {
-                        var user = users.get(i).value();
-                        String displayName = i < displayNames.size()
-                                ? displayNames.get(i)
-                                : user.username();
-
-                        Avatar avatar = new Avatar(displayName);
-                        avatar.setImage(getProfilePicturePath(user.username()));
-                        avatars.add(avatar);
-                    }
-                    return avatars;
-                }));
+                    Avatar avatar = new Avatar(displayName);
+                    avatar.setImage(getProfilePicturePath(user.username()));
+                    return avatar;
+                });
 
         activeUsersDisplay.add(activeUsersLabel, avatarsContainer);
 

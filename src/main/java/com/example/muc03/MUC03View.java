@@ -4,7 +4,6 @@ import jakarta.annotation.security.PermitAll;
 
 import java.util.Random;
 
-import com.example.MissingAPI;
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
@@ -47,6 +46,7 @@ public class MUC03View extends VerticalLayout {
     private final UserSessionRegistry userSessionRegistry;
     private final Random random = new Random();
     private String sessionId;
+    private final java.util.IdentityHashMap<com.vaadin.flow.signals.shared.SharedValueSignal<Integer>, String> scoreKeyMap = new java.util.IdentityHashMap<>();
 
     public MUC03View(CurrentUserSignal currentUserSignal,
             MUC03Signals muc03Signals,
@@ -141,20 +141,19 @@ public class MUC03View extends VerticalLayout {
         leaderboardDiv.getStyle().set("background-color", "#e3f2fd")
                 .set("padding", "1em").set("border-radius", "4px");
 
-        // Bind leaderboard display
-        MissingAPI.bindChildren(leaderboardDiv,
-                com.vaadin.flow.signals.Signal.computed(() -> {
+        // Bind leaderboard display - sorted by score descending
+        leaderboardDiv
+                .bindChildren(com.vaadin.flow.signals.Signal.computed(() -> {
                     var scores = muc03Signals.getLeaderboardSignal().value();
-                    var displayNameMap = buildDisplayNameMap();
-
+                    scoreKeyMap.clear();
+                    scores.forEach(
+                            (key, signal) -> scoreKeyMap.put(signal, key));
                     return scores.entrySet().stream()
                             .sorted((e1, e2) -> Integer.compare(
                                     e2.getValue().value(),
                                     e1.getValue().value()))
-                            .map(entry -> createLeaderboardItem(entry.getKey(),
-                                    entry.getValue().value(), displayNameMap))
-                            .toList();
-                }));
+                            .map(java.util.Map.Entry::getValue).toList();
+                }), this::createLeaderboardItem);
 
         // Info box
         Div infoBox = new Div();
@@ -210,19 +209,33 @@ public class MUC03View extends VerticalLayout {
         return new int[] { left, top };
     }
 
-    private java.util.Map<String, String> buildDisplayNameMap() {
-        var users = userSessionRegistry.getActiveUsersSignal().value();
-        var displayNames = userSessionRegistry.getDisplayNamesSignal().value();
-        java.util.Map<String, String> map = new java.util.HashMap<>();
-        for (int i = 0; i < users.size() && i < displayNames.size(); i++) {
-            map.put(users.get(i).value().getCompositeKey(),
-                    displayNames.get(i));
-        }
-        return map;
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        this.sessionId = SessionIdHelper.getCurrentSessionId();
+        muc03Signals.initializePlayerScore(currentUser, sessionId);
     }
 
-    private HorizontalLayout createLeaderboardItem(String sessionKey, int score,
-            java.util.Map<String, String> displayNameMap) {
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        super.onDetach(detachEvent);
+        muc03Signals.unregisterScore(currentUser, sessionId);
+    }
+
+    private HorizontalLayout createLeaderboardItem(
+            com.vaadin.flow.signals.shared.SharedValueSignal<Integer> scoreSignal) {
+        var users = userSessionRegistry.getActiveUsersSignal().value();
+        var displayNames = userSessionRegistry.getDisplayNamesSignal().value();
+
+        String sessionKey = scoreKeyMap.getOrDefault(scoreSignal, "");
+
+        // Build display name mapping
+        java.util.Map<String, String> displayNameMap = new java.util.HashMap<>();
+        for (int i = 0; i < users.size() && i < displayNames.size(); i++) {
+            String key = users.get(i).value().getCompositeKey();
+            displayNameMap.put(key, displayNames.get(i));
+        }
+
         String displayName = displayNameMap.getOrDefault(sessionKey,
                 sessionKey);
         boolean isCurrentSession = sessionId != null
@@ -246,23 +259,11 @@ public class MUC03View extends VerticalLayout {
         avatar.getStyle().set("border-radius", "50%").set("object-fit",
                 "cover");
 
-        Span nameLabel = new Span(
-                String.format("%s: %d points", displayName, score));
+        Span nameLabel = new Span();
+        nameLabel.bindText(scoreSignal.map(
+                score -> String.format("%s: %d points", displayName, score)));
 
         item.add(avatar, nameLabel);
         return item;
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        this.sessionId = SessionIdHelper.getCurrentSessionId();
-        muc03Signals.initializePlayerScore(currentUser, sessionId);
-    }
-
-    @Override
-    protected void onDetach(DetachEvent detachEvent) {
-        super.onDetach(detachEvent);
-        muc03Signals.unregisterScore(currentUser, sessionId);
     }
 }
