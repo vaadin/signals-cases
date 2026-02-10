@@ -17,3 +17,5 @@ jobs:
           java-version: 21
           cache: maven
       - run: ./mvnw install
+        env:
+          VAADIN_PRO_KEY: ${{ secrets.VAADIN_PRO_KEY }}
