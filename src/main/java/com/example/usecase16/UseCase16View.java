@@ -1,14 +1,10 @@
 package com.example.usecase16;
 
-import jakarta.annotation.security.PermitAll;
-
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
-import com.example.MissingAPI;
 import com.example.views.MainLayout;
-
+import jakarta.annotation.security.PermitAll;
+import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
@@ -25,8 +21,10 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
@@ -44,42 +42,14 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PageTitle("Use Case 16: URL State Integration")
 @Menu(order = 16, title = "UC 16: URL State Integration")
 @PermitAll
-public class UseCase16View extends VerticalLayout
-        implements BeforeEnterObserver {
+public class UseCase16View extends VerticalLayout implements
+        BeforeEnterObserver {
 
-    public static class Article {
-        private final String id;
-        private final String title;
-        private final String category;
-        private final String content;
+    record Article(String id, String title, String category, String content) {
 
-        public Article(String id, String title, String category,
-                String content) {
-            this.id = id;
-            this.title = title;
-            this.category = category;
-            this.content = content;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public String getCategory() {
-            return category;
-        }
-
-        public String getContent() {
-            return content;
-        }
-
-        public boolean matches(String query, String category) {
-            boolean categoryMatch = category.equals("All")
-                    || this.category.equals(category);
+        boolean matches(String query, String category) {
+            boolean categoryMatch =
+                    category.equals("All") || this.category.equals(category);
             if (query.isEmpty()) {
                 return categoryMatch;
             }
@@ -113,8 +83,7 @@ public class UseCase16View extends VerticalLayout
 
     private final ValueSignal<String> searchQuerySignal = new ValueSignal<>("");
     private final ValueSignal<String> categorySignal = new ValueSignal<>("All");
-    private final ValueSignal<List<Article>> filteredArticlesSignal = new ValueSignal<>(
-            List.of());
+    private final ListSignal<Article> filteredArticlesSignal = new ListSignal<>();
 
     private boolean isInitializing = true;
 
@@ -207,9 +176,9 @@ public class UseCase16View extends VerticalLayout
         shareLinks.add(link1, link2, link3);
 
         // Results
-        Signal<String> resultsTitleSignal = filteredArticlesSignal
-                .map(articles -> articles.size() + " article"
-                        + (articles.size() == 1 ? "" : "s") + " found");
+        Signal<String> resultsTitleSignal = filteredArticlesSignal.map(
+                articles -> articles.size() + " article" + (
+                        articles.size() == 1 ? "" : "s") + " found");
         H3 resultsTitle = new H3(resultsTitleSignal);
 
         Div resultsContainer = new Div();
@@ -217,40 +186,37 @@ public class UseCase16View extends VerticalLayout
                 .set("flex-direction", "column").set("gap", "0.5em")
                 .set("margin-top", "1em");
 
-        MissingAPI.bindComponentChildren(resultsContainer,
-                filteredArticlesSignal, article -> {
-                    Div card = new Div();
-                    card.getStyle().set("background-color", "#ffffff")
-                            .set("border",
-                                    "1px solid var(--lumo-contrast-20pct)")
-                            .set("border-radius", "4px").set("padding", "1em");
+        resultsContainer.bindChildren(filteredArticlesSignal, articleSignal -> {
+            Article article = articleSignal.value();
+            Div card = new Div();
+            card.getStyle().set("background-color", "#ffffff")
+                    .set("border", "1px solid var(--lumo-contrast-20pct)")
+                    .set("border-radius", "4px").set("padding", "1em");
 
-                    Div headerDiv = new Div();
-                    headerDiv.getStyle().set("display", "flex")
-                            .set("justify-content", "space-between")
-                            .set("align-items", "center")
-                            .set("margin-bottom", "0.5em");
+            Div headerDiv = new Div();
+            headerDiv.getStyle().set("display", "flex")
+                    .set("justify-content", "space-between")
+                    .set("align-items", "center").set("margin-bottom", "0.5em");
 
-                    Div titleDiv = new Div(article.getTitle());
-                    titleDiv.getStyle().set("font-weight", "bold")
-                            .set("font-size", "1.1em");
+            Div titleDiv = new Div(article.title());
+            titleDiv.getStyle().set("font-weight", "bold")
+                    .set("font-size", "1.1em");
 
-                    Div categoryBadge = new Div(article.getCategory());
-                    categoryBadge.getStyle().set("background-color", "#e0e0e0")
-                            .set("padding", "0.25em 0.5em")
-                            .set("border-radius", "4px")
-                            .set("font-size", "0.85em");
+            Div categoryBadge = new Div(article.category());
+            categoryBadge.getStyle().set("background-color", "#e0e0e0")
+                    .set("padding", "0.25em 0.5em").set("border-radius", "4px")
+                    .set("font-size", "0.85em");
 
-                    headerDiv.add(titleDiv, categoryBadge);
+            headerDiv.add(titleDiv, categoryBadge);
 
-                    Div contentDiv = new Div(article.getContent());
-                    contentDiv.getStyle()
-                            .set("color", "var(--lumo-secondary-text-color)")
-                            .set("font-size", "0.9em");
+            Div contentDiv = new Div(article.content());
+            contentDiv.getStyle()
+                    .set("color", "var(--lumo-secondary-text-color)")
+                    .set("font-size", "0.9em");
 
-                    card.add(headerDiv, contentDiv);
-                    return card;
-                });
+            card.add(headerDiv, contentDiv);
+            return card;
+        });
 
         // Info box
         Div infoBox = new Div();
@@ -273,7 +239,7 @@ public class UseCase16View extends VerticalLayout
 
     private void setupSignalSubscriptions() {
         // When signals change, update URL (except during initialization)
-        com.vaadin.flow.component.ComponentEffect.effect(this, () -> {
+        ComponentEffect.effect(this, () -> {
             // Access signals to track them
             searchQuerySignal.value();
             categorySignal.value();
@@ -296,7 +262,7 @@ public class UseCase16View extends VerticalLayout
 
         // Load search query from URL
         if (params.containsKey("q")) {
-            String query = params.get("q").get(0);
+            String query = params.get("q").getFirst();
             searchQuerySignal.value(query);
         } else {
             searchQuerySignal.value("");
@@ -304,7 +270,7 @@ public class UseCase16View extends VerticalLayout
 
         // Load category from URL
         if (params.containsKey("category")) {
-            String category = params.get("category").get(0);
+            String category = params.get("category").getFirst();
             categorySignal.value(category);
         } else {
             categorySignal.value("All");
@@ -326,14 +292,14 @@ public class UseCase16View extends VerticalLayout
             urlParams.append("q=").append(query);
         }
         if (!category.equals("All")) {
-            if (urlParams.length() > 0)
+            if (!urlParams.isEmpty())
                 urlParams.append("&");
             urlParams.append("category=").append(category);
         }
 
         // Update browser URL without triggering navigation
-        String url = "use-case-16"
-                + (urlParams.length() > 0 ? "?" + urlParams : "");
+        String url =
+                "use-case-16" + (!urlParams.isEmpty() ? "?" + urlParams : "");
         UI.getCurrent().getPage().getHistory().replaceState(null, url);
     }
 
@@ -341,16 +307,14 @@ public class UseCase16View extends VerticalLayout
         String query = searchQuerySignal.value();
         String category = categorySignal.value();
 
-        List<Article> filtered = ALL_ARTICLES.stream()
+        filteredArticlesSignal.clear();
+        ALL_ARTICLES.stream()
                 .filter(article -> article.matches(query, category))
-                .collect(Collectors.toList());
-
-        filteredArticlesSignal.value(filtered);
+                .forEach(filteredArticlesSignal::insertLast);
     }
 
     private String getBaseUrl() {
-        VaadinServletRequest request = (VaadinServletRequest) com.vaadin.flow.server.VaadinRequest
-                .getCurrent();
+        VaadinServletRequest request = (VaadinServletRequest) VaadinRequest.getCurrent();
         if (request != null) {
             String scheme = request.getScheme();
             String serverName = request.getServerName();
@@ -359,8 +323,8 @@ public class UseCase16View extends VerticalLayout
 
             StringBuilder url = new StringBuilder();
             url.append(scheme).append("://").append(serverName);
-            if ((scheme.equals("http") && serverPort != 80)
-                    || (scheme.equals("https") && serverPort != 443)) {
+            if ((scheme.equals("http") && serverPort != 80) || (
+                    scheme.equals("https") && serverPort != 443)) {
                 url.append(":").append(serverPort);
             }
             url.append(contextPath).append("/use-case-16");
