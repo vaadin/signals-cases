@@ -1,6 +1,7 @@
 package com.example.usecase22;
 
-public record Person(String firstName, String lastName, String email, int age, Address address) {
+public record Person(String firstName, String lastName, String email, int age,
+        Address address) {
 
     public Person withFirstName(String newFirstName) {
         return new Person(newFirstName, lastName, email, age, address);

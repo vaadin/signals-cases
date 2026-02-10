@@ -12,10 +12,12 @@ import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.WritableSignal;
 
 /**
- * Session-scoped service that bridges ResourceBundle and Signals for reactive i18n.
+ * Session-scoped service that bridges ResourceBundle and Signals for reactive
+ * i18n.
  *
- * Each call to t(key) returns a computed signal that recomputes when the locale changes.
- * ResourceBundle.getBundle() has built-in caching so repeated calls are efficient.
+ * Each call to t(key) returns a computed signal that recomputes when the locale
+ * changes. ResourceBundle.getBundle() has built-in caching so repeated calls
+ * are efficient.
  */
 @Service
 @SessionScope
@@ -24,17 +26,20 @@ public class TranslationService {
     private static final String BUNDLE_NAME = "i18n.messages";
 
     /**
-     * Returns a computed signal that provides the translated string for the given key.
-     * The signal automatically recomputes when the locale changes.
+     * Returns a computed signal that provides the translated string for the
+     * given key. The signal automatically recomputes when the locale changes.
      *
-     * @param key the translation key
-     * @return a Signal containing the translated string, or "!key!" if not found
+     * @param key
+     *            the translation key
+     * @return a Signal containing the translated string, or "!key!" if not
+     *         found
      */
     public Signal<String> t(String key) {
         return Signal.computed(() -> {
             Locale locale = UI.getCurrent().localeSignal().value();
             try {
-                ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
+                ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_NAME,
+                        locale);
                 if (bundle.containsKey(key)) {
                     return bundle.getString(key);
                 }

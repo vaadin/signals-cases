@@ -5,6 +5,7 @@ import jakarta.annotation.security.PermitAll;
 import java.util.Locale;
 
 import com.example.views.MainLayout;
+
 import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -113,7 +114,8 @@ public class UseCase21View extends VerticalLayout {
         emailField.setWidthFull();
         ComponentEffect.bind(emailField, t.t("uc21.sampleForm.emailLabel"),
                 (field, label) -> field.setLabel(label));
-        ComponentEffect.bind(emailField, t.t("uc21.sampleForm.emailPlaceholder"),
+        ComponentEffect.bind(emailField,
+                t.t("uc21.sampleForm.emailPlaceholder"),
                 (field, placeholder) -> field.setPlaceholder(placeholder));
 
         // Buttons
@@ -124,10 +126,12 @@ public class UseCase21View extends VerticalLayout {
         Button cancelButton = new Button();
         cancelButton.bindText(t.t("uc21.sampleForm.cancelButton"));
 
-        HorizontalLayout buttonLayout = new HorizontalLayout(submitButton, cancelButton);
+        HorizontalLayout buttonLayout = new HorizontalLayout(submitButton,
+                cancelButton);
         buttonLayout.setSpacing(true);
 
-        VerticalLayout formLayout = new VerticalLayout(nameField, emailField, buttonLayout);
+        VerticalLayout formLayout = new VerticalLayout(nameField, emailField,
+                buttonLayout);
         formLayout.setSpacing(true);
         formLayout.setPadding(false);
         formLayout.setMaxWidth("400px");
@@ -170,12 +174,11 @@ public class UseCase21View extends VerticalLayout {
         localeLabel.getStyle().set("font-weight", "bold");
 
         Span localeValue = new Span();
-        localeValue.bindText(UI.getCurrent().localeSignal().map(Locale::toLanguageTag));
-        localeValue.getStyle()
-                .set("font-family", "monospace")
+        localeValue.bindText(
+                UI.getCurrent().localeSignal().map(Locale::toLanguageTag));
+        localeValue.getStyle().set("font-family", "monospace")
                 .set("background-color", "var(--lumo-contrast-10pct)")
-                .set("padding", "0.25em 0.5em")
-                .set("border-radius", "4px");
+                .set("padding", "0.25em 0.5em").set("border-radius", "4px");
 
         localeRow.add(localeLabel, localeValue);
 
@@ -185,10 +188,8 @@ public class UseCase21View extends VerticalLayout {
 
     private Div createCard() {
         Div card = new Div();
-        card.getStyle()
-                .set("background-color", "var(--lumo-contrast-5pct)")
-                .set("border-radius", "8px")
-                .set("padding", "1.5em")
+        card.getStyle().set("background-color", "var(--lumo-contrast-5pct)")
+                .set("border-radius", "8px").set("padding", "1.5em")
                 .set("margin-bottom", "1em");
         return card;
     }

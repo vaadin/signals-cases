@@ -1,5 +1,7 @@
 package com.example.usecase23;
 
+import jakarta.annotation.security.PermitAll;
+
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -10,12 +12,21 @@ import java.util.function.Function;
 
 import com.example.usecase23.ServiceHealth.Status;
 import com.example.views.MainLayout;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.board.Board;
 import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.charts.model.*;
+import com.vaadin.flow.component.charts.model.ChartType;
+import com.vaadin.flow.component.charts.model.Configuration;
+import com.vaadin.flow.component.charts.model.DataSeries;
+import com.vaadin.flow.component.charts.model.DataSeriesItem;
+import com.vaadin.flow.component.charts.model.ListSeries;
+import com.vaadin.flow.component.charts.model.Marker;
+import com.vaadin.flow.component.charts.model.PlotOptionsAreaspline;
+import com.vaadin.flow.component.charts.model.PointPlacement;
+import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -31,16 +42,14 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.lumo.LumoUtility.FontSize;
-import com.vaadin.flow.theme.lumo.LumoUtility.FontWeight;
-import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
-import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
-
-import jakarta.annotation.security.PermitAll;
+import com.vaadin.flow.theme.lumo.LumoUtility.FontSize;
+import com.vaadin.flow.theme.lumo.LumoUtility.FontWeight;
+import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
+import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 
 @PageTitle("Use Case 23: Real-time Dashboard")
 @Route(value = "use-case-23", layout = MainLayout.class)
@@ -49,12 +58,17 @@ import jakarta.annotation.security.PermitAll;
 public class UseCase23View extends Main {
 
     private static final int TIMELINE_POINTS = 12;
-    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter
+            .ofPattern("HH:mm:ss");
 
-    private final WritableSignal<Number> currentUsersSignal = new ValueSignal<>(745);
-    private final WritableSignal<Number> viewEventsSignal = new ValueSignal<>(54600);
-    private final WritableSignal<Number> conversionRateSignal = new ValueSignal<>(18);
-    private final WritableSignal<Number> customMetricSignal = new ValueSignal<>(-123.45);
+    private final WritableSignal<Number> currentUsersSignal = new ValueSignal<>(
+            745);
+    private final WritableSignal<Number> viewEventsSignal = new ValueSignal<>(
+            54600);
+    private final WritableSignal<Number> conversionRateSignal = new ValueSignal<>(
+            18);
+    private final WritableSignal<Number> customMetricSignal = new ValueSignal<>(
+            -123.45);
 
     private final Random random = new Random();
     private final List<HighlightCard> highlightCards = new ArrayList<>();
@@ -73,10 +87,16 @@ public class UseCase23View extends Main {
         addClassName("dashboard-view");
 
         Board board = new Board();
-        board.addRow(createHighlightCard("Current users", currentUsersSignal, this::formatNumber),
-                createHighlightCard("View events", viewEventsSignal, this::formatCompactNumber),
-                createHighlightCard("Conversion rate", conversionRateSignal, number -> String.format("%.1f%%", number.doubleValue())),
-                createHighlightCard("Custom metric", customMetricSignal, this::formatNumber));
+        board.addRow(
+                createHighlightCard("Current users", currentUsersSignal,
+                        this::formatNumber),
+                createHighlightCard("View events", viewEventsSignal,
+                        this::formatCompactNumber),
+                createHighlightCard("Conversion rate", conversionRateSignal,
+                        number -> String.format("%.1f%%",
+                                number.doubleValue())),
+                createHighlightCard("Custom metric", customMetricSignal,
+                        this::formatNumber));
         board.addRow(createViewEvents());
         board.addRow(createServiceHealth(), createResponseTimes());
         add(board);
@@ -89,7 +109,8 @@ public class UseCase23View extends Main {
         });
     }
 
-    private HighlightCard createHighlightCard(String title, WritableSignal<Number> signal, Function<Number, String> format) {
+    private HighlightCard createHighlightCard(String title,
+            WritableSignal<Number> signal, Function<Number, String> format) {
 
         HighlightCard card = new HighlightCard(title, signal, format);
         card.update(signal.value());
@@ -99,7 +120,8 @@ public class UseCase23View extends Main {
 
     private Component createViewEvents() {
         // Header
-        HorizontalLayout header = createHeader("View events", "City / last 2 min");
+        HorizontalLayout header = createHeader("View events",
+                "City / last 2 min");
 
         // Chart
         Chart chart = new Chart(ChartType.AREASPLINE);
@@ -126,7 +148,9 @@ public class UseCase23View extends Main {
         bindData(chart, newYorkSeries, newYorkTimelineSignal);
         bindData(chart, tokyoSeries, tokyoTimelineSignal);
 
-        ComponentEffect.effect(chart, () -> xAxis.setCategories(timelineCategoriesSignal.value().stream().map(Signal::value).toArray(String[]::new)));
+        ComponentEffect.effect(chart,
+                () -> xAxis.setCategories(timelineCategoriesSignal.value()
+                        .stream().map(Signal::value).toArray(String[]::new)));
 
         conf.addSeries(berlinSeries);
         conf.addSeries(londonSeries);
@@ -142,16 +166,20 @@ public class UseCase23View extends Main {
         return viewEvents;
     }
 
-    private static void bindData(Chart chart, ListSeries series, ListSignal<Number> signal) {
+    private static void bindData(Chart chart, ListSeries series,
+            ListSignal<Number> signal) {
         ComponentEffect.effect(chart, () -> {
-            series.setData(signal.value().stream().map(Signal::value).toArray(Number[]::new));
-            // TODO issue of getting the values from ListSignal instead of Signal<Number>
+            series.setData(signal.value().stream().map(Signal::value)
+                    .toArray(Number[]::new));
+            // TODO issue of getting the values from ListSignal instead of
+            // Signal<Number>
         });
     }
 
     private Component createServiceHealth() {
         // Header
-        HorizontalLayout header = createHeader("Service health", "Input / output");
+        HorizontalLayout header = createHeader("Service health",
+                "Input / output");
 
         // Grid
         Grid<ValueSignal<ServiceHealth>> grid = new Grid<>();
@@ -164,26 +192,33 @@ public class UseCase23View extends Main {
             ComponentEffect.effect(status, () -> {
                 ServiceHealth serviceHealth = signal.value();
                 String statusTextInner = getStatusDisplayName(serviceHealth);
-                status.getElement().setAttribute("aria-label", "Status: " + statusTextInner);
-                status.getElement().setAttribute("title", "Status: " + statusTextInner);
+                status.getElement().setAttribute("aria-label",
+                        "Status: " + statusTextInner);
+                status.getElement().setAttribute("title",
+                        "Status: " + statusTextInner);
                 status.getElement().getThemeList().clear();
-                status.getElement().getThemeList().add(getStatusTheme(serviceHealth));
+                status.getElement().getThemeList()
+                        .add(getStatusTheme(serviceHealth));
             });
             return status;
         })).setHeader("").setFlexGrow(0).setAutoWidth(true);
-        grid.addColumn(signal -> signal.value().getCity()).setHeader("City").setFlexGrow(1);
+        grid.addColumn(signal -> signal.value().getCity()).setHeader("City")
+                .setFlexGrow(1);
         grid.addColumn(new ComponentRenderer<>(signal -> {
             var input = new Span(String.valueOf(signal.value().getInput()));
 
-            ComponentEffect.effect(input, () -> input.setText(String.valueOf(signal.value().getInput())));
+            ComponentEffect.effect(input, () -> input
+                    .setText(String.valueOf(signal.value().getInput())));
             return input;
-        })).setHeader("Input").setAutoWidth(true).setTextAlign(ColumnTextAlign.END);
+        })).setHeader("Input").setAutoWidth(true)
+                .setTextAlign(ColumnTextAlign.END);
         grid.addColumn(new ComponentRenderer<>(signal -> {
-                    var output = new Span(String.valueOf(signal.value().getOutput()));
+            var output = new Span(String.valueOf(signal.value().getOutput()));
 
-                    ComponentEffect.effect(output, () -> output.setText(String.valueOf(signal.value().getOutput())));
-                    return output;
-                })).setHeader("Output").setAutoWidth(true)
+            ComponentEffect.effect(output, () -> output
+                    .setText(String.valueOf(signal.value().getOutput())));
+            return output;
+        })).setHeader("Output").setAutoWidth(true)
                 .setTextAlign(ColumnTextAlign.END);
 
         // Add it all together
@@ -200,7 +235,8 @@ public class UseCase23View extends Main {
     }
 
     private Component createResponseTimes() {
-        HorizontalLayout header = createHeader("Response times", "Average across all systems");
+        HorizontalLayout header = createHeader("Response times",
+                "Average across all systems");
 
         // Chart
         Chart chart = new Chart(ChartType.PIE);
@@ -292,17 +328,25 @@ public class UseCase23View extends Main {
         }
 
         if (berlinTimelineSignal.value().size() >= TIMELINE_POINTS) {
-            berlinTimelineSignal.remove(berlinTimelineSignal.value().getFirst()); // TODO github issue remove first / last?
+            berlinTimelineSignal
+                    .remove(berlinTimelineSignal.value().getFirst()); // TODO
+                                                                      // github
+                                                                      // issue
+                                                                      // remove
+                                                                      // first /
+                                                                      // last?
         }
         berlinTimelineSignal.insertLast(randomBetween(480, 920));
 
         if (londonTimelineSignal.value().size() >= TIMELINE_POINTS) {
-            londonTimelineSignal.remove(londonTimelineSignal.value().getFirst());
+            londonTimelineSignal
+                    .remove(londonTimelineSignal.value().getFirst());
         }
         londonTimelineSignal.insertLast(randomBetween(420, 820));
 
         if (newYorkTimelineSignal.value().size() >= TIMELINE_POINTS) {
-            newYorkTimelineSignal.remove(newYorkTimelineSignal.value().getFirst());
+            newYorkTimelineSignal
+                    .remove(newYorkTimelineSignal.value().getFirst());
         }
         newYorkTimelineSignal.insertLast(randomBetween(220, 520));
 
@@ -312,9 +356,11 @@ public class UseCase23View extends Main {
         tokyoTimelineSignal.insertLast(randomBetween(260, 600));
 
         if (timelineCategoriesSignal.value().size() >= TIMELINE_POINTS) {
-            timelineCategoriesSignal.remove(timelineCategoriesSignal.value().getFirst());
+            timelineCategoriesSignal
+                    .remove(timelineCategoriesSignal.value().getFirst());
         }
-        timelineCategoriesSignal.insertLast(LocalTime.now().format(TIME_FORMATTER));
+        timelineCategoriesSignal
+                .insertLast(LocalTime.now().format(TIME_FORMATTER));
 
         if (viewEventsChart != null) {
             viewEventsChart.drawChart();
@@ -324,27 +370,31 @@ public class UseCase23View extends Main {
             signal.value(randomBetween(6, 22));
         }
 
-
         if (responseTimesChart != null) {
             responseTimesChart.drawChart();
         }
 
         // TODO report issue ListSignal set items / set value
-        //serviceHealthSignal.clear();
+        // serviceHealthSignal.clear();
         var healthValues = serviceHealthSignal.value();
-        mockServiceHealth().forEach(newHealth -> healthValues.forEach(currentHealthSignal -> {
-            var currentHealt = currentHealthSignal.value();
-            if (Objects.equals(currentHealt.getCity(), newHealth.getCity())) {
-                currentHealthSignal.value(newHealth);
-            }
-        }));
+        mockServiceHealth().forEach(
+                newHealth -> healthValues.forEach(currentHealthSignal -> {
+                    var currentHealt = currentHealthSignal.value();
+                    if (Objects.equals(currentHealt.getCity(),
+                            newHealth.getCity())) {
+                        currentHealthSignal.value(newHealth);
+                    }
+                }));
     }
 
     private List<ServiceHealth> mockServiceHealth() {
         return List.of(
-                new ServiceHealth(randomStatus(), "Münster", randomBetween(280, 360), randomBetween(1200, 1700)),
-                new ServiceHealth(randomStatus(), "Cluj-Napoca", randomBetween(260, 340), randomBetween(1100, 1600)),
-                new ServiceHealth(randomStatus(), "Ciudad Victoria", randomBetween(240, 320), randomBetween(1000, 1500)));
+                new ServiceHealth(randomStatus(), "Münster",
+                        randomBetween(280, 360), randomBetween(1200, 1700)),
+                new ServiceHealth(randomStatus(), "Cluj-Napoca",
+                        randomBetween(260, 340), randomBetween(1100, 1600)),
+                new ServiceHealth(randomStatus(), "Ciudad Victoria",
+                        randomBetween(240, 320), randomBetween(1000, 1500)));
     }
 
     private Status randomStatus() {
@@ -373,17 +423,19 @@ public class UseCase23View extends Main {
         return String.valueOf(value);
     }
 
-    private static final class HighlightCard extends VerticalLayout{
+    private static final class HighlightCard extends VerticalLayout {
         private final Span valueSpan;
         private final Span badge;
         private final Function<Number, String> format;
         private Number lastNumeric;
 
-        private HighlightCard(String title, WritableSignal<Number> signal, Function<Number, String> format) {
+        private HighlightCard(String title, WritableSignal<Number> signal,
+                Function<Number, String> format) {
             this.format = format;
 
             H2 h2 = new H2(title);
-            h2.addClassNames(FontWeight.NORMAL, Margin.NONE, TextColor.SECONDARY, FontSize.XSMALL);
+            h2.addClassNames(FontWeight.NORMAL, Margin.NONE,
+                    TextColor.SECONDARY, FontSize.XSMALL);
 
             valueSpan = new Span(format.apply(signal.value()));
             valueSpan.addClassNames(FontWeight.SEMIBOLD, FontSize.XXXLARGE);
@@ -403,7 +455,8 @@ public class UseCase23View extends Main {
             String prefix = "";
             String theme = "badge";
 
-            double percentage = calculatePercentageChange(newValue, lastNumeric);
+            double percentage = calculatePercentageChange(newValue,
+                    lastNumeric);
             if (percentage == 0) {
                 prefix = "±";
             } else if (percentage > 0) {
@@ -424,11 +477,13 @@ public class UseCase23View extends Main {
             lastNumeric = newValue;
         }
 
-        private double calculatePercentageChange(Number current, Number previous) {
+        private double calculatePercentageChange(Number current,
+                Number previous) {
             if (previous == null) {
                 return 0.0;
             }
-            double percent = ((current.doubleValue() - previous.doubleValue()) / Math.abs(previous.doubleValue())) * 100.0;
+            double percent = ((current.doubleValue() - previous.doubleValue())
+                    / Math.abs(previous.doubleValue())) * 100.0;
             return Math.round(percent * 10.0) / 10.0;
         }
     }

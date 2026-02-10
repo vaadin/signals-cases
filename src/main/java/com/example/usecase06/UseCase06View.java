@@ -9,7 +9,6 @@ import java.util.List;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.ComponentEffect;
-import com.vaadin.signals.WritableSignal;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
@@ -27,6 +26,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
+import com.vaadin.signals.WritableSignal;
 
 @Route(value = "use-case-06", layout = MainLayout.class)
 @PageTitle("Use Case 6: Shopping Cart with Real-time Totals")
@@ -256,10 +256,8 @@ public class UseCase06View extends VerticalLayout {
         quantityField.setStepButtonsVisible(true);
 
         // Two-way mapped signal for quantity
-        WritableSignal<Integer> quantitySignal = itemSignal.map(
-                CartItem::quantity,
-                CartItem::withQuantity
-        );
+        WritableSignal<Integer> quantitySignal = itemSignal
+                .map(CartItem::quantity, CartItem::withQuantity);
         quantityField.bindValue(quantitySignal);
 
         // Handle removal when quantity drops below 1
@@ -297,8 +295,8 @@ public class UseCase06View extends VerticalLayout {
         cartItemsSignal.value().stream().filter(
                 signal -> signal.value().product().id().equals(product.id()))
                 .findFirst().ifPresentOrElse(
-                        existing -> existing.value(
-                                existing.value().withQuantity(existing.value().quantity() + 1)),
+                        existing -> existing.value(existing.value()
+                                .withQuantity(existing.value().quantity() + 1)),
                         () -> cartItemsSignal
                                 .insertLast(new CartItem(product, 1)));
     }

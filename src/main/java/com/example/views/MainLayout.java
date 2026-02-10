@@ -4,7 +4,6 @@ import jakarta.annotation.security.PermitAll;
 
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.example.preferences.UserPreferences;
 import com.example.security.CurrentUserSignal;
@@ -12,10 +11,10 @@ import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
@@ -129,11 +128,8 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         });
 
         // Locale selector for i18n
-        Map<String, Locale> localeMap = Map.of(
-                "English", Locale.ENGLISH,
-                "Espanol", new Locale("es"),
-                "Suomi", new Locale("fi")
-        );
+        Map<String, Locale> localeMap = Map.of("English", Locale.ENGLISH,
+                "Espanol", new Locale("es"), "Suomi", new Locale("fi"));
 
         Select<String> localeSelector = new Select<>();
         localeSelector.setItems("English", "Espanol", "Suomi");
@@ -143,10 +139,9 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         // Initialize selected value from UI locale signal
         Locale currentLocale = UI.getCurrent().localeSignal().value();
         String initialSelection = localeMap.entrySet().stream()
-                .filter(e -> e.getValue().getLanguage().equals(currentLocale.getLanguage()))
-                .map(Map.Entry::getKey)
-                .findFirst()
-                .orElse("English");
+                .filter(e -> e.getValue().getLanguage()
+                        .equals(currentLocale.getLanguage()))
+                .map(Map.Entry::getKey).findFirst().orElse("English");
         localeSelector.setValue(initialSelection);
 
         // Update locale signal on change

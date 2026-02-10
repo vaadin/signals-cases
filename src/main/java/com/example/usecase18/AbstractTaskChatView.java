@@ -331,8 +331,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
     private void openEditDialog(Task task) {
         // Find the signal for this task
         var taskSignalOpt = tasksSignal.value().stream()
-                .filter(sig -> sig.value().id().equals(task.id()))
-                .findFirst();
+                .filter(sig -> sig.value().id().equals(task.id())).findFirst();
 
         if (taskSignalOpt.isEmpty()) {
             return;
@@ -347,22 +346,14 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         FormLayout formLayout = new FormLayout();
 
         // Create two-way mapped signals for each field
-        WritableSignal<String> titleSignal = taskSignal.map(
-                Task::title,
-                Task::withTitle
-        );
-        WritableSignal<String> descriptionSignal = taskSignal.map(
-                Task::description,
-                Task::withDescription
-        );
-        WritableSignal<Task.TaskStatus> statusSignal = taskSignal.map(
-                Task::status,
-                Task::withStatus
-        );
-        WritableSignal<LocalDate> dueDateSignal = taskSignal.map(
-                Task::dueDate,
-                Task::withDueDate
-        );
+        WritableSignal<String> titleSignal = taskSignal.map(Task::title,
+                Task::withTitle);
+        WritableSignal<String> descriptionSignal = taskSignal
+                .map(Task::description, Task::withDescription);
+        WritableSignal<Task.TaskStatus> statusSignal = taskSignal
+                .map(Task::status, Task::withStatus);
+        WritableSignal<LocalDate> dueDateSignal = taskSignal.map(Task::dueDate,
+                Task::withDueDate);
 
         TextField titleField = new TextField("Title");
         titleField.setWidthFull();

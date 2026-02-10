@@ -1,6 +1,7 @@
 package com.example.usecase22;
 
-public record Address(String street, String city, String zipCode, String country) {
+public record Address(String street, String city, String zipCode,
+        String country) {
 
     public Address withStreet(String newStreet) {
         return new Address(newStreet, city, zipCode, country);
