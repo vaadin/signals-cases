@@ -26,7 +26,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.signals.WritableSignal;
 
 @Route(value = "use-case-06", layout = MainLayout.class)
 @PageTitle("Use Case 6: Shopping Cart with Real-time Totals")
