@@ -61,13 +61,13 @@ public class UseCase23View extends Main {
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter
             .ofPattern("HH:mm:ss");
 
-    private final WritableSignal<Number> currentUsersSignal = new ValueSignal<>(
+    private final ValueSignal<Number> currentUsersSignal = new ValueSignal<>(
             745);
-    private final WritableSignal<Number> viewEventsSignal = new ValueSignal<>(
+    private final ValueSignal<Number> viewEventsSignal = new ValueSignal<>(
             54600);
-    private final WritableSignal<Number> conversionRateSignal = new ValueSignal<>(
+    private final ValueSignal<Number> conversionRateSignal = new ValueSignal<>(
             18);
-    private final WritableSignal<Number> customMetricSignal = new ValueSignal<>(
+    private final ValueSignal<Number> customMetricSignal = new ValueSignal<>(
             -123.45);
 
     private final Random random = new Random();

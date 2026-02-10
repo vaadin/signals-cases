@@ -19,7 +19,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-01", layout = MainLayout.class)
@@ -41,10 +40,10 @@ public class UseCase01View extends VerticalLayout {
                         + "The button also reactively changes text during form submission.");
 
         // Field signals
-        WritableSignal<String> emailSignal = new ValueSignal<>("");
-        WritableSignal<String> passwordSignal = new ValueSignal<>("");
-        WritableSignal<String> confirmPasswordSignal = new ValueSignal<>("");
-        WritableSignal<SubmissionState> submissionStateSignal = new ValueSignal<>(
+        ValueSignal<String> emailSignal = new ValueSignal<>("");
+        ValueSignal<String> passwordSignal = new ValueSignal<>("");
+        ValueSignal<String> confirmPasswordSignal = new ValueSignal<>("");
+        ValueSignal<SubmissionState> submissionStateSignal = new ValueSignal<>(
                 SubmissionState.IDLE);
 
         // Individual field validity signals

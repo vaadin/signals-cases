@@ -18,7 +18,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-04", layout = MainLayout.class)
@@ -40,9 +39,9 @@ public class UseCase04View extends VerticalLayout {
                         + "The filtered list updates automatically as you change any filter.");
 
         // Create signals for filter inputs
-        WritableSignal<String> categoryFilterSignal = new ValueSignal<>("All");
-        WritableSignal<String> searchTermSignal = new ValueSignal<>("");
-        WritableSignal<Boolean> inStockOnlySignal = new ValueSignal<>(false);
+        ValueSignal<String> categoryFilterSignal = new ValueSignal<>("All");
+        ValueSignal<String> searchTermSignal = new ValueSignal<>("");
+        ValueSignal<Boolean> inStockOnlySignal = new ValueSignal<>(false);
 
         // Load all products
         List<Product> allProducts = loadProducts();

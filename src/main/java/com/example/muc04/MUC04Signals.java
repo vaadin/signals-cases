@@ -15,11 +15,11 @@ public class MUC04Signals {
     public record FieldLock(String username, String sessionId) {
     }
 
-    private final WritableSignal<String> companyNameSignal = new SharedValueSignal<>(
+    private final SharedValueSignal<String> companyNameSignal = new SharedValueSignal<>(
             "");
-    private final WritableSignal<String> addressSignal = new SharedValueSignal<>(
+    private final SharedValueSignal<String> addressSignal = new SharedValueSignal<>(
             "");
-    private final WritableSignal<String> phoneSignal = new SharedValueSignal<>(
+    private final SharedValueSignal<String> phoneSignal = new SharedValueSignal<>(
             "");
     // MapSignal where key is fieldName and value is FieldLock
     private final SharedMapSignal<FieldLock> fieldLocksSignal = new SharedMapSignal<>(

@@ -61,7 +61,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
     private MessageInput messageInput;
 
     // Signals for UI state
-    private final WritableSignal<Boolean> messageInputEnabledSignal = new ValueSignal<>(
+    private final ValueSignal<Boolean> messageInputEnabledSignal = new ValueSignal<>(
             true);
 
     // Constructor with signal injection

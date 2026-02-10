@@ -27,7 +27,6 @@ import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
@@ -112,11 +111,9 @@ public class UseCase16View extends VerticalLayout
             new Article("10", "Migration Guide", "Documentation",
                     "Migrating from traditional state to signals..."));
 
-    private final WritableSignal<String> searchQuerySignal = new ValueSignal<>(
-            "");
-    private final WritableSignal<String> categorySignal = new ValueSignal<>(
-            "All");
-    private final WritableSignal<List<Article>> filteredArticlesSignal = new ValueSignal<>(
+    private final ValueSignal<String> searchQuerySignal = new ValueSignal<>("");
+    private final ValueSignal<String> categorySignal = new ValueSignal<>("All");
+    private final ValueSignal<List<Article>> filteredArticlesSignal = new ValueSignal<>(
             List.of());
 
     private boolean isInitializing = true;

@@ -16,15 +16,15 @@ public class MUC03Signals {
     private final SharedMapSignal<Integer> leaderboardSignal = new SharedMapSignal<>(
             Integer.class);
 
-    private final WritableSignal<Boolean> buttonVisibleSignal = new SharedValueSignal<>(
+    private final SharedValueSignal<Boolean> buttonVisibleSignal = new SharedValueSignal<>(
             false);
-    private final WritableSignal<Integer> buttonLeftSignal = new SharedValueSignal<>(
+    private final SharedValueSignal<Integer> buttonLeftSignal = new SharedValueSignal<>(
             0);
-    private final WritableSignal<Integer> buttonTopSignal = new SharedValueSignal<>(
+    private final SharedValueSignal<Integer> buttonTopSignal = new SharedValueSignal<>(
             0);
-    private final WritableSignal<Integer> clicksRemainingSignal = new SharedValueSignal<>(
+    private final SharedValueSignal<Integer> clicksRemainingSignal = new SharedValueSignal<>(
             0);
-    private final WritableSignal<Integer> roundNumberSignal = new SharedValueSignal<>(
+    private final SharedValueSignal<Integer> roundNumberSignal = new SharedValueSignal<>(
             0);
 
     public SharedMapSignal<Integer> getLeaderboardSignal() {

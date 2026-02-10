@@ -24,7 +24,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
@@ -50,18 +49,18 @@ public class UseCase14View extends VerticalLayout {
 
     private final AnalyticsService analyticsService;
 
-    private final WritableSignal<LoadingState.State> stateSignal = new ValueSignal<>(
+    private final ValueSignal<LoadingState.State> stateSignal = new ValueSignal<>(
             LoadingState.State.IDLE);
 
-    private final WritableSignal<AnalyticsReport> reportDataSignal = new ValueSignal<>(
+    private final ValueSignal<AnalyticsReport> reportDataSignal = new ValueSignal<>(
             AnalyticsReport.empty());
 
-    private final WritableSignal<String> errorSignal = new ValueSignal<>("");
+    private final ValueSignal<String> errorSignal = new ValueSignal<>("");
 
-    private final WritableSignal<Boolean> shouldFailSignal = new ValueSignal<>(
+    private final ValueSignal<Boolean> shouldFailSignal = new ValueSignal<>(
             false);
 
-    private final WritableSignal<String> loadingMessageSignal = new ValueSignal<>(
+    private final ValueSignal<String> loadingMessageSignal = new ValueSignal<>(
             "");
 
     public UseCase14View(AnalyticsService analyticsService) {
