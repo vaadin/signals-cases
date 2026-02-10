@@ -17,7 +17,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
@@ -74,7 +73,7 @@ public class UseCase11View extends VerticalLayout {
         }
     }
 
-    private final WritableSignal<ContainerSize> containerSizeSignal = new ValueSignal<>(
+    private final ValueSignal<ContainerSize> containerSizeSignal = new ValueSignal<>(
             new ContainerSize(600, 400));
     private Div responsiveContent;
 

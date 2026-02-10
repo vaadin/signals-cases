@@ -27,7 +27,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
@@ -74,16 +73,14 @@ public class UseCase15View extends VerticalLayout {
             new Product("14", "Webcam HD", "Electronics", 79.99),
             new Product("15", "Bookshelf", "Furniture", 129.99));
 
-    private final WritableSignal<String> searchQuerySignal = new ValueSignal<>(
+    private final ValueSignal<String> searchQuerySignal = new ValueSignal<>("");
+    private final ValueSignal<String> debouncedQuerySignal = new ValueSignal<>(
             "");
-    private final WritableSignal<String> debouncedQuerySignal = new ValueSignal<>(
-            "");
-    private final WritableSignal<Boolean> isSearchingSignal = new ValueSignal<>(
+    private final ValueSignal<Boolean> isSearchingSignal = new ValueSignal<>(
             false);
-    private final WritableSignal<List<Product>> searchResultsSignal = new ValueSignal<>(
+    private final ValueSignal<List<Product>> searchResultsSignal = new ValueSignal<>(
             List.of());
-    private final WritableSignal<Integer> searchCountSignal = new ValueSignal<>(
-            0);
+    private final ValueSignal<Integer> searchCountSignal = new ValueSignal<>(0);
 
     private Timer debounceTimer;
     private final AtomicReference<CompletableFuture<Void>> currentSearch = new AtomicReference<>();

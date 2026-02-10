@@ -15,7 +15,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-05", layout = MainLayout.class)
@@ -37,10 +36,9 @@ public class UseCase05View extends VerticalLayout {
 
         // Create signals for selections - use first country as default
         List<String> countries = loadCountries();
-        WritableSignal<String> countrySignal = new ValueSignal<>(
-                countries.get(0));
-        WritableSignal<String> stateSignal = new ValueSignal<>("");
-        WritableSignal<String> citySignal = new ValueSignal<>("");
+        ValueSignal<String> countrySignal = new ValueSignal<>(countries.get(0));
+        ValueSignal<String> stateSignal = new ValueSignal<>("");
+        ValueSignal<String> citySignal = new ValueSignal<>("");
 
         // Country selector
         ComboBox<String> countrySelect = new ComboBox<>("Country");

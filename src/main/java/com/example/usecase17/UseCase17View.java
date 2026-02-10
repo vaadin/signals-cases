@@ -421,25 +421,25 @@ public class UseCase17View extends VerticalLayout {
     // ==================== Signal Declarations (~70 total) ====================
 
     // 1. Component Selection Signals (12)
-    private final WritableSignal<CPU> cpuSignal = new ValueSignal<>(
+    private final ValueSignal<CPU> cpuSignal = new ValueSignal<>(
             ALL_CPUS.get(ALL_CPUS.size() - 1)); // None
-    private final WritableSignal<Motherboard> motherboardSignal = new ValueSignal<>(
+    private final ValueSignal<Motherboard> motherboardSignal = new ValueSignal<>(
             ALL_MOTHERBOARDS.get(ALL_MOTHERBOARDS.size() - 1)); // None
-    private final WritableSignal<RAM> ramSignal = new ValueSignal<>(
+    private final ValueSignal<RAM> ramSignal = new ValueSignal<>(
             ALL_RAM.get(ALL_RAM.size() - 1)); // None
-    private final WritableSignal<GPU> gpuSignal = new ValueSignal<>(
+    private final ValueSignal<GPU> gpuSignal = new ValueSignal<>(
             ALL_GPUS.get(ALL_GPUS.size() - 1)); // None
-    private final WritableSignal<Storage> storage1Signal = new ValueSignal<>(
+    private final ValueSignal<Storage> storage1Signal = new ValueSignal<>(
             ALL_STORAGE.get(ALL_STORAGE.size() - 1)); // None
-    private final WritableSignal<Storage> storage2Signal = new ValueSignal<>(
+    private final ValueSignal<Storage> storage2Signal = new ValueSignal<>(
             ALL_STORAGE.get(ALL_STORAGE.size() - 1)); // None
-    private final WritableSignal<Storage> storage3Signal = new ValueSignal<>(
+    private final ValueSignal<Storage> storage3Signal = new ValueSignal<>(
             ALL_STORAGE.get(ALL_STORAGE.size() - 1)); // None
-    private final WritableSignal<PSU> psuSignal = new ValueSignal<>(
+    private final ValueSignal<PSU> psuSignal = new ValueSignal<>(
             ALL_PSUS.get(ALL_PSUS.size() - 1)); // None
-    private final WritableSignal<Case> caseSignal = new ValueSignal<>(
+    private final ValueSignal<Case> caseSignal = new ValueSignal<>(
             ALL_CASES.get(ALL_CASES.size() - 1)); // None
-    private final WritableSignal<Cooler> coolerSignal = new ValueSignal<>(
+    private final ValueSignal<Cooler> coolerSignal = new ValueSignal<>(
             ALL_COOLERS.get(ALL_COOLERS.size() - 1)); // None
 
     // 2. Computed Price Signals (10)
@@ -498,9 +498,9 @@ public class UseCase17View extends VerticalLayout {
     private Signal<Boolean> isValidConfigurationSignal;
 
     // 7. UI State Signals (4)
-    private final WritableSignal<Boolean> showCompatibilityDetailsSignal = new ValueSignal<>(
+    private final ValueSignal<Boolean> showCompatibilityDetailsSignal = new ValueSignal<>(
             true);
-    private final WritableSignal<Boolean> showPerformanceDetailsSignal = new ValueSignal<>(
+    private final ValueSignal<Boolean> showPerformanceDetailsSignal = new ValueSignal<>(
             true);
 
     public UseCase17View() {

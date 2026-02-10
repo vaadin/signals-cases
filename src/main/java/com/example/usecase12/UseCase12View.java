@@ -16,7 +16,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
@@ -34,7 +33,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PermitAll
 public class UseCase12View extends VerticalLayout {
 
-    private final WritableSignal<String> viewTitleSignal = new ValueSignal<>(
+    private final ValueSignal<String> viewTitleSignal = new ValueSignal<>(
             "Document Viewer");
     private static final String APP_NAME = "Signal API Demo";
 

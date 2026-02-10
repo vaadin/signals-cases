@@ -32,45 +32,41 @@ import com.vaadin.flow.signals.local.ValueSignal;
 public class UseCase03View extends VerticalLayout {
 
     // Rectangle signals (green) - top left position
-    private final WritableSignal<Integer> rectXSignal = new ValueSignal<>(100);
-    private final WritableSignal<Integer> rectYSignal = new ValueSignal<>(50);
-    private final WritableSignal<Integer> rectWidthSignal = new ValueSignal<>(
-            150);
-    private final WritableSignal<Integer> rectHeightSignal = new ValueSignal<>(
-            80);
-    private final WritableSignal<Integer> rectCornerRadiusSignal = new ValueSignal<>(
+    private final ValueSignal<Integer> rectXSignal = new ValueSignal<>(100);
+    private final ValueSignal<Integer> rectYSignal = new ValueSignal<>(50);
+    private final ValueSignal<Integer> rectWidthSignal = new ValueSignal<>(150);
+    private final ValueSignal<Integer> rectHeightSignal = new ValueSignal<>(80);
+    private final ValueSignal<Integer> rectCornerRadiusSignal = new ValueSignal<>(
             10);
-    private final WritableSignal<String> rectFillSignal = new ValueSignal<>(
+    private final ValueSignal<String> rectFillSignal = new ValueSignal<>(
             "#10b981");
-    private final WritableSignal<String> rectStrokeSignal = new ValueSignal<>(
+    private final ValueSignal<String> rectStrokeSignal = new ValueSignal<>(
             "#059669");
-    private final WritableSignal<Integer> rectStrokeWidthSignal = new ValueSignal<>(
+    private final ValueSignal<Integer> rectStrokeWidthSignal = new ValueSignal<>(
             2);
-    private final WritableSignal<Double> rectOpacitySignal = new ValueSignal<>(
+    private final ValueSignal<Double> rectOpacitySignal = new ValueSignal<>(
             1.0);
-    private final WritableSignal<Integer> rectRotationSignal = new ValueSignal<>(
+    private final ValueSignal<Integer> rectRotationSignal = new ValueSignal<>(
             0);
 
     // Star signals (orange) - below rectangle
-    private final WritableSignal<Integer> starPointsSignal = new ValueSignal<>(
-            5);
-    private final WritableSignal<Integer> starSizeSignal = new ValueSignal<>(
-            50);
-    private final WritableSignal<Integer> starCxSignal = new ValueSignal<>(175);
-    private final WritableSignal<Integer> starCySignal = new ValueSignal<>(300);
-    private final WritableSignal<Integer> starRotationSignal = new ValueSignal<>(
+    private final ValueSignal<Integer> starPointsSignal = new ValueSignal<>(5);
+    private final ValueSignal<Integer> starSizeSignal = new ValueSignal<>(50);
+    private final ValueSignal<Integer> starCxSignal = new ValueSignal<>(175);
+    private final ValueSignal<Integer> starCySignal = new ValueSignal<>(300);
+    private final ValueSignal<Integer> starRotationSignal = new ValueSignal<>(
             0);
-    private final WritableSignal<String> starFillSignal = new ValueSignal<>(
+    private final ValueSignal<String> starFillSignal = new ValueSignal<>(
             "#f59e0b");
-    private final WritableSignal<String> starStrokeSignal = new ValueSignal<>(
+    private final ValueSignal<String> starStrokeSignal = new ValueSignal<>(
             "#d97706");
-    private final WritableSignal<Integer> starStrokeWidthSignal = new ValueSignal<>(
+    private final ValueSignal<Integer> starStrokeWidthSignal = new ValueSignal<>(
             2);
-    private final WritableSignal<Double> starOpacitySignal = new ValueSignal<>(
+    private final ValueSignal<Double> starOpacitySignal = new ValueSignal<>(
             1.0);
 
     // Selected shape tracking
-    private final WritableSignal<Integer> selectedShapeSignal = new ValueSignal<>(
+    private final ValueSignal<Integer> selectedShapeSignal = new ValueSignal<>(
             0);
 
     private Element rectElement;
