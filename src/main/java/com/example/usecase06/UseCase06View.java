@@ -8,7 +8,6 @@ import java.util.List;
 
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
@@ -116,7 +115,7 @@ public class UseCase06View extends VerticalLayout {
                 .set("margin-bottom", "1em");
 
         var cartItemsList = new Div();
-        ComponentEffect.bindChildren(cartItemsList, cartItemsSignal,
+        cartItemsList.bindChildren(cartItemsSignal,
                 itemSignal -> createCartItemRow(itemSignal, cartItemsSignal));
 
         var emptyCart = new Paragraph("Empty cart");
