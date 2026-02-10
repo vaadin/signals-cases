@@ -2,7 +2,6 @@ package com.example.muc02;
 
 import jakarta.annotation.security.PermitAll;
 
-import com.example.MissingAPI;
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
@@ -47,6 +46,7 @@ public class MUC02View extends VerticalLayout {
     private final MUC02Signals muc02Signals;
     private final UserSessionRegistry userSessionRegistry;
     private String sessionId;
+    private final java.util.IdentityHashMap<SharedValueSignal<MUC02Signals.CursorPosition>, String> cursorKeyMap = new java.util.IdentityHashMap<>();
 
     public MUC02View(CurrentUserSignal currentUserSignal,
             MUC02Signals muc02Signals,
@@ -114,18 +114,13 @@ public class MUC02View extends VerticalLayout {
                 .set("padding", "1em").set("border-radius", "4px");
 
         // Display cursor positions per session - reactive
-        MissingAPI.bindChildren(usersList, Signal.computed(() -> {
-            var cursors = muc02Signals.getSessionCursorsSignal().value();
-            var displayNameMap = buildDisplayNameMap();
-
-            return cursors.entrySet().stream().map(entry -> {
-                String sessionKey = entry.getKey();
-                String displayName = displayNameMap.getOrDefault(sessionKey,
-                        "[" + sessionKey + "]");
-                return createCursorListItem(sessionKey, entry.getValue(),
-                        displayName);
-            }).toList();
-        }));
+        usersList.bindChildren(
+                muc02Signals.getSessionCursorsSignal().map(cursors -> {
+                    cursorKeyMap.clear();
+                    cursors.forEach(
+                            (key, signal) -> cursorKeyMap.put(signal, key));
+                    return new java.util.ArrayList<>(cursors.values());
+                }), this::createCursorListItem);
 
         // Info box
         Div infoBox = new Div();
@@ -158,20 +153,21 @@ public class MUC02View extends VerticalLayout {
 
     private void renderAllCursors(Div container) {
         // Reactive rendering of cursor indicators
-        MissingAPI.bindChildren(container, Signal.computed(() -> {
+        container.bindChildren(Signal.computed(() -> {
             var cursors = muc02Signals.getSessionCursorsSignal().value();
-            var displayNameMap = buildDisplayNameMap();
+            cursorKeyMap.clear();
+            cursors.forEach((key, signal) -> cursorKeyMap.put(signal, key));
+            String ownKey = currentUser + ":" + sessionId;
+            return cursors.entrySet().stream()
+                    .filter(entry -> sessionId == null
+                            || !entry.getKey().equals(ownKey))
+                    .map(java.util.Map.Entry::getValue).toList();
+        }), this::createCursorIndicator);
+    }
 
-            return cursors.entrySet().stream().filter(entry -> sessionId == null
-                    || !entry.getKey().equals(currentUser + ":" + sessionId))
-                    .map(entry -> {
-                        String sessionKey = entry.getKey();
-                        String displayName = displayNameMap.getOrDefault(
-                                sessionKey, "[" + sessionKey + "]");
-                        return createCursorIndicator(entry.getValue(),
-                                displayName);
-                    }).toList();
-        }));
+    private String lookupSessionKey(
+            SharedValueSignal<MUC02Signals.CursorPosition> positionSignal) {
+        return cursorKeyMap.getOrDefault(positionSignal, "");
     }
 
     private java.util.Map<String, String> buildDisplayNameMap() {
@@ -185,9 +181,11 @@ public class MUC02View extends VerticalLayout {
         return map;
     }
 
-    private HorizontalLayout createCursorListItem(String sessionKey,
-            SharedValueSignal<MUC02Signals.CursorPosition> positionSignal,
-            String displayName) {
+    private HorizontalLayout createCursorListItem(
+            SharedValueSignal<MUC02Signals.CursorPosition> positionSignal) {
+        String sessionKey = lookupSessionKey(positionSignal);
+        String displayName = buildDisplayNameMap().getOrDefault(sessionKey,
+                "[" + sessionKey + "]");
         String username = sessionKey.split(":")[0];
 
         HorizontalLayout userItem = new HorizontalLayout();
@@ -219,8 +217,11 @@ public class MUC02View extends VerticalLayout {
     }
 
     private Div createCursorIndicator(
-            SharedValueSignal<MUC02Signals.CursorPosition> signal,
-            String displayName) {
+            SharedValueSignal<MUC02Signals.CursorPosition> positionSignal) {
+        String sessionKey = lookupSessionKey(positionSignal);
+        String displayName = buildDisplayNameMap().getOrDefault(sessionKey,
+                "[" + sessionKey + "]");
+
         Div cursorIndicator = new Div();
         cursorIndicator.getStyle().set("position", "absolute")
                 .set("width", "20px").set("height", "20px")
@@ -230,10 +231,10 @@ public class MUC02View extends VerticalLayout {
                 .set("transform", "translate(-50%, -50%)")
                 .set("z-index", "1000");
 
-        cursorIndicator.getStyle().bind("left",
-                signal.map(pos -> pos != null ? pos.x() + "px" : "0px"));
-        cursorIndicator.getStyle().bind("top",
-                signal.map(pos -> pos != null ? pos.y() + "px" : "0px"));
+        cursorIndicator.getStyle().bind("left", positionSignal
+                .map(pos -> pos != null ? pos.x() + "px" : "0px"));
+        cursorIndicator.getStyle().bind("top", positionSignal
+                .map(pos -> pos != null ? pos.y() + "px" : "0px"));
 
         Div label = new Div();
         label.setText(displayName);

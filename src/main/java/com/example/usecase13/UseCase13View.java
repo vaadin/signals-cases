@@ -2,12 +2,9 @@ package com.example.usecase13;
 
 import jakarta.annotation.security.PermitAll;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import com.example.MissingAPI;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserInfo;
 import com.example.signals.UserSessionRegistry;
@@ -109,19 +106,10 @@ public class UseCase13View extends VerticalLayout {
         String currentSessionId = SessionIdHelper.getCurrentSessionId();
 
         // Reactively bind children to active users list
-        MissingAPI.bindChildren(userListContainer, Signal.computed(() -> {
-            List<com.vaadin.flow.signals.shared.SharedValueSignal<UserInfo>> userSignals = userSessionRegistry
-                    .getActiveUsersSignal().value();
-            List<Card> userCards = new ArrayList<>();
-
-            for (var userSignal : userSignals) {
-                UserInfo user = userSignal.value();
-                Card userCard = createUserCard(user, currentSessionId);
-                userCards.add(userCard);
-            }
-
-            return userCards;
-        }));
+        userListContainer.bindChildren(
+                userSessionRegistry.getActiveUsersSignal(),
+                userSignal -> createUserCard(userSignal.value(),
+                        currentSessionId));
 
         // Educational info box
         Div infoBox = new Div();

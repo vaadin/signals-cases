@@ -1,6 +1,5 @@
 package com.example.views;
 
-import com.example.MissingAPI;
 import com.example.signals.UserSessionRegistry;
 
 import com.vaadin.flow.component.avatar.Avatar;
@@ -98,31 +97,23 @@ public class ActiveUsersDisplay extends Div {
         title.getStyle().set("font-weight", "500");
 
         // Bind user avatars and names
-        MissingAPI.bindChildren(usersContainer, Signal.computed(() -> {
-            var displayNames = displayNamesSignal.value();
+        usersContainer.bindChildren(Signal.computed(() -> {
             var users = userSessionRegistry.getActiveUsersSignal().value();
-
-            // Filter users if viewRoute is specified
-            java.util.List<com.example.signals.UserInfo> filteredUsers;
             if (viewRoute != null) {
-                filteredUsers = users.stream()
-                        .map(userSignal -> userSignal.value())
-                        .filter(user -> viewRoute.equals(user.currentView()))
+                return users.stream()
+                        .filter(userSignal -> viewRoute
+                                .equals(userSignal.value().currentView()))
                         .toList();
-            } else {
-                filteredUsers = users.stream()
-                        .map(userSignal -> userSignal.value()).toList();
             }
-
-            return filteredUsers.stream()
-                    .map(ActiveUsersDisplay::createUserItem).toList();
-        }));
+            return users;
+        }), this::createUserItem);
 
         add(title, usersContainer);
     }
 
-    private static HorizontalLayout createUserItem(
-            com.example.signals.UserInfo user) {
+    private HorizontalLayout createUserItem(
+            com.vaadin.flow.signals.Signal<com.example.signals.UserInfo> userSignal) {
+        var user = userSignal.value();
         String displayName = user.nickname() != null
                 && !user.nickname().isEmpty() ? user.nickname()
                         : user.username();
