@@ -116,59 +116,14 @@ public class MUC02View extends VerticalLayout {
         // Display cursor positions per session - reactive
         MissingAPI.bindChildren(usersList, Signal.computed(() -> {
             var cursors = muc02Signals.getSessionCursorsSignal().value();
-            var users = userSessionRegistry.getActiveUsersSignal().value();
-            var displayNames = userSessionRegistry.getDisplayNamesSignal()
-                    .value();
-
-            // Build mapping from sessionKey to display name
-            java.util.Map<String, String> displayNameMap = new java.util.HashMap<>();
-            for (int i = 0; i < users.size() && i < displayNames.size(); i++) {
-                String sessionKey = users.get(i).value().getCompositeKey();
-                displayNameMap.put(sessionKey, displayNames.get(i));
-            }
+            var displayNameMap = buildDisplayNameMap();
 
             return cursors.entrySet().stream().map(entry -> {
                 String sessionKey = entry.getKey();
-                SharedValueSignal<MUC02Signals.CursorPosition> positionSignal = entry
-                        .getValue();
-
-                // Get display name and username from mapping
                 String displayName = displayNameMap.getOrDefault(sessionKey,
                         "[" + sessionKey + "]");
-
-                // Extract username from sessionKey (format:
-                // "username:sessionId")
-                String username = sessionKey.split(":")[0];
-
-                HorizontalLayout userItem = new HorizontalLayout();
-                userItem.setSpacing(true);
-                userItem.setAlignItems(
-                        com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
-                userItem.setWidthFull();
-                userItem.getStyle().set("margin-bottom", "0.5em");
-
-                // Avatar
-                Image avatar = new Image(
-                        MainLayout.getProfilePicturePath(username), "");
-                avatar.setWidth("32px");
-                avatar.setHeight("32px");
-                avatar.getStyle().set("border-radius", "50%").set("object-fit",
-                        "cover");
-
-                // User label
-                Div userLabel = new Div();
-                userLabel.setText(displayName);
-                userLabel.getStyle().set("font-weight", "500");
-
-                // Position label
-                Div positionLabel = new Div(positionSignal
-                        .map(MUC02Signals.CursorPosition::toString));
-                positionLabel.getStyle().set("font-family", "monospace")
-                        .set("color", "var(--lumo-secondary-text-color)")
-                        .set("margin-left", "auto");
-
-                userItem.add(avatar, userLabel, positionLabel);
-                return userItem;
+                return createCursorListItem(sessionKey, entry.getValue(),
+                        displayName);
             }).toList();
         }));
 
@@ -205,61 +160,91 @@ public class MUC02View extends VerticalLayout {
         // Reactive rendering of cursor indicators
         MissingAPI.bindChildren(container, Signal.computed(() -> {
             var cursors = muc02Signals.getSessionCursorsSignal().value();
-            var users = userSessionRegistry.getActiveUsersSignal().value();
-            var displayNames = userSessionRegistry.getDisplayNamesSignal()
-                    .value();
+            var displayNameMap = buildDisplayNameMap();
 
-            // Build mapping from sessionKey to display name
-            java.util.Map<String, String> displayNameMap = new java.util.HashMap<>();
-            for (int i = 0; i < users.size() && i < displayNames.size(); i++) {
-                String sessionKey = users.get(i).value().getCompositeKey();
-                displayNameMap.put(sessionKey, displayNames.get(i));
-            }
-
-            return cursors.entrySet().stream().filter(entry -> sessionId == null
-                    || !entry.getKey().equals(currentUser + ":" + sessionId))
+            return cursors.entrySet().stream()
+                    .filter(entry -> sessionId == null || !entry.getKey()
+                            .equals(currentUser + ":" + sessionId))
                     .map(entry -> {
                         String sessionKey = entry.getKey();
-                        SharedValueSignal<MUC02Signals.CursorPosition> signal = entry
-                                .getValue();
-
-                        // Get display name from mapping (fallback to full
-                        // sessionKey
-                        // for debugging)
                         String displayName = displayNameMap.getOrDefault(
                                 sessionKey, "[" + sessionKey + "]");
-
-                        Div cursorIndicator = new Div();
-                        cursorIndicator.getStyle().set("position", "absolute")
-                                .set("width", "20px").set("height", "20px")
-                                .set("background-color",
-                                        "var(--lumo-primary-color)")
-                                .set("border-radius", "50%")
-                                .set("border", "2px solid white")
-                                .set("pointer-events", "none")
-                                .set("transform", "translate(-50%, -50%)")
-                                .set("z-index", "1000");
-
-                        // Bind position (with null guards)
-                        cursorIndicator.getStyle().bind("left", signal.map(
-                                pos -> pos != null ? pos.x() + "px" : "0px"));
-                        cursorIndicator.getStyle().bind("top", signal.map(
-                                pos -> pos != null ? pos.y() + "px" : "0px"));
-
-                        // Label with display name
-                        Div label = new Div();
-                        label.setText(displayName);
-                        label.getStyle().set("position", "absolute")
-                                .set("top", "25px").set("left", "0")
-                                .set("white-space", "nowrap")
-                                .set("background-color", "rgba(0, 0, 0, 0.7)")
-                                .set("color", "white").set("padding", "2px 6px")
-                                .set("border-radius", "3px")
-                                .set("font-size", "0.75em");
-
-                        cursorIndicator.add(label);
-                        return cursorIndicator;
+                        return createCursorIndicator(entry.getValue(),
+                                displayName);
                     }).toList();
         }));
+    }
+
+    private java.util.Map<String, String> buildDisplayNameMap() {
+        var users = userSessionRegistry.getActiveUsersSignal().value();
+        var displayNames = userSessionRegistry.getDisplayNamesSignal().value();
+        java.util.Map<String, String> map = new java.util.HashMap<>();
+        for (int i = 0; i < users.size() && i < displayNames.size(); i++) {
+            map.put(users.get(i).value().getCompositeKey(),
+                    displayNames.get(i));
+        }
+        return map;
+    }
+
+    private HorizontalLayout createCursorListItem(String sessionKey,
+            SharedValueSignal<MUC02Signals.CursorPosition> positionSignal,
+            String displayName) {
+        String username = sessionKey.split(":")[0];
+
+        HorizontalLayout userItem = new HorizontalLayout();
+        userItem.setSpacing(true);
+        userItem.setAlignItems(
+                com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
+        userItem.setWidthFull();
+        userItem.getStyle().set("margin-bottom", "0.5em");
+
+        Image avatar = new Image(MainLayout.getProfilePicturePath(username),
+                "");
+        avatar.setWidth("32px");
+        avatar.setHeight("32px");
+        avatar.getStyle().set("border-radius", "50%").set("object-fit",
+                "cover");
+
+        Div userLabel = new Div();
+        userLabel.setText(displayName);
+        userLabel.getStyle().set("font-weight", "500");
+
+        Div positionLabel = new Div(
+                positionSignal.map(MUC02Signals.CursorPosition::toString));
+        positionLabel.getStyle().set("font-family", "monospace")
+                .set("color", "var(--lumo-secondary-text-color)")
+                .set("margin-left", "auto");
+
+        userItem.add(avatar, userLabel, positionLabel);
+        return userItem;
+    }
+
+    private Div createCursorIndicator(
+            SharedValueSignal<MUC02Signals.CursorPosition> signal,
+            String displayName) {
+        Div cursorIndicator = new Div();
+        cursorIndicator.getStyle().set("position", "absolute")
+                .set("width", "20px").set("height", "20px")
+                .set("background-color", "var(--lumo-primary-color)")
+                .set("border-radius", "50%").set("border", "2px solid white")
+                .set("pointer-events", "none")
+                .set("transform", "translate(-50%, -50%)")
+                .set("z-index", "1000");
+
+        cursorIndicator.getStyle().bind("left",
+                signal.map(pos -> pos != null ? pos.x() + "px" : "0px"));
+        cursorIndicator.getStyle().bind("top",
+                signal.map(pos -> pos != null ? pos.y() + "px" : "0px"));
+
+        Div label = new Div();
+        label.setText(displayName);
+        label.getStyle().set("position", "absolute").set("top", "25px")
+                .set("left", "0").set("white-space", "nowrap")
+                .set("background-color", "rgba(0, 0, 0, 0.7)")
+                .set("color", "white").set("padding", "2px 6px")
+                .set("border-radius", "3px").set("font-size", "0.75em");
+
+        cursorIndicator.add(label);
+        return cursorIndicator;
     }
 }

@@ -103,38 +103,10 @@ public class MUC04View extends VerticalLayout {
                         return java.util.List.of(msg);
                     }
 
-                    return locks.entrySet().stream().map(entry -> {
-                        String fieldLabel = formatFieldName(entry.getKey());
-                        MUC04Signals.FieldLock lock = entry.getValue().value();
-                        boolean isCurrentSession = sessionId != null
-                                && lock.username().equals(currentUser)
-                                && lock.sessionId().equals(sessionId);
-
-                        HorizontalLayout item = new HorizontalLayout();
-                        item.setSpacing(true);
-                        item.setAlignItems(
-                                com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
-                        item.getStyle().set("padding", "0.5em")
-                                .set("background-color",
-                                        isCurrentSession ? "#fff3e0"
-                                                : "transparent")
-                                .set("border-radius", "4px");
-
-                        // Avatar
-                        Image avatar = new Image(MainLayout
-                                .getProfilePicturePath(lock.username()), "");
-                        avatar.setWidth("32px");
-                        avatar.setHeight("32px");
-                        avatar.getStyle().set("border-radius", "50%")
-                                .set("object-fit", "cover");
-
-                        // Field and user info
-                        Span label = new Span(String.format("🔒 %s: %s",
-                                fieldLabel, lock.username()));
-
-                        item.add(avatar, label);
-                        return item;
-                    }).toList();
+                    return locks.entrySet().stream()
+                            .map(entry -> createLockItem(entry.getKey(),
+                                    entry.getValue().value()))
+                            .toList();
                 }));
 
         // Save button
@@ -237,6 +209,36 @@ public class MUC04View extends VerticalLayout {
         field.bindEnabled(enabledSignal);
 
         return field;
+    }
+
+    private HorizontalLayout createLockItem(String fieldName,
+            MUC04Signals.FieldLock lock) {
+        boolean isCurrentSession = sessionId != null
+                && lock.username().equals(currentUser)
+                && lock.sessionId().equals(sessionId);
+
+        HorizontalLayout item = new HorizontalLayout();
+        item.setSpacing(true);
+        item.setAlignItems(
+                com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
+        item.getStyle().set("padding", "0.5em")
+                .set("background-color",
+                        isCurrentSession ? "#fff3e0" : "transparent")
+                .set("border-radius", "4px");
+
+        Image avatar = new Image(
+                MainLayout.getProfilePicturePath(lock.username()), "");
+        avatar.setWidth("32px");
+        avatar.setHeight("32px");
+        avatar.getStyle().set("border-radius", "50%").set("object-fit",
+                "cover");
+
+        String fieldLabel = formatFieldName(fieldName);
+        Span label = new Span(
+                String.format("🔒 %s: %s", fieldLabel, lock.username()));
+
+        item.add(avatar, label);
+        return item;
     }
 
     private String formatFieldName(String fieldName) {

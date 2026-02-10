@@ -145,65 +145,16 @@ public class MUC03View extends VerticalLayout {
         MissingAPI.bindChildren(leaderboardDiv,
                 com.vaadin.flow.signals.Signal.computed(() -> {
                     var scores = muc03Signals.getLeaderboardSignal().value();
-                    var users = userSessionRegistry.getActiveUsersSignal()
-                            .value();
-                    var displayNames = userSessionRegistry
-                            .getDisplayNamesSignal().value();
-
-                    // Build mapping from sessionKey to display name
-                    java.util.Map<String, String> displayNameMap = new java.util.HashMap<>();
-                    for (int i = 0; i < users.size()
-                            && i < displayNames.size(); i++) {
-                        String sessionKey = users.get(i).value()
-                                .getCompositeKey();
-                        displayNameMap.put(sessionKey, displayNames.get(i));
-                    }
+                    var displayNameMap = buildDisplayNameMap();
 
                     return scores.entrySet().stream()
                             .sorted((e1, e2) -> Integer.compare(
                                     e2.getValue().value(),
                                     e1.getValue().value()))
-                            .map(entry -> {
-                                String sessionKey = entry.getKey();
-                                int score = entry.getValue().value();
-                                String displayName = displayNameMap
-                                        .getOrDefault(sessionKey, sessionKey);
-                                boolean isCurrentSession = sessionId != null
-                                        && sessionKey.equals(
-                                                currentUser + ":" + sessionId);
-
-                                // Extract username from sessionKey (format:
-                                // "username:sessionId")
-                                String username = sessionKey.split(":")[0];
-
-                                HorizontalLayout item = new HorizontalLayout();
-                                item.setSpacing(true);
-                                item.setAlignItems(
-                                        com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
-                                item.getStyle().set("padding", "0.5em")
-                                        .set("background-color",
-                                                isCurrentSession ? "#fff3e0"
-                                                        : "transparent")
-                                        .set("border-radius", "4px")
-                                        .set("font-weight",
-                                                isCurrentSession ? "bold"
-                                                        : "normal");
-
-                                // Avatar
-                                Image avatar = new Image(MainLayout
-                                        .getProfilePicturePath(username), "");
-                                avatar.setWidth("32px");
-                                avatar.setHeight("32px");
-                                avatar.getStyle().set("border-radius", "50%")
-                                        .set("object-fit", "cover");
-
-                                // Name and score
-                                Span nameLabel = new Span(String.format(
-                                        "%s: %d points", displayName, score));
-
-                                item.add(avatar, nameLabel);
-                                return item;
-                            }).toList();
+                            .map(entry -> createLeaderboardItem(
+                                    entry.getKey(), entry.getValue().value(),
+                                    displayNameMap))
+                            .toList();
                 }));
 
         // Info box
@@ -258,6 +209,49 @@ public class MUC03View extends VerticalLayout {
         int left = random.nextInt(400);
         int top = random.nextInt(200);
         return new int[] { left, top };
+    }
+
+    private java.util.Map<String, String> buildDisplayNameMap() {
+        var users = userSessionRegistry.getActiveUsersSignal().value();
+        var displayNames = userSessionRegistry.getDisplayNamesSignal().value();
+        java.util.Map<String, String> map = new java.util.HashMap<>();
+        for (int i = 0; i < users.size() && i < displayNames.size(); i++) {
+            map.put(users.get(i).value().getCompositeKey(),
+                    displayNames.get(i));
+        }
+        return map;
+    }
+
+    private HorizontalLayout createLeaderboardItem(String sessionKey, int score,
+            java.util.Map<String, String> displayNameMap) {
+        String displayName = displayNameMap.getOrDefault(sessionKey,
+                sessionKey);
+        boolean isCurrentSession = sessionId != null
+                && sessionKey.equals(currentUser + ":" + sessionId);
+        String username = sessionKey.split(":")[0];
+
+        HorizontalLayout item = new HorizontalLayout();
+        item.setSpacing(true);
+        item.setAlignItems(
+                com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
+        item.getStyle().set("padding", "0.5em")
+                .set("background-color",
+                        isCurrentSession ? "#fff3e0" : "transparent")
+                .set("border-radius", "4px")
+                .set("font-weight", isCurrentSession ? "bold" : "normal");
+
+        Image avatar = new Image(MainLayout.getProfilePicturePath(username),
+                "");
+        avatar.setWidth("32px");
+        avatar.setHeight("32px");
+        avatar.getStyle().set("border-radius", "50%").set("object-fit",
+                "cover");
+
+        Span nameLabel = new Span(
+                String.format("%s: %d points", displayName, score));
+
+        item.add(avatar, nameLabel);
+        return item;
     }
 
     @Override
