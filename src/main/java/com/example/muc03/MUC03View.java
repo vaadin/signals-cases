@@ -151,9 +151,8 @@ public class MUC03View extends VerticalLayout {
                             .sorted((e1, e2) -> Integer.compare(
                                     e2.getValue().value(),
                                     e1.getValue().value()))
-                            .map(entry -> createLeaderboardItem(
-                                    entry.getKey(), entry.getValue().value(),
-                                    displayNameMap))
+                            .map(entry -> createLeaderboardItem(entry.getKey(),
+                                    entry.getValue().value(), displayNameMap))
                             .toList();
                 }));
 

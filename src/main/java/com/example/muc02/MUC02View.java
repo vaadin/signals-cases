@@ -162,9 +162,8 @@ public class MUC02View extends VerticalLayout {
             var cursors = muc02Signals.getSessionCursorsSignal().value();
             var displayNameMap = buildDisplayNameMap();
 
-            return cursors.entrySet().stream()
-                    .filter(entry -> sessionId == null || !entry.getKey()
-                            .equals(currentUser + ":" + sessionId))
+            return cursors.entrySet().stream().filter(entry -> sessionId == null
+                    || !entry.getKey().equals(currentUser + ":" + sessionId))
                     .map(entry -> {
                         String sessionKey = entry.getKey();
                         String displayName = displayNameMap.getOrDefault(
