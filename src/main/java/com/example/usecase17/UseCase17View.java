@@ -975,23 +975,7 @@ public class UseCase17View extends VerticalLayout {
                 });
 
         MissingAPI.bindComponentChildren(summary, selectedComponentsSignal,
-                comp -> {
-                    Div item = new Div();
-                    item.getStyle().set("margin-bottom", "0.5em")
-                            .set("display", "flex")
-                            .set("justify-content", "space-between");
-
-                    Span name = new Span(comp.getName());
-                    name.getStyle().set("flex", "1");
-
-                    Span price = new Span(
-                            "$" + String.format("%.0f", comp.getPrice()));
-                    price.getStyle().set("font-weight", "bold").set("color",
-                            "var(--lumo-primary-color)");
-
-                    item.add(name, price);
-                    return item;
-                });
+                this::createComponentSummaryItem);
 
         column.add(header, summary);
         return column;
@@ -1150,16 +1134,37 @@ public class UseCase17View extends VerticalLayout {
         });
 
         MissingAPI.bindComponentChildren(checksContainer,
-                compatibilityStatusSignal, status -> {
-                    Div checkDiv = new Div();
-                    checkDiv.getStyle().set("padding", "0.25em 0")
-                            .set("font-size", "0.9em");
-                    checkDiv.getElement().setProperty("innerHTML", status);
-                    return checkDiv;
-                });
+                compatibilityStatusSignal,
+                this::createCompatibilityCheckDiv);
 
         section.add(header, checksContainer);
         return section;
+    }
+
+    private Div createComponentSummaryItem(Component comp) {
+        Div item = new Div();
+        item.getStyle().set("margin-bottom", "0.5em")
+                .set("display", "flex")
+                .set("justify-content", "space-between");
+
+        Span name = new Span(comp.getName());
+        name.getStyle().set("flex", "1");
+
+        Span price = new Span(
+                "$" + String.format("%.0f", comp.getPrice()));
+        price.getStyle().set("font-weight", "bold").set("color",
+                "var(--lumo-primary-color)");
+
+        item.add(name, price);
+        return item;
+    }
+
+    private Div createCompatibilityCheckDiv(String status) {
+        Div checkDiv = new Div();
+        checkDiv.getStyle().set("padding", "0.25em 0")
+                .set("font-size", "0.9em");
+        checkDiv.getElement().setProperty("innerHTML", status);
+        return checkDiv;
     }
 
     private String formatCheck(String label, boolean passes) {
