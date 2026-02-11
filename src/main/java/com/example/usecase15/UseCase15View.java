@@ -248,11 +248,9 @@ public class UseCase15View extends VerticalLayout {
                             .filter(p -> p.matches(query))
                             .collect(Collectors.toList());
 
-                    getUI().ifPresent(ui -> ui.access(() -> {
-                        searchResultsSignal.clear();
-                        results.forEach(searchResultsSignal::insertLast);
-                        isSearchingSignal.value(false);
-                    }));
+                    searchResultsSignal.clear();
+                    results.forEach(searchResultsSignal::insertLast);
+                    isSearchingSignal.value(false);
                 });
 
         currentSearch.set(searchFuture);

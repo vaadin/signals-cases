@@ -194,8 +194,7 @@ public class MUC03View extends VerticalLayout {
 
                     // Reposition button at random location
                     int[] position = getRandomPosition();
-                    getUI().ifPresent(ui -> ui.access(() -> muc03Signals
-                            .repositionButton(position[0], position[1])));
+                    muc03Signals.repositionButton(position[0], position[1]);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
