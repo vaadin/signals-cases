@@ -119,16 +119,15 @@ public class MUC04View extends VerticalLayout {
                     "✓ Changes saved successfully");
             successMsg.getStyle().set("color", "green");
             add(successMsg);
-            getUI().ifPresent(ui -> ui.access(() -> {
-                new Thread(() -> {
-                    try {
-                        Thread.sleep(2000);
-                        ui.access(() -> remove(successMsg));
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }).start();
-            }));
+            new Thread(() -> {
+                try {
+                    Thread.sleep(2000);
+                    getUI().ifPresent(ui -> ui.access(
+                            () -> remove(successMsg)));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }).start();
         });
         saveButton.addThemeName("primary");
 

@@ -116,21 +116,21 @@ public class UseCase01View extends VerticalLayout {
                     Thread.sleep(2000);
                     submissionStateSignal.value(SubmissionState.SUCCESS);
 
-                    // Show success notification and reset form
+                    // Reset form fields
+                    emailSignal.value("");
+                    passwordSignal.value("");
+                    confirmPasswordSignal.value("");
+
+                    // Reset submission state back to IDLE
+                    submissionStateSignal.value(SubmissionState.IDLE);
+
+                    // Show success notification (imperative UI - needs ui.access)
                     getUI().ifPresent(ui -> ui.access(() -> {
                         Notification notification = Notification
                                 .show("Account created successfully!");
                         notification.addThemeVariants(
                                 NotificationVariant.LUMO_SUCCESS);
                         notification.setDuration(3000);
-
-                        // Reset form fields
-                        emailSignal.value("");
-                        passwordSignal.value("");
-                        confirmPasswordSignal.value("");
-
-                        // Reset submission state back to IDLE
-                        submissionStateSignal.value(SubmissionState.IDLE);
                     }));
                 } catch (Exception ex) {
                     submissionStateSignal.value(SubmissionState.ERROR);
