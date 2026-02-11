@@ -218,39 +218,7 @@ public class UseCase16View extends VerticalLayout
                 .set("margin-top", "1em");
 
         MissingAPI.bindComponentChildren(resultsContainer,
-                filteredArticlesSignal, article -> {
-                    Div card = new Div();
-                    card.getStyle().set("background-color", "#ffffff")
-                            .set("border",
-                                    "1px solid var(--lumo-contrast-20pct)")
-                            .set("border-radius", "4px").set("padding", "1em");
-
-                    Div headerDiv = new Div();
-                    headerDiv.getStyle().set("display", "flex")
-                            .set("justify-content", "space-between")
-                            .set("align-items", "center")
-                            .set("margin-bottom", "0.5em");
-
-                    Div titleDiv = new Div(article.getTitle());
-                    titleDiv.getStyle().set("font-weight", "bold")
-                            .set("font-size", "1.1em");
-
-                    Div categoryBadge = new Div(article.getCategory());
-                    categoryBadge.getStyle().set("background-color", "#e0e0e0")
-                            .set("padding", "0.25em 0.5em")
-                            .set("border-radius", "4px")
-                            .set("font-size", "0.85em");
-
-                    headerDiv.add(titleDiv, categoryBadge);
-
-                    Div contentDiv = new Div(article.getContent());
-                    contentDiv.getStyle()
-                            .set("color", "var(--lumo-secondary-text-color)")
-                            .set("font-size", "0.9em");
-
-                    card.add(headerDiv, contentDiv);
-                    return card;
-                });
+                filteredArticlesSignal, this::createArticleCard);
 
         // Info box
         Div infoBox = new Div();
@@ -269,6 +237,39 @@ public class UseCase16View extends VerticalLayout
 
         // Subscribe to signals to update URL and filter results
         setupSignalSubscriptions();
+    }
+
+    private Div createArticleCard(Article article) {
+        Div card = new Div();
+        card.getStyle().set("background-color", "#ffffff")
+                .set("border", "1px solid var(--lumo-contrast-20pct)")
+                .set("border-radius", "4px").set("padding", "1em");
+
+        Div headerDiv = new Div();
+        headerDiv.getStyle().set("display", "flex")
+                .set("justify-content", "space-between")
+                .set("align-items", "center")
+                .set("margin-bottom", "0.5em");
+
+        Div titleDiv = new Div(article.getTitle());
+        titleDiv.getStyle().set("font-weight", "bold")
+                .set("font-size", "1.1em");
+
+        Div categoryBadge = new Div(article.getCategory());
+        categoryBadge.getStyle().set("background-color", "#e0e0e0")
+                .set("padding", "0.25em 0.5em")
+                .set("border-radius", "4px")
+                .set("font-size", "0.85em");
+
+        headerDiv.add(titleDiv, categoryBadge);
+
+        Div contentDiv = new Div(article.getContent());
+        contentDiv.getStyle()
+                .set("color", "var(--lumo-secondary-text-color)")
+                .set("font-size", "0.9em");
+
+        card.add(headerDiv, contentDiv);
+        return card;
     }
 
     private void setupSignalSubscriptions() {
