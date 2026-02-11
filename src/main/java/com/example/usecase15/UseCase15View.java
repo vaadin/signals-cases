@@ -181,40 +181,7 @@ public class UseCase15View extends VerticalLayout {
                 .map(list -> list.stream()
                 .map(ValueSignal::new).toList());
         resultsContainer.bindChildren(resultSignals,
-                signal -> {
-                    Product product = signal.value();
-                    Div card = new Div();
-                    card.getStyle().set("background-color", "#ffffff")
-                            .set("border",
-                                    "1px solid var(--lumo-contrast-20pct)")
-                            .set("border-radius", "4px").set("padding", "1em")
-                            .set("display", "flex")
-                            .set("justify-content", "space-between")
-                            .set("align-items", "center");
-
-                    Div leftSide = new Div();
-                    Div nameDiv = new Div();
-                    nameDiv.getStyle().set("font-weight", "bold");
-
-                    // Highlight matching text
-                    String query = searchQuerySignal.peek();
-                    nameDiv.getElement().setProperty("innerHTML",
-                            highlightMatch(product.name(), query));
-
-                    Div categoryDiv = new Div(product.category());
-                    categoryDiv.getStyle().set("font-size", "0.9em")
-                            .set("color", "var(--lumo-secondary-text-color)");
-
-                    leftSide.add(nameDiv, categoryDiv);
-
-                    Div priceDiv = new Div(
-                            "$" + String.format("%.2f", product.price()));
-                    priceDiv.getStyle().set("font-weight", "bold").set("color",
-                            "var(--lumo-primary-color)");
-
-                    card.add(leftSide, priceDiv);
-                    return card;
-                });
+                this::createProductCard);
 
         // Info box
         Div infoBox = new Div();
@@ -290,6 +257,40 @@ public class UseCase15View extends VerticalLayout {
                 });
 
         currentSearch.set(searchFuture);
+    }
+
+    private Div createProductCard(ValueSignal<Product> productSignal) {
+        Product product = productSignal.value();
+        Div card = new Div();
+        card.getStyle().set("background-color", "#ffffff")
+                .set("border", "1px solid var(--lumo-contrast-20pct)")
+                .set("border-radius", "4px").set("padding", "1em")
+                .set("display", "flex")
+                .set("justify-content", "space-between")
+                .set("align-items", "center");
+
+        Div leftSide = new Div();
+        Div nameDiv = new Div();
+        nameDiv.getStyle().set("font-weight", "bold");
+
+        // Highlight matching text
+        String query = searchQuerySignal.peek();
+        nameDiv.getElement().setProperty("innerHTML",
+                highlightMatch(product.name(), query));
+
+        Div categoryDiv = new Div(product.category());
+        categoryDiv.getStyle().set("font-size", "0.9em")
+                .set("color", "var(--lumo-secondary-text-color)");
+
+        leftSide.add(nameDiv, categoryDiv);
+
+        Div priceDiv = new Div(
+                "$" + String.format("%.2f", product.price()));
+        priceDiv.getStyle().set("font-weight", "bold").set("color",
+                "var(--lumo-primary-color)");
+
+        card.add(leftSide, priceDiv);
+        return card;
     }
 
     private String highlightMatch(String text, String query) {
