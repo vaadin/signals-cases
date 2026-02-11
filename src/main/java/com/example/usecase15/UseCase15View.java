@@ -25,6 +25,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
@@ -74,8 +75,7 @@ public class UseCase15View extends VerticalLayout {
     private final ValueSignal<String> searchQuerySignal = new ValueSignal<>("");
     private final ValueSignal<Boolean> isSearchingSignal = new ValueSignal<>(
             false);
-    private final ValueSignal<List<Product>> searchResultsSignal = new ValueSignal<>(
-            List.of());
+    private final ListSignal<Product> searchResultsSignal = new ListSignal<>();
     private final ValueSignal<Integer> searchCountSignal = new ValueSignal<>(0);
 
     private final AtomicReference<CompletableFuture<Void>> currentSearch = new AtomicReference<>();
@@ -161,7 +161,8 @@ public class UseCase15View extends VerticalLayout {
         statusBox.add(searchingIcon, statusText);
 
         // Results
-        Signal<String> resultsTitleSignal = searchResultsSignal.map(results -> {
+        Signal<String> resultsTitleSignal = Signal.computed(() -> {
+            var results = searchResultsSignal.value();
             if (results.isEmpty() && !searchQuerySignal.peek().isEmpty()) {
                 return "No results found";
             } else if (!results.isEmpty()) {
@@ -177,10 +178,7 @@ public class UseCase15View extends VerticalLayout {
                 .set("flex-direction", "column").set("gap", "0.5em")
                 .set("margin-top", "1em");
 
-        Signal<List<ValueSignal<Product>>> resultSignals = searchResultsSignal
-                .map(list -> list.stream()
-                .map(ValueSignal::new).toList());
-        resultsContainer.bindChildren(resultSignals,
+        resultsContainer.bindChildren(searchResultsSignal,
                 this::createProductCard);
 
         // Info box
@@ -227,7 +225,7 @@ public class UseCase15View extends VerticalLayout {
         }
 
         if (query.isEmpty()) {
-            searchResultsSignal.value(List.of());
+            searchResultsSignal.clear();
             return;
         }
 
@@ -251,7 +249,8 @@ public class UseCase15View extends VerticalLayout {
                             .collect(Collectors.toList());
 
                     getUI().ifPresent(ui -> ui.access(() -> {
-                        searchResultsSignal.value(results);
+                        searchResultsSignal.clear();
+                        results.forEach(searchResultsSignal::insertLast);
                         isSearchingSignal.value(false);
                     }));
                 });
@@ -260,7 +259,7 @@ public class UseCase15View extends VerticalLayout {
     }
 
     private Div createProductCard(ValueSignal<Product> productSignal) {
-        Product product = productSignal.value();
+        var product = productSignal.value();
         Div card = new Div();
         card.getStyle().set("background-color", "#ffffff")
                 .set("border", "1px solid var(--lumo-contrast-20pct)")

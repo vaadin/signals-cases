@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.example.MissingAPI;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.UI;
@@ -27,6 +26,7 @@ import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
@@ -113,8 +113,7 @@ public class UseCase16View extends VerticalLayout
 
     private final ValueSignal<String> searchQuerySignal = new ValueSignal<>("");
     private final ValueSignal<String> categorySignal = new ValueSignal<>("All");
-    private final ValueSignal<List<Article>> filteredArticlesSignal = new ValueSignal<>(
-            List.of());
+    private final ListSignal<Article> filteredArticlesSignal = new ListSignal<>();
 
     private boolean isInitializing = true;
 
@@ -207,9 +206,10 @@ public class UseCase16View extends VerticalLayout
         shareLinks.add(link1, link2, link3);
 
         // Results
-        Signal<String> resultsTitleSignal = filteredArticlesSignal
-                .map(articles -> articles.size() + " article"
-                        + (articles.size() == 1 ? "" : "s") + " found");
+        Signal<String> resultsTitleSignal = Signal.computed(() -> {
+            int size = filteredArticlesSignal.value().size();
+            return size + " article" + (size == 1 ? "" : "s") + " found";
+        });
         H3 resultsTitle = new H3(resultsTitleSignal);
 
         Div resultsContainer = new Div();
@@ -217,8 +217,8 @@ public class UseCase16View extends VerticalLayout
                 .set("flex-direction", "column").set("gap", "0.5em")
                 .set("margin-top", "1em");
 
-        MissingAPI.bindComponentChildren(resultsContainer,
-                filteredArticlesSignal, this::createArticleCard);
+        resultsContainer.bindChildren(filteredArticlesSignal,
+                this::createArticleCard);
 
         // Info box
         Div infoBox = new Div();
@@ -239,7 +239,8 @@ public class UseCase16View extends VerticalLayout
         setupSignalSubscriptions();
     }
 
-    private Div createArticleCard(Article article) {
+    private Div createArticleCard(ValueSignal<Article> articleSignal) {
+        var article = articleSignal.value();
         Div card = new Div();
         card.getStyle().set("background-color", "#ffffff")
                 .set("border", "1px solid var(--lumo-contrast-20pct)")
@@ -346,7 +347,8 @@ public class UseCase16View extends VerticalLayout
                 .filter(article -> article.matches(query, category))
                 .collect(Collectors.toList());
 
-        filteredArticlesSignal.value(filtered);
+        filteredArticlesSignal.clear();
+        filtered.forEach(filteredArticlesSignal::insertLast);
     }
 
     private String getBaseUrl() {

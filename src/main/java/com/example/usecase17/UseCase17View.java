@@ -5,9 +5,9 @@ import jakarta.annotation.security.PermitAll;
 import java.util.Arrays;
 import java.util.List;
 
-import com.example.MissingAPI;
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -23,6 +23,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.WritableSignal;
+import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
@@ -949,32 +950,32 @@ public class UseCase17View extends VerticalLayout {
                 .set("padding", "1em").set("border-radius", "4px")
                 .set("font-size", "0.9em");
 
-        Signal<List<Component>> selectedComponentsSignal = Signal
-                .computed(() -> {
-                    List<Component> selected = new java.util.ArrayList<>();
-                    if (cpuSignal.value() != null)
-                        selected.add(cpuSignal.value());
-                    if (motherboardSignal.value() != null)
-                        selected.add(motherboardSignal.value());
-                    if (ramSignal.value() != null)
-                        selected.add(ramSignal.value());
-                    if (gpuSignal.value() != null)
-                        selected.add(gpuSignal.value());
-                    if (storage1Signal.value() != null)
-                        selected.add(storage1Signal.value());
-                    if (storage2Signal.value() != null
-                            && storage2Signal.value().getPrice() > 0)
-                        selected.add(storage2Signal.value());
-                    if (psuSignal.value() != null)
-                        selected.add(psuSignal.value());
-                    if (caseSignal.value() != null)
-                        selected.add(caseSignal.value());
-                    if (coolerSignal.value() != null)
-                        selected.add(coolerSignal.value());
-                    return selected;
-                });
+        ListSignal<Component> selectedComponentsSignal = new ListSignal<>();
 
-        MissingAPI.bindComponentChildren(summary, selectedComponentsSignal,
+        ComponentEffect.effect(summary, () -> {
+            selectedComponentsSignal.clear();
+            if (cpuSignal.value() != null)
+                selectedComponentsSignal.insertLast(cpuSignal.value());
+            if (motherboardSignal.value() != null)
+                selectedComponentsSignal.insertLast(motherboardSignal.value());
+            if (ramSignal.value() != null)
+                selectedComponentsSignal.insertLast(ramSignal.value());
+            if (gpuSignal.value() != null)
+                selectedComponentsSignal.insertLast(gpuSignal.value());
+            if (storage1Signal.value() != null)
+                selectedComponentsSignal.insertLast(storage1Signal.value());
+            if (storage2Signal.value() != null
+                    && storage2Signal.value().getPrice() > 0)
+                selectedComponentsSignal.insertLast(storage2Signal.value());
+            if (psuSignal.value() != null)
+                selectedComponentsSignal.insertLast(psuSignal.value());
+            if (caseSignal.value() != null)
+                selectedComponentsSignal.insertLast(caseSignal.value());
+            if (coolerSignal.value() != null)
+                selectedComponentsSignal.insertLast(coolerSignal.value());
+        });
+
+        summary.bindChildren(selectedComponentsSignal,
                 this::createComponentSummaryItem);
 
         column.add(header, summary);
@@ -1102,46 +1103,58 @@ public class UseCase17View extends VerticalLayout {
 
         Div checksContainer = new Div();
 
-        Signal<List<String>> compatibilityStatusSignal = Signal.computed(() -> {
-            List<String> statuses = new java.util.ArrayList<>();
-            statuses.add(formatCheck("CPU socket matches motherboard",
+        ListSignal<String> compatibilityStatusSignal = new ListSignal<>();
+
+        ComponentEffect.effect(checksContainer, () -> {
+            compatibilityStatusSignal.clear();
+            compatibilityStatusSignal.insertLast(formatCheck(
+                    "CPU socket matches motherboard",
                     cpuSocketMatchSignal.value()));
-            statuses.add(formatCheck("RAM type matches motherboard",
+            compatibilityStatusSignal.insertLast(formatCheck(
+                    "RAM type matches motherboard",
                     ramTypeMatchSignal.value()));
-            statuses.add(formatCheck("RAM speed supported",
+            compatibilityStatusSignal.insertLast(formatCheck(
+                    "RAM speed supported",
                     ramSpeedSupportedSignal.value()));
-            statuses.add(
-                    formatCheck("GPU fits in case", gpuFitsCaseSignal.value()));
-            statuses.add(formatCheck("CPU cooler fits in case",
+            compatibilityStatusSignal.insertLast(formatCheck(
+                    "GPU fits in case", gpuFitsCaseSignal.value()));
+            compatibilityStatusSignal.insertLast(formatCheck(
+                    "CPU cooler fits in case",
                     coolerFitsCaseSignal.value()));
-            statuses.add(formatCheck("Motherboard fits in case",
+            compatibilityStatusSignal.insertLast(formatCheck(
+                    "Motherboard fits in case",
                     motherboardFitsCaseSignal.value()));
-            statuses.add(formatCheck("M.2 slots available",
+            compatibilityStatusSignal.insertLast(formatCheck(
+                    "M.2 slots available",
                     m2SlotsAvailableSignal.value()));
-            statuses.add(formatCheck("SATA ports available",
+            compatibilityStatusSignal.insertLast(formatCheck(
+                    "SATA ports available",
                     sataSlotsAvailableSignal.value()));
-            statuses.add(
-                    formatCheck("PSU fits in case", psuFitsCaseSignal.value()));
-            statuses.add(formatCheck("Cooler compatible with CPU",
+            compatibilityStatusSignal.insertLast(formatCheck(
+                    "PSU fits in case", psuFitsCaseSignal.value()));
+            compatibilityStatusSignal.insertLast(formatCheck(
+                    "Cooler compatible with CPU",
                     cpuCoolerCompatibleSignal.value()));
-            statuses.add(formatCheck("Cooler TDP sufficient",
+            compatibilityStatusSignal.insertLast(formatCheck(
+                    "Cooler TDP sufficient",
                     coolerTdpSufficientSignal.value()));
-            statuses.add(formatCheck("RAM capacity supported",
+            compatibilityStatusSignal.insertLast(formatCheck(
+                    "RAM capacity supported",
                     ramCapacitySupportedSignal.value()));
-            statuses.add(formatCheck("PSU wattage sufficient",
+            compatibilityStatusSignal.insertLast(formatCheck(
+                    "PSU wattage sufficient",
                     psuSufficiencySignal.value()));
-            return statuses;
         });
 
-        MissingAPI.bindComponentChildren(checksContainer,
-                compatibilityStatusSignal,
+        checksContainer.bindChildren(compatibilityStatusSignal,
                 this::createCompatibilityCheckDiv);
 
         section.add(header, checksContainer);
         return section;
     }
 
-    private Div createComponentSummaryItem(Component comp) {
+    private Div createComponentSummaryItem(ValueSignal<Component> compSignal) {
+        var comp = compSignal.value();
         Div item = new Div();
         item.getStyle().set("margin-bottom", "0.5em")
                 .set("display", "flex")
@@ -1159,7 +1172,8 @@ public class UseCase17View extends VerticalLayout {
         return item;
     }
 
-    private Div createCompatibilityCheckDiv(String status) {
+    private Div createCompatibilityCheckDiv(ValueSignal<String> statusSignal) {
+        var status = statusSignal.value();
         Div checkDiv = new Div();
         checkDiv.getStyle().set("padding", "0.25em 0")
                 .set("font-size", "0.9em");
