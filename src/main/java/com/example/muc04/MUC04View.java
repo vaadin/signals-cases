@@ -23,6 +23,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
  * Multi-User Case 4: Collaborative Form Editing with Locking
@@ -111,19 +112,19 @@ public class MUC04View extends VerticalLayout {
                     return new java.util.ArrayList<>(locks.values());
                 }), this::createLockItem);
 
+        // Save success message with signal-driven visibility
+        ValueSignal<Boolean> showSaveSuccessSignal = new ValueSignal<>(false);
+        Paragraph successMsg = new Paragraph("✓ Changes saved successfully");
+        successMsg.getStyle().set("color", "green");
+        successMsg.bindVisible(showSaveSuccessSignal);
+
         // Save button
         Button saveButton = new Button("Save Changes", event -> {
-            // In production, would check for conflicts and merge
-            // For now, just show a message
-            Paragraph successMsg = new Paragraph(
-                    "✓ Changes saved successfully");
-            successMsg.getStyle().set("color", "green");
-            add(successMsg);
+            showSaveSuccessSignal.value(true);
             new Thread(() -> {
                 try {
                     Thread.sleep(2000);
-                    getUI().ifPresent(ui -> ui.access(
-                            () -> remove(successMsg)));
+                    showSaveSuccessSignal.value(false);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -147,7 +148,7 @@ public class MUC04View extends VerticalLayout {
 
         add(title, description, activeSessionsBox, new H3("Shared Form Data"),
                 companyNameField, addressField, phoneField, saveButton,
-                editorsTitle, editorsDiv, infoBox);
+                successMsg, editorsTitle, editorsDiv, infoBox);
     }
 
     private TextField createLockedField(String fieldName, String label,
