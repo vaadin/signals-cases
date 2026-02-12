@@ -2,7 +2,6 @@ package com.example.muc01;
 
 import jakarta.annotation.security.PermitAll;
 
-import com.example.MissingAPI;
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
@@ -86,11 +85,8 @@ public class MUC01View extends VerticalLayout {
                 .set("overflow-y", "auto").set("max-height", "400px");
 
         // Bind message list to UI
-        MissingAPI.bindChildren(messagesContainer, muc01Signals
-                .getMessagesSignal()
-                .map(messageSignals -> messageSignals.stream().map(
-                        msgSignal -> createMessageComponent(msgSignal.value()))
-                        .toList()));
+        messagesContainer.bindChildren(muc01Signals.getMessagesSignal(),
+                msgSignal -> createMessageComponent(msgSignal.value()));
 
         // Message input
         H3 inputTitle = new H3("Send Message");

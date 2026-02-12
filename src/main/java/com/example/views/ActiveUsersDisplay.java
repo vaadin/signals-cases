@@ -1,6 +1,5 @@
 package com.example.views;
 
-import com.example.MissingAPI;
 import com.example.signals.UserSessionRegistry;
 
 import com.vaadin.flow.component.avatar.Avatar;
@@ -98,50 +97,42 @@ public class ActiveUsersDisplay extends Div {
         title.getStyle().set("font-weight", "500");
 
         // Bind user avatars and names
-        MissingAPI.bindChildren(usersContainer, Signal.computed(() -> {
-            var displayNames = displayNamesSignal.value();
+        usersContainer.bindChildren(Signal.computed(() -> {
             var users = userSessionRegistry.getActiveUsersSignal().value();
-
-            // Filter users if viewRoute is specified
-            java.util.List<com.example.signals.UserInfo> filteredUsers;
             if (viewRoute != null) {
-                filteredUsers = users.stream()
-                        .map(userSignal -> userSignal.value())
-                        .filter(user -> viewRoute.equals(user.currentView()))
+                return users.stream()
+                        .filter(userSignal -> viewRoute
+                                .equals(userSignal.value().currentView()))
                         .toList();
-            } else {
-                filteredUsers = users.stream()
-                        .map(userSignal -> userSignal.value()).toList();
             }
-
-            return filteredUsers.stream().map(user -> {
-                // Display name (use nickname if set, otherwise username)
-                String displayName = user.nickname() != null
-                        && !user.nickname().isEmpty() ? user.nickname()
-                                : user.username();
-
-                HorizontalLayout userItem = new HorizontalLayout();
-                userItem.setSpacing(true);
-                userItem.setAlignItems(
-                        com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
-                userItem.getStyle().set("padding", "0.25em 0.5em")
-                        .set("background-color", "rgba(255, 255, 255, 0.7)")
-                        .set("border-radius", "16px");
-
-                // Avatar (default 40x40 size)
-                Avatar avatar = new Avatar(displayName);
-                avatar.setImage(
-                        MainLayout.getProfilePicturePath(user.username()));
-
-                Span nameLabel = new Span(displayName);
-                nameLabel.getStyle().set("font-size",
-                        "var(--lumo-font-size-s)");
-
-                userItem.add(avatar, nameLabel);
-                return userItem;
-            }).toList();
-        }));
+            return users;
+        }), this::createUserItem);
 
         add(title, usersContainer);
+    }
+
+    private HorizontalLayout createUserItem(
+            com.vaadin.flow.signals.Signal<com.example.signals.UserInfo> userSignal) {
+        var user = userSignal.value();
+        String displayName = user.nickname() != null
+                && !user.nickname().isEmpty() ? user.nickname()
+                        : user.username();
+
+        HorizontalLayout userItem = new HorizontalLayout();
+        userItem.setSpacing(true);
+        userItem.setAlignItems(
+                com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
+        userItem.getStyle().set("padding", "0.25em 0.5em")
+                .set("background-color", "rgba(255, 255, 255, 0.7)")
+                .set("border-radius", "16px");
+
+        Avatar avatar = new Avatar(displayName);
+        avatar.setImage(MainLayout.getProfilePicturePath(user.username()));
+
+        Span nameLabel = new Span(displayName);
+        nameLabel.getStyle().set("font-size", "var(--lumo-font-size-s)");
+
+        userItem.add(avatar, nameLabel);
+        return userItem;
     }
 }

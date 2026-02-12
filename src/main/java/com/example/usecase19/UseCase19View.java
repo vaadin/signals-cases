@@ -2,7 +2,6 @@ package com.example.usecase19;
 
 import jakarta.annotation.security.PermitAll;
 
-import com.example.MissingAPI;
 import com.example.service.DataLoadingService;
 import com.example.usecase14.LoadingState;
 import com.example.views.MainLayout;
@@ -92,9 +91,7 @@ public class UseCase19View extends VerticalLayout {
                 .set("margin", "1em 0");
 
         // Bind cards to items signal
-        MissingAPI.bindChildren(itemsContainer,
-                itemsSignal.map(itemSignals -> itemSignals.stream()
-                        .map(this::createDataItemCard).toList()));
+        itemsContainer.bindChildren(itemsSignal, this::createDataItemCard);
 
         add(title, description, controls, itemsContainer);
     }

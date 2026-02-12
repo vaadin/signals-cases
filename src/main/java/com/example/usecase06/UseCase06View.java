@@ -8,7 +8,6 @@ import java.util.List;
 
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
@@ -116,7 +115,7 @@ public class UseCase06View extends VerticalLayout {
                 .set("margin-bottom", "1em");
 
         var cartItemsList = new Div();
-        ComponentEffect.bindChildren(cartItemsList, cartItemsSignal,
+        cartItemsList.bindChildren(cartItemsSignal,
                 itemSignal -> createCartItemRow(itemSignal, cartItemsSignal));
 
         var emptyCart = new Paragraph("Empty cart");
@@ -235,8 +234,6 @@ public class UseCase06View extends VerticalLayout {
 
     private HorizontalLayout createCartItemRow(ValueSignal<CartItem> itemSignal,
             ListSignal<CartItem> cartItemsSignal) {
-        var item = itemSignal.value();
-
         var row = new HorizontalLayout();
         row.setWidthFull();
         row.setAlignItems(Alignment.CENTER);
@@ -245,8 +242,9 @@ public class UseCase06View extends VerticalLayout {
                 .set("padding", "0.75em").set("border-radius", "4px")
                 .set("margin-bottom", "0.5em");
 
-        var nameLabel = new Span(item.product().name() + " - $"
-                + item.product().price().setScale(2, RoundingMode.HALF_UP));
+        var nameLabel = new Span();
+        nameLabel.bindText(itemSignal.map(item -> item.product().name() + " - $"
+                + item.product().price().setScale(2, RoundingMode.HALF_UP)));
         nameLabel.getStyle().set("flex-grow", "1").set("font-weight", "500");
 
         var quantityField = new IntegerField();
@@ -269,12 +267,10 @@ public class UseCase06View extends VerticalLayout {
         });
 
         var itemTotalLabel = new Span();
-        itemTotalLabel.bindText(Signal.computed(() -> {
-            var current = itemSignal.value();
-            return "$" + current.product().price()
-                    .multiply(BigDecimal.valueOf(current.quantity()))
-                    .setScale(2, RoundingMode.HALF_UP);
-        }));
+        itemTotalLabel.bindText(itemSignal.map(item -> "$"
+                + item.product().price()
+                        .multiply(BigDecimal.valueOf(item.quantity()))
+                        .setScale(2, RoundingMode.HALF_UP)));
         itemTotalLabel.setWidth("100px");
         itemTotalLabel.getStyle().set("text-align", "right")
                 .set("font-weight", "bold")

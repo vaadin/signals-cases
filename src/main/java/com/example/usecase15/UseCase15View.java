@@ -3,13 +3,10 @@ package com.example.usecase15;
 import jakarta.annotation.security.PermitAll;
 
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import com.example.MissingAPI;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -23,10 +20,12 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
@@ -74,15 +73,11 @@ public class UseCase15View extends VerticalLayout {
             new Product("15", "Bookshelf", "Furniture", 129.99));
 
     private final ValueSignal<String> searchQuerySignal = new ValueSignal<>("");
-    private final ValueSignal<String> debouncedQuerySignal = new ValueSignal<>(
-            "");
     private final ValueSignal<Boolean> isSearchingSignal = new ValueSignal<>(
             false);
-    private final ValueSignal<List<Product>> searchResultsSignal = new ValueSignal<>(
-            List.of());
+    private final ListSignal<Product> searchResultsSignal = new ListSignal<>();
     private final ValueSignal<Integer> searchCountSignal = new ValueSignal<>(0);
 
-    private Timer debounceTimer;
     private final AtomicReference<CompletableFuture<Void>> currentSearch = new AtomicReference<>();
 
     public UseCase15View() {
@@ -104,9 +99,13 @@ public class UseCase15View extends VerticalLayout {
         searchField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(
-                com.vaadin.flow.data.value.ValueChangeMode.EAGER);
+                ValueChangeMode.LAZY);
+        searchField.setValueChangeTimeout(300);
 
         searchField.bindValue(searchQuerySignal);
+        searchField.addValueChangeListener(e -> {
+            performSearch(searchQuerySignal.value());
+        });
 
         // Search stats
         Div statsBox = new Div();
@@ -129,7 +128,7 @@ public class UseCase15View extends VerticalLayout {
         Span debouncedLabel = new Span("Debounced value (300ms): ");
         debouncedLabel.getStyle().set("color",
                 "var(--lumo-secondary-text-color)");
-        Span debouncedValue = new Span(debouncedQuerySignal
+        Span debouncedValue = new Span(searchQuerySignal
                 .map(q -> q.isEmpty() ? "(empty)" : "\"" + q + "\""));
         debouncedValue.getStyle().set("font-family", "monospace")
                 .set("font-weight", "bold")
@@ -162,8 +161,9 @@ public class UseCase15View extends VerticalLayout {
         statusBox.add(searchingIcon, statusText);
 
         // Results
-        Signal<String> resultsTitleSignal = searchResultsSignal.map(results -> {
-            if (results.isEmpty() && !debouncedQuerySignal.value().isEmpty()) {
+        Signal<String> resultsTitleSignal = Signal.computed(() -> {
+            var results = searchResultsSignal.value();
+            if (results.isEmpty() && !searchQuerySignal.peek().isEmpty()) {
                 return "No results found";
             } else if (!results.isEmpty()) {
                 return results.size() + " result"
@@ -178,40 +178,8 @@ public class UseCase15View extends VerticalLayout {
                 .set("flex-direction", "column").set("gap", "0.5em")
                 .set("margin-top", "1em");
 
-        MissingAPI.bindComponentChildren(resultsContainer, searchResultsSignal,
-                product -> {
-                    Div card = new Div();
-                    card.getStyle().set("background-color", "#ffffff")
-                            .set("border",
-                                    "1px solid var(--lumo-contrast-20pct)")
-                            .set("border-radius", "4px").set("padding", "1em")
-                            .set("display", "flex")
-                            .set("justify-content", "space-between")
-                            .set("align-items", "center");
-
-                    Div leftSide = new Div();
-                    Div nameDiv = new Div();
-                    nameDiv.getStyle().set("font-weight", "bold");
-
-                    // Highlight matching text
-                    String query = debouncedQuerySignal.value();
-                    nameDiv.getElement().setProperty("innerHTML",
-                            highlightMatch(product.name(), query));
-
-                    Div categoryDiv = new Div(product.category());
-                    categoryDiv.getStyle().set("font-size", "0.9em")
-                            .set("color", "var(--lumo-secondary-text-color)");
-
-                    leftSide.add(nameDiv, categoryDiv);
-
-                    Div priceDiv = new Div(
-                            "$" + String.format("%.2f", product.price()));
-                    priceDiv.getStyle().set("font-weight", "bold").set("color",
-                            "var(--lumo-primary-color)");
-
-                    card.add(leftSide, priceDiv);
-                    return card;
-                });
+        resultsContainer.bindChildren(searchResultsSignal,
+                this::createProductCard);
 
         // Info box
         Div infoBox = new Div();
@@ -237,37 +205,11 @@ public class UseCase15View extends VerticalLayout {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-
-        // Set up debouncing: when searchQuerySignal changes, schedule debounced
-        // update
-        // This is done manually here; in real API would be:
-        // searchQuerySignal.debounce(300ms)
-        com.vaadin.flow.component.ComponentEffect.effect(this, () -> {
-            String query = searchQuerySignal.value();
-
-            // Cancel previous timer
-            if (debounceTimer != null) {
-                debounceTimer.cancel();
-            }
-
-            // Schedule new debounced update
-            debounceTimer = new Timer();
-            debounceTimer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    debouncedQuerySignal.value(query);
-                    performSearch(query);
-                }
-            }, 300); // 300ms debounce delay
-        });
     }
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
-        if (debounceTimer != null) {
-            debounceTimer.cancel();
-        }
         // Cancel any in-flight search
         CompletableFuture<Void> search = currentSearch.get();
         if (search != null) {
@@ -283,13 +225,13 @@ public class UseCase15View extends VerticalLayout {
         }
 
         if (query.isEmpty()) {
-            searchResultsSignal.value(List.of());
+            searchResultsSignal.clear();
             return;
         }
 
         // Set searching state
         isSearchingSignal.value(true);
-        searchCountSignal.value(searchCountSignal.value() + 1);
+        searchCountSignal.value(searchCountSignal.peek() + 1);
 
         // Simulate async search with delay
         CompletableFuture<Void> searchFuture = CompletableFuture
@@ -306,13 +248,46 @@ public class UseCase15View extends VerticalLayout {
                             .filter(p -> p.matches(query))
                             .collect(Collectors.toList());
 
-                    getUI().ifPresent(ui -> ui.access(() -> {
-                        searchResultsSignal.value(results);
-                        isSearchingSignal.value(false);
-                    }));
+                    searchResultsSignal.clear();
+                    results.forEach(searchResultsSignal::insertLast);
+                    isSearchingSignal.value(false);
                 });
 
         currentSearch.set(searchFuture);
+    }
+
+    private Div createProductCard(ValueSignal<Product> productSignal) {
+        var product = productSignal.value();
+        Div card = new Div();
+        card.getStyle().set("background-color", "#ffffff")
+                .set("border", "1px solid var(--lumo-contrast-20pct)")
+                .set("border-radius", "4px").set("padding", "1em")
+                .set("display", "flex")
+                .set("justify-content", "space-between")
+                .set("align-items", "center");
+
+        Div leftSide = new Div();
+        Div nameDiv = new Div();
+        nameDiv.getStyle().set("font-weight", "bold");
+
+        // Highlight matching text
+        String query = searchQuerySignal.peek();
+        nameDiv.getElement().setProperty("innerHTML",
+                highlightMatch(product.name(), query));
+
+        Div categoryDiv = new Div(product.category());
+        categoryDiv.getStyle().set("font-size", "0.9em")
+                .set("color", "var(--lumo-secondary-text-color)");
+
+        leftSide.add(nameDiv, categoryDiv);
+
+        Div priceDiv = new Div(
+                "$" + String.format("%.2f", product.price()));
+        priceDiv.getStyle().set("font-weight", "bold").set("color",
+                "var(--lumo-primary-color)");
+
+        card.add(leftSide, priceDiv);
+        return card;
     }
 
     private String highlightMatch(String text, String query) {

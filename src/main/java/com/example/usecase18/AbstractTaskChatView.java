@@ -481,30 +481,22 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         taskLLMService
                 .streamMessage(userMessage, createTaskContext(), conversationId)
                 .subscribe(token -> {
-                    // Append token and update the message in the signal - must
-                    // be done on UI thread
-                    getUI().ifPresent(ui -> ui.access(() -> {
-                        streamingContent.append(token);
-                        assistantMessageSignal.value(new ChatMessageData(
-                                "Assistant", streamingContent.toString(),
-                                assistantTimestamp));
-                    }));
+                    // Append token and update the message in the signal
+                    streamingContent.append(token);
+                    assistantMessageSignal.value(new ChatMessageData(
+                            "Assistant", streamingContent.toString(),
+                            assistantTimestamp));
                 }, error -> {
-                    // Update with error message - must be done on UI thread
-                    getUI().ifPresent(ui -> ui.access(() -> {
-                        streamingContent.append("\n\n❌ Error: ")
-                                .append(error.getMessage());
-                        assistantMessageSignal.value(new ChatMessageData(
-                                "Assistant", streamingContent.toString(),
-                                assistantTimestamp));
-                        messageInputEnabledSignal.value(true);
-                    }));
+                    // Update with error message
+                    streamingContent.append("\n\n❌ Error: ")
+                            .append(error.getMessage());
+                    assistantMessageSignal.value(new ChatMessageData(
+                            "Assistant", streamingContent.toString(),
+                            assistantTimestamp));
+                    messageInputEnabledSignal.value(true);
                 }, () -> {
-                    // Streaming complete - re-enable input - must be done on UI
-                    // thread
-                    getUI().ifPresent(ui -> ui.access(() -> {
-                        messageInputEnabledSignal.value(true);
-                    }));
+                    // Streaming complete - re-enable input
+                    messageInputEnabledSignal.value(true);
                 });
     }
 

@@ -2,7 +2,6 @@ package com.example.muc04;
 
 import jakarta.annotation.security.PermitAll;
 
-import com.example.MissingAPI;
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
@@ -24,6 +23,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
  * Multi-User Case 4: Collaborative Form Editing with Locking
@@ -45,6 +45,7 @@ public class MUC04View extends VerticalLayout {
     private final MUC04Signals muc04Signals;
     private final UserSessionRegistry userSessionRegistry;
     private String sessionId;
+    private final java.util.IdentityHashMap<com.vaadin.flow.signals.shared.SharedValueSignal<MUC04Signals.FieldLock>, String> lockKeyMap = new java.util.IdentityHashMap<>();
 
     public MUC04View(CurrentUserSignal currentUserSignal,
             MUC04Signals muc04Signals,
@@ -92,69 +93,42 @@ public class MUC04View extends VerticalLayout {
         editorsDiv.getStyle().set("background-color", "#e3f2fd")
                 .set("padding", "1em").set("border-radius", "4px");
 
-        MissingAPI.bindChildren(editorsDiv,
-                muc04Signals.getFieldLocksSignal().map(locks -> {
-                    if (locks.isEmpty()) {
-                        HorizontalLayout msg = new HorizontalLayout();
-                        Span msgText = new Span(
-                                "No fields are currently being edited");
-                        msgText.getStyle().set("font-style", "italic");
-                        msg.add(msgText);
-                        return java.util.List.of(msg);
-                    }
+        // Empty state message
+        Span emptyMsg = new Span("No fields are currently being edited");
+        emptyMsg.getStyle().set("font-style", "italic");
+        emptyMsg.bindVisible(muc04Signals.getFieldLocksSignal()
+                .map(locks -> locks.isEmpty()));
+        editorsDiv.add(emptyMsg);
 
-                    return locks.entrySet().stream().map(entry -> {
-                        String fieldLabel = formatFieldName(entry.getKey());
-                        MUC04Signals.FieldLock lock = entry.getValue().value();
-                        boolean isCurrentSession = sessionId != null
-                                && lock.username().equals(currentUser)
-                                && lock.sessionId().equals(sessionId);
+        // Lock entries container (must be separate since bindChildren
+        // requires exclusive ownership of its children)
+        Div locksContainer = new Div();
+        editorsDiv.add(locksContainer);
 
-                        HorizontalLayout item = new HorizontalLayout();
-                        item.setSpacing(true);
-                        item.setAlignItems(
-                                com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
-                        item.getStyle().set("padding", "0.5em")
-                                .set("background-color",
-                                        isCurrentSession ? "#fff3e0"
-                                                : "transparent")
-                                .set("border-radius", "4px");
+        locksContainer
+                .bindChildren(muc04Signals.getFieldLocksSignal().map(locks -> {
+                    lockKeyMap.clear();
+                    locks.forEach((key, signal) -> lockKeyMap.put(signal, key));
+                    return new java.util.ArrayList<>(locks.values());
+                }), this::createLockItem);
 
-                        // Avatar
-                        Image avatar = new Image(MainLayout
-                                .getProfilePicturePath(lock.username()), "");
-                        avatar.setWidth("32px");
-                        avatar.setHeight("32px");
-                        avatar.getStyle().set("border-radius", "50%")
-                                .set("object-fit", "cover");
-
-                        // Field and user info
-                        Span label = new Span(String.format("🔒 %s: %s",
-                                fieldLabel, lock.username()));
-
-                        item.add(avatar, label);
-                        return item;
-                    }).toList();
-                }));
+        // Save success message with signal-driven visibility
+        ValueSignal<Boolean> showSaveSuccessSignal = new ValueSignal<>(false);
+        Paragraph successMsg = new Paragraph("✓ Changes saved successfully");
+        successMsg.getStyle().set("color", "green");
+        successMsg.bindVisible(showSaveSuccessSignal);
 
         // Save button
         Button saveButton = new Button("Save Changes", event -> {
-            // In production, would check for conflicts and merge
-            // For now, just show a message
-            Paragraph successMsg = new Paragraph(
-                    "✓ Changes saved successfully");
-            successMsg.getStyle().set("color", "green");
-            add(successMsg);
-            getUI().ifPresent(ui -> ui.access(() -> {
-                new Thread(() -> {
-                    try {
-                        Thread.sleep(2000);
-                        ui.access(() -> remove(successMsg));
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }).start();
-            }));
+            showSaveSuccessSignal.value(true);
+            new Thread(() -> {
+                try {
+                    Thread.sleep(2000);
+                    showSaveSuccessSignal.value(false);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }).start();
         });
         saveButton.addThemeName("primary");
 
@@ -174,7 +148,7 @@ public class MUC04View extends VerticalLayout {
 
         add(title, description, activeSessionsBox, new H3("Shared Form Data"),
                 companyNameField, addressField, phoneField, saveButton,
-                editorsTitle, editorsDiv, infoBox);
+                successMsg, editorsTitle, editorsDiv, infoBox);
     }
 
     private TextField createLockedField(String fieldName, String label,
@@ -252,5 +226,38 @@ public class MUC04View extends VerticalLayout {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         this.sessionId = SessionIdHelper.getCurrentSessionId();
+    }
+
+    private HorizontalLayout createLockItem(
+            com.vaadin.flow.signals.shared.SharedValueSignal<MUC04Signals.FieldLock> lockSignal) {
+        String fieldName = lockKeyMap.getOrDefault(lockSignal, "");
+        String fieldLabel = formatFieldName(fieldName);
+
+        MUC04Signals.FieldLock lock = lockSignal.value();
+        boolean isCurrentSession = sessionId != null
+                && lock.username().equals(currentUser)
+                && lock.sessionId().equals(sessionId);
+
+        HorizontalLayout item = new HorizontalLayout();
+        item.setSpacing(true);
+        item.setAlignItems(
+                com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
+        item.getStyle().set("padding", "0.5em")
+                .set("background-color",
+                        isCurrentSession ? "#fff3e0" : "transparent")
+                .set("border-radius", "4px");
+
+        Image avatar = new Image(
+                MainLayout.getProfilePicturePath(lock.username()), "");
+        avatar.setWidth("32px");
+        avatar.setHeight("32px");
+        avatar.getStyle().set("border-radius", "50%").set("object-fit",
+                "cover");
+
+        Span label = new Span(
+                String.format("🔒 %s: %s", fieldLabel, lock.username()));
+
+        item.add(avatar, label);
+        return item;
     }
 }

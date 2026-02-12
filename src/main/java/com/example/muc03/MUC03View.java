@@ -4,7 +4,6 @@ import jakarta.annotation.security.PermitAll;
 
 import java.util.Random;
 
-import com.example.MissingAPI;
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
@@ -47,6 +46,7 @@ public class MUC03View extends VerticalLayout {
     private final UserSessionRegistry userSessionRegistry;
     private final Random random = new Random();
     private String sessionId;
+    private final java.util.IdentityHashMap<com.vaadin.flow.signals.shared.SharedValueSignal<Integer>, String> scoreKeyMap = new java.util.IdentityHashMap<>();
 
     public MUC03View(CurrentUserSignal currentUserSignal,
             MUC03Signals muc03Signals,
@@ -141,70 +141,19 @@ public class MUC03View extends VerticalLayout {
         leaderboardDiv.getStyle().set("background-color", "#e3f2fd")
                 .set("padding", "1em").set("border-radius", "4px");
 
-        // Bind leaderboard display
-        MissingAPI.bindChildren(leaderboardDiv,
-                com.vaadin.flow.signals.Signal.computed(() -> {
+        // Bind leaderboard display - sorted by score descending
+        leaderboardDiv
+                .bindChildren(com.vaadin.flow.signals.Signal.computed(() -> {
                     var scores = muc03Signals.getLeaderboardSignal().value();
-                    var users = userSessionRegistry.getActiveUsersSignal()
-                            .value();
-                    var displayNames = userSessionRegistry
-                            .getDisplayNamesSignal().value();
-
-                    // Build mapping from sessionKey to display name
-                    java.util.Map<String, String> displayNameMap = new java.util.HashMap<>();
-                    for (int i = 0; i < users.size()
-                            && i < displayNames.size(); i++) {
-                        String sessionKey = users.get(i).value()
-                                .getCompositeKey();
-                        displayNameMap.put(sessionKey, displayNames.get(i));
-                    }
-
+                    scoreKeyMap.clear();
+                    scores.forEach(
+                            (key, signal) -> scoreKeyMap.put(signal, key));
                     return scores.entrySet().stream()
                             .sorted((e1, e2) -> Integer.compare(
                                     e2.getValue().value(),
                                     e1.getValue().value()))
-                            .map(entry -> {
-                                String sessionKey = entry.getKey();
-                                int score = entry.getValue().value();
-                                String displayName = displayNameMap
-                                        .getOrDefault(sessionKey, sessionKey);
-                                boolean isCurrentSession = sessionId != null
-                                        && sessionKey.equals(
-                                                currentUser + ":" + sessionId);
-
-                                // Extract username from sessionKey (format:
-                                // "username:sessionId")
-                                String username = sessionKey.split(":")[0];
-
-                                HorizontalLayout item = new HorizontalLayout();
-                                item.setSpacing(true);
-                                item.setAlignItems(
-                                        com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
-                                item.getStyle().set("padding", "0.5em")
-                                        .set("background-color",
-                                                isCurrentSession ? "#fff3e0"
-                                                        : "transparent")
-                                        .set("border-radius", "4px")
-                                        .set("font-weight",
-                                                isCurrentSession ? "bold"
-                                                        : "normal");
-
-                                // Avatar
-                                Image avatar = new Image(MainLayout
-                                        .getProfilePicturePath(username), "");
-                                avatar.setWidth("32px");
-                                avatar.setHeight("32px");
-                                avatar.getStyle().set("border-radius", "50%")
-                                        .set("object-fit", "cover");
-
-                                // Name and score
-                                Span nameLabel = new Span(String.format(
-                                        "%s: %d points", displayName, score));
-
-                                item.add(avatar, nameLabel);
-                                return item;
-                            }).toList();
-                }));
+                            .map(java.util.Map.Entry::getValue).toList();
+                }), this::createLeaderboardItem);
 
         // Info box
         Div infoBox = new Div();
@@ -245,8 +194,7 @@ public class MUC03View extends VerticalLayout {
 
                     // Reposition button at random location
                     int[] position = getRandomPosition();
-                    getUI().ifPresent(ui -> ui.access(() -> muc03Signals
-                            .repositionButton(position[0], position[1])));
+                    muc03Signals.repositionButton(position[0], position[1]);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
@@ -271,5 +219,50 @@ public class MUC03View extends VerticalLayout {
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
         muc03Signals.unregisterScore(currentUser, sessionId);
+    }
+
+    private HorizontalLayout createLeaderboardItem(
+            com.vaadin.flow.signals.shared.SharedValueSignal<Integer> scoreSignal) {
+        var users = userSessionRegistry.getActiveUsersSignal().value();
+        var displayNames = userSessionRegistry.getDisplayNamesSignal().value();
+
+        String sessionKey = scoreKeyMap.getOrDefault(scoreSignal, "");
+
+        // Build display name mapping
+        java.util.Map<String, String> displayNameMap = new java.util.HashMap<>();
+        for (int i = 0; i < users.size() && i < displayNames.size(); i++) {
+            String key = users.get(i).value().getCompositeKey();
+            displayNameMap.put(key, displayNames.get(i));
+        }
+
+        String displayName = displayNameMap.getOrDefault(sessionKey,
+                sessionKey);
+        boolean isCurrentSession = sessionId != null
+                && sessionKey.equals(currentUser + ":" + sessionId);
+        String username = sessionKey.split(":")[0];
+
+        HorizontalLayout item = new HorizontalLayout();
+        item.setSpacing(true);
+        item.setAlignItems(
+                com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
+        item.getStyle().set("padding", "0.5em")
+                .set("background-color",
+                        isCurrentSession ? "#fff3e0" : "transparent")
+                .set("border-radius", "4px")
+                .set("font-weight", isCurrentSession ? "bold" : "normal");
+
+        Image avatar = new Image(MainLayout.getProfilePicturePath(username),
+                "");
+        avatar.setWidth("32px");
+        avatar.setHeight("32px");
+        avatar.getStyle().set("border-radius", "50%").set("object-fit",
+                "cover");
+
+        Span nameLabel = new Span();
+        nameLabel.bindText(scoreSignal.map(
+                score -> String.format("%s: %d points", displayName, score)));
+
+        item.add(avatar, nameLabel);
+        return item;
     }
 }

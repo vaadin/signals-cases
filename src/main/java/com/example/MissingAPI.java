@@ -1,8 +1,6 @@
 package com.example;
 
 import java.util.List;
-import java.util.function.Function;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.grid.Grid;
@@ -76,45 +74,6 @@ public class MissingAPI {
                 cb.setItems(List.of());
             }
         });
-    }
-
-    /**
-     * Binds a component's children dynamically based on a Signal containing a
-     * List.
-     */
-    public static <T> void bindChildren(Component container,
-            Signal<List<T>> signal, Function<T, Component> mapper) {
-        ComponentEffect.bind(container, signal, (c, items) -> {
-            c.getElement().removeAllChildren();
-            if (items != null) {
-                items.stream().map(mapper).forEach(child -> c.getElement()
-                        .appendChild(child.getElement()));
-            }
-        });
-    }
-
-    /**
-     * Binds a component's children dynamically when the signal already contains
-     * Component instances.
-     */
-    public static <T extends Component> void bindChildren(Component container,
-            Signal<List<T>> signal) {
-        ComponentEffect.bind(container, signal, (c, items) -> {
-            c.getElement().removeAllChildren();
-            if (items != null) {
-                items.forEach(child -> c.getElement()
-                        .appendChild(child.getElement()));
-            }
-        });
-    }
-
-    /**
-     * Binds a component's children using ComponentProvider pattern (for
-     * advanced use cases).
-     */
-    public static <T> void bindComponentChildren(Component container,
-            Signal<List<T>> signal, Function<T, Component> mapper) {
-        bindChildren(container, signal, mapper);
     }
 
     /**

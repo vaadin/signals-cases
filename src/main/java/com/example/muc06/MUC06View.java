@@ -5,7 +5,6 @@ import jakarta.annotation.security.PermitAll;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import com.example.MissingAPI;
 import com.example.security.CurrentUserSignal;
 import com.example.signals.UserSessionRegistry;
 import com.example.views.ActiveUsersDisplay;
@@ -128,10 +127,8 @@ public class MUC06View extends VerticalLayout {
                 .set("flex-direction", "column").set("gap", "0.5em")
                 .set("margin-bottom", "1em");
 
-        MissingAPI.bindChildren(tasksContainer,
-                tasksSignal.map(taskSignals -> taskSignals.stream().map(
-                        taskSignal -> createTaskRow(taskSignal, tasksSignal))
-                        .toList()));
+        tasksContainer.bindChildren(tasksSignal,
+                taskSignal -> createTaskRow(taskSignal, tasksSignal));
 
         // Add task button
         Button addButton = new Button("Add Task", event -> {
