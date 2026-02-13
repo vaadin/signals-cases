@@ -1,9 +1,9 @@
 # Vaadin Signal API Use Cases - Current Implementation
 
 **Last Updated**: 2026-02-09
-**Current Implementation**: 30 use cases (23 single-user + 7 multi-user)
+**Current Implementation**: 28 use cases (22 single-user + 6 multi-user)
 
-This document describes the 26 use cases currently implemented in this project.
+This document describes the 28 use cases currently implemented in this project.
 
 ## Introduction
 
@@ -11,7 +11,7 @@ Signals provide a reactive, declarative approach to building UIs where component
 
 ---
 
-## Single-User Use Cases (23 total)
+## Single-User Use Cases (22 total)
 
 ### UC 1: Dynamic Button State
 
@@ -109,7 +109,7 @@ WritableSignal<Integer> quantitySignal = itemSignal.map(
     CartItem::quantity,      // getter
     CartItem::withQuantity   // merger (creates new CartItem)
 );
-quantityField.bindValue(quantitySignal);
+quantityField.bindValue(quantitySignal, quantitySignal::set);
 ```
 
 ---
@@ -376,7 +376,7 @@ WritableSignal<String> firstNameSignal = personSignal.map(
     Person::firstName,      // getter: Person -> String
     Person::withFirstName   // merger: (Person, String) -> Person
 );
-textField.bindValue(firstNameSignal);
+textField.bindValue(firstNameSignal, firstNameSignal::set);
 
 // Nested mapping (Person -> Address -> City)
 WritableSignal<Address> addressSignal = personSignal.map(
@@ -387,7 +387,7 @@ WritableSignal<String> citySignal = addressSignal.map(
     Address::city,
     Address::withCity
 );
-cityField.bindValue(citySignal);
+cityField.bindValue(citySignal, citySignal::set);
 ```
 
 **When to Use:**
@@ -413,7 +413,7 @@ cityField.bindValue(citySignal);
 - Application-scoped shared signal
 - Append-only list operations
 - Real-time updates across users
-- CollaborativeSignals component
+- MUC01Signals component
 
 **Route**: `/muc-01`
 
@@ -496,8 +496,8 @@ cityField.bindValue(citySignal);
 ## Signal API Features Used
 
 ### Core Signal Operations
-- `Signal.create()` / `new ValueSignal<>()` - Creating writable signals
-- `signal.value()` - Getting/setting signal values
+- `new ValueSignal<>()` - Creating writable signals
+- `signal.get()` / `signal.set()` - Getting/setting signal values
 - `signal.map()` - Transforming signal values (one-way)
 - `WritableSignal.map(getter, merger)` - **Two-way mapped signals** (see UC06, UC22)
 - Computed signals combining multiple sources
@@ -528,16 +528,15 @@ cityField.bindValue(citySignal);
 
 ### Application-Scoped Signals
 
-Three Spring components provide application-wide signals:
+Two Spring components provide application-wide signals:
 
 1. **CurrentUserSignal** - Holds current authenticated user information
-2. **CollaborativeSignals** - Shared signals for multi-user use cases
-3. **UserSessionRegistry** - Tracks active users with reactive signal
+2. **UserSessionRegistry** - Tracks active users with reactive signal
 
 ### Multi-User Signal Sharing
 
 Multi-user use cases (MUC01-04, MUC06-07) share signals across sessions:
-- Signals stored in application-scoped Spring components (CollaborativeSignals)
+- Each MUC has its own application-scoped Spring signal class (MUC01Signals, MUC02Signals, MUC03Signals, MUC04Signals, MUC06Signals, MUC07Signals)
 - All users observe the same signal instances
 - Updates propagate automatically to all connected clients via Vaadin Push
 - User registration via onAttach/onDetach lifecycle hooks
@@ -571,5 +570,5 @@ Multi-user use cases (MUC01-04, MUC06-07) share signals across sessions:
 
 ---
 
-**Total Use Cases**: 30 (23 single-user + 7 multi-user)
-**Last Updated**: 2026-02-09
+**Total Use Cases**: 28 (22 single-user + 6 multi-user)
+**Last Updated**: 2026-02-13

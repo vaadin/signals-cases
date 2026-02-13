@@ -4,11 +4,11 @@ This repository contains a collection of Vaadin views demonstrating the Signal A
 
 ## Overview
 
-The Vaadin Signal API provides reactive state management for Vaadin Flow applications. This project contains **22 implemented use cases** showcasing various signal patterns and real-world UI scenarios.
+The Vaadin Signal API provides reactive state management for Vaadin Flow applications. This project contains **28 implemented use cases** (22 single-user + 6 multi-user) showcasing various signal patterns and real-world UI scenarios.
 
 ## Use Cases
 
-### Single-User Use Cases (16 total)
+### Single-User Use Cases (22 total)
 
 1. **Dynamic Button State** - Form validation with reactive button enable/disable
 2. **Progressive Disclosure** - Nested conditional form sections
@@ -27,7 +27,11 @@ The Vaadin Signal API provides reactive state management for Vaadin Flow applica
 16. **URL State Integration** - Query parameters as signals with router integration
 17. **Custom PC Builder** - Complex state at scale with ~70 interdependent signals
 18. **LLM-Powered Task Management** - AI assistant with real-time chat interface
+19. **Parallel Data Loading** - Per-item loading states with individual spinners
 20. **User Preferences** - Session-scoped signal for user settings
+21. **Signals-Based i18n** - Reactive internationalization with ResourceBundles
+22. **Two-Way Mapped Signals** - Bidirectional field-to-record binding
+23. **Real-time Dashboard** - Interactive dashboard with charts and live metrics
 
 ### Multi-User Collaboration (6 total)
 
@@ -42,24 +46,32 @@ The Vaadin Signal API provides reactive state management for Vaadin Flow applica
 
 ```
 src/main/java/com/example/
+├── usecase01/                       # UC01-UC23 (one package per use case)
+│   └── UseCase01View.java
+├── usecase02/ ... usecase23/
+├── muc01/                           # MUC01-MUC07 (one package per use case)
+│   ├── MUC01View.java
+│   └── MUC01Signals.java           # Per-MUC shared signal class
+├── muc02/ ... muc07/
 ├── security/
-│   ├── CurrentUserSignal.java      # Application-scoped user context signal
+│   ├── CurrentUserSignal.java       # Application-scoped user context signal
 │   ├── SecurityConfiguration.java   # Spring Security setup
 │   └── SecurityService.java
+├── service/                         # Shared services (analytics, data loading)
 ├── signals/
-│   ├── CollaborativeSignals.java   # Shared signals for MUC use cases
-│   └── UserSessionRegistry.java    # Active user tracking
+│   ├── UserSessionRegistry.java     # Active user tracking
+│   ├── UserInfo.java
+│   └── SessionIdHelper.java
+├── preferences/
+│   └── UserPreferences.java         # Session-scoped user preferences
+├── listeners/
+│   └── UserInteractionTracker.java
 ├── views/
-│   ├── MainLayout.java             # App layout with navigation
-│   ├── LoginView.java              # Login page
-│   ├── HomeView.java               # Landing page
-│   ├── UseCase01View.java          # UC 1-13 (single-user)
-│   ├── ...
-│   ├── UseCase13View.java
-│   ├── MUC01View.java              # MUC 1-4 (multi-user)
-│   ├── ...
-│   └── MUC04View.java
-└── MissingAPI.java                 # Helper methods for signal bindings
+│   ├── MainLayout.java              # App layout with navigation
+│   ├── LoginView.java               # Login page
+│   ├── HomeView.java                # Landing page
+│   └── ActiveUsersDisplay.java
+└── MissingAPI.java                  # Helper methods for signal bindings
 ```
 
 ## Running the Application
@@ -98,21 +110,18 @@ src/main/java/com/example/
 
 ## MissingAPI Helpers
 
-Since the official Signal API is still in development, `MissingAPI.java` provides temporary helper methods:
+Since the official Signal API is still in development, `MissingAPI.java` provides temporary helper methods for bindings not yet in the framework:
 
-- `bindValue()` - Two-way binding for form fields
-- `bindVisible()` - Conditional visibility
-- `bindEnabled()` - Dynamic enabled/disabled state
-- `bindText()` - Dynamic text content
-- `bindBrowserTitle()` - Browser tab title binding
-- `bindChildren()` - Dynamic component children
-- `bindItems()` - List binding for Grid/ComboBox
+- `bindItems()` - List binding for Grid/ComboBox (multiple overloads for Signal, ListSignal, SharedListSignal)
+- `bindBrowserTitle()` - Browser document title binding
+- `bindInvalid()` - Component invalid state binding
+- `tabsSyncSelectedIndex()` - Bidirectional Tabs selected index synchronization
 
 ## Multi-User Architecture
 
 Multi-user use cases (MUC 01-04, 06-07) demonstrate collaborative features using:
 
-- **CollaborativeSignals** - Application-scoped Spring component holding shared signals
+- **Per-MUC Signal Classes** - Each MUC has its own application-scoped Spring component (MUC01Signals, MUC02Signals, MUC03Signals, MUC04Signals, MUC06Signals, MUC07Signals) holding shared signals
 - **UserSessionRegistry** - Tracks active users with reactive signal
 - **onAttach/onDetach** - Lifecycle hooks for user registration
 
@@ -120,9 +129,7 @@ All users see real-time updates via Vaadin's automatic UI synchronization.
 
 ## Documentation
 
-- **signal-use-cases.md** - Detailed descriptions and patterns (TO BE UPDATED)
-- **REORGANIZATION_PLAN.md** - Project structure decisions
-- **USE_CASE_REAL_WORLD_ANALYSIS.md** - Analysis of real-world requirements
+- **signal-use-cases.md** - Detailed descriptions and patterns for all 28 use cases
 
 ## Technical Stack
 
@@ -141,5 +148,5 @@ All users see real-time updates via Vaadin's automatic UI synchronization.
 ---
 
 **Status**: Active development
-**Last Updated**: 2026-01-20
-**Total Use Cases**: 22 (16 single-user + 6 multi-user)
+**Last Updated**: 2026-02-13
+**Total Use Cases**: 28 (22 single-user + 6 multi-user)
