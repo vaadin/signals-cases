@@ -193,7 +193,7 @@ public class MUC04View extends VerticalLayout {
                                 + " is editing this field";
                     }
                 });
-        field.getElement().bindProperty("helperText", helperTextSignal);
+        field.bindHelperText(helperTextSignal);
 
         // Disable if locked by another user
         Signal<Boolean> enabledSignal = muc04Signals.getFieldLocksSignal()
