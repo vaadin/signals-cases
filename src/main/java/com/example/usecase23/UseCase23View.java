@@ -2,7 +2,6 @@ package com.example.usecase23;
 
 import jakarta.annotation.security.PermitAll;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -71,17 +70,9 @@ public class UseCase23View extends Main {
     private final ListSignal<ServiceHealth> serviceHealthSignal = new ListSignal<>();
     private final ListSignal<Number> responseSignal = new ListSignal<>();
 
-    // components
-    private final List<HighlightCard> highlightCards = new ArrayList<>();
-    private Chart viewEventsChart;
-    private Chart responseTimesChart;
-    private DataSeries responseSeries;
-
-    private final SchedulerService schedulerService;
     private String taskId;
 
     public UseCase23View(SchedulerService schedulerService) {
-        this.schedulerService = schedulerService;
         addClassName("dashboard-view");
 
         Board board = new Board();
@@ -114,11 +105,7 @@ public class UseCase23View extends Main {
 
     private HighlightCard createHighlightCard(String title,
             WritableSignal<Number> signal, Function<Number, String> format) {
-
-        HighlightCard card = new HighlightCard(title, signal, format);
-        card.update(signal.get());
-        highlightCards.add(card);
-        return card;
+        return new HighlightCard(title, signal, format);
     }
 
     private Component createViewEvents() {
@@ -160,7 +147,14 @@ public class UseCase23View extends Main {
         conf.addSeries(newYorkSeries);
         conf.addSeries(tokyoSeries);
 
-        viewEventsChart = chart;
+        // Trigger chart redraw when any timeline signal changes
+        ComponentEffect.effect(chart, () -> {
+            berlinTimelineSignal.get();
+            londonTimelineSignal.get();
+            newYorkTimelineSignal.get();
+            tokyoTimelineSignal.get();
+            chart.drawChart();
+        });
 
         // Add it all together
         VerticalLayout viewEvents = new VerticalLayout(header, chart);
@@ -208,18 +202,12 @@ public class UseCase23View extends Main {
         grid.addColumn(signal -> signal.get().getCity()).setHeader("City")
                 .setFlexGrow(1);
         grid.addColumn(new ComponentRenderer<>(signal -> {
-            var input = new Span(String.valueOf(signal.get().getInput()));
-
-            ComponentEffect.effect(input, () -> input
-                    .setText(String.valueOf(signal.get().getInput())));
+            var input = new Span(signal.map(sh -> String.valueOf(sh.getInput())));
             return input;
         })).setHeader("Input").setAutoWidth(true)
                 .setTextAlign(ColumnTextAlign.END);
         grid.addColumn(new ComponentRenderer<>(signal -> {
-            var output = new Span(String.valueOf(signal.get().getOutput()));
-
-            ComponentEffect.effect(output, () -> output
-                    .setText(String.valueOf(signal.get().getOutput())));
+            var output = new Span(signal.map(sh -> String.valueOf(sh.getOutput())));
             return output;
         })).setHeader("Output").setAutoWidth(true)
                 .setTextAlign(ColumnTextAlign.END);
@@ -249,9 +237,8 @@ public class UseCase23View extends Main {
         Configuration conf = chart.getConfiguration();
         conf.getChart().setStyledMode(true);
         chart.setThemeName("gradient");
-        responseTimesChart = chart;
 
-        responseSeries = new DataSeries();
+        DataSeries responseSeries = new DataSeries();
         responseSeries.add(new DataSeriesItem("System 1", 12.5));
         responseSeries.add(new DataSeriesItem("System 2", 12.5));
         responseSeries.add(new DataSeriesItem("System 3", 12.5));
@@ -268,6 +255,7 @@ public class UseCase23View extends Main {
             responseSeries.get(3).setY(responseValues.get(3).get());
             responseSeries.get(4).setY(responseValues.get(4).get());
             responseSeries.get(5).setY(responseValues.get(5).get());
+            chart.drawChart();
         });
 
         responseSignal.insertLast(12.5);
@@ -364,19 +352,10 @@ public class UseCase23View extends Main {
         }
         timelineCategoriesSignal.insertLast(timeline.timestamp());
 
-        // Trigger chart redraw
-        if (viewEventsChart != null) {
-            viewEventsChart.drawChart();
-        }
-
         // Update response times
         List<Double> responseTimes = data.responseTimes();
         for (int i = 0; i < responseSignal.get().size() && i < responseTimes.size(); i++) {
             responseSignal.get().get(i).set(responseTimes.get(i));
-        }
-
-        if (responseTimesChart != null) {
-            responseTimesChart.drawChart();
         }
 
         // Update service health
@@ -405,8 +384,9 @@ public class UseCase23View extends Main {
     private static final class HighlightCard extends VerticalLayout {
         private final Span valueSpan;
         private final Span badge;
+        private final Span percentageSpan;
         private final Function<Number, String> format;
-        private Number lastNumeric;
+        private final ValueSignal<Number> lastNumeric = new ValueSignal<>();
 
         private HighlightCard(String title, WritableSignal<Number> signal,
                 Function<Number, String> format) {
@@ -416,44 +396,67 @@ public class UseCase23View extends Main {
             h2.addClassNames(FontWeight.NORMAL, Margin.NONE,
                     TextColor.SECONDARY, FontSize.XSMALL);
 
-            valueSpan = new Span(format.apply(signal.get()));
+            valueSpan = new Span();
             valueSpan.addClassNames(FontWeight.SEMIBOLD, FontSize.XXXLARGE);
-            ComponentEffect.effect(valueSpan, () -> update(signal.get()));
+            valueSpan.bindText(signal.map(format::apply));
+
+            // Computed signal for percentage change
+            Signal<Double> percentageSignal = signal.map(newValue ->
+                calculatePercentageChange(newValue, lastNumeric.get())
+            );
+
+            // Computed signals using method references
+            Signal<String> prefixSignal = percentageSignal.map(this::getPrefix);
+            Signal<VaadinIcon> iconSignal = percentageSignal.map(this::getIcon);
+            Signal<String> themeSignal = percentageSignal.map(this::getTheme);
 
             badge = new Span();
+            percentageSpan = new Span();
+            percentageSpan.bindText(prefixSignal.map(prefix ->
+                prefix + percentageSignal.get()
+            ));
+
+            // Effect to update badge structure
+            ComponentEffect.effect(badge, () -> {
+                badge.removeAll();
+
+                Icon i = iconSignal.get().create();
+                i.setSize("10px");
+                i.getStyle().setMarginRight("4px").setMarginLeft("0");
+                badge.add(i, percentageSpan);
+
+                badge.getElement().getThemeList().clear();
+                badge.getElement().getThemeList().add(themeSignal.get());
+
+                lastNumeric.set(signal.get());
+            });
 
             add(h2, valueSpan, badge);
             getStyle().setGap("5px");
         }
 
-        private void update(Number newValue) {
-            valueSpan.setText(format.apply(newValue));
-            badge.removeAll();
-
-            VaadinIcon icon = VaadinIcon.ARROW_UP;
-            String prefix = "";
-            String theme = "badge";
-
-            double percentage = calculatePercentageChange(newValue,
-                    lastNumeric);
+        private String getPrefix(double percentage) {
             if (percentage == 0) {
-                prefix = "±";
+                return "±";
             } else if (percentage > 0) {
-                prefix = "+";
-                theme += " success";
+                return "+";
             } else {
-                icon = VaadinIcon.ARROW_DOWN;
+                return "";
+            }
+        }
+
+        private VaadinIcon getIcon(double percentage) {
+            return percentage < 0 ? VaadinIcon.ARROW_DOWN : VaadinIcon.ARROW_UP;
+        }
+
+        private String getTheme(double percentage) {
+            String theme = "badge";
+            if (percentage > 0) {
+                theme += " success";
+            } else if (percentage < 0) {
                 theme += " error";
             }
-
-            Icon i = icon.create();
-            i.setSize("10px");
-            i.getStyle().setMarginRight("4px").setMarginLeft("0");
-            badge.add(i, new Span(prefix + percentage));
-            badge.getElement().getThemeList().clear();
-            badge.getElement().getThemeList().add(theme);
-
-            lastNumeric = newValue;
+            return theme;
         }
 
         private double calculatePercentageChange(Number current,
