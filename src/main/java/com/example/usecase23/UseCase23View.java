@@ -2,12 +2,10 @@ package com.example.usecase23;
 
 import jakarta.annotation.security.PermitAll;
 
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import com.example.usecase23.ServiceHealth.Status;
@@ -58,32 +56,32 @@ import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 public class UseCase23View extends Main {
 
     private static final int TIMELINE_POINTS = 12;
-    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter
-            .ofPattern("HH:mm:ss");
 
-    private final ValueSignal<Number> currentUsersSignal = new ValueSignal<>(
-            745);
-    private final ValueSignal<Number> viewEventsSignal = new ValueSignal<>(
-            54600);
-    private final ValueSignal<Number> conversionRateSignal = new ValueSignal<>(
-            18);
-    private final ValueSignal<Number> customMetricSignal = new ValueSignal<>(
-            -123.45);
+    // state
+    private final ValueSignal<Number> currentUsersSignal = new ValueSignal<>();
+    private final ValueSignal<Number> viewEventsSignal = new ValueSignal<>();
+    private final ValueSignal<Number> conversionRateSignal = new ValueSignal<>();
+    private final ValueSignal<Number> customMetricSignal = new ValueSignal<>();
 
-    private final Random random = new Random();
-    private final List<HighlightCard> highlightCards = new ArrayList<>();
-    private Chart viewEventsChart;
     private final ListSignal<String> timelineCategoriesSignal = new ListSignal<>();
     private final ListSignal<Number> berlinTimelineSignal = new ListSignal<>();
     private final ListSignal<Number> londonTimelineSignal = new ListSignal<>();
     private final ListSignal<Number> newYorkTimelineSignal = new ListSignal<>();
     private final ListSignal<Number> tokyoTimelineSignal = new ListSignal<>();
     private final ListSignal<ServiceHealth> serviceHealthSignal = new ListSignal<>();
-    private Chart responseTimesChart;
-    private DataSeries responseSeries;
     private final ListSignal<Number> responseSignal = new ListSignal<>();
 
-    public UseCase23View() {
+    // components
+    private final List<HighlightCard> highlightCards = new ArrayList<>();
+    private Chart viewEventsChart;
+    private Chart responseTimesChart;
+    private DataSeries responseSeries;
+
+    private final SchedulerService schedulerService;
+    private String taskId;
+
+    public UseCase23View(SchedulerService schedulerService) {
+        this.schedulerService = schedulerService;
         addClassName("dashboard-view");
 
         Board board = new Board();
@@ -102,10 +100,15 @@ public class UseCase23View extends Main {
         add(board);
 
         addAttachListener(event -> {
-            // TODO do not use polling for this
             UI ui = event.getUI();
-            ui.setPollInterval(2000);
-            ui.addPollListener(pollEvent -> updateMockData());
+            taskId = "dashboard-" + ui.getUIId();
+            schedulerService.scheduleDashboardDataUpdate(taskId, ui, this::onDataUpdate, 0, 2, TimeUnit.SECONDS);
+        });
+
+        addDetachListener(event -> {
+            if (taskId != null) {
+                schedulerService.cancelTask(taskId);
+            }
         });
     }
 
@@ -229,7 +232,10 @@ public class UseCase23View extends Main {
             // TODO not this, update each signal individually
         });
 
-        mockServiceHealth().forEach(serviceHealthSignal::insertLast);
+        // Initialize with empty service health entries (will be populated by scheduler)
+        List.of("Münster", "Cluj-Napoca", "Ciudad Victoria").forEach(city -> {
+            serviceHealthSignal.insertLast(new ServiceHealth(Status.OK, city, 0, 0));
+        });
 
         return serviceHealth;
     }
@@ -319,95 +325,69 @@ public class UseCase23View extends Main {
         return theme;
     }
 
-    private void updateMockData() {
-        if (highlightCards.size() >= 4) {
-            currentUsersSignal.set(randomBetween(650, 820));
-            viewEventsSignal.set(randomBetween(42000, 62000));
-            conversionRateSignal.set(randomBetween(12, 24));
-            customMetricSignal.set(randomBetween(-200, 200));
-        }
+    /**
+     * Callback invoked by the scheduler service with new dashboard data.
+     * This method only updates signals - no UI access or chart drawing.
+     */
+    private void onDataUpdate(DashboardData data) {
+        // Update highlight card signals
+        currentUsersSignal.set(data.currentUsers());
+        viewEventsSignal.set(data.viewEvents());
+        conversionRateSignal.set(data.conversionRate());
+        customMetricSignal.set(data.customMetric());
+
+        // Update timeline signals
+        DashboardData.TimelineData timeline = data.timelineData();
 
         if (berlinTimelineSignal.get().size() >= TIMELINE_POINTS) {
-            berlinTimelineSignal.remove(berlinTimelineSignal.get().getFirst()); // TODO
-                                                                                // github
-                                                                                // issue
-                                                                                // remove
-                                                                                // first
-                                                                                // /
-                                                                                // last?
+            berlinTimelineSignal.remove(berlinTimelineSignal.get().getFirst());
         }
-        berlinTimelineSignal.insertLast(randomBetween(480, 920));
+        berlinTimelineSignal.insertLast(timeline.berlinValue());
 
         if (londonTimelineSignal.get().size() >= TIMELINE_POINTS) {
             londonTimelineSignal.remove(londonTimelineSignal.get().getFirst());
         }
-        londonTimelineSignal.insertLast(randomBetween(420, 820));
+        londonTimelineSignal.insertLast(timeline.londonValue());
 
         if (newYorkTimelineSignal.get().size() >= TIMELINE_POINTS) {
-            newYorkTimelineSignal
-                    .remove(newYorkTimelineSignal.get().getFirst());
+            newYorkTimelineSignal.remove(newYorkTimelineSignal.get().getFirst());
         }
-        newYorkTimelineSignal.insertLast(randomBetween(220, 520));
+        newYorkTimelineSignal.insertLast(timeline.newYorkValue());
 
         if (tokyoTimelineSignal.get().size() >= TIMELINE_POINTS) {
             tokyoTimelineSignal.remove(tokyoTimelineSignal.get().getFirst());
         }
-        tokyoTimelineSignal.insertLast(randomBetween(260, 600));
+        tokyoTimelineSignal.insertLast(timeline.tokyoValue());
 
         if (timelineCategoriesSignal.get().size() >= TIMELINE_POINTS) {
-            timelineCategoriesSignal
-                    .remove(timelineCategoriesSignal.get().getFirst());
+            timelineCategoriesSignal.remove(timelineCategoriesSignal.get().getFirst());
         }
-        timelineCategoriesSignal
-                .insertLast(LocalTime.now().format(TIME_FORMATTER));
+        timelineCategoriesSignal.insertLast(timeline.timestamp());
 
+        // Trigger chart redraw
         if (viewEventsChart != null) {
             viewEventsChart.drawChart();
         }
 
-        for (ValueSignal<Number> signal : responseSignal.get()) {
-            signal.set(randomBetween(6, 22));
+        // Update response times
+        List<Double> responseTimes = data.responseTimes();
+        for (int i = 0; i < responseSignal.get().size() && i < responseTimes.size(); i++) {
+            responseSignal.get().get(i).set(responseTimes.get(i));
         }
 
         if (responseTimesChart != null) {
             responseTimesChart.drawChart();
         }
 
-        // TODO report issue ListSignal set items / set value
-        // serviceHealthSignal.clear();
+        // Update service health
         var healthValues = serviceHealthSignal.get();
-        mockServiceHealth().forEach(
+        data.serviceHealthList().forEach(
                 newHealth -> healthValues.forEach(currentHealthSignal -> {
-                    var currentHealt = currentHealthSignal.get();
-                    if (Objects.equals(currentHealt.getCity(),
-                            newHealth.getCity())) {
+                    var currentHealth = currentHealthSignal.get();
+                    if (Objects.equals(currentHealth.getCity(), newHealth.getCity())) {
                         currentHealthSignal.set(newHealth);
                     }
                 }));
-    }
-
-    private List<ServiceHealth> mockServiceHealth() {
-        return List.of(
-                new ServiceHealth(randomStatus(), "Münster",
-                        randomBetween(280, 360), randomBetween(1200, 1700)),
-                new ServiceHealth(randomStatus(), "Cluj-Napoca",
-                        randomBetween(260, 340), randomBetween(1100, 1600)),
-                new ServiceHealth(randomStatus(), "Ciudad Victoria",
-                        randomBetween(240, 320), randomBetween(1000, 1500)));
-    }
-
-    private Status randomStatus() {
-        int pick = random.nextInt(3);
-        if (pick == 0) {
-            return Status.EXCELLENT;
-        } else if (pick == 1) {
-            return Status.OK;
-        }
-        return Status.FAILING;
-    }
-
-    private int randomBetween(int min, int max) {
-        return min + random.nextInt(max - min + 1);
     }
 
     private String formatNumber(Number value) {
