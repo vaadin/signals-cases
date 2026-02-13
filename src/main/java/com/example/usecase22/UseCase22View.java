@@ -191,8 +191,8 @@ public class UseCase22View extends VerticalLayout {
         stateDisplay.getStyle().set("background-color", "#f5f5f5")
                 .set("padding", "1em").set("border-radius", "4px")
                 .set("overflow-x", "auto").set("font-size", "0.9em");
-        stateDisplay.bindText(Signal
-                .computed(() -> formatPersonAsJson(personSignal.get())));
+        stateDisplay.bindText(
+                Signal.computed(() -> formatPersonAsJson(personSignal.get())));
 
         stateBox.add(stateTitle, stateDisplay);
         return stateBox;

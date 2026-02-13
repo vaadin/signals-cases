@@ -75,9 +75,8 @@ public class UseCase13View extends VerticalLayout {
                         + "Try opening multiple browser tabs with different users to see live synchronization!");
 
         // Active users counter
-        Signal<Integer> userCountSignal = Signal
-                .computed(() -> userSessionRegistry.getActiveUsersSignal()
-                        .get().size());
+        Signal<Integer> userCountSignal = Signal.computed(
+                () -> userSessionRegistry.getActiveUsersSignal().get().size());
 
         Div counterBox = new Div();
         counterBox.getStyle()

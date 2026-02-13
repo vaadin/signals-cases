@@ -98,8 +98,7 @@ public class UseCase15View extends VerticalLayout {
         searchField.setWidth("400px");
         searchField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
         searchField.setClearButtonVisible(true);
-        searchField.setValueChangeMode(
-                ValueChangeMode.LAZY);
+        searchField.setValueChangeMode(ValueChangeMode.LAZY);
         searchField.setValueChangeTimeout(300);
 
         searchField.bindValue(searchQuerySignal, searchQuerySignal::set);
@@ -262,8 +261,7 @@ public class UseCase15View extends VerticalLayout {
         card.getStyle().set("background-color", "#ffffff")
                 .set("border", "1px solid var(--lumo-contrast-20pct)")
                 .set("border-radius", "4px").set("padding", "1em")
-                .set("display", "flex")
-                .set("justify-content", "space-between")
+                .set("display", "flex").set("justify-content", "space-between")
                 .set("align-items", "center");
 
         Div leftSide = new Div();
@@ -276,13 +274,12 @@ public class UseCase15View extends VerticalLayout {
                 highlightMatch(product.name(), query));
 
         Div categoryDiv = new Div(product.category());
-        categoryDiv.getStyle().set("font-size", "0.9em")
-                .set("color", "var(--lumo-secondary-text-color)");
+        categoryDiv.getStyle().set("font-size", "0.9em").set("color",
+                "var(--lumo-secondary-text-color)");
 
         leftSide.add(nameDiv, categoryDiv);
 
-        Div priceDiv = new Div(
-                "$" + String.format("%.2f", product.price()));
+        Div priceDiv = new Div("$" + String.format("%.2f", product.price()));
         priceDiv.getStyle().set("font-weight", "bold").set("color",
                 "var(--lumo-primary-color)");
 

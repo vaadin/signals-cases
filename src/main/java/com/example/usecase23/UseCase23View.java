@@ -328,19 +328,18 @@ public class UseCase23View extends Main {
         }
 
         if (berlinTimelineSignal.get().size() >= TIMELINE_POINTS) {
-            berlinTimelineSignal
-                    .remove(berlinTimelineSignal.get().getFirst()); // TODO
-                                                                      // github
-                                                                      // issue
-                                                                      // remove
-                                                                      // first /
-                                                                      // last?
+            berlinTimelineSignal.remove(berlinTimelineSignal.get().getFirst()); // TODO
+                                                                                // github
+                                                                                // issue
+                                                                                // remove
+                                                                                // first
+                                                                                // /
+                                                                                // last?
         }
         berlinTimelineSignal.insertLast(randomBetween(480, 920));
 
         if (londonTimelineSignal.get().size() >= TIMELINE_POINTS) {
-            londonTimelineSignal
-                    .remove(londonTimelineSignal.get().getFirst());
+            londonTimelineSignal.remove(londonTimelineSignal.get().getFirst());
         }
         londonTimelineSignal.insertLast(randomBetween(420, 820));
 

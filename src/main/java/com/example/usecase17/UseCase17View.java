@@ -543,12 +543,12 @@ public class UseCase17View extends VerticalLayout {
         coolerPriceSignal = coolerSignal
                 .map(cooler -> cooler != null ? cooler.getPrice() : 0.0);
 
-        totalPriceSignal = Signal.computed(() -> cpuPriceSignal.get()
-                + motherboardPriceSignal.get() + ramPriceSignal.get()
-                + gpuPriceSignal.get() + storage1PriceSignal.get()
-                + storage2PriceSignal.get() + storage3PriceSignal.get()
-                + psuPriceSignal.get() + casePriceSignal.get()
-                + coolerPriceSignal.get());
+        totalPriceSignal = Signal.computed(
+                () -> cpuPriceSignal.get() + motherboardPriceSignal.get()
+                        + ramPriceSignal.get() + gpuPriceSignal.get()
+                        + storage1PriceSignal.get() + storage2PriceSignal.get()
+                        + storage3PriceSignal.get() + psuPriceSignal.get()
+                        + casePriceSignal.get() + coolerPriceSignal.get());
     }
 
     private void initializePowerSignals() {
@@ -556,13 +556,13 @@ public class UseCase17View extends VerticalLayout {
         gpuPowerSignal = gpuSignal
                 .map(gpu -> gpu != null ? gpu.getPowerConsumption() : 0);
 
-        totalPowerSignal = Signal.computed(
-                () -> cpuPowerSignal.get() + gpuPowerSignal.get() + 50 // Motherboard,
-                                                                           // RAM,
-                                                                           // storage,
-                                                                           // fans
-                                                                           // (estimated)
-        );
+        totalPowerSignal = Signal
+                .computed(() -> cpuPowerSignal.get() + gpuPowerSignal.get() + 50 // Motherboard,
+                                                                                 // RAM,
+                                                                                 // storage,
+                                                                                 // fans
+                                                                                 // (estimated)
+                );
 
         recommendedPsuWattageSignal = totalPowerSignal
                 .map(power -> (int) (power * 1.3) // 30% headroom
@@ -694,9 +694,8 @@ public class UseCase17View extends VerticalLayout {
 
         allCompatibleSignal = Signal.computed(() -> cpuSocketMatchSignal.get()
                 && ramTypeMatchSignal.get() && ramSpeedSupportedSignal.get()
-                && ramCapacitySupportedSignal.get()
-                && gpuFitsCaseSignal.get() && coolerFitsCaseSignal.get()
-                && motherboardFitsCaseSignal.get()
+                && ramCapacitySupportedSignal.get() && gpuFitsCaseSignal.get()
+                && coolerFitsCaseSignal.get() && motherboardFitsCaseSignal.get()
                 && m2SlotsAvailableSignal.get()
                 && sataSlotsAvailableSignal.get() && psuFitsCaseSignal.get()
                 && cpuCoolerCompatibleSignal.get()
@@ -1107,43 +1106,36 @@ public class UseCase17View extends VerticalLayout {
 
         ComponentEffect.effect(checksContainer, () -> {
             compatibilityStatusSignal.clear();
+            compatibilityStatusSignal
+                    .insertLast(formatCheck("CPU socket matches motherboard",
+                            cpuSocketMatchSignal.get()));
             compatibilityStatusSignal.insertLast(formatCheck(
-                    "CPU socket matches motherboard",
-                    cpuSocketMatchSignal.get()));
+                    "RAM type matches motherboard", ramTypeMatchSignal.get()));
             compatibilityStatusSignal.insertLast(formatCheck(
-                    "RAM type matches motherboard",
-                    ramTypeMatchSignal.get()));
+                    "RAM speed supported", ramSpeedSupportedSignal.get()));
+            compatibilityStatusSignal.insertLast(
+                    formatCheck("GPU fits in case", gpuFitsCaseSignal.get()));
             compatibilityStatusSignal.insertLast(formatCheck(
-                    "RAM speed supported",
-                    ramSpeedSupportedSignal.get()));
+                    "CPU cooler fits in case", coolerFitsCaseSignal.get()));
+            compatibilityStatusSignal
+                    .insertLast(formatCheck("Motherboard fits in case",
+                            motherboardFitsCaseSignal.get()));
             compatibilityStatusSignal.insertLast(formatCheck(
-                    "GPU fits in case", gpuFitsCaseSignal.get()));
+                    "M.2 slots available", m2SlotsAvailableSignal.get()));
             compatibilityStatusSignal.insertLast(formatCheck(
-                    "CPU cooler fits in case",
-                    coolerFitsCaseSignal.get()));
+                    "SATA ports available", sataSlotsAvailableSignal.get()));
+            compatibilityStatusSignal.insertLast(
+                    formatCheck("PSU fits in case", psuFitsCaseSignal.get()));
+            compatibilityStatusSignal
+                    .insertLast(formatCheck("Cooler compatible with CPU",
+                            cpuCoolerCompatibleSignal.get()));
             compatibilityStatusSignal.insertLast(formatCheck(
-                    "Motherboard fits in case",
-                    motherboardFitsCaseSignal.get()));
+                    "Cooler TDP sufficient", coolerTdpSufficientSignal.get()));
+            compatibilityStatusSignal
+                    .insertLast(formatCheck("RAM capacity supported",
+                            ramCapacitySupportedSignal.get()));
             compatibilityStatusSignal.insertLast(formatCheck(
-                    "M.2 slots available",
-                    m2SlotsAvailableSignal.get()));
-            compatibilityStatusSignal.insertLast(formatCheck(
-                    "SATA ports available",
-                    sataSlotsAvailableSignal.get()));
-            compatibilityStatusSignal.insertLast(formatCheck(
-                    "PSU fits in case", psuFitsCaseSignal.get()));
-            compatibilityStatusSignal.insertLast(formatCheck(
-                    "Cooler compatible with CPU",
-                    cpuCoolerCompatibleSignal.get()));
-            compatibilityStatusSignal.insertLast(formatCheck(
-                    "Cooler TDP sufficient",
-                    coolerTdpSufficientSignal.get()));
-            compatibilityStatusSignal.insertLast(formatCheck(
-                    "RAM capacity supported",
-                    ramCapacitySupportedSignal.get()));
-            compatibilityStatusSignal.insertLast(formatCheck(
-                    "PSU wattage sufficient",
-                    psuSufficiencySignal.get()));
+                    "PSU wattage sufficient", psuSufficiencySignal.get()));
         });
 
         checksContainer.bindChildren(compatibilityStatusSignal,
@@ -1156,15 +1148,13 @@ public class UseCase17View extends VerticalLayout {
     private Div createComponentSummaryItem(ValueSignal<Component> compSignal) {
         var comp = compSignal.get();
         Div item = new Div();
-        item.getStyle().set("margin-bottom", "0.5em")
-                .set("display", "flex")
+        item.getStyle().set("margin-bottom", "0.5em").set("display", "flex")
                 .set("justify-content", "space-between");
 
         Span name = new Span(comp.getName());
         name.getStyle().set("flex", "1");
 
-        Span price = new Span(
-                "$" + String.format("%.0f", comp.getPrice()));
+        Span price = new Span("$" + String.format("%.0f", comp.getPrice()));
         price.getStyle().set("font-weight", "bold").set("color",
                 "var(--lumo-primary-color)");
 
@@ -1175,8 +1165,8 @@ public class UseCase17View extends VerticalLayout {
     private Div createCompatibilityCheckDiv(ValueSignal<String> statusSignal) {
         var status = statusSignal.get();
         Div checkDiv = new Div();
-        checkDiv.getStyle().set("padding", "0.25em 0")
-                .set("font-size", "0.9em");
+        checkDiv.getStyle().set("padding", "0.25em 0").set("font-size",
+                "0.9em");
         checkDiv.getElement().setProperty("innerHTML", status);
         return checkDiv;
     }

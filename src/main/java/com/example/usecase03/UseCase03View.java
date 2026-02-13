@@ -3,7 +3,6 @@ package com.example.usecase03;
 import jakarta.annotation.security.PermitAll;
 
 import com.example.MissingAPI;
-import com.vaadin.flow.component.slider.Slider;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -15,6 +14,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.slider.Slider;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.dom.Element;
@@ -224,8 +224,7 @@ public class UseCase03View extends VerticalLayout {
         // Stroke width increases when selected
         Signal<String> rectStrokeWidthComputed = Signal.computed(() -> {
             int baseWidth = rectStrokeWidthSignal.get();
-            boolean isSelected = "rectangle"
-                    .equals(selectedShapeSignal.get());
+            boolean isSelected = "rectangle".equals(selectedShapeSignal.get());
             return String.valueOf(isSelected ? baseWidth + 2 : baseWidth);
         });
         rect.bindAttribute("stroke-width", rectStrokeWidthComputed);
@@ -328,18 +327,21 @@ public class UseCase03View extends VerticalLayout {
 
         Slider widthSlider = new Slider("Width", 50, 250, 50);
         var rectWidthDoubleSignal = mapIntegerToDoubleSignal(rectWidthSignal);
-        widthSlider.bindValue(rectWidthDoubleSignal, rectWidthDoubleSignal::set);
+        widthSlider.bindValue(rectWidthDoubleSignal,
+                rectWidthDoubleSignal::set);
         widthSlider.setWidthFull();
 
         Slider heightSlider = new Slider("Height", 30, 150, 30);
         var rectHeightDoubleSignal = mapIntegerToDoubleSignal(rectHeightSignal);
-        heightSlider.bindValue(rectHeightDoubleSignal, rectHeightDoubleSignal::set);
+        heightSlider.bindValue(rectHeightDoubleSignal,
+                rectHeightDoubleSignal::set);
         heightSlider.setWidthFull();
 
         Slider cornerRadiusSlider = new Slider("Corner Radius", 0, 50, 0);
-        var rectCornerRadiusDoubleSignal = mapIntegerToDoubleSignal(rectCornerRadiusSignal);
-        cornerRadiusSlider
-                .bindValue(rectCornerRadiusDoubleSignal, rectCornerRadiusDoubleSignal::set);
+        var rectCornerRadiusDoubleSignal = mapIntegerToDoubleSignal(
+                rectCornerRadiusSignal);
+        cornerRadiusSlider.bindValue(rectCornerRadiusDoubleSignal,
+                rectCornerRadiusDoubleSignal::set);
         cornerRadiusSlider.setWidthFull();
 
         // Appearance section
@@ -367,8 +369,10 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500").set("margin-top", "8px");
 
         Slider rotationSlider = new Slider("Rotation", 0, 360, 0);
-        var rectRotationDoubleSignal = mapIntegerToDoubleSignal(rectRotationSignal);
-        rotationSlider.bindValue(rectRotationDoubleSignal, rectRotationDoubleSignal::set);
+        var rectRotationDoubleSignal = mapIntegerToDoubleSignal(
+                rectRotationSignal);
+        rotationSlider.bindValue(rectRotationDoubleSignal,
+                rectRotationDoubleSignal::set);
         rotationSlider.setWidthFull();
 
         fields.add(positionLabel, xSlider, ySlider, sizeLabel, widthSlider,
@@ -413,7 +417,8 @@ public class UseCase03View extends VerticalLayout {
 
         Slider pointsSlider = new Slider("Points", 3, 10, 3);
         var starPointsDoubleSignal = mapIntegerToDoubleSignal(starPointsSignal);
-        pointsSlider.bindValue(starPointsDoubleSignal, starPointsDoubleSignal::set);
+        pointsSlider.bindValue(starPointsDoubleSignal,
+                starPointsDoubleSignal::set);
         pointsSlider.setWidthFull();
 
         Slider sizeSlider = new Slider("Size", 30, 80, 30);
@@ -446,8 +451,10 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500").set("margin-top", "8px");
 
         Slider rotationSlider = new Slider("Rotation", 0, 360, 0);
-        var starRotationDoubleSignal = mapIntegerToDoubleSignal(starRotationSignal);
-        rotationSlider.bindValue(starRotationDoubleSignal, starRotationDoubleSignal::set);
+        var starRotationDoubleSignal = mapIntegerToDoubleSignal(
+                starRotationSignal);
+        rotationSlider.bindValue(starRotationDoubleSignal,
+                starRotationDoubleSignal::set);
         rotationSlider.setWidthFull();
 
         fields.add(positionLabel, cxSlider, cySlider, shapeLabel, pointsSlider,

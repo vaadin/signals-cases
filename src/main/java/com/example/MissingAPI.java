@@ -1,6 +1,7 @@
 package com.example;
 
 import java.util.List;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.grid.Grid;

@@ -57,8 +57,7 @@ public class MUC03Signals {
     }
 
     public synchronized boolean awardPoint(String username, String sessionId) {
-        if (!buttonVisibleSignal.get()
-                || clicksRemainingSignal.get() <= 0) {
+        if (!buttonVisibleSignal.get() || clicksRemainingSignal.get() <= 0) {
             return false; // Round already finished
         }
 

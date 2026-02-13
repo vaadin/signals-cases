@@ -80,7 +80,8 @@ public class UseCase19View extends VerticalLayout {
         loadButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         Checkbox errorCheckbox = new Checkbox("Simulate Random Errors");
-        errorCheckbox.bindValue(simulateErrorsSignal, simulateErrorsSignal::set);
+        errorCheckbox.bindValue(simulateErrorsSignal,
+                simulateErrorsSignal::set);
 
         controls.add(loadButton, errorCheckbox);
 

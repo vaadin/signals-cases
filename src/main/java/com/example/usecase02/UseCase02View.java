@@ -88,7 +88,8 @@ public class UseCase02View extends VerticalLayout {
         binder.forField(hasH1BPreviouslyCheckbox).bind(
                 VisaApplicationData::getHasH1BPreviously,
                 VisaApplicationData::setHasH1BPreviously);
-        hasH1BPreviouslyCheckbox.bindValue(hasH1BPreviouslySignal, hasH1BPreviouslySignal::set);
+        hasH1BPreviouslyCheckbox.bindValue(hasH1BPreviouslySignal,
+                hasH1BPreviouslySignal::set);
 
         TextField h1bSpecialtyOccupation = new TextField(
                 "Specialty Occupation");
