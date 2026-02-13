@@ -1,9 +1,12 @@
 package com.example.usecase16;
 
+import jakarta.annotation.security.PermitAll;
+
 import java.util.List;
 import java.util.Map;
+
 import com.example.views.MainLayout;
-import jakarta.annotation.security.PermitAll;
+
 import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Anchor;
@@ -42,14 +45,14 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PageTitle("Use Case 16: URL State Integration")
 @Menu(order = 16, title = "UC 16: URL State Integration")
 @PermitAll
-public class UseCase16View extends VerticalLayout implements
-        BeforeEnterObserver {
+public class UseCase16View extends VerticalLayout
+        implements BeforeEnterObserver {
 
     record Article(String id, String title, String category, String content) {
 
         boolean matches(String query, String category) {
-            boolean categoryMatch =
-                    category.equals("All") || this.category.equals(category);
+            boolean categoryMatch = category.equals("All")
+                    || this.category.equals(category);
             if (query.isEmpty()) {
                 return categoryMatch;
             }
@@ -222,8 +225,8 @@ public class UseCase16View extends VerticalLayout implements
                 .set("align-items", "center").set("margin-bottom", "0.5em");
 
         Div titleDiv = new Div(article.title());
-        titleDiv.getStyle().set("font-weight", "bold")
-                .set("font-size", "1.1em");
+        titleDiv.getStyle().set("font-weight", "bold").set("font-size",
+                "1.1em");
 
         Div categoryBadge = new Div(article.category());
         categoryBadge.getStyle().set("background-color", "#e0e0e0")
@@ -233,8 +236,7 @@ public class UseCase16View extends VerticalLayout implements
         headerDiv.add(titleDiv, categoryBadge);
 
         Div contentDiv = new Div(article.content());
-        contentDiv.getStyle()
-                .set("color", "var(--lumo-secondary-text-color)")
+        contentDiv.getStyle().set("color", "var(--lumo-secondary-text-color)")
                 .set("font-size", "0.9em");
 
         card.add(headerDiv, contentDiv);
@@ -302,8 +304,8 @@ public class UseCase16View extends VerticalLayout implements
         }
 
         // Update browser URL without triggering navigation
-        String url =
-                "use-case-16" + (!urlParams.isEmpty() ? "?" + urlParams : "");
+        String url = "use-case-16"
+                + (!urlParams.isEmpty() ? "?" + urlParams : "");
         UI.getCurrent().getPage().getHistory().replaceState(null, url);
     }
 
@@ -318,7 +320,8 @@ public class UseCase16View extends VerticalLayout implements
     }
 
     private String getBaseUrl() {
-        VaadinServletRequest request = (VaadinServletRequest) VaadinRequest.getCurrent();
+        VaadinServletRequest request = (VaadinServletRequest) VaadinRequest
+                .getCurrent();
         if (request != null) {
             String scheme = request.getScheme();
             String serverName = request.getServerName();
@@ -327,8 +330,8 @@ public class UseCase16View extends VerticalLayout implements
 
             StringBuilder url = new StringBuilder();
             url.append(scheme).append("://").append(serverName);
-            if ((scheme.equals("http") && serverPort != 80) || (
-                    scheme.equals("https") && serverPort != 443)) {
+            if ((scheme.equals("http") && serverPort != 80)
+                    || (scheme.equals("https") && serverPort != 443)) {
                 url.append(":").append(serverPort);
             }
             url.append(contextPath).append("/use-case-16");
