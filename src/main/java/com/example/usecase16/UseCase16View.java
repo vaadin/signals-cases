@@ -29,12 +29,12 @@ import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
  * Use Case 16: Search with URL State (Router Integration)
- *
+ * <p>
  * Demonstrates deep linking and URL state management: - Query parameters as
  * signals (two-way binding) - Update URL when signal changes - Load signal from
  * URL on navigation - Back button support (browser history) - Shareable URLs
  * with search state
- *
+ * <p>
  * Key Patterns: - Router integration with signals - Query parameter binding -
  * URL state synchronization - Deep linking support
  */
@@ -108,13 +108,13 @@ public class UseCase16View extends VerticalLayout implements
         searchField.setPlaceholder("Search articles...");
         searchField.setWidth("300px");
         searchField.setClearButtonVisible(true);
-        searchField.bindValue(searchQuerySignal, searchQuerySignal::value);
+        searchField.bindValue(searchQuerySignal, searchQuerySignal::set);
 
         Select<String> categorySelect = new Select<>();
         categorySelect.setLabel("Category");
         categorySelect.setItems("All", "Tutorial", "Guide", "Documentation");
         categorySelect.setWidth("200px");
-        categorySelect.bindValue(categorySignal, categorySignal::value);
+        categorySelect.bindValue(categorySignal, categorySignal::set);
 
         controls.add(searchField, categorySelect);
 
@@ -130,8 +130,8 @@ public class UseCase16View extends VerticalLayout implements
         // Update URL display based on signals
         Signal<String> currentUrlSignal = Signal.computed(() -> {
             String baseUrl = getBaseUrl();
-            String query = searchQuerySignal.value();
-            String category = categorySignal.value();
+            String query = searchQuerySignal.get();
+            String category = categorySignal.get();
 
             StringBuilder url = new StringBuilder(baseUrl);
             if (!query.isEmpty() || !category.equals("All")) {
@@ -177,7 +177,7 @@ public class UseCase16View extends VerticalLayout implements
 
         // Results
         Signal<String> resultsTitleSignal = Signal.computed(() -> {
-            int size = filteredArticlesSignal.value().size();
+            int size = filteredArticlesSignal.get().size();
             return size + " article" + (size == 1 ? "" : "s") + " found";
         });
         H3 resultsTitle = new H3(resultsTitleSignal);
@@ -210,7 +210,7 @@ public class UseCase16View extends VerticalLayout implements
     }
 
     private Div createArticleCard(ValueSignal<Article> articleSignal) {
-        var article = articleSignal.value();
+        var article = articleSignal.get();
         Div card = new Div();
         card.getStyle().set("background-color", "#ffffff")
                 .set("border", "1px solid var(--lumo-contrast-20pct)")
@@ -222,11 +222,11 @@ public class UseCase16View extends VerticalLayout implements
                 .set("align-items", "center")
                 .set("margin-bottom", "0.5em");
 
-        Div titleDiv = new Div(article.getTitle());
+        Div titleDiv = new Div(article.title());
         titleDiv.getStyle().set("font-weight", "bold")
                 .set("font-size", "1.1em");
 
-        Div categoryBadge = new Div(article.getCategory());
+        Div categoryBadge = new Div(article.category());
         categoryBadge.getStyle().set("background-color", "#e0e0e0")
                 .set("padding", "0.25em 0.5em")
                 .set("border-radius", "4px")
@@ -234,7 +234,7 @@ public class UseCase16View extends VerticalLayout implements
 
         headerDiv.add(titleDiv, categoryBadge);
 
-        Div contentDiv = new Div(article.getContent());
+        Div contentDiv = new Div(article.content());
         contentDiv.getStyle()
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-size", "0.9em");
@@ -247,8 +247,8 @@ public class UseCase16View extends VerticalLayout implements
         // When signals change, update URL (except during initialization)
         ComponentEffect.effect(this, () -> {
             // Access signals to track them
-            searchQuerySignal.value();
-            categorySignal.value();
+            searchQuerySignal.get();
+            categorySignal.get();
 
             if (!isInitializing) {
                 updateUrl();
@@ -269,17 +269,17 @@ public class UseCase16View extends VerticalLayout implements
         // Load search query from URL
         if (params.containsKey("q")) {
             String query = params.get("q").getFirst();
-            searchQuerySignal.value(query);
+            searchQuerySignal.set(query);
         } else {
-            searchQuerySignal.value("");
+            searchQuerySignal.set("");
         }
 
         // Load category from URL
         if (params.containsKey("category")) {
             String category = params.get("category").getFirst();
-            categorySignal.value(category);
+            categorySignal.set(category);
         } else {
-            categorySignal.value("All");
+            categorySignal.set("All");
         }
 
         isInitializing = false;
@@ -289,8 +289,8 @@ public class UseCase16View extends VerticalLayout implements
     }
 
     private void updateUrl() {
-        String query = searchQuerySignal.value();
-        String category = categorySignal.value();
+        String query = searchQuerySignal.get();
+        String category = categorySignal.get();
 
         // Build query parameters
         StringBuilder urlParams = new StringBuilder();
@@ -310,8 +310,8 @@ public class UseCase16View extends VerticalLayout implements
     }
 
     private void updateFilteredResults() {
-        String query = searchQuerySignal.value();
-        String category = categorySignal.value();
+        String query = searchQuerySignal.get();
+        String category = categorySignal.get();
 
         filteredArticlesSignal.clear();
         ALL_ARTICLES.stream()

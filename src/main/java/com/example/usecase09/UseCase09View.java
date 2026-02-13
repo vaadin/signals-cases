@@ -60,12 +60,12 @@ public class UseCase09View extends VerticalLayout {
                 AccountType.PERSONAL);
         ValueSignal<Integer> ageSignal = new ValueSignal<>(0);
 
-        accountTypeSelect.bindValue(accountTypeSignal);
-        ageField.bindValue(ageSignal);
+        accountTypeSelect.bindValue(accountTypeSignal, accountTypeSignal::set);
+        ageField.bindValue(ageSignal, ageSignal::set);
 
         Signal<Boolean> ageValidSignal = Signal.computed(() -> {
-            Integer age = ageSignal.value();
-            AccountType accountType = accountTypeSignal.value();
+            Integer age = ageSignal.get();
+            AccountType accountType = accountTypeSignal.get();
             if (age == null)
                 return false;
             // Business accounts require age >= 18
@@ -101,8 +101,8 @@ public class UseCase09View extends VerticalLayout {
         binder.forField(accountTypeSelect).bind("accountType");
         // another cross-field validation, this one uses signals directly
         binder.forField(ageField)
-                .withValidator(value -> ageValidSignal.value(), value -> {
-                    AccountType accountType = accountTypeSignal.value();
+                .withValidator(value -> ageValidSignal.get(), value -> {
+                    AccountType accountType = accountTypeSignal.get();
                     if (accountType == AccountType.BUSINESS) {
                         return "Business accounts require age 18 or older";
                     }

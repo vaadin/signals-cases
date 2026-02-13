@@ -44,7 +44,7 @@ public class MUC07View extends AbstractTaskChatView {
     private static String getUserConversationId(
             CurrentUserSignal currentUserSignal) {
         CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
-                .value();
+                .get();
         if (userInfo == null || !userInfo.isAuthenticated()) {
             throw new IllegalStateException("User must be authenticated");
         }

@@ -25,7 +25,7 @@ public class MUC06Signals {
 
     @PostConstruct
     public void initializeSampleTasks() {
-        if (tasksSignal.value().isEmpty()) {
+        if (tasksSignal.get().isEmpty()) {
             tasksSignal.insertLast(new Task("task-1", "Review pull requests",
                     false, java.time.LocalDate.now()));
             tasksSignal.insertLast(new Task("task-2", "Update documentation",

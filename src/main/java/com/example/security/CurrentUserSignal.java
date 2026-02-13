@@ -95,7 +95,7 @@ public class CurrentUserSignal {
      * this after login, logout, or impersonation changes.
      */
     public void refresh() {
-        userSignal.value(getCurrentUserInfo());
+        userSignal.set(getCurrentUserInfo());
     }
 
     private UserInfo getCurrentUserInfo() {

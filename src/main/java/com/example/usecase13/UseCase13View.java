@@ -77,7 +77,7 @@ public class UseCase13View extends VerticalLayout {
         // Active users counter
         Signal<Integer> userCountSignal = Signal
                 .computed(() -> userSessionRegistry.getActiveUsersSignal()
-                        .value().size());
+                        .get().size());
 
         Div counterBox = new Div();
         counterBox.getStyle()
@@ -108,7 +108,7 @@ public class UseCase13View extends VerticalLayout {
         // Reactively bind children to active users list
         userListContainer.bindChildren(
                 userSessionRegistry.getActiveUsersSignal(),
-                userSignal -> createUserCard(userSignal.value(),
+                userSignal -> createUserCard(userSignal.get(),
                         currentSessionId));
 
         // Educational info box
@@ -192,16 +192,16 @@ public class UseCase13View extends VerticalLayout {
                         : userInfo.username();
 
         // Add session number if multiple sessions for same user
-        long sessionCount = userSessionRegistry.getActiveUsersSignal().value()
+        long sessionCount = userSessionRegistry.getActiveUsersSignal().get()
                 .stream()
-                .filter(us -> us.value().username().equals(userInfo.username()))
+                .filter(us -> us.get().username().equals(userInfo.username()))
                 .count();
 
         if (sessionCount > 1) {
             // Find this session's number
             long sessionNumber = 0;
-            for (var us : userSessionRegistry.getActiveUsersSignal().value()) {
-                UserInfo u = us.value();
+            for (var us : userSessionRegistry.getActiveUsersSignal().get()) {
+                UserInfo u = us.get();
                 if (u.username().equals(userInfo.username())) {
                     sessionNumber++;
                     if (u.sessionId().equals(userInfo.sessionId())) {

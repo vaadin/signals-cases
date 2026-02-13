@@ -43,17 +43,17 @@ public class UseCase05View extends VerticalLayout {
         // Country selector
         ComboBox<String> countrySelect = new ComboBox<>("Country");
         countrySelect.setItems(countries);
-        countrySelect.bindValue(countrySignal);
+        countrySelect.bindValue(countrySignal, countrySignal::set);
 
         // State selector - computed items based on country
         ComboBox<String> stateSelect = new ComboBox<>("State/Province");
         stateSelect.setItems(List.of()); // Initialize with empty items
         MissingAPI.bindItems(stateSelect, countrySignal.map(country -> {
-            stateSignal.value(""); // Reset state when country changes
+            stateSignal.set(""); // Reset state when country changes
             return country != null && !country.isEmpty() ? loadStates(country)
                     : List.of();
         }));
-        stateSelect.bindValue(stateSignal);
+        stateSelect.bindValue(stateSignal, stateSignal::set);
         stateSelect.bindEnabled(countrySignal
                 .map(country -> country != null && !country.isEmpty()));
 
@@ -61,12 +61,12 @@ public class UseCase05View extends VerticalLayout {
         ComboBox<String> citySelect = new ComboBox<>("City");
         citySelect.setItems(List.of()); // Initialize with empty items
         MissingAPI.bindItems(citySelect, stateSignal.map(state -> {
-            citySignal.value(""); // Reset city when state changes
+            citySignal.set(""); // Reset city when state changes
             return state != null && !state.isEmpty()
-                    ? loadCities(countrySignal.value(), state)
+                    ? loadCities(countrySignal.get(), state)
                     : List.of();
         }));
-        citySelect.bindValue(citySignal);
+        citySelect.bindValue(citySignal, citySignal::set);
         citySelect.bindEnabled(
                 stateSignal.map(state -> state != null && !state.isEmpty()));
 

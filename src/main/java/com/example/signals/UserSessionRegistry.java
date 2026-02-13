@@ -18,12 +18,12 @@ public class UserSessionRegistry {
     // Computed signal for display names with session numbers and nicknames
     private final Signal<java.util.List<String>> displayNamesSignal = Signal
             .computed(() -> {
-                var userSignals = activeUsersSignal.value();
+                var userSignals = activeUsersSignal.get();
 
                 // Count sessions per username for auto-naming
                 java.util.Map<String, Integer> sessionCounts = new java.util.HashMap<>();
                 for (var userSignal : userSignals) {
-                    String username = userSignal.value().username();
+                    String username = userSignal.get().username();
                     sessionCounts.merge(username, 1, Integer::sum);
                 }
 
@@ -32,7 +32,7 @@ public class UserSessionRegistry {
                 java.util.List<String> displayNames = new java.util.ArrayList<>();
 
                 for (var userSignal : userSignals) {
-                    UserInfo user = userSignal.value();
+                    UserInfo user = userSignal.get();
 
                     // Check for nickname first
                     if (user.nickname() != null && !user.nickname().isEmpty()) {
@@ -91,9 +91,9 @@ public class UserSessionRegistry {
 
         // Check using composite key
         String compositeKey = username + ":" + sessionId;
-        boolean exists = activeUsersSignal.value().stream()
+        boolean exists = activeUsersSignal.get().stream()
                 .anyMatch(userSignal -> compositeKey
-                        .equals(userSignal.value().getCompositeKey()));
+                        .equals(userSignal.get().getCompositeKey()));
 
         if (!exists) {
             activeUsersSignal.insertLast(
@@ -114,9 +114,9 @@ public class UserSessionRegistry {
         }
 
         String compositeKey = username + ":" + sessionId;
-        activeUsersSignal.value().stream()
+        activeUsersSignal.get().stream()
                 .filter(userSignal -> compositeKey
-                        .equals(userSignal.value().getCompositeKey()))
+                        .equals(userSignal.get().getCompositeKey()))
                 .findFirst().ifPresent(activeUsersSignal::remove);
     }
 
@@ -124,7 +124,7 @@ public class UserSessionRegistry {
      * Get count of active users.
      */
     public int getActiveUserCount() {
-        return activeUsersSignal.value().size();
+        return activeUsersSignal.get().size();
     }
 
     /**
@@ -135,8 +135,8 @@ public class UserSessionRegistry {
             throw new IllegalArgumentException("Username cannot be null");
         }
 
-        return activeUsersSignal.value().stream().anyMatch(
-                userSignal -> username.equals(userSignal.value().username()));
+        return activeUsersSignal.get().stream().anyMatch(
+                userSignal -> username.equals(userSignal.get().username()));
     }
 
     /**
@@ -149,9 +149,9 @@ public class UserSessionRegistry {
         }
 
         String compositeKey = username + ":" + sessionId;
-        return activeUsersSignal.value().stream()
+        return activeUsersSignal.get().stream()
                 .anyMatch(userSignal -> compositeKey
-                        .equals(userSignal.value().getCompositeKey()));
+                        .equals(userSignal.get().getCompositeKey()));
     }
 
     /**
@@ -164,12 +164,12 @@ public class UserSessionRegistry {
                 ? null
                 : nickname.trim();
 
-        activeUsersSignal.value().stream()
+        activeUsersSignal.get().stream()
                 .filter(userSignal -> compositeKey
-                        .equals(userSignal.value().getCompositeKey()))
+                        .equals(userSignal.get().getCompositeKey()))
                 .findFirst().ifPresent(userSignal -> {
-                    UserInfo oldInfo = userSignal.value();
-                    userSignal.value(oldInfo.withNickname(trimmedNickname));
+                    UserInfo oldInfo = userSignal.get();
+                    userSignal.set(oldInfo.withNickname(trimmedNickname));
                 });
     }
 
@@ -178,10 +178,10 @@ public class UserSessionRegistry {
      */
     public String getNickname(String username, String sessionId) {
         String compositeKey = username + ":" + sessionId;
-        return activeUsersSignal.value().stream()
+        return activeUsersSignal.get().stream()
                 .filter(userSignal -> compositeKey
-                        .equals(userSignal.value().getCompositeKey()))
-                .findFirst().map(userSignal -> userSignal.value().nickname())
+                        .equals(userSignal.get().getCompositeKey()))
+                .findFirst().map(userSignal -> userSignal.get().nickname())
                 .orElse(null);
     }
 
@@ -193,12 +193,12 @@ public class UserSessionRegistry {
         String compositeKey = username + ":" + sessionId;
 
         // Find the user and update their view
-        activeUsersSignal.value().stream()
+        activeUsersSignal.get().stream()
                 .filter(userSignal -> compositeKey
-                        .equals(userSignal.value().getCompositeKey()))
+                        .equals(userSignal.get().getCompositeKey()))
                 .findFirst().ifPresent(userSignal -> {
-                    UserInfo oldInfo = userSignal.value();
-                    userSignal.value(oldInfo.withCurrentView(viewRoute));
+                    UserInfo oldInfo = userSignal.get();
+                    userSignal.set(oldInfo.withCurrentView(viewRoute));
                 });
     }
 
@@ -208,12 +208,12 @@ public class UserSessionRegistry {
     public Signal<java.util.List<String>> getActiveUsersOnView(
             String viewRoute) {
         return Signal.computed(() -> {
-            var allUsers = activeUsersSignal.value();
-            var allDisplayNames = displayNamesSignal.value();
+            var allUsers = activeUsersSignal.get();
+            var allDisplayNames = displayNamesSignal.get();
 
             java.util.List<String> result = new java.util.ArrayList<>();
             for (int i = 0; i < allUsers.size(); i++) {
-                UserInfo user = allUsers.get(i).value();
+                UserInfo user = allUsers.get(i).get();
                 if (viewRoute.equals(user.currentView())) {
                     result.add(allDisplayNames.get(i));
                 }
@@ -236,12 +236,12 @@ public class UserSessionRegistry {
             boolean isActive) {
         String compositeKey = username + ":" + sessionId;
 
-        activeUsersSignal.value().stream()
+        activeUsersSignal.get().stream()
                 .filter(userSignal -> compositeKey
-                        .equals(userSignal.value().getCompositeKey()))
+                        .equals(userSignal.get().getCompositeKey()))
                 .findFirst().ifPresent(userSignal -> {
-                    UserInfo oldInfo = userSignal.value();
-                    userSignal.value(oldInfo.withTabActive(isActive));
+                    UserInfo oldInfo = userSignal.get();
+                    userSignal.set(oldInfo.withTabActive(isActive));
                 });
     }
 
@@ -256,12 +256,12 @@ public class UserSessionRegistry {
     public void updateLastInteraction(String username, String sessionId) {
         String compositeKey = username + ":" + sessionId;
 
-        activeUsersSignal.value().stream()
+        activeUsersSignal.get().stream()
                 .filter(userSignal -> compositeKey
-                        .equals(userSignal.value().getCompositeKey()))
+                        .equals(userSignal.get().getCompositeKey()))
                 .findFirst().ifPresent(userSignal -> {
-                    UserInfo oldInfo = userSignal.value();
-                    userSignal.value(oldInfo.withLastInteractionTime(
+                    UserInfo oldInfo = userSignal.get();
+                    userSignal.set(oldInfo.withLastInteractionTime(
                             System.currentTimeMillis()));
                 });
     }
