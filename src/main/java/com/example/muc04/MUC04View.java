@@ -51,7 +51,7 @@ public class MUC04View extends VerticalLayout {
             MUC04Signals muc04Signals,
             UserSessionRegistry userSessionRegistry) {
         CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
-                .value();
+                .get();
         if (userInfo == null || !userInfo.isAuthenticated()) {
             throw new IllegalStateException(
                     "User must be authenticated to access this view");
@@ -120,11 +120,11 @@ public class MUC04View extends VerticalLayout {
 
         // Save button
         Button saveButton = new Button("Save Changes", event -> {
-            showSaveSuccessSignal.value(true);
+            showSaveSuccessSignal.set(true);
             new Thread(() -> {
                 try {
                     Thread.sleep(2000);
-                    showSaveSuccessSignal.value(false);
+                    showSaveSuccessSignal.set(false);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -157,7 +157,7 @@ public class MUC04View extends VerticalLayout {
         field.setWidthFull();
 
         // Bind value
-        field.bindValue(signal, signal::value);
+        field.bindValue(signal, signal::set);
 
         // Lock field when focused
         field.addFocusListener(event -> {
@@ -181,7 +181,7 @@ public class MUC04View extends VerticalLayout {
                     if (lockSignal == null) {
                         return "Available to edit";
                     }
-                    MUC04Signals.FieldLock lock = lockSignal.value();
+                    MUC04Signals.FieldLock lock = lockSignal.get();
                     if (lock == null) {
                         return "Available to edit";
                     } else if (sessionId != null
@@ -203,7 +203,7 @@ public class MUC04View extends VerticalLayout {
                     if (lockSignal == null) {
                         return true;
                     }
-                    MUC04Signals.FieldLock lock = lockSignal.value();
+                    MUC04Signals.FieldLock lock = lockSignal.get();
                     return lock == null || (sessionId != null
                             && lock.username().equals(currentUser)
                             && lock.sessionId().equals(sessionId));
@@ -233,7 +233,7 @@ public class MUC04View extends VerticalLayout {
         String fieldName = lockKeyMap.getOrDefault(lockSignal, "");
         String fieldLabel = formatFieldName(fieldName);
 
-        MUC04Signals.FieldLock lock = lockSignal.value();
+        MUC04Signals.FieldLock lock = lockSignal.get();
         boolean isCurrentSession = sessionId != null
                 && lock.username().equals(currentUser)
                 && lock.sessionId().equals(sessionId);

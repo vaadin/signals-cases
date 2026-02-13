@@ -57,7 +57,7 @@ public class MUC06View extends VerticalLayout {
             MUC06Signals muc06Signals,
             UserSessionRegistry userSessionRegistry) {
         CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
-                .value();
+                .get();
         if (userInfo == null || !userInfo.isAuthenticated()) {
             throw new IllegalStateException(
                     "User must be authenticated to access this view");
@@ -87,10 +87,10 @@ public class MUC06View extends VerticalLayout {
         // Computed signals for statistics
         Signal<Integer> totalSignal = tasksSignal.map(list -> list.size());
         Signal<Integer> completedSignal = Signal
-                .computed(() -> (int) tasksSignal.value().stream()
-                        .filter(t -> t.value().completed()).count());
+                .computed(() -> (int) tasksSignal.get().stream()
+                        .filter(t -> t.get().completed()).count());
         Signal<Integer> pendingSignal = Signal
-                .computed(() -> totalSignal.value() - completedSignal.value());
+                .computed(() -> totalSignal.get() - completedSignal.get());
 
         // User count display
         ActiveUsersDisplay userCountBox = new ActiveUsersDisplay(
@@ -161,15 +161,15 @@ public class MUC06View extends VerticalLayout {
     private HorizontalLayout createTaskRow(
             SharedValueSignal<MUC06Signals.Task> taskSignal,
             SharedListSignal<MUC06Signals.Task> tasksSignal) {
-        MUC06Signals.Task task = taskSignal.value();
+        MUC06Signals.Task task = taskSignal.get();
 
         // Checkbox for completed status
         Checkbox checkbox = new Checkbox();
         checkbox.setValue(task.completed());
         checkbox.setAriaLabel("Task completed");
         checkbox.addValueChangeListener(e -> {
-            MUC06Signals.Task current = taskSignal.value();
-            taskSignal.value(new MUC06Signals.Task(current.id(),
+            MUC06Signals.Task current = taskSignal.get();
+            taskSignal.set(new MUC06Signals.Task(current.id(),
                     current.title(), e.getValue(), current.dueDate()));
         });
 
@@ -179,8 +179,8 @@ public class MUC06View extends VerticalLayout {
         titleField.setPlaceholder("Task title...");
         titleField.setWidth("400px");
         titleField.addValueChangeListener(e -> {
-            MUC06Signals.Task current = taskSignal.value();
-            taskSignal.value(new MUC06Signals.Task(current.id(), e.getValue(),
+            MUC06Signals.Task current = taskSignal.get();
+            taskSignal.set(new MUC06Signals.Task(current.id(), e.getValue(),
                     current.completed(), current.dueDate()));
         });
 
@@ -197,8 +197,8 @@ public class MUC06View extends VerticalLayout {
         datePicker.setPlaceholder("Due date");
         datePicker.setWidth("180px");
         datePicker.addValueChangeListener(e -> {
-            MUC06Signals.Task current = taskSignal.value();
-            taskSignal.value(new MUC06Signals.Task(current.id(),
+            MUC06Signals.Task current = taskSignal.get();
+            taskSignal.set(new MUC06Signals.Task(current.id(),
                     current.title(), current.completed(), e.getValue()));
         });
 

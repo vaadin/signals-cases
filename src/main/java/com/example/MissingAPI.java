@@ -39,9 +39,9 @@ public class MissingAPI {
     public static <T> void bindItems(Grid<T> grid,
             SharedListSignal<T> listSignal) {
         ComponentEffect.effect(grid, () -> {
-            List<SharedValueSignal<T>> signals = listSignal.value();
+            List<SharedValueSignal<T>> signals = listSignal.get();
             // Read each individual signal to register dependency
-            List<T> items = signals.stream().map(SharedValueSignal::value)
+            List<T> items = signals.stream().map(SharedValueSignal::get)
                     .toList();
             grid.setItems(items);
         });
@@ -54,9 +54,9 @@ public class MissingAPI {
      */
     public static <T> void bindItems(Grid<T> grid, ListSignal<T> listSignal) {
         ComponentEffect.effect(grid, () -> {
-            List<ValueSignal<T>> signals = listSignal.value();
+            List<ValueSignal<T>> signals = listSignal.get();
             // Read each individual signal to register dependency
-            List<T> items = signals.stream().map(ValueSignal::value).toList();
+            List<T> items = signals.stream().map(ValueSignal::get).toList();
             grid.setItems(items);
         });
     }
@@ -83,7 +83,7 @@ public class MissingAPI {
     public static void bindBrowserTitle(com.vaadin.flow.component.UI ui,
             Signal<String> signal) {
         ComponentEffect.effect(ui, () -> {
-            String title = signal.value();
+            String title = signal.get();
             if (title != null) {
                 ui.getPage().setTitle(title);
             }
@@ -123,7 +123,7 @@ public class MissingAPI {
             WritableSignal<Integer> numberSignal) {
         ComponentEffect.bind(tabs, numberSignal, Tabs::setSelectedIndex);
         tabs.addSelectedChangeListener(event -> {
-            numberSignal.value(event.getSource().getSelectedIndex());
+            numberSignal.set(event.getSource().getSelectedIndex());
         });
     }
 }

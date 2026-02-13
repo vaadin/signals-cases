@@ -52,7 +52,7 @@ public class MUC01View extends VerticalLayout {
             MUC01Signals muc01Signals,
             UserSessionRegistry userSessionRegistry) {
         CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
-                .value();
+                .get();
         if (userInfo == null || !userInfo.isAuthenticated()) {
             throw new IllegalStateException(
                     "User must be authenticated to access this view");
@@ -86,7 +86,7 @@ public class MUC01View extends VerticalLayout {
 
         // Bind message list to UI
         messagesContainer.bindChildren(muc01Signals.getMessagesSignal(),
-                msgSignal -> createMessageComponent(msgSignal.value()));
+                msgSignal -> createMessageComponent(msgSignal.get()));
 
         // Message input
         H3 inputTitle = new H3("Send Message");
@@ -198,13 +198,13 @@ public class MUC01View extends VerticalLayout {
             return currentUser;
         }
 
-        var users = userSessionRegistry.getActiveUsersSignal().value();
-        var displayNames = userSessionRegistry.getDisplayNamesSignal().value();
+        var users = userSessionRegistry.getActiveUsersSignal().get();
+        var displayNames = userSessionRegistry.getDisplayNamesSignal().get();
 
         // Find matching session key for current user
         String sessionKey = currentUser + ":" + sessionId;
         for (int i = 0; i < users.size() && i < displayNames.size(); i++) {
-            if (sessionKey.equals(users.get(i).value().getCompositeKey())) {
+            if (sessionKey.equals(users.get(i).get().getCompositeKey())) {
                 return displayNames.get(i);
             }
         }

@@ -95,7 +95,7 @@ public class UseCase14View extends VerticalLayout {
 
         var checkbox = new com.vaadin.flow.component.checkbox.Checkbox(
                 "Simulate Error");
-        checkbox.bindValue(shouldFailSignal, shouldFailSignal::value);
+        checkbox.bindValue(shouldFailSignal, shouldFailSignal::set);
         errorToggle.add(checkbox);
 
         controls.add(loadButton, errorToggle);
@@ -229,32 +229,32 @@ public class UseCase14View extends VerticalLayout {
 
     private void loadReport() {
         // Set loading state immediately
-        stateSignal.value(LoadingState.State.LOADING);
-        reportDataSignal.value(AnalyticsReport.empty());
-        errorSignal.value("");
-        loadingMessageSignal.value("Fetching relevant data... (1/2)");
+        stateSignal.set(LoadingState.State.LOADING);
+        reportDataSignal.set(AnalyticsReport.empty());
+        errorSignal.set("");
+        loadingMessageSignal.set("Fetching relevant data... (1/2)");
 
         // Step 1: Fetch raw data from data sources
         // The @Async annotation causes Spring to execute this in a separate
         // thread
-        analyticsService.fetchReportData(shouldFailSignal.value())
+        analyticsService.fetchReportData(shouldFailSignal.get())
                 .thenCompose(rawData -> {
                     // Signals are thread-safe - update directly from background
                     // thread
-                    loadingMessageSignal.value("Generating report... (2/2)");
+                    loadingMessageSignal.set("Generating report... (2/2)");
 
                     // Step 2: Process the fetched data into a report
                     return analyticsService.generateReportFromData(rawData,
-                            shouldFailSignal.value());
+                            shouldFailSignal.get());
                 }).thenAccept(report -> {
                     // Signals are thread-safe - update directly from background
                     // thread
-                    reportDataSignal.value(report);
-                    stateSignal.value(LoadingState.State.SUCCESS);
+                    reportDataSignal.set(report);
+                    stateSignal.set(LoadingState.State.SUCCESS);
                 }).exceptionally(error -> {
                     // Signals are thread-safe - update directly from background
                     // thread
-                    stateSignal.value(LoadingState.State.ERROR);
+                    stateSignal.set(LoadingState.State.ERROR);
                     return null;
                 });
     }

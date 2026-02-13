@@ -322,6 +322,6 @@ public class UseCase11View extends VerticalLayout {
      */
     @com.vaadin.flow.component.ClientCallable
     public void updateContainerSize(int width, int height) {
-        containerSizeSignal.value(new ContainerSize(width, height));
+        containerSizeSignal.set(new ContainerSize(width, height));
     }
 }

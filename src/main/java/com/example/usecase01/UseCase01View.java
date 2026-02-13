@@ -48,21 +48,21 @@ public class UseCase01View extends VerticalLayout {
 
         // Individual field validity signals
         Signal<Boolean> isPasswordValidSignal = Signal.computed(() -> {
-            String password = passwordSignal.value();
+            String password = passwordSignal.get();
             return password.isEmpty() || password.length() >= 8;
         });
 
         Signal<Boolean> isConfirmValidSignal = Signal.computed(() -> {
-            String password = passwordSignal.value();
-            String confirm = confirmPasswordSignal.value();
+            String password = passwordSignal.get();
+            String confirm = confirmPasswordSignal.get();
             return confirm.isEmpty() || password.equals(confirm);
         });
 
         // Computed validity signal
         Signal<Boolean> isValidSignal = Signal.computed(() -> {
-            String email = emailSignal.value();
-            String password = passwordSignal.value();
-            String confirm = confirmPasswordSignal.value();
+            String email = emailSignal.get();
+            String password = passwordSignal.get();
+            String confirm = confirmPasswordSignal.get();
 
             return email.contains("@") && password.length() >= 8
                     && password.equals(confirm);
@@ -71,16 +71,16 @@ public class UseCase01View extends VerticalLayout {
         // Form fields
         EmailField emailField = new EmailField("Email");
         emailField.setHelperText("Valid email address required");
-        emailField.bindValue(emailSignal, emailSignal::value);
+        emailField.bindValue(emailSignal, emailSignal::set);
 
         PasswordField passwordField = new PasswordField("Password");
         passwordField.setHelperText("Minimum 8 characters required");
-        passwordField.bindValue(passwordSignal, passwordSignal::value);
+        passwordField.bindValue(passwordSignal, passwordSignal::set);
         passwordField.setMinLength(8);
 
         PasswordField confirmField = new PasswordField("Confirm Password");
         confirmField.setHelperText("Must match password");
-        confirmField.bindValue(confirmPasswordSignal, confirmPasswordSignal::value);
+        confirmField.bindValue(confirmPasswordSignal, confirmPasswordSignal::set);
         confirmField.setErrorMessage("Passwords do not match");
         MissingAPI.bindInvalid(confirmField,
                 isConfirmValidSignal.map(valid -> !valid));
@@ -90,8 +90,8 @@ public class UseCase01View extends VerticalLayout {
 
         // Bind enabled state: enabled when valid AND not submitting
         submitButton.bindEnabled(Signal
-                .computed(() -> isValidSignal.value() && (submissionStateSignal
-                        .value() != SubmissionState.SUBMITTING)));
+                .computed(() -> isValidSignal.get() && (submissionStateSignal
+                        .get() != SubmissionState.SUBMITTING)));
 
         // Bind button text based on submission state
         submitButton
@@ -109,20 +109,20 @@ public class UseCase01View extends VerticalLayout {
                 .map(state -> state != SubmissionState.SUCCESS));
 
         submitButton.addClickListener(e -> {
-            submissionStateSignal.value(SubmissionState.SUBMITTING);
+            submissionStateSignal.set(SubmissionState.SUBMITTING);
             // Simulate async submission
             CompletableFuture.runAsync(() -> {
                 try {
                     Thread.sleep(2000);
-                    submissionStateSignal.value(SubmissionState.SUCCESS);
+                    submissionStateSignal.set(SubmissionState.SUCCESS);
 
                     // Reset form fields
-                    emailSignal.value("");
-                    passwordSignal.value("");
-                    confirmPasswordSignal.value("");
+                    emailSignal.set("");
+                    passwordSignal.set("");
+                    confirmPasswordSignal.set("");
 
                     // Reset submission state back to IDLE
-                    submissionStateSignal.value(SubmissionState.IDLE);
+                    submissionStateSignal.set(SubmissionState.IDLE);
 
                     // Show success notification (imperative UI - needs ui.access)
                     getUI().ifPresent(ui -> ui.access(() -> {
@@ -133,7 +133,7 @@ public class UseCase01View extends VerticalLayout {
                         notification.setDuration(3000);
                     }));
                 } catch (Exception ex) {
-                    submissionStateSignal.value(SubmissionState.ERROR);
+                    submissionStateSignal.set(SubmissionState.ERROR);
                 }
             });
         });

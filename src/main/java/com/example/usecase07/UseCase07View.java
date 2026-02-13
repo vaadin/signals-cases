@@ -79,7 +79,7 @@ public class UseCase07View extends VerticalLayout {
 
         // Computed signal for invoice details
         Signal<InvoiceDetails> invoiceDetailsSignal = Signal.computed(() -> {
-            Invoice selected = selectedInvoiceSignal.value();
+            Invoice selected = selectedInvoiceSignal.get();
             return (selected != null && !selected.getId().isEmpty())
                     ? invoiceService.fetchInvoiceDetails(selected.getId())
                     : EMPTY_DETAILS;
@@ -90,14 +90,14 @@ public class UseCase07View extends VerticalLayout {
         invoiceGrid.setColumns("id", "customerName", "dueDate", "total",
                 "status");
         ComponentEffect.bind(invoiceGrid, invoiceListSignal, (grid, items) -> {
-            var invoices = invoiceListSignal.value().stream()
+            var invoices = invoiceListSignal.get().stream()
                     .map(ValueSignal::peek).toList();
             if (items != null) {
                 grid.setItems(invoices);
             } else {
                 grid.setItems(List.of());
             }
-            invoiceListSignal.value().forEach(signal -> ComponentEffect
+            invoiceListSignal.get().forEach(signal -> ComponentEffect
                     .bind(invoiceGrid, signal, (g, inv) -> {
                         g.getDataProvider().refreshItem(inv);
                     }));
@@ -105,7 +105,7 @@ public class UseCase07View extends VerticalLayout {
         invoiceGrid.asSingleSelect().addValueChangeListener(e -> {
             Invoice selected = e.getValue();
             selectedInvoiceSignal
-                    .value(selected != null ? selected : EMPTY_INVOICE);
+                    .set(selected != null ? selected : EMPTY_INVOICE);
         });
 
         // Detail: Invoice details panel
@@ -134,7 +134,7 @@ public class UseCase07View extends VerticalLayout {
         invoiceBinder.forField(dueDate).bind(Invoice::getDueDate,
                 Invoice::setDueDate);
         ComponentEffect.effect(this, () -> invoiceBinder
-                .setBean(invoiceDetailsSignal.value().getInvoice()));
+                .setBean(invoiceDetailsSignal.get().getInvoice()));
         invoiceBinder.addValueChangeListener(event -> {
             var status = invoiceBinder.validate();
             if (status.isOk()) {
@@ -158,7 +158,7 @@ public class UseCase07View extends VerticalLayout {
                 InvoiceDetails::getCustomerAddress,
                 InvoiceDetails::setCustomerAddress);
         ComponentEffect.effect(this,
-                () -> detailsBinder.setBean(invoiceDetailsSignal.value()));
+                () -> detailsBinder.setBean(invoiceDetailsSignal.get()));
         detailsBinder.addValueChangeListener(event -> {
             var status = detailsBinder.validate();
             if (status.isOk()) {
@@ -181,14 +181,14 @@ public class UseCase07View extends VerticalLayout {
             Button button = new Button();
             button.setTooltipText("Remove Line Item");
             button.addClickListener(e -> {
-                removeLineItem(invoiceDetailsSignal.value(), lineItem);
+                removeLineItem(invoiceDetailsSignal.get(), lineItem);
             });
             button.setIcon(VaadinIcon.CLOSE.create());
             return button;
         });
 
         ComponentEffect.bind(lineItemsGrid, lineItemsSignal, (grid, items) -> {
-            var lineItems = lineItemsSignal.value().stream()
+            var lineItems = lineItemsSignal.get().stream()
                     .map(ValueSignal::peek).toList();
             if (items != null) {
                 grid.setItems(lineItems);
@@ -196,7 +196,7 @@ public class UseCase07View extends VerticalLayout {
                 grid.setItems(List.of());
             }
             updateFooterTotal(lineItemsGrid);
-            lineItemsSignal.value().forEach(signal -> ComponentEffect
+            lineItemsSignal.get().forEach(signal -> ComponentEffect
                     .bind(lineItemsGrid, signal, (g, inv) -> {
                         // refresh the item in the grid
                         g.getDataProvider().refreshItem(inv);
@@ -206,7 +206,7 @@ public class UseCase07View extends VerticalLayout {
         });
 
         ComponentEffect.effect(lineItemsGrid, () -> {
-            List<LineItem> items = invoiceDetailsSignal.value().getLineItems();
+            List<LineItem> items = invoiceDetailsSignal.get().getLineItems();
             lineItemsSignal.clear();
             items.forEach(lineItemsSignal::insertLast);
         });
@@ -234,7 +234,7 @@ public class UseCase07View extends VerticalLayout {
                 LineItem::setUnitPrice);
 
         ComponentEffect.effect(this,
-                () -> lineItemBinder.setBean(selectedLineItemSignal.value()));
+                () -> lineItemBinder.setBean(selectedLineItemSignal.get()));
         lineItemBinder.addValueChangeListener(event -> {
             var status = lineItemBinder.validate();
             if (status.isOk()) {
@@ -249,7 +249,7 @@ public class UseCase07View extends VerticalLayout {
                 lineItemsSignal.peek().stream().filter(
                         signal -> signal.peek().getId() == lineItem.getId())
                         .findFirst().ifPresent(signal -> {
-                            signal.value(
+                            signal.set(
                                     details.getLineItemById(lineItem.getId()));
                         });
             } else if (status.hasErrors()) {
@@ -281,7 +281,7 @@ public class UseCase07View extends VerticalLayout {
         detailsPanel.add(customerInfo, new H3("Line Items"),
                 new Span("(Double-click a cell to edit)"));
         detailsPanel.add(new Button("Add Line Item",
-                e -> addNewLineItem(invoiceDetailsSignal.value())));
+                e -> addNewLineItem(invoiceDetailsSignal.get())));
         detailsPanel.addAndExpand(lineItemsGrid);
         detailsPanel.add(paymentStatus);
         detailsPanel
@@ -309,7 +309,7 @@ public class UseCase07View extends VerticalLayout {
         invoiceListSignal.peek().stream()
                 .filter(signal -> signal.peek().getId().equals(invoice.getId()))
                 .findFirst().ifPresent(signal -> {
-                    signal.value(invoice);
+                    signal.set(invoice);
                 });
     }
 
@@ -335,7 +335,7 @@ public class UseCase07View extends VerticalLayout {
 
     private void removeLineItem(InvoiceDetails value, LineItem lineItem) {
         invoiceService.removeLineItem(value.getInvoice().getId(), lineItem);
-        lineItemsSignal.value().stream().filter(v -> v.peek().equals(lineItem))
+        lineItemsSignal.get().stream().filter(v -> v.peek().equals(lineItem))
                 .findFirst().ifPresent(lineItemsSignal::remove);
         // need to also update the invoice total in the invoice list
         updateInvoiceListSignalItem(

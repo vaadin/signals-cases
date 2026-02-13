@@ -60,7 +60,7 @@ public class UseCase02View extends VerticalLayout {
         binder.forField(needsVisaCheckbox).bind(
                 VisaApplicationData::getNeedsVisa,
                 VisaApplicationData::setNeedsVisa);
-        needsVisaCheckbox.bindValue(needsVisaSignal, needsVisaSignal::value);
+        needsVisaCheckbox.bindValue(needsVisaSignal, needsVisaSignal::set);
 
         // Level 1: Visa-related fields (shown when needsVisa is true)
         VerticalLayout visaSection = new VerticalLayout();
@@ -70,7 +70,7 @@ public class UseCase02View extends VerticalLayout {
         visaTypeSelect.setValue(VisaType.H1B);
         binder.forField(visaTypeSelect).bind(VisaApplicationData::getVisaType,
                 VisaApplicationData::setVisaType);
-        visaTypeSelect.bindValue(visaTypeSignal, visaTypeSignal::value);
+        visaTypeSelect.bindValue(visaTypeSignal, visaTypeSignal::set);
 
         TextField currentVisaStatus = new TextField("Current Visa Status");
         binder.forField(currentVisaStatus).bind(
@@ -88,7 +88,7 @@ public class UseCase02View extends VerticalLayout {
         binder.forField(hasH1BPreviouslyCheckbox).bind(
                 VisaApplicationData::getHasH1BPreviously,
                 VisaApplicationData::setHasH1BPreviously);
-        hasH1BPreviouslyCheckbox.bindValue(hasH1BPreviouslySignal, hasH1BPreviouslySignal::value);
+        hasH1BPreviouslyCheckbox.bindValue(hasH1BPreviouslySignal, hasH1BPreviouslySignal::set);
 
         TextField h1bSpecialtyOccupation = new TextField(
                 "Specialty Occupation");
@@ -97,8 +97,8 @@ public class UseCase02View extends VerticalLayout {
                 VisaApplicationData::setH1bSpecialtyOccupation);
 
         h1bSection.add(hasH1BPreviouslyCheckbox, h1bSpecialtyOccupation);
-        h1bSection.bindVisible(() -> needsVisaSignal.value()
-                && visaTypeSignal.value() == VisaType.H1B);
+        h1bSection.bindVisible(() -> needsVisaSignal.get()
+                && visaTypeSignal.get() == VisaType.H1B);
 
         // Level 3: Previous H1-B details (shown when has H1-B previously)
         VerticalLayout previousH1BSection = new VerticalLayout();
@@ -122,9 +122,9 @@ public class UseCase02View extends VerticalLayout {
 
         previousH1BSection.add(previousEmployer, previousPetitionNumber,
                 previousH1BStartDate);
-        previousH1BSection.bindVisible(() -> needsVisaSignal.value()
-                && visaTypeSignal.value() == VisaType.H1B
-                && hasH1BPreviouslySignal.value());
+        previousH1BSection.bindVisible(() -> needsVisaSignal.get()
+                && visaTypeSignal.get() == VisaType.H1B
+                && hasH1BPreviouslySignal.get());
 
         // Level 2: L1 specific fields (shown when visa type is L1)
         VerticalLayout l1Section = new VerticalLayout();
@@ -146,8 +146,8 @@ public class UseCase02View extends VerticalLayout {
                 VisaApplicationData::setL1Category);
 
         l1Section.add(parentCompanyName, yearsWithParentCompany, l1Category);
-        l1Section.bindVisible(() -> needsVisaSignal.value()
-                && visaTypeSignal.value() == VisaType.L1);
+        l1Section.bindVisible(() -> needsVisaSignal.get()
+                && visaTypeSignal.get() == VisaType.L1);
 
         // Level 2: O1 specific fields (shown when visa type is O1)
         VerticalLayout o1Section = new VerticalLayout();
@@ -168,8 +168,8 @@ public class UseCase02View extends VerticalLayout {
                 VisaApplicationData::setPublications);
 
         o1Section.add(fieldOfExtraordinaryAbility, majorAwards, publications);
-        o1Section.bindVisible(() -> needsVisaSignal.value()
-                && visaTypeSignal.value() == VisaType.O1);
+        o1Section.bindVisible(() -> needsVisaSignal.get()
+                && visaTypeSignal.get() == VisaType.O1);
 
         // Display area for collected values
         Div resultDisplay = new Div();
@@ -191,8 +191,8 @@ public class UseCase02View extends VerticalLayout {
 
         // Show Values button
         Button showValuesButton = new Button("Show Collected Values", event -> {
-            results.text.value(data.toString());
-            results.visible.value(true);
+            results.text.set(data.toString());
+            results.visible.set(true);
         });
         showValuesButton.addThemeName("primary");
 

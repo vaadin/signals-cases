@@ -113,7 +113,7 @@ public class UseCase23View extends Main {
             WritableSignal<Number> signal, Function<Number, String> format) {
 
         HighlightCard card = new HighlightCard(title, signal, format);
-        card.update(signal.value());
+        card.update(signal.get());
         highlightCards.add(card);
         return card;
     }
@@ -149,8 +149,8 @@ public class UseCase23View extends Main {
         bindData(chart, tokyoSeries, tokyoTimelineSignal);
 
         ComponentEffect.effect(chart,
-                () -> xAxis.setCategories(timelineCategoriesSignal.value()
-                        .stream().map(Signal::value).toArray(String[]::new)));
+                () -> xAxis.setCategories(timelineCategoriesSignal.get()
+                        .stream().map(Signal::get).toArray(String[]::new)));
 
         conf.addSeries(berlinSeries);
         conf.addSeries(londonSeries);
@@ -169,7 +169,7 @@ public class UseCase23View extends Main {
     private static void bindData(Chart chart, ListSeries series,
             ListSignal<Number> signal) {
         ComponentEffect.effect(chart, () -> {
-            series.setData(signal.value().stream().map(Signal::value)
+            series.setData(signal.get().stream().map(Signal::get)
                     .toArray(Number[]::new));
             // TODO issue of getting the values from ListSignal instead of
             // Signal<Number>
@@ -190,7 +190,7 @@ public class UseCase23View extends Main {
             Span status = new Span();
 
             ComponentEffect.effect(status, () -> {
-                ServiceHealth serviceHealth = signal.value();
+                ServiceHealth serviceHealth = signal.get();
                 String statusTextInner = getStatusDisplayName(serviceHealth);
                 status.getElement().setAttribute("aria-label",
                         "Status: " + statusTextInner);
@@ -202,21 +202,21 @@ public class UseCase23View extends Main {
             });
             return status;
         })).setHeader("").setFlexGrow(0).setAutoWidth(true);
-        grid.addColumn(signal -> signal.value().getCity()).setHeader("City")
+        grid.addColumn(signal -> signal.get().getCity()).setHeader("City")
                 .setFlexGrow(1);
         grid.addColumn(new ComponentRenderer<>(signal -> {
-            var input = new Span(String.valueOf(signal.value().getInput()));
+            var input = new Span(String.valueOf(signal.get().getInput()));
 
             ComponentEffect.effect(input, () -> input
-                    .setText(String.valueOf(signal.value().getInput())));
+                    .setText(String.valueOf(signal.get().getInput())));
             return input;
         })).setHeader("Input").setAutoWidth(true)
                 .setTextAlign(ColumnTextAlign.END);
         grid.addColumn(new ComponentRenderer<>(signal -> {
-            var output = new Span(String.valueOf(signal.value().getOutput()));
+            var output = new Span(String.valueOf(signal.get().getOutput()));
 
             ComponentEffect.effect(output, () -> output
-                    .setText(String.valueOf(signal.value().getOutput())));
+                    .setText(String.valueOf(signal.get().getOutput())));
             return output;
         })).setHeader("Output").setAutoWidth(true)
                 .setTextAlign(ColumnTextAlign.END);
@@ -225,7 +225,7 @@ public class UseCase23View extends Main {
         VerticalLayout serviceHealth = new VerticalLayout(header, grid);
 
         ComponentEffect.effect(grid, () -> {
-            grid.setItems(serviceHealthSignal.value());
+            grid.setItems(serviceHealthSignal.get());
             // TODO not this, update each signal individually
         });
 
@@ -255,13 +255,13 @@ public class UseCase23View extends Main {
         conf.addSeries(responseSeries);
 
         ComponentEffect.effect(chart, () -> {
-            var responseValues = responseSignal.value();
-            responseSeries.get(0).setY(responseValues.get(0).value());
-            responseSeries.get(1).setY(responseValues.get(1).value());
-            responseSeries.get(2).setY(responseValues.get(2).value());
-            responseSeries.get(3).setY(responseValues.get(3).value());
-            responseSeries.get(4).setY(responseValues.get(4).value());
-            responseSeries.get(5).setY(responseValues.get(5).value());
+            var responseValues = responseSignal.get();
+            responseSeries.get(0).setY(responseValues.get(0).get());
+            responseSeries.get(1).setY(responseValues.get(1).get());
+            responseSeries.get(2).setY(responseValues.get(2).get());
+            responseSeries.get(3).setY(responseValues.get(3).get());
+            responseSeries.get(4).setY(responseValues.get(4).get());
+            responseSeries.get(5).setY(responseValues.get(5).get());
         });
 
         responseSignal.insertLast(12.5);
@@ -321,15 +321,15 @@ public class UseCase23View extends Main {
 
     private void updateMockData() {
         if (highlightCards.size() >= 4) {
-            currentUsersSignal.value(randomBetween(650, 820));
-            viewEventsSignal.value(randomBetween(42000, 62000));
-            conversionRateSignal.value(randomBetween(12, 24));
-            customMetricSignal.value(randomBetween(-200, 200));
+            currentUsersSignal.set(randomBetween(650, 820));
+            viewEventsSignal.set(randomBetween(42000, 62000));
+            conversionRateSignal.set(randomBetween(12, 24));
+            customMetricSignal.set(randomBetween(-200, 200));
         }
 
-        if (berlinTimelineSignal.value().size() >= TIMELINE_POINTS) {
+        if (berlinTimelineSignal.get().size() >= TIMELINE_POINTS) {
             berlinTimelineSignal
-                    .remove(berlinTimelineSignal.value().getFirst()); // TODO
+                    .remove(berlinTimelineSignal.get().getFirst()); // TODO
                                                                       // github
                                                                       // issue
                                                                       // remove
@@ -338,26 +338,26 @@ public class UseCase23View extends Main {
         }
         berlinTimelineSignal.insertLast(randomBetween(480, 920));
 
-        if (londonTimelineSignal.value().size() >= TIMELINE_POINTS) {
+        if (londonTimelineSignal.get().size() >= TIMELINE_POINTS) {
             londonTimelineSignal
-                    .remove(londonTimelineSignal.value().getFirst());
+                    .remove(londonTimelineSignal.get().getFirst());
         }
         londonTimelineSignal.insertLast(randomBetween(420, 820));
 
-        if (newYorkTimelineSignal.value().size() >= TIMELINE_POINTS) {
+        if (newYorkTimelineSignal.get().size() >= TIMELINE_POINTS) {
             newYorkTimelineSignal
-                    .remove(newYorkTimelineSignal.value().getFirst());
+                    .remove(newYorkTimelineSignal.get().getFirst());
         }
         newYorkTimelineSignal.insertLast(randomBetween(220, 520));
 
-        if (tokyoTimelineSignal.value().size() >= TIMELINE_POINTS) {
-            tokyoTimelineSignal.remove(tokyoTimelineSignal.value().getFirst());
+        if (tokyoTimelineSignal.get().size() >= TIMELINE_POINTS) {
+            tokyoTimelineSignal.remove(tokyoTimelineSignal.get().getFirst());
         }
         tokyoTimelineSignal.insertLast(randomBetween(260, 600));
 
-        if (timelineCategoriesSignal.value().size() >= TIMELINE_POINTS) {
+        if (timelineCategoriesSignal.get().size() >= TIMELINE_POINTS) {
             timelineCategoriesSignal
-                    .remove(timelineCategoriesSignal.value().getFirst());
+                    .remove(timelineCategoriesSignal.get().getFirst());
         }
         timelineCategoriesSignal
                 .insertLast(LocalTime.now().format(TIME_FORMATTER));
@@ -366,8 +366,8 @@ public class UseCase23View extends Main {
             viewEventsChart.drawChart();
         }
 
-        for (ValueSignal<Number> signal : responseSignal.value()) {
-            signal.value(randomBetween(6, 22));
+        for (ValueSignal<Number> signal : responseSignal.get()) {
+            signal.set(randomBetween(6, 22));
         }
 
         if (responseTimesChart != null) {
@@ -376,13 +376,13 @@ public class UseCase23View extends Main {
 
         // TODO report issue ListSignal set items / set value
         // serviceHealthSignal.clear();
-        var healthValues = serviceHealthSignal.value();
+        var healthValues = serviceHealthSignal.get();
         mockServiceHealth().forEach(
                 newHealth -> healthValues.forEach(currentHealthSignal -> {
-                    var currentHealt = currentHealthSignal.value();
+                    var currentHealt = currentHealthSignal.get();
                     if (Objects.equals(currentHealt.getCity(),
                             newHealth.getCity())) {
-                        currentHealthSignal.value(newHealth);
+                        currentHealthSignal.set(newHealth);
                     }
                 }));
     }
@@ -437,9 +437,9 @@ public class UseCase23View extends Main {
             h2.addClassNames(FontWeight.NORMAL, Margin.NONE,
                     TextColor.SECONDARY, FontSize.XSMALL);
 
-            valueSpan = new Span(format.apply(signal.value()));
+            valueSpan = new Span(format.apply(signal.get()));
             valueSpan.addClassNames(FontWeight.SEMIBOLD, FontSize.XXXLARGE);
-            ComponentEffect.effect(valueSpan, () -> update(signal.value()));
+            ComponentEffect.effect(valueSpan, () -> update(signal.get()));
 
             badge = new Span();
 

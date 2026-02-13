@@ -157,7 +157,7 @@ public class UseCase21View extends VerticalLayout {
 
         Span languageValue = new Span();
         Signal<String> languageNameSignal = Signal.computed(() -> {
-            Locale locale = UI.getCurrent().localeSignal().value();
+            Locale locale = UI.getCurrent().localeSignal().get();
             return locale.getDisplayLanguage(locale);
         });
         languageValue.bindText(languageNameSignal);

@@ -57,7 +57,7 @@ public class UseCase12View extends VerticalLayout {
         documentTypeSelect.setValue("Document Viewer");
         documentTypeSelect.addValueChangeListener(event -> {
             if (event.getValue() != null) {
-                viewTitleSignal.value(event.getValue());
+                viewTitleSignal.set(event.getValue());
             }
         });
 

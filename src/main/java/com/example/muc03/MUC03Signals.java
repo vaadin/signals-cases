@@ -57,45 +57,45 @@ public class MUC03Signals {
     }
 
     public synchronized boolean awardPoint(String username, String sessionId) {
-        if (!buttonVisibleSignal.value()
-                || clicksRemainingSignal.value() <= 0) {
+        if (!buttonVisibleSignal.get()
+                || clicksRemainingSignal.get() <= 0) {
             return false; // Round already finished
         }
 
         // Award the point
         String sessionKey = username + ":" + sessionId;
-        SharedValueSignal<Integer> scoreSignal = leaderboardSignal.value()
+        SharedValueSignal<Integer> scoreSignal = leaderboardSignal.get()
                 .get(sessionKey);
         if (scoreSignal != null) {
-            scoreSignal.value(scoreSignal.value() + 1);
+            scoreSignal.set(scoreSignal.get() + 1);
         } else {
             // Initialize if not present
             leaderboardSignal.put(sessionKey, 1);
         }
 
         // Decrement clicks remaining
-        int remaining = clicksRemainingSignal.value() - 1;
-        clicksRemainingSignal.value(remaining);
+        int remaining = clicksRemainingSignal.get() - 1;
+        clicksRemainingSignal.set(remaining);
 
         // Hide button temporarily (will be repositioned by view)
-        buttonVisibleSignal.value(false);
+        buttonVisibleSignal.set(false);
 
         // Return true if more clicks remain in this round
         return remaining > 0;
     }
 
     public void startNewRound(int left, int top) {
-        buttonLeftSignal.value(left);
-        buttonTopSignal.value(top);
-        clicksRemainingSignal.value(5); // 5 clicks per round
-        roundNumberSignal.value(roundNumberSignal.value() + 1);
-        buttonVisibleSignal.value(true);
+        buttonLeftSignal.set(left);
+        buttonTopSignal.set(top);
+        clicksRemainingSignal.set(5); // 5 clicks per round
+        roundNumberSignal.set(roundNumberSignal.get() + 1);
+        buttonVisibleSignal.set(true);
     }
 
     public void repositionButton(int left, int top) {
-        buttonLeftSignal.value(left);
-        buttonTopSignal.value(top);
-        buttonVisibleSignal.value(true);
+        buttonLeftSignal.set(left);
+        buttonTopSignal.set(top);
+        buttonVisibleSignal.set(true);
     }
 
     public void resetLeaderboard() {

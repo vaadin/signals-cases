@@ -82,21 +82,21 @@ public class UseCase22View extends VerticalLayout {
         firstNameField.setWidthFull();
         WritableSignal<String> firstNameSignal = personSignal
                 .map(Person::firstName, Person::withFirstName);
-        firstNameField.bindValue(firstNameSignal, firstNameSignal::value);
+        firstNameField.bindValue(firstNameSignal, firstNameSignal::set);
 
         // Last name - direct field mapping
         var lastNameField = new TextField("Last Name");
         lastNameField.setWidthFull();
         WritableSignal<String> lastNameSignal = personSignal
                 .map(Person::lastName, Person::withLastName);
-        lastNameField.bindValue(lastNameSignal, lastNameSignal::value);
+        lastNameField.bindValue(lastNameSignal, lastNameSignal::set);
 
         // Email - direct field mapping
         var emailField = new TextField("Email");
         emailField.setWidthFull();
         WritableSignal<String> emailSignal = personSignal.map(Person::email,
                 Person::withEmail);
-        emailField.bindValue(emailSignal, emailSignal::value);
+        emailField.bindValue(emailSignal, emailSignal::set);
 
         // Age - integer field mapping
         var ageField = new IntegerField("Age");
@@ -106,12 +106,12 @@ public class UseCase22View extends VerticalLayout {
         ageField.setStepButtonsVisible(true);
         WritableSignal<Integer> ageSignal = personSignal.map(Person::age,
                 Person::withAge);
-        ageField.bindValue(ageSignal, ageSignal::value);
+        ageField.bindValue(ageSignal, ageSignal::set);
 
         // Computed full name display
         var fullNameLabel = new Span();
         fullNameLabel.bindText(Signal.computed(() -> {
-            Person p = personSignal.value();
+            Person p = personSignal.get();
             return "Full name: " + p.firstName() + " " + p.lastName();
         }));
         fullNameLabel.getStyle().set("font-weight", "bold").set("color",
@@ -142,30 +142,30 @@ public class UseCase22View extends VerticalLayout {
         streetField.setWidthFull();
         WritableSignal<String> streetSignal = addressSignal.map(Address::street,
                 Address::withStreet);
-        streetField.bindValue(streetSignal, streetSignal::value);
+        streetField.bindValue(streetSignal, streetSignal::set);
 
         var cityField = new TextField("City");
         cityField.setWidthFull();
         WritableSignal<String> citySignal = addressSignal.map(Address::city,
                 Address::withCity);
-        cityField.bindValue(citySignal, citySignal::value);
+        cityField.bindValue(citySignal, citySignal::set);
 
         var zipCodeField = new TextField("ZIP Code");
         zipCodeField.setWidthFull();
         WritableSignal<String> zipCodeSignal = addressSignal
                 .map(Address::zipCode, Address::withZipCode);
-        zipCodeField.bindValue(zipCodeSignal, zipCodeSignal::value);
+        zipCodeField.bindValue(zipCodeSignal, zipCodeSignal::set);
 
         var countryField = new TextField("Country");
         countryField.setWidthFull();
         WritableSignal<String> countrySignal = addressSignal
                 .map(Address::country, Address::withCountry);
-        countryField.bindValue(countrySignal, countrySignal::value);
+        countryField.bindValue(countrySignal, countrySignal::set);
 
         // Computed formatted address
         var formattedAddressLabel = new Span();
         formattedAddressLabel.bindText(Signal.computed(() -> {
-            Address addr = addressSignal.value();
+            Address addr = addressSignal.get();
             return "Formatted: " + addr.street() + ", " + addr.city() + " "
                     + addr.zipCode() + ", " + addr.country();
         }));
@@ -192,7 +192,7 @@ public class UseCase22View extends VerticalLayout {
                 .set("padding", "1em").set("border-radius", "4px")
                 .set("overflow-x", "auto").set("font-size", "0.9em");
         stateDisplay.bindText(Signal
-                .computed(() -> formatPersonAsJson(personSignal.value())));
+                .computed(() -> formatPersonAsJson(personSignal.get())));
 
         stateBox.add(stateTitle, stateDisplay);
         return stateBox;

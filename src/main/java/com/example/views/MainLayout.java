@@ -58,7 +58,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
         // Get current user info
         CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
-                .value();
+                .get();
         if (userInfo != null && userInfo.isAuthenticated()) {
             this.currentUser = userInfo.getUsername();
         }
@@ -90,11 +90,11 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
         avatarsContainer.bindChildren(
                 userSessionRegistry.getActiveUsersSignal(), userSignal -> {
-                    var user = userSignal.value();
+                    var user = userSignal.get();
                     var users = userSessionRegistry.getActiveUsersSignal()
-                            .value();
+                            .get();
                     var displayNames = userSessionRegistry
-                            .getDisplayNamesSignal().value();
+                            .getDisplayNamesSignal().get();
                     int index = users.indexOf(userSignal);
                     String displayName = index >= 0
                             && index < displayNames.size()
@@ -134,7 +134,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         localeSelector.getStyle().set("margin-right", "1em");
 
         // Initialize selected value from UI locale signal
-        Locale currentLocale = UI.getCurrent().localeSignal().value();
+        Locale currentLocale = UI.getCurrent().localeSignal().get();
         String initialSelection = localeMap.entrySet().stream()
                 .filter(e -> e.getValue().getLanguage()
                         .equals(currentLocale.getLanguage()))
@@ -145,7 +145,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         localeSelector.addValueChangeListener(event -> {
             Locale selectedLocale = localeMap.get(event.getValue());
             if (selectedLocale != null) {
-                UI.getCurrent().localeSignal().value(selectedLocale);
+                UI.getCurrent().localeSignal().set(selectedLocale);
             }
         });
 

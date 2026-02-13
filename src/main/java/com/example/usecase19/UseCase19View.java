@@ -80,7 +80,7 @@ public class UseCase19View extends VerticalLayout {
         loadButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
         Checkbox errorCheckbox = new Checkbox("Simulate Random Errors");
-        errorCheckbox.bindValue(simulateErrorsSignal, simulateErrorsSignal::value);
+        errorCheckbox.bindValue(simulateErrorsSignal, simulateErrorsSignal::set);
 
         controls.add(loadButton, errorCheckbox);
 
@@ -118,27 +118,27 @@ public class UseCase19View extends VerticalLayout {
      * Load all items in parallel
      */
     private void loadAllItems() {
-        itemsSignal.value().forEach(itemSignal -> {
-            DataItem item = itemSignal.value();
+        itemsSignal.get().forEach(itemSignal -> {
+            DataItem item = itemSignal.get();
             // Update to LOADING state
-            itemSignal.value(new DataItem(item.id(), item.name(),
+            itemSignal.set(new DataItem(item.id(), item.name(),
                     LoadingState.State.LOADING, null, null,
                     item.simulatedDelayMs()));
 
             // Launch async operation (truly parallel via Spring @Async)
             dataLoadingService.loadDataAsync(item.id(), item.simulatedDelayMs(),
-                    simulateErrorsSignal.value()).thenAccept(data -> {
+                    simulateErrorsSignal.get()).thenAccept(data -> {
                         // Update to SUCCESS state
                         // Signals are thread-safe - update directly from
                         // background thread
-                        itemSignal.value(new DataItem(item.id(), item.name(),
+                        itemSignal.set(new DataItem(item.id(), item.name(),
                                 LoadingState.State.SUCCESS, data, null,
                                 item.simulatedDelayMs()));
                     }).exceptionally(error -> {
                         // Update to ERROR state
                         // Signals are thread-safe - update directly from
                         // background thread
-                        itemSignal.value(new DataItem(item.id(), item.name(),
+                        itemSignal.set(new DataItem(item.id(), item.name(),
                                 LoadingState.State.ERROR, null,
                                 extractErrorMessage(error),
                                 item.simulatedDelayMs()));
@@ -151,23 +151,23 @@ public class UseCase19View extends VerticalLayout {
      * Retry loading a single item
      */
     private void retryItem(ValueSignal<DataItem> itemSignal) {
-        DataItem item = itemSignal.value();
+        DataItem item = itemSignal.get();
 
         // Update to LOADING state
-        itemSignal.value(
+        itemSignal.set(
                 new DataItem(item.id(), item.name(), LoadingState.State.LOADING,
                         null, null, item.simulatedDelayMs()));
 
         // Launch async operation
         dataLoadingService.loadDataAsync(item.id(), item.simulatedDelayMs(),
-                simulateErrorsSignal.value()).thenAccept(data -> {
+                simulateErrorsSignal.get()).thenAccept(data -> {
                     // Update to SUCCESS state
-                    itemSignal.value(new DataItem(item.id(), item.name(),
+                    itemSignal.set(new DataItem(item.id(), item.name(),
                             LoadingState.State.SUCCESS, data, null,
                             item.simulatedDelayMs()));
                 }).exceptionally(error -> {
                     // Update to ERROR state
-                    itemSignal.value(new DataItem(item.id(), item.name(),
+                    itemSignal.set(new DataItem(item.id(), item.name(),
                             LoadingState.State.ERROR, null,
                             extractErrorMessage(error),
                             item.simulatedDelayMs()));
