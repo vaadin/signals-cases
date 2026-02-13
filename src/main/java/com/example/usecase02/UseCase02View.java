@@ -60,7 +60,7 @@ public class UseCase02View extends VerticalLayout {
         binder.forField(needsVisaCheckbox).bind(
                 VisaApplicationData::getNeedsVisa,
                 VisaApplicationData::setNeedsVisa);
-        needsVisaCheckbox.bindValue(needsVisaSignal);
+        needsVisaCheckbox.bindValue(needsVisaSignal, needsVisaSignal::value);
 
         // Level 1: Visa-related fields (shown when needsVisa is true)
         VerticalLayout visaSection = new VerticalLayout();
@@ -70,7 +70,7 @@ public class UseCase02View extends VerticalLayout {
         visaTypeSelect.setValue(VisaType.H1B);
         binder.forField(visaTypeSelect).bind(VisaApplicationData::getVisaType,
                 VisaApplicationData::setVisaType);
-        visaTypeSelect.bindValue(visaTypeSignal);
+        visaTypeSelect.bindValue(visaTypeSignal, visaTypeSignal::value);
 
         TextField currentVisaStatus = new TextField("Current Visa Status");
         binder.forField(currentVisaStatus).bind(
@@ -88,7 +88,7 @@ public class UseCase02View extends VerticalLayout {
         binder.forField(hasH1BPreviouslyCheckbox).bind(
                 VisaApplicationData::getHasH1BPreviously,
                 VisaApplicationData::setHasH1BPreviously);
-        hasH1BPreviouslyCheckbox.bindValue(hasH1BPreviouslySignal);
+        hasH1BPreviouslyCheckbox.bindValue(hasH1BPreviouslySignal, hasH1BPreviouslySignal::value);
 
         TextField h1bSpecialtyOccupation = new TextField(
                 "Specialty Occupation");

@@ -58,17 +58,17 @@ public class UseCase08View extends VerticalLayout {
         step1Layout.add(new H3("Step 1: Personal Information"));
 
         TextField firstNameField = new TextField("First Name");
-        firstNameField.bindValue(firstNameSignal);
+        firstNameField.bindValue(firstNameSignal, firstNameSignal::value);
         firstNameField.setRequired(true);
         firstNameField.setMinLength(2);
 
         TextField lastNameField = new TextField("Last Name");
-        lastNameField.bindValue(lastNameSignal);
+        lastNameField.bindValue(lastNameSignal, lastNameSignal::value);
         lastNameField.setRequired(true);
         lastNameField.setMinLength(2);
 
         EmailField emailField = new EmailField("Email");
-        emailField.bindValue(emailSignal);
+        emailField.bindValue(emailSignal, emailSignal::value);
         emailField.setRequired(true);
 
         step1Layout.add(firstNameField, lastNameField, emailField);
@@ -80,18 +80,18 @@ public class UseCase08View extends VerticalLayout {
         step2Layout.add(new H3("Step 2: Company Information"));
 
         TextField companyNameField = new TextField("Company Name");
-        companyNameField.bindValue(companyNameSignal);
+        companyNameField.bindValue(companyNameSignal, companyNameSignal::value);
         companyNameField.setRequired(true);
 
         ComboBox<String> companySizeSelect = new ComboBox<>("Company Size",
                 List.of("1-10", "11-50", "51-200", "201-1000", "1000+"));
-        companySizeSelect.bindValue(companySizeSignal);
+        companySizeSelect.bindValue(companySizeSignal, companySizeSignal::value);
         companySizeSelect.setRequired(true);
 
         ComboBox<String> industrySelect = new ComboBox<>("Industry",
                 List.of("Technology", "Healthcare", "Finance", "Retail",
                         "Manufacturing", "Other"));
-        industrySelect.bindValue(industrySignal);
+        industrySelect.bindValue(industrySignal, industrySignal::value);
         industrySelect.setRequired(true);
 
         step2Layout.add(companyNameField, companySizeSelect, industrySelect);
@@ -103,7 +103,7 @@ public class UseCase08View extends VerticalLayout {
         step3Layout.add(new H3("Step 3: Select Your Plan"));
 
         ComboBox<Plan> planSelect = new ComboBox<>("Plan", Plan.values());
-        planSelect.bindValue(planSignal);
+        planSelect.bindValue(planSignal, planSignal::value);
         planSelect.setRequired(true);
 
         Span planDescription = new Span();

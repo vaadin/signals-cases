@@ -82,21 +82,21 @@ public class UseCase22View extends VerticalLayout {
         firstNameField.setWidthFull();
         WritableSignal<String> firstNameSignal = personSignal
                 .map(Person::firstName, Person::withFirstName);
-        firstNameField.bindValue(firstNameSignal);
+        firstNameField.bindValue(firstNameSignal, firstNameSignal::value);
 
         // Last name - direct field mapping
         var lastNameField = new TextField("Last Name");
         lastNameField.setWidthFull();
         WritableSignal<String> lastNameSignal = personSignal
                 .map(Person::lastName, Person::withLastName);
-        lastNameField.bindValue(lastNameSignal);
+        lastNameField.bindValue(lastNameSignal, lastNameSignal::value);
 
         // Email - direct field mapping
         var emailField = new TextField("Email");
         emailField.setWidthFull();
         WritableSignal<String> emailSignal = personSignal.map(Person::email,
                 Person::withEmail);
-        emailField.bindValue(emailSignal);
+        emailField.bindValue(emailSignal, emailSignal::value);
 
         // Age - integer field mapping
         var ageField = new IntegerField("Age");
@@ -106,7 +106,7 @@ public class UseCase22View extends VerticalLayout {
         ageField.setStepButtonsVisible(true);
         WritableSignal<Integer> ageSignal = personSignal.map(Person::age,
                 Person::withAge);
-        ageField.bindValue(ageSignal);
+        ageField.bindValue(ageSignal, ageSignal::value);
 
         // Computed full name display
         var fullNameLabel = new Span();
@@ -142,25 +142,25 @@ public class UseCase22View extends VerticalLayout {
         streetField.setWidthFull();
         WritableSignal<String> streetSignal = addressSignal.map(Address::street,
                 Address::withStreet);
-        streetField.bindValue(streetSignal);
+        streetField.bindValue(streetSignal, streetSignal::value);
 
         var cityField = new TextField("City");
         cityField.setWidthFull();
         WritableSignal<String> citySignal = addressSignal.map(Address::city,
                 Address::withCity);
-        cityField.bindValue(citySignal);
+        cityField.bindValue(citySignal, citySignal::value);
 
         var zipCodeField = new TextField("ZIP Code");
         zipCodeField.setWidthFull();
         WritableSignal<String> zipCodeSignal = addressSignal
                 .map(Address::zipCode, Address::withZipCode);
-        zipCodeField.bindValue(zipCodeSignal);
+        zipCodeField.bindValue(zipCodeSignal, zipCodeSignal::value);
 
         var countryField = new TextField("Country");
         countryField.setWidthFull();
         WritableSignal<String> countrySignal = addressSignal
                 .map(Address::country, Address::withCountry);
-        countryField.bindValue(countrySignal);
+        countryField.bindValue(countrySignal, countrySignal::value);
 
         // Computed formatted address
         var formattedAddressLabel = new Span();

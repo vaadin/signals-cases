@@ -78,7 +78,7 @@ public class UseCase20View extends VerticalLayout {
             tile.add(text);
             return tile;
         }));
-        colorPicker.bindValue(colorSignal);
+        colorPicker.bindValue(colorSignal, colorSignal::value);
 
         add(title, description, colorPicker);
     }

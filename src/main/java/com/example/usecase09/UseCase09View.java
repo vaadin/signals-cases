@@ -60,8 +60,8 @@ public class UseCase09View extends VerticalLayout {
                 AccountType.PERSONAL);
         ValueSignal<Integer> ageSignal = new ValueSignal<>(0);
 
-        accountTypeSelect.bindValue(accountTypeSignal);
-        ageField.bindValue(ageSignal);
+        accountTypeSelect.bindValue(accountTypeSignal, accountTypeSignal::value);
+        ageField.bindValue(ageSignal, ageSignal::value);
 
         Signal<Boolean> ageValidSignal = Signal.computed(() -> {
             Integer age = ageSignal.value();

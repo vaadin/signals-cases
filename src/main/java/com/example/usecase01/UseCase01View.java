@@ -71,16 +71,16 @@ public class UseCase01View extends VerticalLayout {
         // Form fields
         EmailField emailField = new EmailField("Email");
         emailField.setHelperText("Valid email address required");
-        emailField.bindValue(emailSignal);
+        emailField.bindValue(emailSignal, emailSignal::value);
 
         PasswordField passwordField = new PasswordField("Password");
         passwordField.setHelperText("Minimum 8 characters required");
-        passwordField.bindValue(passwordSignal);
+        passwordField.bindValue(passwordSignal, passwordSignal::value);
         passwordField.setMinLength(8);
 
         PasswordField confirmField = new PasswordField("Confirm Password");
         confirmField.setHelperText("Must match password");
-        confirmField.bindValue(confirmPasswordSignal);
+        confirmField.bindValue(confirmPasswordSignal, confirmPasswordSignal::value);
         confirmField.setErrorMessage("Passwords do not match");
         MissingAPI.bindInvalid(confirmField,
                 isConfirmValidSignal.map(valid -> !valid));

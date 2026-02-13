@@ -357,21 +357,21 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
 
         TextField titleField = new TextField("Title");
         titleField.setWidthFull();
-        titleField.bindValue(titleSignal);
+        titleField.bindValue(titleSignal, titleSignal::value);
 
         TextArea descriptionField = new TextArea("Description");
         descriptionField.setWidthFull();
         descriptionField.setMaxHeight("100px");
-        descriptionField.bindValue(descriptionSignal);
+        descriptionField.bindValue(descriptionSignal, descriptionSignal::value);
 
         ComboBox<Task.TaskStatus> statusCombo = new ComboBox<>("Status");
         statusCombo.setItems(Task.TaskStatus.values());
         statusCombo.setWidthFull();
-        statusCombo.bindValue(statusSignal);
+        statusCombo.bindValue(statusSignal, statusSignal::value);
 
         DatePicker dueDatePicker = new DatePicker("Due Date");
         dueDatePicker.setWidthFull();
-        dueDatePicker.bindValue(dueDateSignal);
+        dueDatePicker.bindValue(dueDateSignal, dueDateSignal::value);
 
         formLayout.add(titleField, descriptionField, statusCombo,
                 dueDatePicker);

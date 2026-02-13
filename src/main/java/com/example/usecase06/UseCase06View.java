@@ -133,13 +133,13 @@ public class UseCase06View extends VerticalLayout {
         var discountField = new TextField("Discount Code");
         discountField.setPlaceholder("Enter SAVE10 or SAVE20");
         discountField.setWidth("250px");
-        discountField.bindValue(discountCodeSignal);
+        discountField.bindValue(discountCodeSignal, discountCodeSignal::value);
 
         var shippingSelect = new ComboBox<>("Shipping Method",
                 ShippingOption.values());
         shippingSelect.setValue(ShippingOption.STANDARD);
         shippingSelect.setWidth("200px");
-        shippingSelect.bindValue(shippingOptionSignal);
+        shippingSelect.bindValue(shippingOptionSignal, shippingOptionSignal::value);
 
         optionsLayout.add(discountField, shippingSelect);
 
@@ -256,7 +256,7 @@ public class UseCase06View extends VerticalLayout {
         // Two-way mapped signal for quantity
         WritableSignal<Integer> quantitySignal = itemSignal
                 .map(CartItem::quantity, CartItem::withQuantity);
-        quantityField.bindValue(quantitySignal);
+        quantityField.bindValue(quantitySignal, quantitySignal::value);
 
         // Handle removal when quantity drops below 1
         quantityField.addValueChangeListener(e -> {

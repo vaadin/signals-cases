@@ -138,13 +138,13 @@ public class UseCase16View extends VerticalLayout
         searchField.setPlaceholder("Search articles...");
         searchField.setWidth("300px");
         searchField.setClearButtonVisible(true);
-        searchField.bindValue(searchQuerySignal);
+        searchField.bindValue(searchQuerySignal, searchQuerySignal::value);
 
         Select<String> categorySelect = new Select<>();
         categorySelect.setLabel("Category");
         categorySelect.setItems("All", "Tutorial", "Guide", "Documentation");
         categorySelect.setWidth("200px");
-        categorySelect.bindValue(categorySignal);
+        categorySelect.bindValue(categorySignal, categorySignal::value);
 
         controls.add(searchField, categorySelect);
 

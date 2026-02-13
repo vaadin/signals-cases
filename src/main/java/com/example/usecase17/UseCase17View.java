@@ -933,7 +933,7 @@ public class UseCase17View extends VerticalLayout {
         combo.setItems(items);
         combo.setItemLabelGenerator(Component::getName);
         combo.setWidthFull();
-        combo.bindValue(signal);
+        combo.bindValue(signal, signal::value);
         return combo;
     }
 

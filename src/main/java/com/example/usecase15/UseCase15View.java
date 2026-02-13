@@ -102,7 +102,7 @@ public class UseCase15View extends VerticalLayout {
                 ValueChangeMode.LAZY);
         searchField.setValueChangeTimeout(300);
 
-        searchField.bindValue(searchQuerySignal);
+        searchField.bindValue(searchQuerySignal, searchQuerySignal::value);
         searchField.addValueChangeListener(e -> {
             performSearch(searchQuerySignal.value());
         });

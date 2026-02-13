@@ -95,7 +95,7 @@ public class UseCase14View extends VerticalLayout {
 
         var checkbox = new com.vaadin.flow.component.checkbox.Checkbox(
                 "Simulate Error");
-        checkbox.bindValue(shouldFailSignal);
+        checkbox.bindValue(shouldFailSignal, shouldFailSignal::value);
         errorToggle.add(checkbox);
 
         controls.add(loadButton, errorToggle);

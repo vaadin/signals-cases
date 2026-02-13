@@ -157,7 +157,7 @@ public class MUC04View extends VerticalLayout {
         field.setWidthFull();
 
         // Bind value
-        field.bindValue(signal);
+        field.bindValue(signal, signal::value);
 
         // Lock field when focused
         field.addFocusListener(event -> {

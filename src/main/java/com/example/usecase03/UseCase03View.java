@@ -311,11 +311,13 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500");
 
         Slider xSlider = new Slider("X", 0, 500, 0);
-        xSlider.bindValue(mapIntegerToDoubleSignal(rectXSignal));
+        var rectXDoubleSignal = mapIntegerToDoubleSignal(rectXSignal);
+        xSlider.bindValue(rectXDoubleSignal, rectXDoubleSignal::value);
         xSlider.setWidthFull();
 
         Slider ySlider = new Slider("Y", 0, 500, 0);
-        ySlider.bindValue(mapIntegerToDoubleSignal(rectYSignal));
+        var rectYDoubleSignal = mapIntegerToDoubleSignal(rectYSignal);
+        ySlider.bindValue(rectYDoubleSignal, rectYDoubleSignal::value);
         ySlider.setWidthFull();
 
         // Size section
@@ -325,16 +327,19 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500").set("margin-top", "8px");
 
         Slider widthSlider = new Slider("Width", 50, 250, 50);
-        widthSlider.bindValue(mapIntegerToDoubleSignal(rectWidthSignal));
+        var rectWidthDoubleSignal = mapIntegerToDoubleSignal(rectWidthSignal);
+        widthSlider.bindValue(rectWidthDoubleSignal, rectWidthDoubleSignal::value);
         widthSlider.setWidthFull();
 
         Slider heightSlider = new Slider("Height", 30, 150, 30);
-        heightSlider.bindValue(mapIntegerToDoubleSignal(rectHeightSignal));
+        var rectHeightDoubleSignal = mapIntegerToDoubleSignal(rectHeightSignal);
+        heightSlider.bindValue(rectHeightDoubleSignal, rectHeightDoubleSignal::value);
         heightSlider.setWidthFull();
 
         Slider cornerRadiusSlider = new Slider("Corner Radius", 0, 50, 0);
+        var rectCornerRadiusDoubleSignal = mapIntegerToDoubleSignal(rectCornerRadiusSignal);
         cornerRadiusSlider
-                .bindValue(mapIntegerToDoubleSignal(rectCornerRadiusSignal));
+                .bindValue(rectCornerRadiusDoubleSignal, rectCornerRadiusDoubleSignal::value);
         cornerRadiusSlider.setWidthFull();
 
         // Appearance section
@@ -344,15 +349,15 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500").set("margin-top", "8px");
 
         ComboBox<String> fillColorField = createColorPicker("Fill");
-        fillColorField.bindValue(rectFillSignal);
+        fillColorField.bindValue(rectFillSignal, rectFillSignal::value);
         fillColorField.setWidthFull();
 
         ComboBox<String> strokeColorField = createColorPicker("Stroke");
-        strokeColorField.bindValue(rectStrokeSignal);
+        strokeColorField.bindValue(rectStrokeSignal, rectStrokeSignal::value);
         strokeColorField.setWidthFull();
 
         Slider opacitySlider = new Slider("Opacity", 0.0, 1.0, 0.1, 0.0);
-        opacitySlider.bindValue(rectOpacitySignal);
+        opacitySlider.bindValue(rectOpacitySignal, rectOpacitySignal::value);
         opacitySlider.setWidthFull();
 
         // Transform section
@@ -362,7 +367,8 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500").set("margin-top", "8px");
 
         Slider rotationSlider = new Slider("Rotation", 0, 360, 0);
-        rotationSlider.bindValue(mapIntegerToDoubleSignal(rectRotationSignal));
+        var rectRotationDoubleSignal = mapIntegerToDoubleSignal(rectRotationSignal);
+        rotationSlider.bindValue(rectRotationDoubleSignal, rectRotationDoubleSignal::value);
         rotationSlider.setWidthFull();
 
         fields.add(positionLabel, xSlider, ySlider, sizeLabel, widthSlider,
@@ -390,11 +396,13 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500");
 
         Slider cxSlider = new Slider("Center X", 0, 500, 0);
-        cxSlider.bindValue(mapIntegerToDoubleSignal(starCxSignal));
+        var starCxDoubleSignal = mapIntegerToDoubleSignal(starCxSignal);
+        cxSlider.bindValue(starCxDoubleSignal, starCxDoubleSignal::value);
         cxSlider.setWidthFull();
 
         Slider cySlider = new Slider("Center Y", 0, 500, 0);
-        cySlider.bindValue(mapIntegerToDoubleSignal(starCySignal));
+        var starCyDoubleSignal = mapIntegerToDoubleSignal(starCySignal);
+        cySlider.bindValue(starCyDoubleSignal, starCyDoubleSignal::value);
         cySlider.setWidthFull();
 
         // Shape section
@@ -404,11 +412,13 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500").set("margin-top", "8px");
 
         Slider pointsSlider = new Slider("Points", 3, 10, 3);
-        pointsSlider.bindValue(mapIntegerToDoubleSignal(starPointsSignal));
+        var starPointsDoubleSignal = mapIntegerToDoubleSignal(starPointsSignal);
+        pointsSlider.bindValue(starPointsDoubleSignal, starPointsDoubleSignal::value);
         pointsSlider.setWidthFull();
 
         Slider sizeSlider = new Slider("Size", 30, 80, 30);
-        sizeSlider.bindValue(mapIntegerToDoubleSignal(starSizeSignal));
+        var starSizeDoubleSignal = mapIntegerToDoubleSignal(starSizeSignal);
+        sizeSlider.bindValue(starSizeDoubleSignal, starSizeDoubleSignal::value);
         sizeSlider.setWidthFull();
 
         // Appearance section
@@ -418,15 +428,15 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500").set("margin-top", "8px");
 
         ComboBox<String> fillColorField = createColorPicker("Fill");
-        fillColorField.bindValue(starFillSignal);
+        fillColorField.bindValue(starFillSignal, starFillSignal::value);
         fillColorField.setWidthFull();
 
         ComboBox<String> strokeColorField = createColorPicker("Stroke");
-        strokeColorField.bindValue(starStrokeSignal);
+        strokeColorField.bindValue(starStrokeSignal, starStrokeSignal::value);
         strokeColorField.setWidthFull();
 
         Slider opacitySlider = new Slider("Opacity", 0.0, 1.0, 0.1, 0.0);
-        opacitySlider.bindValue(starOpacitySignal);
+        opacitySlider.bindValue(starOpacitySignal, starOpacitySignal::value);
         opacitySlider.setWidthFull();
 
         // Transform section
@@ -436,7 +446,8 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500").set("margin-top", "8px");
 
         Slider rotationSlider = new Slider("Rotation", 0, 360, 0);
-        rotationSlider.bindValue(mapIntegerToDoubleSignal(starRotationSignal));
+        var starRotationDoubleSignal = mapIntegerToDoubleSignal(starRotationSignal);
+        rotationSlider.bindValue(starRotationDoubleSignal, starRotationDoubleSignal::value);
         rotationSlider.setWidthFull();
 
         fields.add(positionLabel, cxSlider, cySlider, shapeLabel, pointsSlider,

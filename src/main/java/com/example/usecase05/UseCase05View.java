@@ -43,7 +43,7 @@ public class UseCase05View extends VerticalLayout {
         // Country selector
         ComboBox<String> countrySelect = new ComboBox<>("Country");
         countrySelect.setItems(countries);
-        countrySelect.bindValue(countrySignal);
+        countrySelect.bindValue(countrySignal, countrySignal::value);
 
         // State selector - computed items based on country
         ComboBox<String> stateSelect = new ComboBox<>("State/Province");
@@ -53,7 +53,7 @@ public class UseCase05View extends VerticalLayout {
             return country != null && !country.isEmpty() ? loadStates(country)
                     : List.of();
         }));
-        stateSelect.bindValue(stateSignal);
+        stateSelect.bindValue(stateSignal, stateSignal::value);
         stateSelect.bindEnabled(countrySignal
                 .map(country -> country != null && !country.isEmpty()));
 
@@ -66,7 +66,7 @@ public class UseCase05View extends VerticalLayout {
                     ? loadCities(countrySignal.value(), state)
                     : List.of();
         }));
-        citySelect.bindValue(citySignal);
+        citySelect.bindValue(citySignal, citySignal::value);
         citySelect.bindEnabled(
                 stateSignal.map(state -> state != null && !state.isEmpty()));
 

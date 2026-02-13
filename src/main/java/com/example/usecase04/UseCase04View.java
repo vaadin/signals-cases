@@ -64,14 +64,14 @@ public class UseCase04View extends VerticalLayout {
         // Filter UI components
         ComboBox<String> categoryFilter = new ComboBox<>("Category", List.of(
                 "All", "Electronics", "Clothing", "Books", "Home & Garden"));
-        categoryFilter.bindValue(categoryFilterSignal);
+        categoryFilter.bindValue(categoryFilterSignal, categoryFilterSignal::value);
 
         TextField searchField = new TextField("Search");
         searchField.setPlaceholder("Search by name or ID");
-        searchField.bindValue(searchTermSignal);
+        searchField.bindValue(searchTermSignal, searchTermSignal::value);
 
         Checkbox inStockCheckbox = new Checkbox("Show in-stock items only");
-        inStockCheckbox.bindValue(inStockOnlySignal);
+        inStockCheckbox.bindValue(inStockOnlySignal, inStockOnlySignal::value);
 
         // Data grid
         Grid<Product> grid = new Grid<>(Product.class);
