@@ -127,8 +127,7 @@ public class UseCase08View extends VerticalLayout {
                 + "Email: " + emailSignal.get() + "\n" + "Company: "
                 + companyNameSignal.get() + "\n" + "Size: "
                 + companySizeSignal.get() + "\n" + "Industry: "
-                + industrySignal.get() + "\n" + "Plan: "
-                + planSignal.get()));
+                + industrySignal.get() + "\n" + "Plan: " + planSignal.get()));
 
         step4Layout.add(reviewDiv);
         step4Layout.bindVisible(

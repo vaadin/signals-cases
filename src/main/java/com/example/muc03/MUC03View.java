@@ -150,8 +150,7 @@ public class MUC03View extends VerticalLayout {
                             (key, signal) -> scoreKeyMap.put(signal, key));
                     return scores.entrySet().stream()
                             .sorted((e1, e2) -> Integer.compare(
-                                    e2.getValue().get(),
-                                    e1.getValue().get()))
+                                    e2.getValue().get(), e1.getValue().get()))
                             .map(java.util.Map.Entry::getValue).toList();
                 }), this::createLeaderboardItem);
 

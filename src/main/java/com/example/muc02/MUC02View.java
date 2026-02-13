@@ -175,8 +175,7 @@ public class MUC02View extends VerticalLayout {
         var displayNames = userSessionRegistry.getDisplayNamesSignal().get();
         java.util.Map<String, String> map = new java.util.HashMap<>();
         for (int i = 0; i < users.size() && i < displayNames.size(); i++) {
-            map.put(users.get(i).get().getCompositeKey(),
-                    displayNames.get(i));
+            map.put(users.get(i).get().getCompositeKey(), displayNames.get(i));
         }
         return map;
     }

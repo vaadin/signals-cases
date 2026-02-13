@@ -80,7 +80,8 @@ public class UseCase01View extends VerticalLayout {
 
         PasswordField confirmField = new PasswordField("Confirm Password");
         confirmField.setHelperText("Must match password");
-        confirmField.bindValue(confirmPasswordSignal, confirmPasswordSignal::set);
+        confirmField.bindValue(confirmPasswordSignal,
+                confirmPasswordSignal::set);
         confirmField.setErrorMessage("Passwords do not match");
         MissingAPI.bindInvalid(confirmField,
                 isConfirmValidSignal.map(valid -> !valid));
@@ -124,7 +125,8 @@ public class UseCase01View extends VerticalLayout {
                     // Reset submission state back to IDLE
                     submissionStateSignal.set(SubmissionState.IDLE);
 
-                    // Show success notification (imperative UI - needs ui.access)
+                    // Show success notification (imperative UI - needs
+                    // ui.access)
                     getUI().ifPresent(ui -> ui.access(() -> {
                         Notification notification = Notification
                                 .show("Account created successfully!");

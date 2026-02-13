@@ -169,8 +169,8 @@ public class MUC06View extends VerticalLayout {
         checkbox.setAriaLabel("Task completed");
         checkbox.addValueChangeListener(e -> {
             MUC06Signals.Task current = taskSignal.get();
-            taskSignal.set(new MUC06Signals.Task(current.id(),
-                    current.title(), e.getValue(), current.dueDate()));
+            taskSignal.set(new MUC06Signals.Task(current.id(), current.title(),
+                    e.getValue(), current.dueDate()));
         });
 
         // TextField for title
@@ -198,8 +198,8 @@ public class MUC06View extends VerticalLayout {
         datePicker.setWidth("180px");
         datePicker.addValueChangeListener(e -> {
             MUC06Signals.Task current = taskSignal.get();
-            taskSignal.set(new MUC06Signals.Task(current.id(),
-                    current.title(), current.completed(), e.getValue()));
+            taskSignal.set(new MUC06Signals.Task(current.id(), current.title(),
+                    current.completed(), e.getValue()));
         });
 
         // Delete button

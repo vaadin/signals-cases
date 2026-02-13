@@ -73,10 +73,9 @@ public class UseCase06View extends VerticalLayout {
                 .computed(() -> getShippingCost(shippingOptionSignal.get()));
 
         // Computed signal for tax (8%)
-        var taxSignal = Signal.computed(
-                () -> subtotalSignal.get().subtract(discountSignal.get())
-                        .multiply(new BigDecimal("0.08"))
-                        .setScale(2, RoundingMode.HALF_UP));
+        var taxSignal = Signal.computed(() -> subtotalSignal.get()
+                .subtract(discountSignal.get()).multiply(new BigDecimal("0.08"))
+                .setScale(2, RoundingMode.HALF_UP));
 
         // Computed signal for grand total
         var totalSignal = Signal.computed(() -> subtotalSignal.get()
@@ -139,7 +138,8 @@ public class UseCase06View extends VerticalLayout {
                 ShippingOption.values());
         shippingSelect.setValue(ShippingOption.STANDARD);
         shippingSelect.setWidth("200px");
-        shippingSelect.bindValue(shippingOptionSignal, shippingOptionSignal::set);
+        shippingSelect.bindValue(shippingOptionSignal,
+                shippingOptionSignal::set);
 
         optionsLayout.add(discountField, shippingSelect);
 
@@ -267,10 +267,9 @@ public class UseCase06View extends VerticalLayout {
         });
 
         var itemTotalLabel = new Span();
-        itemTotalLabel.bindText(itemSignal.map(item -> "$"
-                + item.product().price()
-                        .multiply(BigDecimal.valueOf(item.quantity()))
-                        .setScale(2, RoundingMode.HALF_UP)));
+        itemTotalLabel.bindText(itemSignal.map(item -> "$" + item.product()
+                .price().multiply(BigDecimal.valueOf(item.quantity()))
+                .setScale(2, RoundingMode.HALF_UP)));
         itemTotalLabel.setWidth("100px");
         itemTotalLabel.getStyle().set("text-align", "right")
                 .set("font-weight", "bold")

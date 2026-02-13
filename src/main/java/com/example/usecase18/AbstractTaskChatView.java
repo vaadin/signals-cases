@@ -307,9 +307,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
             deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR,
                     ButtonVariant.LUMO_SMALL);
             deleteButton.addClickListener(e -> {
-                tasksSignal.get().stream()
-                        .filter(sig -> sig.get().equals(task)).findFirst()
-                        .ifPresent(tasksSignal::remove);
+                tasksSignal.get().stream().filter(sig -> sig.get().equals(task))
+                        .findFirst().ifPresent(tasksSignal::remove);
             });
 
             actions.add(editButton, deleteButton);
@@ -483,16 +482,14 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
                 .subscribe(token -> {
                     // Append token and update the message in the signal
                     streamingContent.append(token);
-                    assistantMessageSignal.set(new ChatMessageData(
-                            "Assistant", streamingContent.toString(),
-                            assistantTimestamp));
+                    assistantMessageSignal.set(new ChatMessageData("Assistant",
+                            streamingContent.toString(), assistantTimestamp));
                 }, error -> {
                     // Update with error message
                     streamingContent.append("\n\n❌ Error: ")
                             .append(error.getMessage());
-                    assistantMessageSignal.set(new ChatMessageData(
-                            "Assistant", streamingContent.toString(),
-                            assistantTimestamp));
+                    assistantMessageSignal.set(new ChatMessageData("Assistant",
+                            streamingContent.toString(), assistantTimestamp));
                     messageInputEnabledSignal.set(true);
                 }, () -> {
                     // Streaming complete - re-enable input
@@ -502,8 +499,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
 
     private void updateTaskField(String taskId,
             java.util.function.Function<Task, Task> updater) {
-        tasksSignal.get().stream()
-                .filter(sig -> sig.get().id().equals(taskId)).findFirst()
+        tasksSignal.get().stream().filter(sig -> sig.get().id().equals(taskId))
+                .findFirst()
                 .ifPresent(sig -> sig.set(updater.apply(sig.get())));
     }
 
@@ -511,8 +508,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         return new TaskContext() {
             @Override
             public java.util.List<Task> getAllTasks() {
-                return tasksSignal.get().stream()
-                        .map(SharedValueSignal::get).toList();
+                return tasksSignal.get().stream().map(SharedValueSignal::get)
+                        .toList();
             }
 
             @Override

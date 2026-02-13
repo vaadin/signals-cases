@@ -219,8 +219,7 @@ public class UseCase16View extends VerticalLayout implements
         Div headerDiv = new Div();
         headerDiv.getStyle().set("display", "flex")
                 .set("justify-content", "space-between")
-                .set("align-items", "center")
-                .set("margin-bottom", "0.5em");
+                .set("align-items", "center").set("margin-bottom", "0.5em");
 
         Div titleDiv = new Div(article.title());
         titleDiv.getStyle().set("font-weight", "bold")
@@ -228,8 +227,7 @@ public class UseCase16View extends VerticalLayout implements
 
         Div categoryBadge = new Div(article.category());
         categoryBadge.getStyle().set("background-color", "#e0e0e0")
-                .set("padding", "0.25em 0.5em")
-                .set("border-radius", "4px")
+                .set("padding", "0.25em 0.5em").set("border-radius", "4px")
                 .set("font-size", "0.85em");
 
         headerDiv.add(titleDiv, categoryBadge);
