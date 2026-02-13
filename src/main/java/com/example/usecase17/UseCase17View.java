@@ -543,12 +543,12 @@ public class UseCase17View extends VerticalLayout {
         coolerPriceSignal = coolerSignal
                 .map(cooler -> cooler != null ? cooler.getPrice() : 0.0);
 
-        totalPriceSignal = Signal.computed(() -> cpuPriceSignal.value()
-                + motherboardPriceSignal.value() + ramPriceSignal.value()
-                + gpuPriceSignal.value() + storage1PriceSignal.value()
-                + storage2PriceSignal.value() + storage3PriceSignal.value()
-                + psuPriceSignal.value() + casePriceSignal.value()
-                + coolerPriceSignal.value());
+        totalPriceSignal = Signal.computed(() -> cpuPriceSignal.get()
+                + motherboardPriceSignal.get() + ramPriceSignal.get()
+                + gpuPriceSignal.get() + storage1PriceSignal.get()
+                + storage2PriceSignal.get() + storage3PriceSignal.get()
+                + psuPriceSignal.get() + casePriceSignal.get()
+                + coolerPriceSignal.get());
     }
 
     private void initializePowerSignals() {
@@ -557,7 +557,7 @@ public class UseCase17View extends VerticalLayout {
                 .map(gpu -> gpu != null ? gpu.getPowerConsumption() : 0);
 
         totalPowerSignal = Signal.computed(
-                () -> cpuPowerSignal.value() + gpuPowerSignal.value() + 50 // Motherboard,
+                () -> cpuPowerSignal.get() + gpuPowerSignal.get() + 50 // Motherboard,
                                                                            // RAM,
                                                                            // storage,
                                                                            // fans
@@ -569,24 +569,24 @@ public class UseCase17View extends VerticalLayout {
                 );
 
         psuSufficiencySignal = Signal.computed(() -> {
-            PSU psu = psuSignal.value();
+            PSU psu = psuSignal.get();
             if (psu == null)
                 return false;
-            return psu.getWattage() >= totalPowerSignal.value();
+            return psu.getWattage() >= totalPowerSignal.get();
         });
 
         powerMarginSignal = Signal.computed(() -> {
-            PSU psu = psuSignal.value();
+            PSU psu = psuSignal.get();
             if (psu == null)
                 return 0;
-            return psu.getWattage() - totalPowerSignal.value();
+            return psu.getWattage() - totalPowerSignal.get();
         });
     }
 
     private void initializeCompatibilitySignals() {
         cpuSocketMatchSignal = Signal.computed(() -> {
-            CPU cpu = cpuSignal.value();
-            Motherboard mobo = motherboardSignal.value();
+            CPU cpu = cpuSignal.get();
+            Motherboard mobo = motherboardSignal.get();
             if (cpu == null || mobo == null || "None".equals(cpu.getName())
                     || "None".equals(mobo.getName()))
                 return true;
@@ -594,48 +594,48 @@ public class UseCase17View extends VerticalLayout {
         });
 
         ramTypeMatchSignal = Signal.computed(() -> {
-            RAM ram = ramSignal.value();
-            Motherboard mobo = motherboardSignal.value();
+            RAM ram = ramSignal.get();
+            Motherboard mobo = motherboardSignal.get();
             if (ram == null || mobo == null)
                 return true;
             return ram.getType().equals(mobo.getRamType());
         });
 
         ramSpeedSupportedSignal = Signal.computed(() -> {
-            RAM ram = ramSignal.value();
-            Motherboard mobo = motherboardSignal.value();
+            RAM ram = ramSignal.get();
+            Motherboard mobo = motherboardSignal.get();
             if (ram == null || mobo == null)
                 return true;
             return ram.getSpeed() <= mobo.getMaxRamSpeed();
         });
 
         ramCapacitySupportedSignal = Signal.computed(() -> {
-            RAM ram = ramSignal.value();
-            Motherboard mobo = motherboardSignal.value();
+            RAM ram = ramSignal.get();
+            Motherboard mobo = motherboardSignal.get();
             if (ram == null || mobo == null)
                 return true;
             return ram.getCapacity() <= mobo.getMaxRamCapacity();
         });
 
         gpuFitsCaseSignal = Signal.computed(() -> {
-            GPU gpu = gpuSignal.value();
-            Case pc = caseSignal.value();
+            GPU gpu = gpuSignal.get();
+            Case pc = caseSignal.get();
             if (gpu == null || pc == null)
                 return true;
             return gpu.getLengthMm() <= pc.getGpuClearanceMm();
         });
 
         coolerFitsCaseSignal = Signal.computed(() -> {
-            Cooler cooler = coolerSignal.value();
-            Case pc = caseSignal.value();
+            Cooler cooler = coolerSignal.get();
+            Case pc = caseSignal.get();
             if (cooler == null || pc == null)
                 return true;
             return cooler.getHeightMm() <= pc.getCpuCoolerClearanceMm();
         });
 
         motherboardFitsCaseSignal = Signal.computed(() -> {
-            Motherboard mobo = motherboardSignal.value();
-            Case pc = caseSignal.value();
+            Motherboard mobo = motherboardSignal.get();
+            Case pc = caseSignal.get();
             if (mobo == null || pc == null)
                 return true;
             return mobo.getFormFactor().equals(pc.getFormFactor())
@@ -643,8 +643,8 @@ public class UseCase17View extends VerticalLayout {
         });
 
         m2SlotsAvailableSignal = Signal.computed(() -> {
-            Motherboard mobo = motherboardSignal.value();
-            Storage stor1 = storage1Signal.value();
+            Motherboard mobo = motherboardSignal.get();
+            Storage stor1 = storage1Signal.get();
             if (mobo == null)
                 return true;
             int m2Count = 0;
@@ -654,11 +654,11 @@ public class UseCase17View extends VerticalLayout {
         });
 
         sataSlotsAvailableSignal = Signal.computed(() -> {
-            Motherboard mobo = motherboardSignal.value();
+            Motherboard mobo = motherboardSignal.get();
             if (mobo == null)
                 return true;
-            Storage stor2 = storage2Signal.value();
-            Storage stor3 = storage3Signal.value();
+            Storage stor2 = storage2Signal.get();
+            Storage stor3 = storage3Signal.get();
             int sataCount = 0;
             if (stor2 != null && stor2.getType().contains("SATA"))
                 sataCount++;
@@ -668,16 +668,16 @@ public class UseCase17View extends VerticalLayout {
         });
 
         psuFitsCaseSignal = Signal.computed(() -> {
-            PSU psu = psuSignal.value();
-            Case pc = caseSignal.value();
+            PSU psu = psuSignal.get();
+            Case pc = caseSignal.get();
             if (psu == null || pc == null)
                 return true;
             return psu.getFormFactor().equals(pc.getPsuFormFactor());
         });
 
         cpuCoolerCompatibleSignal = Signal.computed(() -> {
-            CPU cpu = cpuSignal.value();
-            Cooler cooler = coolerSignal.value();
+            CPU cpu = cpuSignal.get();
+            Cooler cooler = coolerSignal.get();
             if (cpu == null || cooler == null)
                 return true;
             return Arrays.asList(cooler.getCompatibleSockets())
@@ -685,54 +685,54 @@ public class UseCase17View extends VerticalLayout {
         });
 
         coolerTdpSufficientSignal = Signal.computed(() -> {
-            CPU cpu = cpuSignal.value();
-            Cooler cooler = coolerSignal.value();
+            CPU cpu = cpuSignal.get();
+            Cooler cooler = coolerSignal.get();
             if (cpu == null || cooler == null)
                 return true;
             return cooler.getMaxTdp() >= cpu.getTdp();
         });
 
-        allCompatibleSignal = Signal.computed(() -> cpuSocketMatchSignal.value()
-                && ramTypeMatchSignal.value() && ramSpeedSupportedSignal.value()
-                && ramCapacitySupportedSignal.value()
-                && gpuFitsCaseSignal.value() && coolerFitsCaseSignal.value()
-                && motherboardFitsCaseSignal.value()
-                && m2SlotsAvailableSignal.value()
-                && sataSlotsAvailableSignal.value() && psuFitsCaseSignal.value()
-                && cpuCoolerCompatibleSignal.value()
-                && coolerTdpSufficientSignal.value()
-                && psuSufficiencySignal.value());
+        allCompatibleSignal = Signal.computed(() -> cpuSocketMatchSignal.get()
+                && ramTypeMatchSignal.get() && ramSpeedSupportedSignal.get()
+                && ramCapacitySupportedSignal.get()
+                && gpuFitsCaseSignal.get() && coolerFitsCaseSignal.get()
+                && motherboardFitsCaseSignal.get()
+                && m2SlotsAvailableSignal.get()
+                && sataSlotsAvailableSignal.get() && psuFitsCaseSignal.get()
+                && cpuCoolerCompatibleSignal.get()
+                && coolerTdpSufficientSignal.get()
+                && psuSufficiencySignal.get());
 
         hasCriticalIssuesSignal = allCompatibleSignal
                 .map(compatible -> !compatible);
 
         compatibilityCheckCountSignal = Signal.computed(() -> {
             int passed = 0;
-            if (cpuSocketMatchSignal.value())
+            if (cpuSocketMatchSignal.get())
                 passed++;
-            if (ramTypeMatchSignal.value())
+            if (ramTypeMatchSignal.get())
                 passed++;
-            if (ramSpeedSupportedSignal.value())
+            if (ramSpeedSupportedSignal.get())
                 passed++;
-            if (gpuFitsCaseSignal.value())
+            if (gpuFitsCaseSignal.get())
                 passed++;
-            if (coolerFitsCaseSignal.value())
+            if (coolerFitsCaseSignal.get())
                 passed++;
-            if (motherboardFitsCaseSignal.value())
+            if (motherboardFitsCaseSignal.get())
                 passed++;
-            if (m2SlotsAvailableSignal.value())
+            if (m2SlotsAvailableSignal.get())
                 passed++;
-            if (sataSlotsAvailableSignal.value())
+            if (sataSlotsAvailableSignal.get())
                 passed++;
-            if (psuFitsCaseSignal.value())
+            if (psuFitsCaseSignal.get())
                 passed++;
-            if (cpuCoolerCompatibleSignal.value())
+            if (cpuCoolerCompatibleSignal.get())
                 passed++;
-            if (coolerTdpSufficientSignal.value())
+            if (coolerTdpSufficientSignal.get())
                 passed++;
-            if (ramCapacitySupportedSignal.value())
+            if (ramCapacitySupportedSignal.get())
                 passed++;
-            if (psuSufficiencySignal.value())
+            if (psuSufficiencySignal.get())
                 passed++;
             return passed;
         });
@@ -745,22 +745,22 @@ public class UseCase17View extends VerticalLayout {
                 .map(s -> s != null ? s.getSpeedMBps() : 0);
 
         overallScoreSignal = Signal
-                .computed(() -> (int) (cpuScoreSignal.value() * 0.3
-                        + gpuScoreSignal.value() * 0.6
-                        + storageSpeedSignal.value() / 100.0 * 0.1));
+                .computed(() -> (int) (cpuScoreSignal.get() * 0.3
+                        + gpuScoreSignal.get() * 0.6
+                        + storageSpeedSignal.get() / 100.0 * 0.1));
 
         gamingScoreSignal = Signal
-                .computed(() -> (int) (cpuScoreSignal.value() * 0.2
-                        + gpuScoreSignal.value() * 0.8));
+                .computed(() -> (int) (cpuScoreSignal.get() * 0.2
+                        + gpuScoreSignal.get() * 0.8));
 
         productivityScoreSignal = Signal
-                .computed(() -> (int) (cpuScoreSignal.value() * 0.6
-                        + gpuScoreSignal.value() * 0.3
-                        + storageSpeedSignal.value() / 100.0 * 0.1));
+                .computed(() -> (int) (cpuScoreSignal.get() * 0.6
+                        + gpuScoreSignal.get() * 0.3
+                        + storageSpeedSignal.get() / 100.0 * 0.1));
 
         bottleneckSignal = Signal.computed(() -> {
-            int cpuScore = cpuScoreSignal.value();
-            int gpuScore = gpuScoreSignal.value();
+            int cpuScore = cpuScoreSignal.get();
+            int gpuScore = gpuScoreSignal.get();
             if (cpuScore == 0 || gpuScore == 0)
                 return "N/A";
             if (cpuScore < gpuScore * 0.6)
@@ -786,42 +786,42 @@ public class UseCase17View extends VerticalLayout {
     private void initializeValidationSignals() {
         missingComponentsSignal = Signal.computed(() -> {
             List<String> missing = new java.util.ArrayList<>();
-            if (cpuSignal.value() == null)
+            if (cpuSignal.get() == null)
                 missing.add("CPU");
-            if (motherboardSignal.value() == null)
+            if (motherboardSignal.get() == null)
                 missing.add("Motherboard");
-            if (ramSignal.value() == null)
+            if (ramSignal.get() == null)
                 missing.add("RAM");
-            if (gpuSignal.value() == null)
+            if (gpuSignal.get() == null)
                 missing.add("GPU");
-            if (storage1Signal.value() == null)
+            if (storage1Signal.get() == null)
                 missing.add("Primary Storage");
-            if (psuSignal.value() == null)
+            if (psuSignal.get() == null)
                 missing.add("Power Supply");
-            if (caseSignal.value() == null)
+            if (caseSignal.get() == null)
                 missing.add("Case");
-            if (coolerSignal.value() == null)
+            if (coolerSignal.get() == null)
                 missing.add("CPU Cooler");
             return missing;
         });
 
         warningMessagesSignal = Signal.computed(() -> {
             List<String> warnings = new java.util.ArrayList<>();
-            if (!cpuSocketMatchSignal.value())
+            if (!cpuSocketMatchSignal.get())
                 warnings.add("⚠ CPU socket doesn't match motherboard");
-            if (!ramTypeMatchSignal.value())
+            if (!ramTypeMatchSignal.get())
                 warnings.add("⚠ RAM type doesn't match motherboard");
-            if (!ramSpeedSupportedSignal.value())
+            if (!ramSpeedSupportedSignal.get())
                 warnings.add("⚠ RAM speed not supported by motherboard");
-            if (!gpuFitsCaseSignal.value())
+            if (!gpuFitsCaseSignal.get())
                 warnings.add("⚠ GPU too long for case");
-            if (!coolerFitsCaseSignal.value())
+            if (!coolerFitsCaseSignal.get())
                 warnings.add("⚠ CPU cooler too tall for case");
-            if (!psuSufficiencySignal.value() && psuSignal.value() != null)
+            if (!psuSufficiencySignal.get() && psuSignal.get() != null)
                 warnings.add("⚠ PSU wattage insufficient");
-            if (!cpuCoolerCompatibleSignal.value())
+            if (!cpuCoolerCompatibleSignal.get())
                 warnings.add("⚠ Cooler not compatible with CPU socket");
-            if (!coolerTdpSufficientSignal.value())
+            if (!coolerTdpSufficientSignal.get())
                 warnings.add("⚠ Cooler TDP rating insufficient for CPU");
             return warnings;
         });
@@ -829,8 +829,8 @@ public class UseCase17View extends VerticalLayout {
         warningCountSignal = warningMessagesSignal.map(List::size);
 
         canBuildSignal = Signal
-                .computed(() -> missingComponentsSignal.value().isEmpty()
-                        && allCompatibleSignal.value());
+                .computed(() -> missingComponentsSignal.get().isEmpty()
+                        && allCompatibleSignal.get());
 
         isValidConfigurationSignal = canBuildSignal;
     }
@@ -887,9 +887,9 @@ public class UseCase17View extends VerticalLayout {
         addToCartButton.bindEnabled(canBuildSignal);
 
         Signal<String> cartButtonText = Signal.computed(() -> {
-            if (canBuildSignal.value()) {
+            if (canBuildSignal.get()) {
                 return "Add to Cart ($"
-                        + String.format("%.0f", totalPriceSignal.value()) + ")";
+                        + String.format("%.0f", totalPriceSignal.get()) + ")";
             }
             return "Complete Build First";
         });
@@ -933,7 +933,7 @@ public class UseCase17View extends VerticalLayout {
         combo.setItems(items);
         combo.setItemLabelGenerator(Component::getName);
         combo.setWidthFull();
-        combo.bindValue(signal);
+        combo.bindValue(signal, signal::set);
         return combo;
     }
 
@@ -954,25 +954,25 @@ public class UseCase17View extends VerticalLayout {
 
         ComponentEffect.effect(summary, () -> {
             selectedComponentsSignal.clear();
-            if (cpuSignal.value() != null)
-                selectedComponentsSignal.insertLast(cpuSignal.value());
-            if (motherboardSignal.value() != null)
-                selectedComponentsSignal.insertLast(motherboardSignal.value());
-            if (ramSignal.value() != null)
-                selectedComponentsSignal.insertLast(ramSignal.value());
-            if (gpuSignal.value() != null)
-                selectedComponentsSignal.insertLast(gpuSignal.value());
-            if (storage1Signal.value() != null)
-                selectedComponentsSignal.insertLast(storage1Signal.value());
-            if (storage2Signal.value() != null
-                    && storage2Signal.value().getPrice() > 0)
-                selectedComponentsSignal.insertLast(storage2Signal.value());
-            if (psuSignal.value() != null)
-                selectedComponentsSignal.insertLast(psuSignal.value());
-            if (caseSignal.value() != null)
-                selectedComponentsSignal.insertLast(caseSignal.value());
-            if (coolerSignal.value() != null)
-                selectedComponentsSignal.insertLast(coolerSignal.value());
+            if (cpuSignal.get() != null)
+                selectedComponentsSignal.insertLast(cpuSignal.get());
+            if (motherboardSignal.get() != null)
+                selectedComponentsSignal.insertLast(motherboardSignal.get());
+            if (ramSignal.get() != null)
+                selectedComponentsSignal.insertLast(ramSignal.get());
+            if (gpuSignal.get() != null)
+                selectedComponentsSignal.insertLast(gpuSignal.get());
+            if (storage1Signal.get() != null)
+                selectedComponentsSignal.insertLast(storage1Signal.get());
+            if (storage2Signal.get() != null
+                    && storage2Signal.get().getPrice() > 0)
+                selectedComponentsSignal.insertLast(storage2Signal.get());
+            if (psuSignal.get() != null)
+                selectedComponentsSignal.insertLast(psuSignal.get());
+            if (caseSignal.get() != null)
+                selectedComponentsSignal.insertLast(caseSignal.get());
+            if (coolerSignal.get() != null)
+                selectedComponentsSignal.insertLast(coolerSignal.get());
         });
 
         summary.bindChildren(selectedComponentsSignal,
@@ -1009,11 +1009,11 @@ public class UseCase17View extends VerticalLayout {
         powerValue.getStyle().set("display", "block");
 
         Signal<String> psuStatusText = Signal.computed(() -> {
-            PSU psu = psuSignal.value();
+            PSU psu = psuSignal.get();
             if (psu == null)
                 return "No PSU selected";
-            boolean sufficient = psuSufficiencySignal.value();
-            int margin = powerMarginSignal.value();
+            boolean sufficient = psuSufficiencySignal.get();
+            int margin = powerMarginSignal.get();
             return psu.getWattage() + "W PSU: "
                     + (sufficient ? "✓ OK (+" + margin + "W)"
                             : "⚠ Insufficient");
@@ -1109,41 +1109,41 @@ public class UseCase17View extends VerticalLayout {
             compatibilityStatusSignal.clear();
             compatibilityStatusSignal.insertLast(formatCheck(
                     "CPU socket matches motherboard",
-                    cpuSocketMatchSignal.value()));
+                    cpuSocketMatchSignal.get()));
             compatibilityStatusSignal.insertLast(formatCheck(
                     "RAM type matches motherboard",
-                    ramTypeMatchSignal.value()));
+                    ramTypeMatchSignal.get()));
             compatibilityStatusSignal.insertLast(formatCheck(
                     "RAM speed supported",
-                    ramSpeedSupportedSignal.value()));
+                    ramSpeedSupportedSignal.get()));
             compatibilityStatusSignal.insertLast(formatCheck(
-                    "GPU fits in case", gpuFitsCaseSignal.value()));
+                    "GPU fits in case", gpuFitsCaseSignal.get()));
             compatibilityStatusSignal.insertLast(formatCheck(
                     "CPU cooler fits in case",
-                    coolerFitsCaseSignal.value()));
+                    coolerFitsCaseSignal.get()));
             compatibilityStatusSignal.insertLast(formatCheck(
                     "Motherboard fits in case",
-                    motherboardFitsCaseSignal.value()));
+                    motherboardFitsCaseSignal.get()));
             compatibilityStatusSignal.insertLast(formatCheck(
                     "M.2 slots available",
-                    m2SlotsAvailableSignal.value()));
+                    m2SlotsAvailableSignal.get()));
             compatibilityStatusSignal.insertLast(formatCheck(
                     "SATA ports available",
-                    sataSlotsAvailableSignal.value()));
+                    sataSlotsAvailableSignal.get()));
             compatibilityStatusSignal.insertLast(formatCheck(
-                    "PSU fits in case", psuFitsCaseSignal.value()));
+                    "PSU fits in case", psuFitsCaseSignal.get()));
             compatibilityStatusSignal.insertLast(formatCheck(
                     "Cooler compatible with CPU",
-                    cpuCoolerCompatibleSignal.value()));
+                    cpuCoolerCompatibleSignal.get()));
             compatibilityStatusSignal.insertLast(formatCheck(
                     "Cooler TDP sufficient",
-                    coolerTdpSufficientSignal.value()));
+                    coolerTdpSufficientSignal.get()));
             compatibilityStatusSignal.insertLast(formatCheck(
                     "RAM capacity supported",
-                    ramCapacitySupportedSignal.value()));
+                    ramCapacitySupportedSignal.get()));
             compatibilityStatusSignal.insertLast(formatCheck(
                     "PSU wattage sufficient",
-                    psuSufficiencySignal.value()));
+                    psuSufficiencySignal.get()));
         });
 
         checksContainer.bindChildren(compatibilityStatusSignal,
@@ -1154,7 +1154,7 @@ public class UseCase17View extends VerticalLayout {
     }
 
     private Div createComponentSummaryItem(ValueSignal<Component> compSignal) {
-        var comp = compSignal.value();
+        var comp = compSignal.get();
         Div item = new Div();
         item.getStyle().set("margin-bottom", "0.5em")
                 .set("display", "flex")
@@ -1173,7 +1173,7 @@ public class UseCase17View extends VerticalLayout {
     }
 
     private Div createCompatibilityCheckDiv(ValueSignal<String> statusSignal) {
-        var status = statusSignal.value();
+        var status = statusSignal.get();
         Div checkDiv = new Div();
         checkDiv.getStyle().set("padding", "0.25em 0")
                 .set("font-size", "0.9em");
@@ -1190,16 +1190,16 @@ public class UseCase17View extends VerticalLayout {
     }
 
     private void resetBuild() {
-        cpuSignal.value(ALL_CPUS.get(ALL_CPUS.size() - 1)); // None
+        cpuSignal.set(ALL_CPUS.get(ALL_CPUS.size() - 1)); // None
         motherboardSignal
-                .value(ALL_MOTHERBOARDS.get(ALL_MOTHERBOARDS.size() - 1)); // None
-        ramSignal.value(ALL_RAM.get(ALL_RAM.size() - 1)); // None
-        gpuSignal.value(ALL_GPUS.get(ALL_GPUS.size() - 1)); // None
-        storage1Signal.value(ALL_STORAGE.get(ALL_STORAGE.size() - 1)); // None
-        storage2Signal.value(ALL_STORAGE.get(ALL_STORAGE.size() - 1)); // None
-        storage3Signal.value(ALL_STORAGE.get(ALL_STORAGE.size() - 1)); // None
-        psuSignal.value(ALL_PSUS.get(ALL_PSUS.size() - 1)); // None
-        caseSignal.value(ALL_CASES.get(ALL_CASES.size() - 1)); // None
-        coolerSignal.value(ALL_COOLERS.get(ALL_COOLERS.size() - 1)); // None
+                .set(ALL_MOTHERBOARDS.get(ALL_MOTHERBOARDS.size() - 1)); // None
+        ramSignal.set(ALL_RAM.get(ALL_RAM.size() - 1)); // None
+        gpuSignal.set(ALL_GPUS.get(ALL_GPUS.size() - 1)); // None
+        storage1Signal.set(ALL_STORAGE.get(ALL_STORAGE.size() - 1)); // None
+        storage2Signal.set(ALL_STORAGE.get(ALL_STORAGE.size() - 1)); // None
+        storage3Signal.set(ALL_STORAGE.get(ALL_STORAGE.size() - 1)); // None
+        psuSignal.set(ALL_PSUS.get(ALL_PSUS.size() - 1)); // None
+        caseSignal.set(ALL_CASES.get(ALL_CASES.size() - 1)); // None
+        coolerSignal.set(ALL_COOLERS.get(ALL_COOLERS.size() - 1)); // None
     }
 }

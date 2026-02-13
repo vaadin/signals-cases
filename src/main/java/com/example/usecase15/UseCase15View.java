@@ -102,9 +102,9 @@ public class UseCase15View extends VerticalLayout {
                 ValueChangeMode.LAZY);
         searchField.setValueChangeTimeout(300);
 
-        searchField.bindValue(searchQuerySignal);
+        searchField.bindValue(searchQuerySignal, searchQuerySignal::set);
         searchField.addValueChangeListener(e -> {
-            performSearch(searchQuerySignal.value());
+            performSearch(searchQuerySignal.get());
         });
 
         // Search stats
@@ -162,7 +162,7 @@ public class UseCase15View extends VerticalLayout {
 
         // Results
         Signal<String> resultsTitleSignal = Signal.computed(() -> {
-            var results = searchResultsSignal.value();
+            var results = searchResultsSignal.get();
             if (results.isEmpty() && !searchQuerySignal.peek().isEmpty()) {
                 return "No results found";
             } else if (!results.isEmpty()) {
@@ -230,8 +230,8 @@ public class UseCase15View extends VerticalLayout {
         }
 
         // Set searching state
-        isSearchingSignal.value(true);
-        searchCountSignal.value(searchCountSignal.peek() + 1);
+        isSearchingSignal.set(true);
+        searchCountSignal.set(searchCountSignal.peek() + 1);
 
         // Simulate async search with delay
         CompletableFuture<Void> searchFuture = CompletableFuture
@@ -250,14 +250,14 @@ public class UseCase15View extends VerticalLayout {
 
                     searchResultsSignal.clear();
                     results.forEach(searchResultsSignal::insertLast);
-                    isSearchingSignal.value(false);
+                    isSearchingSignal.set(false);
                 });
 
         currentSearch.set(searchFuture);
     }
 
     private Div createProductCard(ValueSignal<Product> productSignal) {
-        var product = productSignal.value();
+        var product = productSignal.get();
         Div card = new Div();
         card.getStyle().set("background-color", "#ffffff")
                 .set("border", "1px solid var(--lumo-contrast-20pct)")

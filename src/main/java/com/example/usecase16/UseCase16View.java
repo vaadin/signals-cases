@@ -138,13 +138,13 @@ public class UseCase16View extends VerticalLayout
         searchField.setPlaceholder("Search articles...");
         searchField.setWidth("300px");
         searchField.setClearButtonVisible(true);
-        searchField.bindValue(searchQuerySignal);
+        searchField.bindValue(searchQuerySignal, searchQuerySignal::set);
 
         Select<String> categorySelect = new Select<>();
         categorySelect.setLabel("Category");
         categorySelect.setItems("All", "Tutorial", "Guide", "Documentation");
         categorySelect.setWidth("200px");
-        categorySelect.bindValue(categorySignal);
+        categorySelect.bindValue(categorySignal, categorySignal::set);
 
         controls.add(searchField, categorySelect);
 
@@ -160,8 +160,8 @@ public class UseCase16View extends VerticalLayout
         // Update URL display based on signals
         Signal<String> currentUrlSignal = Signal.computed(() -> {
             String baseUrl = getBaseUrl();
-            String query = searchQuerySignal.value();
-            String category = categorySignal.value();
+            String query = searchQuerySignal.get();
+            String category = categorySignal.get();
 
             StringBuilder url = new StringBuilder(baseUrl);
             if (!query.isEmpty() || !category.equals("All")) {
@@ -207,7 +207,7 @@ public class UseCase16View extends VerticalLayout
 
         // Results
         Signal<String> resultsTitleSignal = Signal.computed(() -> {
-            int size = filteredArticlesSignal.value().size();
+            int size = filteredArticlesSignal.get().size();
             return size + " article" + (size == 1 ? "" : "s") + " found";
         });
         H3 resultsTitle = new H3(resultsTitleSignal);
@@ -240,7 +240,7 @@ public class UseCase16View extends VerticalLayout
     }
 
     private Div createArticleCard(ValueSignal<Article> articleSignal) {
-        var article = articleSignal.value();
+        var article = articleSignal.get();
         Div card = new Div();
         card.getStyle().set("background-color", "#ffffff")
                 .set("border", "1px solid var(--lumo-contrast-20pct)")
@@ -277,8 +277,8 @@ public class UseCase16View extends VerticalLayout
         // When signals change, update URL (except during initialization)
         com.vaadin.flow.component.ComponentEffect.effect(this, () -> {
             // Access signals to track them
-            searchQuerySignal.value();
-            categorySignal.value();
+            searchQuerySignal.get();
+            categorySignal.get();
 
             if (!isInitializing) {
                 updateUrl();
@@ -299,17 +299,17 @@ public class UseCase16View extends VerticalLayout
         // Load search query from URL
         if (params.containsKey("q")) {
             String query = params.get("q").get(0);
-            searchQuerySignal.value(query);
+            searchQuerySignal.set(query);
         } else {
-            searchQuerySignal.value("");
+            searchQuerySignal.set("");
         }
 
         // Load category from URL
         if (params.containsKey("category")) {
             String category = params.get("category").get(0);
-            categorySignal.value(category);
+            categorySignal.set(category);
         } else {
-            categorySignal.value("All");
+            categorySignal.set("All");
         }
 
         isInitializing = false;
@@ -319,8 +319,8 @@ public class UseCase16View extends VerticalLayout
     }
 
     private void updateUrl() {
-        String query = searchQuerySignal.value();
-        String category = categorySignal.value();
+        String query = searchQuerySignal.get();
+        String category = categorySignal.get();
 
         // Build query parameters
         StringBuilder urlParams = new StringBuilder();
@@ -340,8 +340,8 @@ public class UseCase16View extends VerticalLayout
     }
 
     private void updateFilteredResults() {
-        String query = searchQuerySignal.value();
-        String category = categorySignal.value();
+        String query = searchQuerySignal.get();
+        String category = categorySignal.get();
 
         List<Article> filtered = ALL_ARTICLES.stream()
                 .filter(article -> article.matches(query, category))

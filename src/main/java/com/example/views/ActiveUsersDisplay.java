@@ -98,11 +98,11 @@ public class ActiveUsersDisplay extends Div {
 
         // Bind user avatars and names
         usersContainer.bindChildren(Signal.computed(() -> {
-            var users = userSessionRegistry.getActiveUsersSignal().value();
+            var users = userSessionRegistry.getActiveUsersSignal().get();
             if (viewRoute != null) {
                 return users.stream()
                         .filter(userSignal -> viewRoute
-                                .equals(userSignal.value().currentView()))
+                                .equals(userSignal.get().currentView()))
                         .toList();
             }
             return users;
@@ -113,7 +113,7 @@ public class ActiveUsersDisplay extends Div {
 
     private HorizontalLayout createUserItem(
             com.vaadin.flow.signals.Signal<com.example.signals.UserInfo> userSignal) {
-        var user = userSignal.value();
+        var user = userSignal.get();
         String displayName = user.nickname() != null
                 && !user.nickname().isEmpty() ? user.nickname()
                         : user.username();

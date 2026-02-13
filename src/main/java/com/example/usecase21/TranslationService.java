@@ -36,7 +36,7 @@ public class TranslationService {
      */
     public Signal<String> t(String key) {
         return Signal.computed(() -> {
-            Locale locale = UI.getCurrent().localeSignal().value();
+            Locale locale = UI.getCurrent().localeSignal().get();
             try {
                 ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE_NAME,
                         locale);

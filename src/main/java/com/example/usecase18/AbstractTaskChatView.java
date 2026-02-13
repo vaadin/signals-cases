@@ -84,10 +84,10 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
 
         // Set up computed signals
         totalTasksSignal = tasksSignal.map(list -> list.size());
-        completedTasksSignal = Signal.computed(() -> (int) tasksSignal.value()
-                .stream().filter(t -> t.value().isCompleted()).count());
+        completedTasksSignal = Signal.computed(() -> (int) tasksSignal.get()
+                .stream().filter(t -> t.get().isCompleted()).count());
         pendingTasksSignal = Signal.computed(
-                () -> totalTasksSignal.value() - completedTasksSignal.value());
+                () -> totalTasksSignal.get() - completedTasksSignal.get());
 
         // Build UI - Statistics on top, then AI and Grid side by side
         HorizontalLayout statsSection = buildStatisticsSection();
@@ -108,7 +108,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
 
     private String getCurrentDisplayName() {
         CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
-                .value();
+                .get();
         if (userInfo == null || !userInfo.isAuthenticated()) {
             return "Anonymous";
         }
@@ -118,13 +118,13 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
             return username;
         }
 
-        var users = userSessionRegistry.getActiveUsersSignal().value();
-        var displayNames = userSessionRegistry.getDisplayNamesSignal().value();
+        var users = userSessionRegistry.getActiveUsersSignal().get();
+        var displayNames = userSessionRegistry.getDisplayNamesSignal().get();
 
         // Find matching session key for current user
         String sessionKey = username + ":" + sessionId;
         for (int i = 0; i < users.size() && i < displayNames.size(); i++) {
-            if (sessionKey.equals(users.get(i).value().getCompositeKey())) {
+            if (sessionKey.equals(users.get(i).get().getCompositeKey())) {
                 return displayNames.get(i);
             }
         }
@@ -307,8 +307,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
             deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR,
                     ButtonVariant.LUMO_SMALL);
             deleteButton.addClickListener(e -> {
-                tasksSignal.value().stream()
-                        .filter(sig -> sig.value().equals(task)).findFirst()
+                tasksSignal.get().stream()
+                        .filter(sig -> sig.get().equals(task)).findFirst()
                         .ifPresent(tasksSignal::remove);
             });
 
@@ -330,8 +330,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
 
     private void openEditDialog(Task task) {
         // Find the signal for this task
-        var taskSignalOpt = tasksSignal.value().stream()
-                .filter(sig -> sig.value().id().equals(task.id())).findFirst();
+        var taskSignalOpt = tasksSignal.get().stream()
+                .filter(sig -> sig.get().id().equals(task.id())).findFirst();
 
         if (taskSignalOpt.isEmpty()) {
             return;
@@ -357,21 +357,21 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
 
         TextField titleField = new TextField("Title");
         titleField.setWidthFull();
-        titleField.bindValue(titleSignal);
+        titleField.bindValue(titleSignal, titleSignal::set);
 
         TextArea descriptionField = new TextArea("Description");
         descriptionField.setWidthFull();
         descriptionField.setMaxHeight("100px");
-        descriptionField.bindValue(descriptionSignal);
+        descriptionField.bindValue(descriptionSignal, descriptionSignal::set);
 
         ComboBox<Task.TaskStatus> statusCombo = new ComboBox<>("Status");
         statusCombo.setItems(Task.TaskStatus.values());
         statusCombo.setWidthFull();
-        statusCombo.bindValue(statusSignal);
+        statusCombo.bindValue(statusSignal, statusSignal::set);
 
         DatePicker dueDatePicker = new DatePicker("Due Date");
         dueDatePicker.setWidthFull();
-        dueDatePicker.bindValue(dueDateSignal);
+        dueDatePicker.bindValue(dueDateSignal, dueDateSignal::set);
 
         formLayout.add(titleField, descriptionField, statusCombo,
                 dueDatePicker);
@@ -403,10 +403,10 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
                 chatMessagesSignal, (msgList, msgSignals) -> {
                     if (msgSignals != null) {
                         CurrentUserSignal.UserInfo userInfo = currentUserSignal
-                                .getUserSignal().value();
+                                .getUserSignal().get();
 
                         var items = msgSignals.stream().map(msgSignal -> {
-                            ChatMessageData msg = msgSignal.value();
+                            ChatMessageData msg = msgSignal.get();
                             MessageListItem item = new MessageListItem(
                                     msg.content().isBlank() ? "_typing..._"
                                             : msg.content(),
@@ -458,7 +458,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         }
 
         // Disable input while processing
-        messageInputEnabledSignal.value(false);
+        messageInputEnabledSignal.set(false);
 
         // Add user message
         chatMessagesSignal.insertLast(
@@ -471,8 +471,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
 
         // Get reference to the last message signal (assistant message) for
         // updates
-        var assistantMessageSignal = chatMessagesSignal.value()
-                .get(chatMessagesSignal.value().size() - 1);
+        var assistantMessageSignal = chatMessagesSignal.get()
+                .get(chatMessagesSignal.get().size() - 1);
 
         // Accumulate streaming content
         StringBuilder streamingContent = new StringBuilder();
@@ -483,36 +483,36 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
                 .subscribe(token -> {
                     // Append token and update the message in the signal
                     streamingContent.append(token);
-                    assistantMessageSignal.value(new ChatMessageData(
+                    assistantMessageSignal.set(new ChatMessageData(
                             "Assistant", streamingContent.toString(),
                             assistantTimestamp));
                 }, error -> {
                     // Update with error message
                     streamingContent.append("\n\n❌ Error: ")
                             .append(error.getMessage());
-                    assistantMessageSignal.value(new ChatMessageData(
+                    assistantMessageSignal.set(new ChatMessageData(
                             "Assistant", streamingContent.toString(),
                             assistantTimestamp));
-                    messageInputEnabledSignal.value(true);
+                    messageInputEnabledSignal.set(true);
                 }, () -> {
                     // Streaming complete - re-enable input
-                    messageInputEnabledSignal.value(true);
+                    messageInputEnabledSignal.set(true);
                 });
     }
 
     private void updateTaskField(String taskId,
             java.util.function.Function<Task, Task> updater) {
-        tasksSignal.value().stream()
-                .filter(sig -> sig.value().id().equals(taskId)).findFirst()
-                .ifPresent(sig -> sig.value(updater.apply(sig.value())));
+        tasksSignal.get().stream()
+                .filter(sig -> sig.get().id().equals(taskId)).findFirst()
+                .ifPresent(sig -> sig.set(updater.apply(sig.get())));
     }
 
     private TaskContext createTaskContext() {
         return new TaskContext() {
             @Override
             public java.util.List<Task> getAllTasks() {
-                return tasksSignal.value().stream()
-                        .map(SharedValueSignal::value).toList();
+                return tasksSignal.get().stream()
+                        .map(SharedValueSignal::get).toList();
             }
 
             @Override
@@ -522,8 +522,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
 
             @Override
             public void removeTask(String taskId) {
-                tasksSignal.value().stream()
-                        .filter(sig -> sig.value().id().equals(taskId))
+                tasksSignal.get().stream()
+                        .filter(sig -> sig.get().id().equals(taskId))
                         .findFirst().ifPresent(tasksSignal::remove);
             }
 

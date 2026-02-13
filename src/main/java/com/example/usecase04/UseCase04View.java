@@ -48,9 +48,9 @@ public class UseCase04View extends VerticalLayout {
 
         // Computed signal for filtered products
         Signal<List<Product>> filteredProductsSignal = Signal.computed(() -> {
-            String category = categoryFilterSignal.value();
-            String searchTerm = searchTermSignal.value().toLowerCase();
-            boolean inStockOnly = inStockOnlySignal.value();
+            String category = categoryFilterSignal.get();
+            String searchTerm = searchTermSignal.get().toLowerCase();
+            boolean inStockOnly = inStockOnlySignal.get();
 
             return allProducts.stream()
                     .filter(p -> category.equals("All")
@@ -64,14 +64,14 @@ public class UseCase04View extends VerticalLayout {
         // Filter UI components
         ComboBox<String> categoryFilter = new ComboBox<>("Category", List.of(
                 "All", "Electronics", "Clothing", "Books", "Home & Garden"));
-        categoryFilter.bindValue(categoryFilterSignal);
+        categoryFilter.bindValue(categoryFilterSignal, categoryFilterSignal::set);
 
         TextField searchField = new TextField("Search");
         searchField.setPlaceholder("Search by name or ID");
-        searchField.bindValue(searchTermSignal);
+        searchField.bindValue(searchTermSignal, searchTermSignal::set);
 
         Checkbox inStockCheckbox = new Checkbox("Show in-stock items only");
-        inStockCheckbox.bindValue(inStockOnlySignal);
+        inStockCheckbox.bindValue(inStockOnlySignal, inStockOnlySignal::set);
 
         // Data grid
         Grid<Product> grid = new Grid<>(Product.class);

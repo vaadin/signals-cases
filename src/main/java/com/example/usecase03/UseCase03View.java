@@ -194,11 +194,11 @@ public class UseCase03View extends VerticalLayout {
 
         // Add click handlers to select shapes
         rectElement.addEventListener("click", e -> {
-            selectedShapeSignal.value(0);
+            selectedShapeSignal.set(0);
         });
 
         starElement.addEventListener("click", e -> {
-            selectedShapeSignal.value(1);
+            selectedShapeSignal.set(1);
         });
 
         // Add cursor pointer style for shapes
@@ -223,9 +223,9 @@ public class UseCase03View extends VerticalLayout {
 
         // Stroke width increases when selected
         Signal<String> rectStrokeWidthComputed = Signal.computed(() -> {
-            int baseWidth = rectStrokeWidthSignal.value();
+            int baseWidth = rectStrokeWidthSignal.get();
             boolean isSelected = "rectangle"
-                    .equals(selectedShapeSignal.value());
+                    .equals(selectedShapeSignal.get());
             return String.valueOf(isSelected ? baseWidth + 2 : baseWidth);
         });
         rect.bindAttribute("stroke-width", rectStrokeWidthComputed);
@@ -234,13 +234,13 @@ public class UseCase03View extends VerticalLayout {
 
         // Computed transform attribute (rotate around center)
         Signal<String> rectTransformSignal = Signal.computed(() -> {
-            int x = rectXSignal.value();
-            int y = rectYSignal.value();
-            int w = rectWidthSignal.value();
-            int h = rectHeightSignal.value();
+            int x = rectXSignal.get();
+            int y = rectYSignal.get();
+            int w = rectWidthSignal.get();
+            int h = rectHeightSignal.get();
             int centerX = x + w / 2;
             int centerY = y + h / 2;
-            int rotation = rectRotationSignal.value();
+            int rotation = rectRotationSignal.get();
             return String.format("rotate(%d %d %d)", rotation, centerX,
                     centerY);
         });
@@ -256,8 +256,8 @@ public class UseCase03View extends VerticalLayout {
 
         // Computed points attribute (complex calculation) - centered at origin
         Signal<String> starPointsAttrSignal = Signal.computed(() -> {
-            int n = starPointsSignal.value();
-            int size = starSizeSignal.value();
+            int n = starPointsSignal.get();
+            int size = starSizeSignal.get();
             return generateStarPoints(n, size, 0, 0); // Generate at origin
         });
         polygon.bindAttribute("points", starPointsAttrSignal);
@@ -268,8 +268,8 @@ public class UseCase03View extends VerticalLayout {
 
         // Stroke width increases when selected
         Signal<String> starStrokeWidthComputed = Signal.computed(() -> {
-            int baseWidth = starStrokeWidthSignal.value();
-            boolean isSelected = "star".equals(selectedShapeSignal.value());
+            int baseWidth = starStrokeWidthSignal.get();
+            boolean isSelected = "star".equals(selectedShapeSignal.get());
             return String.valueOf(isSelected ? baseWidth + 2 : baseWidth);
         });
         polygon.bindAttribute("stroke-width", starStrokeWidthComputed);
@@ -279,9 +279,9 @@ public class UseCase03View extends VerticalLayout {
 
         // Computed transform: translate to position, then rotate
         Signal<String> starTransformSignal = Signal.computed(() -> {
-            int rotation = starRotationSignal.value();
-            int cx = starCxSignal.value();
-            int cy = starCySignal.value();
+            int rotation = starRotationSignal.get();
+            int cx = starCxSignal.get();
+            int cy = starCySignal.get();
             // Since points are centered at (0,0), translate to position then
             // rotate
             return String.format("translate(%d %d) rotate(%d)", cx, cy,
@@ -311,11 +311,13 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500");
 
         Slider xSlider = new Slider("X", 0, 500, 0);
-        xSlider.bindValue(mapIntegerToDoubleSignal(rectXSignal));
+        var rectXDoubleSignal = mapIntegerToDoubleSignal(rectXSignal);
+        xSlider.bindValue(rectXDoubleSignal, rectXDoubleSignal::set);
         xSlider.setWidthFull();
 
         Slider ySlider = new Slider("Y", 0, 500, 0);
-        ySlider.bindValue(mapIntegerToDoubleSignal(rectYSignal));
+        var rectYDoubleSignal = mapIntegerToDoubleSignal(rectYSignal);
+        ySlider.bindValue(rectYDoubleSignal, rectYDoubleSignal::set);
         ySlider.setWidthFull();
 
         // Size section
@@ -325,16 +327,19 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500").set("margin-top", "8px");
 
         Slider widthSlider = new Slider("Width", 50, 250, 50);
-        widthSlider.bindValue(mapIntegerToDoubleSignal(rectWidthSignal));
+        var rectWidthDoubleSignal = mapIntegerToDoubleSignal(rectWidthSignal);
+        widthSlider.bindValue(rectWidthDoubleSignal, rectWidthDoubleSignal::set);
         widthSlider.setWidthFull();
 
         Slider heightSlider = new Slider("Height", 30, 150, 30);
-        heightSlider.bindValue(mapIntegerToDoubleSignal(rectHeightSignal));
+        var rectHeightDoubleSignal = mapIntegerToDoubleSignal(rectHeightSignal);
+        heightSlider.bindValue(rectHeightDoubleSignal, rectHeightDoubleSignal::set);
         heightSlider.setWidthFull();
 
         Slider cornerRadiusSlider = new Slider("Corner Radius", 0, 50, 0);
+        var rectCornerRadiusDoubleSignal = mapIntegerToDoubleSignal(rectCornerRadiusSignal);
         cornerRadiusSlider
-                .bindValue(mapIntegerToDoubleSignal(rectCornerRadiusSignal));
+                .bindValue(rectCornerRadiusDoubleSignal, rectCornerRadiusDoubleSignal::set);
         cornerRadiusSlider.setWidthFull();
 
         // Appearance section
@@ -344,15 +349,15 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500").set("margin-top", "8px");
 
         ComboBox<String> fillColorField = createColorPicker("Fill");
-        fillColorField.bindValue(rectFillSignal);
+        fillColorField.bindValue(rectFillSignal, rectFillSignal::set);
         fillColorField.setWidthFull();
 
         ComboBox<String> strokeColorField = createColorPicker("Stroke");
-        strokeColorField.bindValue(rectStrokeSignal);
+        strokeColorField.bindValue(rectStrokeSignal, rectStrokeSignal::set);
         strokeColorField.setWidthFull();
 
         Slider opacitySlider = new Slider("Opacity", 0.0, 1.0, 0.1, 0.0);
-        opacitySlider.bindValue(rectOpacitySignal);
+        opacitySlider.bindValue(rectOpacitySignal, rectOpacitySignal::set);
         opacitySlider.setWidthFull();
 
         // Transform section
@@ -362,7 +367,8 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500").set("margin-top", "8px");
 
         Slider rotationSlider = new Slider("Rotation", 0, 360, 0);
-        rotationSlider.bindValue(mapIntegerToDoubleSignal(rectRotationSignal));
+        var rectRotationDoubleSignal = mapIntegerToDoubleSignal(rectRotationSignal);
+        rotationSlider.bindValue(rectRotationDoubleSignal, rectRotationDoubleSignal::set);
         rotationSlider.setWidthFull();
 
         fields.add(positionLabel, xSlider, ySlider, sizeLabel, widthSlider,
@@ -390,11 +396,13 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500");
 
         Slider cxSlider = new Slider("Center X", 0, 500, 0);
-        cxSlider.bindValue(mapIntegerToDoubleSignal(starCxSignal));
+        var starCxDoubleSignal = mapIntegerToDoubleSignal(starCxSignal);
+        cxSlider.bindValue(starCxDoubleSignal, starCxDoubleSignal::set);
         cxSlider.setWidthFull();
 
         Slider cySlider = new Slider("Center Y", 0, 500, 0);
-        cySlider.bindValue(mapIntegerToDoubleSignal(starCySignal));
+        var starCyDoubleSignal = mapIntegerToDoubleSignal(starCySignal);
+        cySlider.bindValue(starCyDoubleSignal, starCyDoubleSignal::set);
         cySlider.setWidthFull();
 
         // Shape section
@@ -404,11 +412,13 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500").set("margin-top", "8px");
 
         Slider pointsSlider = new Slider("Points", 3, 10, 3);
-        pointsSlider.bindValue(mapIntegerToDoubleSignal(starPointsSignal));
+        var starPointsDoubleSignal = mapIntegerToDoubleSignal(starPointsSignal);
+        pointsSlider.bindValue(starPointsDoubleSignal, starPointsDoubleSignal::set);
         pointsSlider.setWidthFull();
 
         Slider sizeSlider = new Slider("Size", 30, 80, 30);
-        sizeSlider.bindValue(mapIntegerToDoubleSignal(starSizeSignal));
+        var starSizeDoubleSignal = mapIntegerToDoubleSignal(starSizeSignal);
+        sizeSlider.bindValue(starSizeDoubleSignal, starSizeDoubleSignal::set);
         sizeSlider.setWidthFull();
 
         // Appearance section
@@ -418,15 +428,15 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500").set("margin-top", "8px");
 
         ComboBox<String> fillColorField = createColorPicker("Fill");
-        fillColorField.bindValue(starFillSignal);
+        fillColorField.bindValue(starFillSignal, starFillSignal::set);
         fillColorField.setWidthFull();
 
         ComboBox<String> strokeColorField = createColorPicker("Stroke");
-        strokeColorField.bindValue(starStrokeSignal);
+        strokeColorField.bindValue(starStrokeSignal, starStrokeSignal::set);
         strokeColorField.setWidthFull();
 
         Slider opacitySlider = new Slider("Opacity", 0.0, 1.0, 0.1, 0.0);
-        opacitySlider.bindValue(starOpacitySignal);
+        opacitySlider.bindValue(starOpacitySignal, starOpacitySignal::set);
         opacitySlider.setWidthFull();
 
         // Transform section
@@ -436,7 +446,8 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500").set("margin-top", "8px");
 
         Slider rotationSlider = new Slider("Rotation", 0, 360, 0);
-        rotationSlider.bindValue(mapIntegerToDoubleSignal(starRotationSignal));
+        var starRotationDoubleSignal = mapIntegerToDoubleSignal(starRotationSignal);
+        rotationSlider.bindValue(starRotationDoubleSignal, starRotationDoubleSignal::set);
         rotationSlider.setWidthFull();
 
         fields.add(positionLabel, cxSlider, cySlider, shapeLabel, pointsSlider,
@@ -522,27 +533,27 @@ public class UseCase03View extends VerticalLayout {
 
     private void resetAll() {
         // Reset rectangle
-        rectXSignal.value(100);
-        rectYSignal.value(50);
-        rectWidthSignal.value(150);
-        rectHeightSignal.value(80);
-        rectCornerRadiusSignal.value(10);
-        rectFillSignal.value("#10b981");
-        rectStrokeSignal.value("#059669");
-        rectStrokeWidthSignal.value(2);
-        rectOpacitySignal.value(1.0);
-        rectRotationSignal.value(0);
+        rectXSignal.set(100);
+        rectYSignal.set(50);
+        rectWidthSignal.set(150);
+        rectHeightSignal.set(80);
+        rectCornerRadiusSignal.set(10);
+        rectFillSignal.set("#10b981");
+        rectStrokeSignal.set("#059669");
+        rectStrokeWidthSignal.set(2);
+        rectOpacitySignal.set(1.0);
+        rectRotationSignal.set(0);
 
         // Reset star
-        starPointsSignal.value(5);
-        starSizeSignal.value(50);
-        starCxSignal.value(175);
-        starCySignal.value(300);
-        starRotationSignal.value(0);
-        starFillSignal.value("#f59e0b");
-        starStrokeSignal.value("#d97706");
-        starStrokeWidthSignal.value(2);
-        starOpacitySignal.value(1.0);
+        starPointsSignal.set(5);
+        starSizeSignal.set(50);
+        starCxSignal.set(175);
+        starCySignal.set(300);
+        starRotationSignal.set(0);
+        starFillSignal.set("#f59e0b");
+        starStrokeSignal.set("#d97706");
+        starStrokeWidthSignal.set(2);
+        starOpacitySignal.set(1.0);
     }
 
     private WritableSignal<Double> mapIntegerToDoubleSignal(

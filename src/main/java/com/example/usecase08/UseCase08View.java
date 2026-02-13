@@ -58,17 +58,17 @@ public class UseCase08View extends VerticalLayout {
         step1Layout.add(new H3("Step 1: Personal Information"));
 
         TextField firstNameField = new TextField("First Name");
-        firstNameField.bindValue(firstNameSignal);
+        firstNameField.bindValue(firstNameSignal, firstNameSignal::set);
         firstNameField.setRequired(true);
         firstNameField.setMinLength(2);
 
         TextField lastNameField = new TextField("Last Name");
-        lastNameField.bindValue(lastNameSignal);
+        lastNameField.bindValue(lastNameSignal, lastNameSignal::set);
         lastNameField.setRequired(true);
         lastNameField.setMinLength(2);
 
         EmailField emailField = new EmailField("Email");
-        emailField.bindValue(emailSignal);
+        emailField.bindValue(emailSignal, emailSignal::set);
         emailField.setRequired(true);
 
         step1Layout.add(firstNameField, lastNameField, emailField);
@@ -80,18 +80,18 @@ public class UseCase08View extends VerticalLayout {
         step2Layout.add(new H3("Step 2: Company Information"));
 
         TextField companyNameField = new TextField("Company Name");
-        companyNameField.bindValue(companyNameSignal);
+        companyNameField.bindValue(companyNameSignal, companyNameSignal::set);
         companyNameField.setRequired(true);
 
         ComboBox<String> companySizeSelect = new ComboBox<>("Company Size",
                 List.of("1-10", "11-50", "51-200", "201-1000", "1000+"));
-        companySizeSelect.bindValue(companySizeSignal);
+        companySizeSelect.bindValue(companySizeSignal, companySizeSignal::set);
         companySizeSelect.setRequired(true);
 
         ComboBox<String> industrySelect = new ComboBox<>("Industry",
                 List.of("Technology", "Healthcare", "Finance", "Retail",
                         "Manufacturing", "Other"));
-        industrySelect.bindValue(industrySignal);
+        industrySelect.bindValue(industrySignal, industrySignal::set);
         industrySelect.setRequired(true);
 
         step2Layout.add(companyNameField, companySizeSelect, industrySelect);
@@ -103,7 +103,7 @@ public class UseCase08View extends VerticalLayout {
         step3Layout.add(new H3("Step 3: Select Your Plan"));
 
         ComboBox<Plan> planSelect = new ComboBox<>("Plan", Plan.values());
-        planSelect.bindValue(planSignal);
+        planSelect.bindValue(planSignal, planSignal::set);
         planSelect.setRequired(true);
 
         Span planDescription = new Span();
@@ -123,12 +123,12 @@ public class UseCase08View extends VerticalLayout {
 
         Div reviewDiv = new Div();
         reviewDiv.bindText(Signal.computed(() -> "Name: "
-                + firstNameSignal.value() + " " + lastNameSignal.value() + "\n"
-                + "Email: " + emailSignal.value() + "\n" + "Company: "
-                + companyNameSignal.value() + "\n" + "Size: "
-                + companySizeSignal.value() + "\n" + "Industry: "
-                + industrySignal.value() + "\n" + "Plan: "
-                + planSignal.value()));
+                + firstNameSignal.get() + " " + lastNameSignal.get() + "\n"
+                + "Email: " + emailSignal.get() + "\n" + "Company: "
+                + companyNameSignal.get() + "\n" + "Size: "
+                + companySizeSignal.get() + "\n" + "Industry: "
+                + industrySignal.get() + "\n" + "Plan: "
+                + planSignal.get()));
 
         step4Layout.add(reviewDiv);
         step4Layout.bindVisible(
@@ -136,56 +136,56 @@ public class UseCase08View extends VerticalLayout {
 
         Signal<Boolean> step1ValidSignal = Signal.computed(() -> {
             boolean firstNameValid = firstNameSignal
-                    .map(isValid(firstNameField)).value();
+                    .map(isValid(firstNameField)).get();
             boolean lastNameValid = lastNameSignal.map(isValid(lastNameField))
-                    .value();
-            boolean emailValid = emailSignal.map(isValid(emailField)).value();
+                    .get();
+            boolean emailValid = emailSignal.map(isValid(emailField)).get();
             return firstNameValid && lastNameValid && emailValid;
         });
 
         Signal<Boolean> step2ValidSignal = Signal.computed(() -> {
             boolean companyNameValid = companyNameSignal
-                    .map(isValid(companyNameField)).value();
+                    .map(isValid(companyNameField)).get();
             boolean companySizeValid = companySizeSignal
-                    .map(isValid(companySizeSelect)).value();
+                    .map(isValid(companySizeSelect)).get();
             boolean industryValid = industrySignal.map(isValid(industrySelect))
-                    .value();
+                    .get();
             return companyNameValid && companySizeValid && industryValid;
         });
 
         Signal<Boolean> step3ValidSignal = Signal
-                .computed(() -> planSignal.map(isValid(planSelect)).value());
+                .computed(() -> planSignal.map(isValid(planSelect)).get());
 
         // Navigation buttons
         HorizontalLayout navigationLayout = new HorizontalLayout();
 
         Button previousButton = new Button("Previous", e -> {
-            Step current = currentStepSignal.value();
+            Step current = currentStepSignal.get();
             switch (current) {
-            case COMPANY_INFO -> currentStepSignal.value(Step.PERSONAL_INFO);
-            case PLAN_SELECTION -> currentStepSignal.value(Step.COMPANY_INFO);
-            case REVIEW -> currentStepSignal.value(Step.PLAN_SELECTION);
+            case COMPANY_INFO -> currentStepSignal.set(Step.PERSONAL_INFO);
+            case PLAN_SELECTION -> currentStepSignal.set(Step.COMPANY_INFO);
+            case REVIEW -> currentStepSignal.set(Step.PLAN_SELECTION);
             }
         });
         previousButton.bindVisible(
                 currentStepSignal.map(step -> step != Step.PERSONAL_INFO));
 
         Button nextButton = new Button("Next", e -> {
-            Step current = currentStepSignal.value();
+            Step current = currentStepSignal.get();
             switch (current) {
-            case PERSONAL_INFO -> currentStepSignal.value(Step.COMPANY_INFO);
-            case COMPANY_INFO -> currentStepSignal.value(Step.PLAN_SELECTION);
-            case PLAN_SELECTION -> currentStepSignal.value(Step.REVIEW);
+            case PERSONAL_INFO -> currentStepSignal.set(Step.COMPANY_INFO);
+            case COMPANY_INFO -> currentStepSignal.set(Step.PLAN_SELECTION);
+            case PLAN_SELECTION -> currentStepSignal.set(Step.REVIEW);
             }
         });
         nextButton.bindVisible(
                 currentStepSignal.map(step -> step != Step.REVIEW));
         nextButton.bindEnabled(Signal.computed(() -> {
-            Step current = currentStepSignal.value();
+            Step current = currentStepSignal.get();
             return switch (current) {
-            case PERSONAL_INFO -> step1ValidSignal.value();
-            case COMPANY_INFO -> step2ValidSignal.value();
-            case PLAN_SELECTION -> step3ValidSignal.value();
+            case PERSONAL_INFO -> step1ValidSignal.get();
+            case COMPANY_INFO -> step2ValidSignal.get();
+            case PLAN_SELECTION -> step3ValidSignal.get();
             case REVIEW -> false;
             };
         }));

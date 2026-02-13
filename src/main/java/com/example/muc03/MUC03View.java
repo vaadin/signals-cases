@@ -52,7 +52,7 @@ public class MUC03View extends VerticalLayout {
             MUC03Signals muc03Signals,
             UserSessionRegistry userSessionRegistry) {
         CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
-                .value();
+                .get();
         if (userInfo == null || !userInfo.isAuthenticated()) {
             throw new IllegalStateException(
                     "User must be authenticated to access this view");
@@ -144,14 +144,14 @@ public class MUC03View extends VerticalLayout {
         // Bind leaderboard display - sorted by score descending
         leaderboardDiv
                 .bindChildren(com.vaadin.flow.signals.Signal.computed(() -> {
-                    var scores = muc03Signals.getLeaderboardSignal().value();
+                    var scores = muc03Signals.getLeaderboardSignal().get();
                     scoreKeyMap.clear();
                     scores.forEach(
                             (key, signal) -> scoreKeyMap.put(signal, key));
                     return scores.entrySet().stream()
                             .sorted((e1, e2) -> Integer.compare(
-                                    e2.getValue().value(),
-                                    e1.getValue().value()))
+                                    e2.getValue().get(),
+                                    e1.getValue().get()))
                             .map(java.util.Map.Entry::getValue).toList();
                 }), this::createLeaderboardItem);
 
@@ -223,15 +223,15 @@ public class MUC03View extends VerticalLayout {
 
     private HorizontalLayout createLeaderboardItem(
             com.vaadin.flow.signals.shared.SharedValueSignal<Integer> scoreSignal) {
-        var users = userSessionRegistry.getActiveUsersSignal().value();
-        var displayNames = userSessionRegistry.getDisplayNamesSignal().value();
+        var users = userSessionRegistry.getActiveUsersSignal().get();
+        var displayNames = userSessionRegistry.getDisplayNamesSignal().get();
 
         String sessionKey = scoreKeyMap.getOrDefault(scoreSignal, "");
 
         // Build display name mapping
         java.util.Map<String, String> displayNameMap = new java.util.HashMap<>();
         for (int i = 0; i < users.size() && i < displayNames.size(); i++) {
-            String key = users.get(i).value().getCompositeKey();
+            String key = users.get(i).get().getCompositeKey();
             displayNameMap.put(key, displayNames.get(i));
         }
 

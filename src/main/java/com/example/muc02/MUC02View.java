@@ -52,7 +52,7 @@ public class MUC02View extends VerticalLayout {
             MUC02Signals muc02Signals,
             UserSessionRegistry userSessionRegistry) {
         CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
-                .value();
+                .get();
         if (userInfo == null || !userInfo.isAuthenticated()) {
             throw new IllegalStateException(
                     "User must be authenticated to access this view");
@@ -98,7 +98,7 @@ public class MUC02View extends VerticalLayout {
                         .asDouble();
                 double clientY = event.getEventData().get("event.offsetY")
                         .asDouble();
-                myCursorSignal.value(new MUC02Signals.CursorPosition(
+                myCursorSignal.set(new MUC02Signals.CursorPosition(
                         (int) clientX, (int) clientY));
             }
         }).addEventData("event.offsetX").addEventData("event.offsetY");
@@ -154,7 +154,7 @@ public class MUC02View extends VerticalLayout {
     private void renderAllCursors(Div container) {
         // Reactive rendering of cursor indicators
         container.bindChildren(Signal.computed(() -> {
-            var cursors = muc02Signals.getSessionCursorsSignal().value();
+            var cursors = muc02Signals.getSessionCursorsSignal().get();
             cursorKeyMap.clear();
             cursors.forEach((key, signal) -> cursorKeyMap.put(signal, key));
             String ownKey = currentUser + ":" + sessionId;
@@ -171,11 +171,11 @@ public class MUC02View extends VerticalLayout {
     }
 
     private java.util.Map<String, String> buildDisplayNameMap() {
-        var users = userSessionRegistry.getActiveUsersSignal().value();
-        var displayNames = userSessionRegistry.getDisplayNamesSignal().value();
+        var users = userSessionRegistry.getActiveUsersSignal().get();
+        var displayNames = userSessionRegistry.getDisplayNamesSignal().get();
         java.util.Map<String, String> map = new java.util.HashMap<>();
         for (int i = 0; i < users.size() && i < displayNames.size(); i++) {
-            map.put(users.get(i).value().getCompositeKey(),
+            map.put(users.get(i).get().getCompositeKey(),
                     displayNames.get(i));
         }
         return map;

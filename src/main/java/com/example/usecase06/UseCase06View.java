@@ -52,17 +52,17 @@ public class UseCase06View extends VerticalLayout {
 
         // Computed signal for subtotal
         var subtotalSignal = Signal.computed(
-                () -> cartItemsSignal.value().stream().map(ValueSignal::value)
+                () -> cartItemsSignal.get().stream().map(ValueSignal::get)
                         .map(item -> item.product().price()
                                 .multiply(BigDecimal.valueOf(item.quantity())))
                         .reduce(BigDecimal.ZERO, BigDecimal::add));
 
         // Computed signal for discount
         var discountSignal = Signal.computed(() -> {
-            String code = discountCodeSignal.value();
+            String code = discountCodeSignal.get();
             DiscountCode discount = validateDiscountCode(code);
             if (discount != null) {
-                return subtotalSignal.value().multiply(discount.percentage())
+                return subtotalSignal.get().multiply(discount.percentage())
                         .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
             }
             return BigDecimal.ZERO;
@@ -70,18 +70,18 @@ public class UseCase06View extends VerticalLayout {
 
         // Computed signal for shipping cost
         var shippingSignal = Signal
-                .computed(() -> getShippingCost(shippingOptionSignal.value()));
+                .computed(() -> getShippingCost(shippingOptionSignal.get()));
 
         // Computed signal for tax (8%)
         var taxSignal = Signal.computed(
-                () -> subtotalSignal.value().subtract(discountSignal.value())
+                () -> subtotalSignal.get().subtract(discountSignal.get())
                         .multiply(new BigDecimal("0.08"))
                         .setScale(2, RoundingMode.HALF_UP));
 
         // Computed signal for grand total
-        var totalSignal = Signal.computed(() -> subtotalSignal.value()
-                .subtract(discountSignal.value()).add(shippingSignal.value())
-                .add(taxSignal.value()).setScale(2, RoundingMode.HALF_UP));
+        var totalSignal = Signal.computed(() -> subtotalSignal.get()
+                .subtract(discountSignal.get()).add(shippingSignal.get())
+                .add(taxSignal.get()).setScale(2, RoundingMode.HALF_UP));
 
         var products = List.of(
                 new Product("1", "Laptop", new BigDecimal("999.99")),
@@ -122,7 +122,7 @@ public class UseCase06View extends VerticalLayout {
         emptyCart.getStyle().set("margin", "0").set("font-style", "italic")
                 .set("color", "var(--lumo-secondary-text-color)");
         emptyCart.bindVisible(
-                Signal.computed(() -> cartItemsSignal.value().isEmpty()));
+                Signal.computed(() -> cartItemsSignal.get().isEmpty()));
         cartItemsContainer.add(emptyCart, cartItemsList);
 
         // Options section
@@ -133,13 +133,13 @@ public class UseCase06View extends VerticalLayout {
         var discountField = new TextField("Discount Code");
         discountField.setPlaceholder("Enter SAVE10 or SAVE20");
         discountField.setWidth("250px");
-        discountField.bindValue(discountCodeSignal);
+        discountField.bindValue(discountCodeSignal, discountCodeSignal::set);
 
         var shippingSelect = new ComboBox<>("Shipping Method",
                 ShippingOption.values());
         shippingSelect.setValue(ShippingOption.STANDARD);
         shippingSelect.setWidth("200px");
-        shippingSelect.bindValue(shippingOptionSignal);
+        shippingSelect.bindValue(shippingOptionSignal, shippingOptionSignal::set);
 
         optionsLayout.add(discountField, shippingSelect);
 
@@ -256,7 +256,7 @@ public class UseCase06View extends VerticalLayout {
         // Two-way mapped signal for quantity
         WritableSignal<Integer> quantitySignal = itemSignal
                 .map(CartItem::quantity, CartItem::withQuantity);
-        quantityField.bindValue(quantitySignal);
+        quantityField.bindValue(quantitySignal, quantitySignal::set);
 
         // Handle removal when quantity drops below 1
         quantityField.addValueChangeListener(e -> {
@@ -288,11 +288,11 @@ public class UseCase06View extends VerticalLayout {
 
     private void addToCart(Product product,
             ListSignal<CartItem> cartItemsSignal) {
-        cartItemsSignal.value().stream().filter(
-                signal -> signal.value().product().id().equals(product.id()))
+        cartItemsSignal.get().stream().filter(
+                signal -> signal.get().product().id().equals(product.id()))
                 .findFirst().ifPresentOrElse(
-                        existing -> existing.value(existing.value()
-                                .withQuantity(existing.value().quantity() + 1)),
+                        existing -> existing.set(existing.get()
+                                .withQuantity(existing.get().quantity() + 1)),
                         () -> cartItemsSignal
                                 .insertLast(new CartItem(product, 1)));
     }
