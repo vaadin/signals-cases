@@ -34,8 +34,8 @@ public class MUC02Signals {
     public WritableSignal<CursorPosition> getCursorSignalForUser(
             String username, String sessionId) {
         String sessionKey = username + ":" + sessionId;
-        return sessionCursorsSignal
-                .putIfAbsent(sessionKey, new CursorPosition(0, 0)).signal();
+        sessionCursorsSignal.putIfAbsent(sessionKey, new CursorPosition(0, 0));
+        return sessionCursorsSignal.get().get(sessionKey);
     }
 
     public void unregisterCursor(String username, String sessionId) {
