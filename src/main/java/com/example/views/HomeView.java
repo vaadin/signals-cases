@@ -30,9 +30,9 @@ public class HomeView extends VerticalLayout {
 
         // Introduction
         Paragraph intro = new Paragraph(
-                "This application demonstrates 17 comprehensive use cases for the proposed Vaadin Signal API. "
+                "This application demonstrates 28 use cases (22 single-user + 6 multi-user) for the Vaadin Signal API. "
                         + "Each use case validates different aspects of the reactive programming model, from basic "
-                        + "one-way bindings to complex form validation and dynamic component rendering.");
+                        + "one-way bindings to complex forms, AI integration, and multi-user collaboration.");
 
         // Signal API Overview
         H2 overviewTitle = new H2("What are Signals?");
@@ -53,35 +53,49 @@ public class HomeView extends VerticalLayout {
         stats.setSpacing(false);
         stats.setPadding(false);
         stats.add(
-                createStat("17",
-                        "Total use cases covering the full API surface"),
+                createStat("28",
+                        "Total use cases (22 single-user + 6 multi-user)"),
+                createStat("22",
+                        "Single-user use cases across 13 categories"),
                 createStat("6",
-                        "Categories from basic bindings to advanced features"),
-                createStat("100%", "Coverage of proposed signal API features"));
+                        "Multi-user collaboration use cases"));
 
         // Categories
         H2 categoriesTitle = new H2("Use Case Categories");
         VerticalLayout categories = new VerticalLayout();
         categories.setSpacing(false);
         categories.setPadding(false);
-        categories.add(createCategory("Category 1: Basic Signal Bindings",
-                "Use Cases 1-3",
-                "One-way and two-way bindings, component state synchronization"),
-                createCategory("Category 2: Computed Signals & Derivations",
-                        "Use Cases 4-5",
-                        "Multi-signal computations and transformation pipelines"),
-                createCategory("Category 3: Conditional Rendering",
-                        "Use Cases 6-8",
-                        "Dynamic subforms, progressive disclosure, permission-based UI"),
-                createCategory("Category 4: List & Collection Rendering",
-                        "Use Cases 9-10",
-                        "Filtered data grids and dynamic lists with real-time updates"),
-                createCategory("Category 5: Cross-Component Interactions",
-                        "Use Cases 11-13",
-                        "Cascading dropdowns, shopping carts, master-detail patterns"),
-                createCategory("Category 6: Complex Forms & Advanced",
-                        "Use Cases 14-17",
-                        "Multi-step wizards, Binder integration, ComponentToggle, Grid providers"));
+        categories.add(
+                createCategory("Basic Reactivity",
+                        "UC01-02",
+                        "Dynamic button state, progressive disclosure with nested conditions"),
+                createCategory("SVG / Graphics",
+                        "UC03",
+                        "Interactive SVG shape editor with attribute binding"),
+                createCategory("Lists & Grids",
+                        "UC04, UC06-07",
+                        "Filtered data grid, shopping cart, master-detail invoice"),
+                createCategory("Forms",
+                        "UC05, UC08-09",
+                        "Cascading selector, multi-step wizard, Binder integration"),
+                createCategory("Browser Integration",
+                        "UC11-13",
+                        "Responsive layout, dynamic view title, current user signal"),
+                createCategory("Async & Search",
+                        "UC14-16",
+                        "Async data loading, debounced search, URL state integration"),
+                createCategory("Complex State & AI",
+                        "UC17-18",
+                        "Custom PC builder (~70 signals), LLM-powered task management"),
+                createCategory("Parallel Loading & Preferences",
+                        "UC19-20",
+                        "Parallel data loading with individual spinners, user preferences"),
+                createCategory("i18n, Mapping & Dashboard",
+                        "UC21-23",
+                        "Reactive i18n, two-way mapped signals, real-time dashboard"),
+                createCategory("Multi-User Collaboration",
+                        "MUC01-04, MUC06-07",
+                        "Chat, cursors, click race game, locking, shared tasks, shared LLM tasks"));
 
         // Documentation Link
         H2 docsTitle = new H2("Documentation");
@@ -91,7 +105,7 @@ public class HomeView extends VerticalLayout {
                 "vaadin/platform#8366 - Signal API Proposal"));
         docs.add(new Span(" and the "));
         docs.add(new Anchor(
-                "https://github.com/Artur-/signals-cases/blob/main/signal-use-cases.md",
+                "https://github.com/vaadin/signals-cases/blob/main/signal-use-cases.md",
                 "signal-use-cases.md"));
         docs.add(new Span(" file in this project."));
 

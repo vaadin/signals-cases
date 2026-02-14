@@ -42,7 +42,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
                 + "editor / password → EDITOR\n" + "admin / password → ADMIN\n"
                 + "superadmin / password → SUPER_ADMIN");
 
-        Paragraph hint = new Paragraph("Use UC 8 to see permission-based UI");
+        Paragraph hint = new Paragraph("Use UC 13 to see permission-based UI");
         hint.getStyle().set("font-style", "italic").set("margin-top", "0.5em")
                 .set("color", "#666");
 
