@@ -159,12 +159,14 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         Avatar userAvatar = new Avatar();
         userAvatar.getElement().bindProperty("name", currentUserSignal
                 .getUserSignal()
-                .map(user -> user.isAuthenticated() ? user.getUsername() : ""), null);
+                .map(user -> user.isAuthenticated() ? user.getUsername() : ""),
+                null);
         userAvatar.getElement().bindProperty("img",
                 currentUserSignal.getUserSignal()
                         .map(user -> user.isAuthenticated()
                                 ? getProfilePicturePath(user.getUsername())
-                                : ""), null);
+                                : ""),
+                null);
         userAvatar.bindVisible(currentUserSignal.getUserSignal()
                 .map(user -> user.isAuthenticated()));
 
