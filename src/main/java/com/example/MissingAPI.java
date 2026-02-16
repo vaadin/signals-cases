@@ -6,6 +6,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.local.ListSignal;
@@ -60,6 +61,52 @@ public class MissingAPI {
             // Read each individual signal to register dependency
             List<T> items = signals.stream().map(ValueSignal::get).toList();
             grid.setItems(items);
+        });
+    }
+
+    /**
+     * Binds a VirtualList's items to a Signal containing a List.
+     */
+    public static <T> void bindItems(VirtualList<T> virtualList,
+            Signal<List<T>> signal) {
+        ComponentEffect.effect(virtualList, () -> {
+            List<T> items = signal.get();
+            if (items != null) {
+                virtualList.setItems(items);
+            } else {
+                virtualList.setItems(List.of());
+            }
+        });
+    }
+
+    /**
+     * Binds a VirtualList's items to a SharedListSignal. Registers dependencies
+     * on all individual ValueSignals within the ListSignal by reading each one,
+     * so the VirtualList updates when any item changes.
+     */
+    public static <T> void bindItems(VirtualList<T> virtualList,
+            SharedListSignal<T> listSignal) {
+        ComponentEffect.effect(virtualList, () -> {
+            List<SharedValueSignal<T>> signals = listSignal.get();
+            // Read each individual signal to register dependency
+            List<T> items = signals.stream().map(SharedValueSignal::get)
+                    .toList();
+            virtualList.setItems(items);
+        });
+    }
+
+    /**
+     * Binds a VirtualList's items to a local ListSignal. Registers dependencies
+     * on all individual ValueSignals within the ListSignal by reading each one,
+     * so the VirtualList updates when any item changes.
+     */
+    public static <T> void bindItems(VirtualList<T> virtualList,
+            ListSignal<T> listSignal) {
+        ComponentEffect.effect(virtualList, () -> {
+            List<ValueSignal<T>> signals = listSignal.get();
+            // Read each individual signal to register dependency
+            List<T> items = signals.stream().map(ValueSignal::get).toList();
+            virtualList.setItems(items);
         });
     }
 
