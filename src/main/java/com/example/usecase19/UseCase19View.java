@@ -328,9 +328,10 @@ public class UseCase19View extends VerticalLayout {
         });
 
         // Apply border color using ComponentEffect
-        com.vaadin.flow.component.ComponentEffect.bind(card, borderColorSignal,
-                (c, color) -> c.getStyle().set("border-left",
-                        "4px solid " + color));
+        com.vaadin.flow.component.ComponentEffect.effect(card, () -> {
+            String color = borderColorSignal.get();
+            card.getStyle().set("border-left", "4px solid " + color);
+        });
 
         return card;
     }
