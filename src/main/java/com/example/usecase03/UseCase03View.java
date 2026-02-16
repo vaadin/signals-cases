@@ -309,12 +309,12 @@ public class UseCase03View extends VerticalLayout {
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-weight", "500");
 
-        Slider xSlider = new Slider("X", 0, 500, 0);
+        Slider xSlider = new Slider("X", 0, 500);
         var rectXDoubleSignal = mapIntegerToDoubleSignal(rectXSignal);
         xSlider.bindValue(rectXDoubleSignal, rectXDoubleSignal::set);
         xSlider.setWidthFull();
 
-        Slider ySlider = new Slider("Y", 0, 500, 0);
+        Slider ySlider = new Slider("Y", 0, 500);
         var rectYDoubleSignal = mapIntegerToDoubleSignal(rectYSignal);
         ySlider.bindValue(rectYDoubleSignal, rectYDoubleSignal::set);
         ySlider.setWidthFull();
@@ -325,19 +325,19 @@ public class UseCase03View extends VerticalLayout {
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-weight", "500").set("margin-top", "8px");
 
-        Slider widthSlider = new Slider("Width", 50, 250, 50);
+        Slider widthSlider = new Slider("Width", 50, 250);
         var rectWidthDoubleSignal = mapIntegerToDoubleSignal(rectWidthSignal);
         widthSlider.bindValue(rectWidthDoubleSignal,
                 rectWidthDoubleSignal::set);
         widthSlider.setWidthFull();
 
-        Slider heightSlider = new Slider("Height", 30, 150, 30);
+        Slider heightSlider = new Slider("Height", 30, 150);
         var rectHeightDoubleSignal = mapIntegerToDoubleSignal(rectHeightSignal);
         heightSlider.bindValue(rectHeightDoubleSignal,
                 rectHeightDoubleSignal::set);
         heightSlider.setWidthFull();
 
-        Slider cornerRadiusSlider = new Slider("Corner Radius", 0, 50, 0);
+        Slider cornerRadiusSlider = new Slider("Corner Radius", 0, 50);
         var rectCornerRadiusDoubleSignal = mapIntegerToDoubleSignal(
                 rectCornerRadiusSignal);
         cornerRadiusSlider.bindValue(rectCornerRadiusDoubleSignal,
@@ -358,7 +358,8 @@ public class UseCase03View extends VerticalLayout {
         strokeColorField.bindValue(rectStrokeSignal, rectStrokeSignal::set);
         strokeColorField.setWidthFull();
 
-        Slider opacitySlider = new Slider("Opacity", 0.0, 1.0, 0.1, 0.0);
+        Slider opacitySlider = new Slider("Opacity", 0.0, 1.0);
+        opacitySlider.setStep(0.1);
         opacitySlider.bindValue(rectOpacitySignal, rectOpacitySignal::set);
         opacitySlider.setWidthFull();
 
@@ -368,7 +369,7 @@ public class UseCase03View extends VerticalLayout {
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-weight", "500").set("margin-top", "8px");
 
-        Slider rotationSlider = new Slider("Rotation", 0, 360, 0);
+        Slider rotationSlider = new Slider("Rotation", 0, 360);
         var rectRotationDoubleSignal = mapIntegerToDoubleSignal(
                 rectRotationSignal);
         rotationSlider.bindValue(rectRotationDoubleSignal,
@@ -399,12 +400,12 @@ public class UseCase03View extends VerticalLayout {
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-weight", "500");
 
-        Slider cxSlider = new Slider("Center X", 0, 500, 0);
+        Slider cxSlider = new Slider("Center X", 0, 500);
         var starCxDoubleSignal = mapIntegerToDoubleSignal(starCxSignal);
         cxSlider.bindValue(starCxDoubleSignal, starCxDoubleSignal::set);
         cxSlider.setWidthFull();
 
-        Slider cySlider = new Slider("Center Y", 0, 500, 0);
+        Slider cySlider = new Slider("Center Y", 0, 500);
         var starCyDoubleSignal = mapIntegerToDoubleSignal(starCySignal);
         cySlider.bindValue(starCyDoubleSignal, starCyDoubleSignal::set);
         cySlider.setWidthFull();
@@ -415,13 +416,13 @@ public class UseCase03View extends VerticalLayout {
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-weight", "500").set("margin-top", "8px");
 
-        Slider pointsSlider = new Slider("Points", 3, 10, 3);
+        Slider pointsSlider = new Slider("Points", 3, 10);
         var starPointsDoubleSignal = mapIntegerToDoubleSignal(starPointsSignal);
         pointsSlider.bindValue(starPointsDoubleSignal,
                 starPointsDoubleSignal::set);
         pointsSlider.setWidthFull();
 
-        Slider sizeSlider = new Slider("Size", 30, 80, 30);
+        Slider sizeSlider = new Slider("Size", 30, 80);
         var starSizeDoubleSignal = mapIntegerToDoubleSignal(starSizeSignal);
         sizeSlider.bindValue(starSizeDoubleSignal, starSizeDoubleSignal::set);
         sizeSlider.setWidthFull();
@@ -440,7 +441,8 @@ public class UseCase03View extends VerticalLayout {
         strokeColorField.bindValue(starStrokeSignal, starStrokeSignal::set);
         strokeColorField.setWidthFull();
 
-        Slider opacitySlider = new Slider("Opacity", 0.0, 1.0, 0.1, 0.0);
+        Slider opacitySlider = new Slider("Opacity", 0.0, 1.0);
+        opacitySlider.setStep(0.1);
         opacitySlider.bindValue(starOpacitySignal, starOpacitySignal::set);
         opacitySlider.setWidthFull();
 
@@ -450,7 +452,7 @@ public class UseCase03View extends VerticalLayout {
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-weight", "500").set("margin-top", "8px");
 
-        Slider rotationSlider = new Slider("Rotation", 0, 360, 0);
+        Slider rotationSlider = new Slider("Rotation", 0, 360);
         var starRotationDoubleSignal = mapIntegerToDoubleSignal(
                 starRotationSignal);
         rotationSlider.bindValue(starRotationDoubleSignal,
