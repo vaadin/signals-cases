@@ -398,45 +398,45 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         messageList.setMarkdown(true);
 
         // Reactively update message list using ComponentEffect
-        com.vaadin.flow.component.ComponentEffect.bind(messageList,
-                chatMessagesSignal, (msgList, msgSignals) -> {
-                    if (msgSignals != null) {
-                        CurrentUserSignal.UserInfo userInfo = currentUserSignal
-                                .getUserSignal().get();
+        com.vaadin.flow.component.ComponentEffect.effect(messageList, () -> {
+            var msgSignals = chatMessagesSignal.get();
+            if (msgSignals != null) {
+                CurrentUserSignal.UserInfo userInfo = currentUserSignal
+                        .getUserSignal().get();
 
-                        var items = msgSignals.stream().map(msgSignal -> {
-                            ChatMessageData msg = msgSignal.get();
-                            MessageListItem item = new MessageListItem(
-                                    msg.content().isBlank() ? "_typing..._"
-                                            : msg.content(),
-                                    msg.timestamp(), msg.role());
+                var items = msgSignals.stream().map(msgSignal -> {
+                    ChatMessageData msg = msgSignal.get();
+                    MessageListItem item = new MessageListItem(
+                            msg.content().isBlank() ? "_typing..._"
+                                    : msg.content(),
+                            msg.timestamp(), msg.role());
 
-                            if (msg.role().equals("You") && userInfo != null
-                                    && userInfo.isAuthenticated()) {
-                                item.setUserColorIndex(0);
-                                String displayName = getCurrentDisplayName();
-                                String username = userInfo.getUsername();
-                                if (displayName != null
-                                        && !displayName.isBlank()) {
-                                    item.setUserName(displayName);
-                                }
-                                if (username != null && !username.isBlank()) {
-                                    String userImage = MainLayout
-                                            .getProfilePicturePath(username);
-                                    if (userImage != null
-                                            && !userImage.isBlank()) {
-                                        item.setUserImage(userImage);
-                                    }
-                                }
-                            } else {
-                                item.setUserColorIndex(1);
+                    if (msg.role().equals("You") && userInfo != null
+                            && userInfo.isAuthenticated()) {
+                        item.setUserColorIndex(0);
+                        String displayName = getCurrentDisplayName();
+                        String username = userInfo.getUsername();
+                        if (displayName != null
+                                && !displayName.isBlank()) {
+                            item.setUserName(displayName);
+                        }
+                        if (username != null && !username.isBlank()) {
+                            String userImage = MainLayout
+                                    .getProfilePicturePath(username);
+                            if (userImage != null
+                                    && !userImage.isBlank()) {
+                                item.setUserImage(userImage);
                             }
-
-                            return item;
-                        }).toList();
-                        msgList.setItems(items);
+                        }
+                    } else {
+                        item.setUserColorIndex(1);
                     }
-                });
+
+                    return item;
+                }).toList();
+                messageList.setItems(items);
+            }
+        });
 
         // Message input
         messageInput = new MessageInput();

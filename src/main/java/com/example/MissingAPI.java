@@ -23,11 +23,12 @@ public class MissingAPI {
      * Binds a Grid's items to a Signal containing a List.
      */
     public static <T> void bindItems(Grid<T> grid, Signal<List<T>> signal) {
-        ComponentEffect.bind(grid, signal, (g, items) -> {
+        ComponentEffect.effect(grid, () -> {
+            List<T> items = signal.get();
             if (items != null) {
-                g.setItems(items);
+                grid.setItems(items);
             } else {
-                g.setItems(List.of());
+                grid.setItems(List.of());
             }
         });
     }
@@ -68,11 +69,12 @@ public class MissingAPI {
     public static <T> void bindItems(
             com.vaadin.flow.component.combobox.ComboBox<T> comboBox,
             Signal<List<T>> signal) {
-        ComponentEffect.bind(comboBox, signal, (cb, items) -> {
+        ComponentEffect.effect(comboBox, () -> {
+            List<T> items = signal.get();
             if (items != null) {
-                cb.setItems(items);
+                comboBox.setItems(items);
             } else {
-                cb.setItems(List.of());
+                comboBox.setItems(List.of());
             }
         });
     }
@@ -98,9 +100,11 @@ public class MissingAPI {
             com.vaadin.flow.component.HasValidation component,
             Signal<Boolean> signal) {
         component.setManualValidation(true);
-        ComponentEffect.bind((Component) component, signal,
-                (c, invalid) -> ((com.vaadin.flow.component.HasValidation) c)
-                        .setInvalid(invalid));
+        ComponentEffect.effect((Component) component, () -> {
+            Boolean invalid = signal.get();
+            ((com.vaadin.flow.component.HasValidation) component)
+                    .setInvalid(invalid != null && invalid);
+        });
     }
 
     /**
@@ -122,7 +126,12 @@ public class MissingAPI {
      */
     public static void tabsSyncSelectedIndex(Tabs tabs,
             WritableSignal<Integer> numberSignal) {
-        ComponentEffect.bind(tabs, numberSignal, Tabs::setSelectedIndex);
+        ComponentEffect.effect(tabs, () -> {
+            Integer index = numberSignal.get();
+            if (index != null) {
+                tabs.setSelectedIndex(index);
+            }
+        });
         tabs.addSelectedChangeListener(event -> {
             numberSignal.set(event.getSource().getSelectedIndex());
         });

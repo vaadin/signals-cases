@@ -184,10 +184,11 @@ public class UseCase02View extends VerticalLayout {
         resultDisplay.add(new H3("Collected Form Data"), resultText);
         Results results = new Results();
         resultText.bindText(results.text);
-        ComponentEffect.bind(resultText, results.text,
-                (component, signal) -> Notification.show(
-                        "Form data displayed below", 2000,
-                        Notification.Position.BOTTOM_START));
+        ComponentEffect.effect(resultText, () -> {
+            results.text.get();
+            Notification.show("Form data displayed below", 2000,
+                    Notification.Position.BOTTOM_START);
+        });
         resultDisplay.bindVisible(results.visible);
 
         // Show Values button

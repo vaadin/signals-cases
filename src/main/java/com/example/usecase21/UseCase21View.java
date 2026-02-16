@@ -104,19 +104,18 @@ public class UseCase21View extends VerticalLayout {
         // Name field
         TextField nameField = new TextField();
         nameField.setWidthFull();
-        ComponentEffect.bind(nameField, t.t("uc21.sampleForm.nameLabel"),
-                (field, label) -> field.setLabel(label));
-        ComponentEffect.bind(nameField, t.t("uc21.sampleForm.namePlaceholder"),
-                (field, placeholder) -> field.setPlaceholder(placeholder));
+        ComponentEffect.effect(nameField,
+                () -> nameField.setLabel(t.t("uc21.sampleForm.nameLabel").get()));
+        ComponentEffect.effect(nameField,
+                () -> nameField.setPlaceholder(t.t("uc21.sampleForm.namePlaceholder").get()));
 
         // Email field
         EmailField emailField = new EmailField();
         emailField.setWidthFull();
-        ComponentEffect.bind(emailField, t.t("uc21.sampleForm.emailLabel"),
-                (field, label) -> field.setLabel(label));
-        ComponentEffect.bind(emailField,
-                t.t("uc21.sampleForm.emailPlaceholder"),
-                (field, placeholder) -> field.setPlaceholder(placeholder));
+        ComponentEffect.effect(emailField,
+                () -> emailField.setLabel(t.t("uc21.sampleForm.emailLabel").get()));
+        ComponentEffect.effect(emailField,
+                () -> emailField.setPlaceholder(t.t("uc21.sampleForm.emailPlaceholder").get()));
 
         // Buttons
         Button submitButton = new Button();
