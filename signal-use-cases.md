@@ -1,9 +1,9 @@
 # Vaadin Signal API Use Cases - Current Implementation
 
-**Last Updated**: 2026-02-09
-**Current Implementation**: 28 use cases (22 single-user + 6 multi-user)
+**Last Updated**: 2026-02-16
+**Current Implementation**: 29 use cases (23 single-user + 6 multi-user)
 
-This document describes the 28 use cases currently implemented in this project.
+This document describes the 29 use cases currently implemented in this project.
 
 ## Introduction
 
@@ -11,7 +11,7 @@ Signals provide a reactive, declarative approach to building UIs where component
 
 ---
 
-## Single-User Use Cases (22 total)
+## Single-User Use Cases (23 total)
 
 ### UC 1: Dynamic Button State
 
@@ -365,6 +365,22 @@ quantityField.bindValue(
 
 ---
 
+### UC 24: VirtualList with Signal Data Source
+
+**Description**: Notification inbox using a VirtualList bound to a signal-based data source. Users can view, filter by type and read status, and manage notifications (mark read/unread, dismiss). Demonstrates VirtualList as an alternative to Grid for signal-bound lists with custom component rendering.
+
+**Key Patterns**:
+- `ListSignal<Notification>` as the source of truth
+- Computed `Signal<List<Notification>>` for filtered view (by type and read status)
+- VirtualList bound to the filtered signal via `MissingAPI.bindItems()`
+- Custom `ComponentRenderer` for rich per-item rendering
+- Reactive aggregate signals (unread count, filtered count)
+- Mutating items within a `ListSignal` (mark read/unread, dismiss)
+
+**Route**: `/use-case-24`
+
+---
+
 **Core Pattern:**
 ```java
 // Parent signal (single source of truth)
@@ -550,6 +566,10 @@ Multi-user use cases (MUC01-04, MUC06-07) share signals across sessions:
 
 ## Recent Changes
 
+**2026-02-16 Update:**
+- Added UC24 (VirtualList with Signal Data Source) - notification inbox with VirtualList bound to signals
+- Added VirtualList `bindItems()` overloads to MissingAPI.java
+
 **2026-02-09 Update:**
 - Added UC23 (Real-time Dashboard)
 
@@ -565,5 +585,5 @@ Multi-user use cases (MUC01-04, MUC06-07) share signals across sessions:
 
 ---
 
-**Total Use Cases**: 28 (22 single-user + 6 multi-user)
-**Last Updated**: 2026-02-13
+**Total Use Cases**: 29 (23 single-user + 6 multi-user)
+**Last Updated**: 2026-02-16
