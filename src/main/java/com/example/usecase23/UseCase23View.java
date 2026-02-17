@@ -1,5 +1,6 @@
 package com.example.usecase23;
 
+import com.vaadin.copilot.shaded.guava.util.concurrent.AtomicDouble;
 import jakarta.annotation.security.PermitAll;
 
 import java.util.List;
@@ -57,10 +58,10 @@ public class UseCase23View extends Main {
     private static final int TIMELINE_POINTS = 12;
 
     // state
-    private final ValueSignal<Number> currentUsersSignal = new ValueSignal<>();
-    private final ValueSignal<Number> viewEventsSignal = new ValueSignal<>();
-    private final ValueSignal<Number> conversionRateSignal = new ValueSignal<>();
-    private final ValueSignal<Number> customMetricSignal = new ValueSignal<>();
+    private final ValueSignal<Number> currentUsersSignal = new ValueSignal<>(0);
+    private final ValueSignal<Number> viewEventsSignal = new ValueSignal<>(0);
+    private final ValueSignal<Number> conversionRateSignal = new ValueSignal<>(0);
+    private final ValueSignal<Number> customMetricSignal = new ValueSignal<>(0);
 
     private final ListSignal<String> timelineCategoriesSignal = new ListSignal<>();
     private final ListSignal<Number> berlinTimelineSignal = new ListSignal<>();
@@ -382,54 +383,46 @@ public class UseCase23View extends Main {
     }
 
     private static final class HighlightCard extends VerticalLayout {
-        private final Span valueSpan;
-        private final Span badge;
-        private final Span percentageSpan;
-        private final Function<Number, String> format;
-        private final ValueSignal<Number> lastNumeric = new ValueSignal<>();
+        private double lastNumeric;
 
         private HighlightCard(String title, WritableSignal<Number> signal,
                 Function<Number, String> format) {
-            this.format = format;
+
+            // Computed signal for percentage change
+            lastNumeric = signal.peek().doubleValue();
+            Signal<Double> percentageSignal = signal.map(newValue -> {
+                double percentageChange = calculatePercentageChange(newValue, lastNumeric);
+                lastNumeric = newValue.doubleValue();
+                return percentageChange;
+            });
+
+            // Computed signals using method references
+            Signal<String> prefixSignal = percentageSignal.map(this::getPrefix);
+            Signal<VaadinIcon> iconSignal = percentageSignal.map(this::getIcon);
+            Signal<Boolean> successSignal = percentageSignal.map(percentage -> percentage > 0);
 
             H2 h2 = new H2(title);
             h2.addClassNames(FontWeight.NORMAL, Margin.NONE,
                     TextColor.SECONDARY, FontSize.XSMALL);
 
-            valueSpan = new Span();
+            Span valueSpan = new Span();
             valueSpan.addClassNames(FontWeight.SEMIBOLD, FontSize.XXXLARGE);
             valueSpan.bindText(signal.map(format::apply));
 
-            // Computed signal for percentage change
-            Signal<Double> percentageSignal = signal.map(newValue ->
-                calculatePercentageChange(newValue, lastNumeric.get())
-            );
-
-            // Computed signals using method references
-            Signal<String> prefixSignal = percentageSignal.map(this::getPrefix);
-            Signal<VaadinIcon> iconSignal = percentageSignal.map(this::getIcon);
-            Signal<String> themeSignal = percentageSignal.map(this::getTheme);
-
-            badge = new Span();
-            percentageSpan = new Span();
+            Span percentageSpan = new Span();
             percentageSpan.bindText(prefixSignal.map(prefix ->
                 prefix + percentageSignal.get()
             ));
 
-            // Effect to update badge structure
-            ComponentEffect.effect(badge, () -> {
-                badge.removeAll();
+            Icon icon = new Icon(iconSignal);
+            icon.setSize("10px");
+            icon.getStyle().setMarginRight("4px").setMarginLeft("0");
 
-                Icon i = iconSignal.get().create();
-                i.setSize("10px");
-                i.getStyle().setMarginRight("4px").setMarginLeft("0");
-                badge.add(i, percentageSpan);
-
-                badge.getElement().getThemeList().clear();
-                badge.getElement().getThemeList().add(themeSignal.get());
-
-                lastNumeric.set(signal.get());
-            });
+            Span badge = new Span();
+            badge.add(icon, percentageSpan);
+            badge.getElement().getThemeList().add("badge");
+            badge.getElement().getThemeList().bind("success", successSignal);
+            badge.getElement().getThemeList().bind("error", Signal.not(successSignal));
 
             add(h2, valueSpan, badge);
             getStyle().setGap("5px");
@@ -447,16 +440,6 @@ public class UseCase23View extends Main {
 
         private VaadinIcon getIcon(double percentage) {
             return percentage < 0 ? VaadinIcon.ARROW_DOWN : VaadinIcon.ARROW_UP;
-        }
-
-        private String getTheme(double percentage) {
-            String theme = "badge";
-            if (percentage > 0) {
-                theme += " success";
-            } else if (percentage < 0) {
-                theme += " error";
-            }
-            return theme;
         }
 
         private double calculatePercentageChange(Number current,
