@@ -9,7 +9,7 @@ import org.springframework.web.context.annotation.SessionScope;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.WritableSignal;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
  * Session-scoped service that bridges ResourceBundle and Signals for reactive
@@ -53,7 +53,7 @@ public class TranslationService {
     /**
      * Returns the current locale signal for direct access.
      */
-    public WritableSignal<Locale> getLocaleSignal() {
+    public ValueSignal<Locale> getLocaleSignal() {
         return UI.getCurrent().localeSignal();
     }
 }

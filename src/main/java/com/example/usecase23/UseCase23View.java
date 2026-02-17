@@ -41,7 +41,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.flow.theme.lumo.LumoUtility.FontSize;
@@ -105,7 +104,7 @@ public class UseCase23View extends Main {
     }
 
     private HighlightCard createHighlightCard(String title,
-            WritableSignal<Number> signal, Function<Number, String> format) {
+            ValueSignal<Number> signal, Function<Number, String> format) {
         return new HighlightCard(title, signal, format);
     }
 
@@ -385,7 +384,7 @@ public class UseCase23View extends Main {
     private static final class HighlightCard extends VerticalLayout {
         private double lastNumeric;
 
-        private HighlightCard(String title, WritableSignal<Number> signal,
+        private HighlightCard(String title, ValueSignal<Number> signal,
                 Function<Number, String> format) {
 
             // Computed signal for percentage change

@@ -22,7 +22,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-03", layout = MainLayout.class)
@@ -309,14 +308,12 @@ public class UseCase03View extends VerticalLayout {
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-weight", "500");
 
-        Slider xSlider = new Slider("X", 0, 500, 0);
-        var rectXDoubleSignal = mapIntegerToDoubleSignal(rectXSignal);
-        xSlider.bindValue(rectXDoubleSignal, rectXDoubleSignal::set);
+        Slider xSlider = new Slider("X", 0, 500);
+        bindSliderToInteger(xSlider, rectXSignal);
         xSlider.setWidthFull();
 
-        Slider ySlider = new Slider("Y", 0, 500, 0);
-        var rectYDoubleSignal = mapIntegerToDoubleSignal(rectYSignal);
-        ySlider.bindValue(rectYDoubleSignal, rectYDoubleSignal::set);
+        Slider ySlider = new Slider("Y", 0, 500);
+        bindSliderToInteger(ySlider, rectYSignal);
         ySlider.setWidthFull();
 
         // Size section
@@ -325,23 +322,16 @@ public class UseCase03View extends VerticalLayout {
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-weight", "500").set("margin-top", "8px");
 
-        Slider widthSlider = new Slider("Width", 50, 250, 50);
-        var rectWidthDoubleSignal = mapIntegerToDoubleSignal(rectWidthSignal);
-        widthSlider.bindValue(rectWidthDoubleSignal,
-                rectWidthDoubleSignal::set);
+        Slider widthSlider = new Slider("Width", 50, 250);
+        bindSliderToInteger(widthSlider, rectWidthSignal);
         widthSlider.setWidthFull();
 
-        Slider heightSlider = new Slider("Height", 30, 150, 30);
-        var rectHeightDoubleSignal = mapIntegerToDoubleSignal(rectHeightSignal);
-        heightSlider.bindValue(rectHeightDoubleSignal,
-                rectHeightDoubleSignal::set);
+        Slider heightSlider = new Slider("Height", 30, 150);
+        bindSliderToInteger(heightSlider, rectHeightSignal);
         heightSlider.setWidthFull();
 
-        Slider cornerRadiusSlider = new Slider("Corner Radius", 0, 50, 0);
-        var rectCornerRadiusDoubleSignal = mapIntegerToDoubleSignal(
-                rectCornerRadiusSignal);
-        cornerRadiusSlider.bindValue(rectCornerRadiusDoubleSignal,
-                rectCornerRadiusDoubleSignal::set);
+        Slider cornerRadiusSlider = new Slider("Corner Radius", 0, 50);
+        bindSliderToInteger(cornerRadiusSlider, rectCornerRadiusSignal);
         cornerRadiusSlider.setWidthFull();
 
         // Appearance section
@@ -358,7 +348,8 @@ public class UseCase03View extends VerticalLayout {
         strokeColorField.bindValue(rectStrokeSignal, rectStrokeSignal::set);
         strokeColorField.setWidthFull();
 
-        Slider opacitySlider = new Slider("Opacity", 0.0, 1.0, 0.1, 0.0);
+        Slider opacitySlider = new Slider("Opacity", 0.0, 1.0);
+        opacitySlider.setStep(0.1);
         opacitySlider.bindValue(rectOpacitySignal, rectOpacitySignal::set);
         opacitySlider.setWidthFull();
 
@@ -368,11 +359,8 @@ public class UseCase03View extends VerticalLayout {
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-weight", "500").set("margin-top", "8px");
 
-        Slider rotationSlider = new Slider("Rotation", 0, 360, 0);
-        var rectRotationDoubleSignal = mapIntegerToDoubleSignal(
-                rectRotationSignal);
-        rotationSlider.bindValue(rectRotationDoubleSignal,
-                rectRotationDoubleSignal::set);
+        Slider rotationSlider = new Slider("Rotation", 0, 360);
+        bindSliderToInteger(rotationSlider, rectRotationSignal);
         rotationSlider.setWidthFull();
 
         fields.add(positionLabel, xSlider, ySlider, sizeLabel, widthSlider,
@@ -399,14 +387,12 @@ public class UseCase03View extends VerticalLayout {
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-weight", "500");
 
-        Slider cxSlider = new Slider("Center X", 0, 500, 0);
-        var starCxDoubleSignal = mapIntegerToDoubleSignal(starCxSignal);
-        cxSlider.bindValue(starCxDoubleSignal, starCxDoubleSignal::set);
+        Slider cxSlider = new Slider("Center X", 0, 500);
+        bindSliderToInteger(cxSlider, starCxSignal);
         cxSlider.setWidthFull();
 
-        Slider cySlider = new Slider("Center Y", 0, 500, 0);
-        var starCyDoubleSignal = mapIntegerToDoubleSignal(starCySignal);
-        cySlider.bindValue(starCyDoubleSignal, starCyDoubleSignal::set);
+        Slider cySlider = new Slider("Center Y", 0, 500);
+        bindSliderToInteger(cySlider, starCySignal);
         cySlider.setWidthFull();
 
         // Shape section
@@ -415,15 +401,12 @@ public class UseCase03View extends VerticalLayout {
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-weight", "500").set("margin-top", "8px");
 
-        Slider pointsSlider = new Slider("Points", 3, 10, 3);
-        var starPointsDoubleSignal = mapIntegerToDoubleSignal(starPointsSignal);
-        pointsSlider.bindValue(starPointsDoubleSignal,
-                starPointsDoubleSignal::set);
+        Slider pointsSlider = new Slider("Points", 3, 10);
+        bindSliderToInteger(pointsSlider, starPointsSignal);
         pointsSlider.setWidthFull();
 
-        Slider sizeSlider = new Slider("Size", 30, 80, 30);
-        var starSizeDoubleSignal = mapIntegerToDoubleSignal(starSizeSignal);
-        sizeSlider.bindValue(starSizeDoubleSignal, starSizeDoubleSignal::set);
+        Slider sizeSlider = new Slider("Size", 30, 80);
+        bindSliderToInteger(sizeSlider, starSizeSignal);
         sizeSlider.setWidthFull();
 
         // Appearance section
@@ -440,7 +423,8 @@ public class UseCase03View extends VerticalLayout {
         strokeColorField.bindValue(starStrokeSignal, starStrokeSignal::set);
         strokeColorField.setWidthFull();
 
-        Slider opacitySlider = new Slider("Opacity", 0.0, 1.0, 0.1, 0.0);
+        Slider opacitySlider = new Slider("Opacity", 0.0, 1.0);
+        opacitySlider.setStep(0.1);
         opacitySlider.bindValue(starOpacitySignal, starOpacitySignal::set);
         opacitySlider.setWidthFull();
 
@@ -450,11 +434,8 @@ public class UseCase03View extends VerticalLayout {
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-weight", "500").set("margin-top", "8px");
 
-        Slider rotationSlider = new Slider("Rotation", 0, 360, 0);
-        var starRotationDoubleSignal = mapIntegerToDoubleSignal(
-                starRotationSignal);
-        rotationSlider.bindValue(starRotationDoubleSignal,
-                starRotationDoubleSignal::set);
+        Slider rotationSlider = new Slider("Rotation", 0, 360);
+        bindSliderToInteger(rotationSlider, starRotationSignal);
         rotationSlider.setWidthFull();
 
         fields.add(positionLabel, cxSlider, cySlider, shapeLabel, pointsSlider,
@@ -563,10 +544,11 @@ public class UseCase03View extends VerticalLayout {
         starOpacitySignal.set(1.0);
     }
 
-    private WritableSignal<Double> mapIntegerToDoubleSignal(
-            WritableSignal<Integer> integerSignal) {
-        return integerSignal.map(Integer::doubleValue,
-                (Integer oldValue, Double newValue) -> newValue.intValue());
+    private void bindSliderToInteger(Slider slider,
+            ValueSignal<Integer> integerSignal) {
+        slider.bindValue(integerSignal.map(Integer::doubleValue),
+                integerSignal.updater(
+                        (current, doubleValue) -> doubleValue.intValue()));
     }
 
 }

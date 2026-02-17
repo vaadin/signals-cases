@@ -4,10 +4,10 @@ import jakarta.annotation.security.PermitAll;
 
 import java.util.concurrent.CompletableFuture;
 
-import com.example.MissingAPI;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
@@ -83,7 +83,7 @@ public class UseCase01View extends VerticalLayout {
         confirmField.bindValue(confirmPasswordSignal,
                 confirmPasswordSignal::set);
         confirmField.setErrorMessage("Passwords do not match");
-        MissingAPI.bindInvalid(confirmField,
+        confirmField.bindInvalid(
                 isConfirmValidSignal.map(valid -> !valid));
 
         // Submit button with multiple signal bindings
@@ -104,9 +104,9 @@ public class UseCase01View extends VerticalLayout {
                 }));
 
         // Bind theme variant
-        submitButton.bindThemeName("success",
+        submitButton.bindThemeVariant(ButtonVariant.LUMO_SUCCESS,
                 submissionStateSignal.map(SubmissionState.SUCCESS::equals));
-        submitButton.bindThemeName("primary", submissionStateSignal
+        submitButton.bindThemeVariant(ButtonVariant.LUMO_PRIMARY, submissionStateSignal
                 .map(state -> state != SubmissionState.SUCCESS));
 
         submitButton.addClickListener(e -> {

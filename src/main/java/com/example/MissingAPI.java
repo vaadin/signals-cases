@@ -3,11 +3,10 @@ package com.example;
 import java.util.List;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.WritableSignal;
+import com.vaadin.flow.signals.impl.Effect;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.flow.signals.shared.SharedListSignal;
@@ -23,11 +22,12 @@ public class MissingAPI {
      * Binds a Grid's items to a Signal containing a List.
      */
     public static <T> void bindItems(Grid<T> grid, Signal<List<T>> signal) {
-        ComponentEffect.bind(grid, signal, (g, items) -> {
+        Effect.effect(grid, () -> {
+            List<T> items = signal.get();
             if (items != null) {
-                g.setItems(items);
+                grid.setItems(items);
             } else {
-                g.setItems(List.of());
+                grid.setItems(List.of());
             }
         });
     }
@@ -39,7 +39,7 @@ public class MissingAPI {
      */
     public static <T> void bindItems(Grid<T> grid,
             SharedListSignal<T> listSignal) {
-        ComponentEffect.effect(grid, () -> {
+        Effect.effect(grid, () -> {
             List<SharedValueSignal<T>> signals = listSignal.get();
             // Read each individual signal to register dependency
             List<T> items = signals.stream().map(SharedValueSignal::get)
@@ -54,7 +54,7 @@ public class MissingAPI {
      * Grid updates when any item changes.
      */
     public static <T> void bindItems(Grid<T> grid, ListSignal<T> listSignal) {
-        ComponentEffect.effect(grid, () -> {
+        Effect.effect(grid, () -> {
             List<ValueSignal<T>> signals = listSignal.get();
             // Read each individual signal to register dependency
             List<T> items = signals.stream().map(ValueSignal::get).toList();
@@ -68,11 +68,12 @@ public class MissingAPI {
     public static <T> void bindItems(
             com.vaadin.flow.component.combobox.ComboBox<T> comboBox,
             Signal<List<T>> signal) {
-        ComponentEffect.bind(comboBox, signal, (cb, items) -> {
+        Effect.effect(comboBox, () -> {
+            List<T> items = signal.get();
             if (items != null) {
-                cb.setItems(items);
+                comboBox.setItems(items);
             } else {
-                cb.setItems(List.of());
+                comboBox.setItems(List.of());
             }
         });
     }
@@ -83,24 +84,12 @@ public class MissingAPI {
      */
     public static void bindBrowserTitle(com.vaadin.flow.component.UI ui,
             Signal<String> signal) {
-        ComponentEffect.effect(ui, () -> {
+        Effect.effect(ui, () -> {
             String title = signal.get();
             if (title != null) {
                 ui.getPage().setTitle(title);
             }
         });
-    }
-
-    /**
-     * Binds a component's invalid state to a Signal containing a boolean value.
-     */
-    public static void bindInvalid(
-            com.vaadin.flow.component.HasValidation component,
-            Signal<Boolean> signal) {
-        component.setManualValidation(true);
-        ComponentEffect.bind((Component) component, signal,
-                (c, invalid) -> ((com.vaadin.flow.component.HasValidation) c)
-                        .setInvalid(invalid));
     }
 
     /**
@@ -121,8 +110,13 @@ public class MissingAPI {
      *            {@code null}.
      */
     public static void tabsSyncSelectedIndex(Tabs tabs,
-            WritableSignal<Integer> numberSignal) {
-        ComponentEffect.bind(tabs, numberSignal, Tabs::setSelectedIndex);
+            ValueSignal<Integer> numberSignal) {
+        Effect.effect(tabs, () -> {
+            Integer index = numberSignal.get();
+            if (index != null) {
+                tabs.setSelectedIndex(index);
+            }
+        });
         tabs.addSelectedChangeListener(event -> {
             numberSignal.set(event.getSource().getSelectedIndex());
         });

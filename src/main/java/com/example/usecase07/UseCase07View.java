@@ -89,18 +89,13 @@ public class UseCase07View extends VerticalLayout {
         invoiceGrid = new Grid<>(Invoice.class);
         invoiceGrid.setColumns("id", "customerName", "dueDate", "total",
                 "status");
-        ComponentEffect.bind(invoiceGrid, invoiceListSignal, (grid, items) -> {
+        ComponentEffect.effect(invoiceGrid, () -> {
             var invoices = invoiceListSignal.get().stream()
                     .map(ValueSignal::peek).toList();
-            if (items != null) {
-                grid.setItems(invoices);
-            } else {
-                grid.setItems(List.of());
-            }
-            invoiceListSignal.get().forEach(signal -> ComponentEffect
-                    .bind(invoiceGrid, signal, (g, inv) -> {
-                        g.getDataProvider().refreshItem(inv);
-                    }));
+            invoiceGrid.setItems(invoices);
+            invoiceListSignal.get().forEach(signal -> {
+                signal.get(); // register dependency
+            });
         });
         invoiceGrid.asSingleSelect().addValueChangeListener(e -> {
             Invoice selected = e.getValue();
@@ -187,22 +182,14 @@ public class UseCase07View extends VerticalLayout {
             return button;
         });
 
-        ComponentEffect.bind(lineItemsGrid, lineItemsSignal, (grid, items) -> {
+        ComponentEffect.effect(lineItemsGrid, () -> {
             var lineItems = lineItemsSignal.get().stream()
                     .map(ValueSignal::peek).toList();
-            if (items != null) {
-                grid.setItems(lineItems);
-            } else {
-                grid.setItems(List.of());
-            }
+            lineItemsGrid.setItems(lineItems);
             updateFooterTotal(lineItemsGrid);
-            lineItemsSignal.get().forEach(signal -> ComponentEffect
-                    .bind(lineItemsGrid, signal, (g, inv) -> {
-                        // refresh the item in the grid
-                        g.getDataProvider().refreshItem(inv);
-                        // update footer total
-                        updateFooterTotal(lineItemsGrid);
-                    }));
+            lineItemsSignal.get().forEach(signal -> {
+                signal.get(); // register dependency
+            });
         });
 
         ComponentEffect.effect(lineItemsGrid, () -> {
