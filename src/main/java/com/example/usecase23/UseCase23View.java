@@ -43,7 +43,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.flow.theme.lumo.LumoUtility.FontSize;
@@ -110,7 +109,7 @@ public class UseCase23View extends Main {
     }
 
     private HighlightCard createHighlightCard(String title,
-            WritableSignal<Number> signal, Function<Number, String> format) {
+            ValueSignal<Number> signal, Function<Number, String> format) {
 
         HighlightCard card = new HighlightCard(title, signal, format);
         card.update(signal.get());
@@ -428,7 +427,7 @@ public class UseCase23View extends Main {
         private final Function<Number, String> format;
         private Number lastNumeric;
 
-        private HighlightCard(String title, WritableSignal<Number> signal,
+        private HighlightCard(String title, ValueSignal<Number> signal,
                 Function<Number, String> format) {
             this.format = format;
 

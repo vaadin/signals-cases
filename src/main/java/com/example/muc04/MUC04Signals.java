@@ -2,7 +2,6 @@ package com.example.muc04;
 
 import org.springframework.stereotype.Component;
 
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.shared.SharedMapSignal;
 import com.vaadin.flow.signals.shared.SharedValueSignal;
 
@@ -25,15 +24,15 @@ public class MUC04Signals {
     private final SharedMapSignal<FieldLock> fieldLocksSignal = new SharedMapSignal<>(
             FieldLock.class);
 
-    public WritableSignal<String> getCompanyNameSignal() {
+    public SharedValueSignal<String> getCompanyNameSignal() {
         return companyNameSignal;
     }
 
-    public WritableSignal<String> getAddressSignal() {
+    public SharedValueSignal<String> getAddressSignal() {
         return addressSignal;
     }
 
-    public WritableSignal<String> getPhoneSignal() {
+    public SharedValueSignal<String> getPhoneSignal() {
         return phoneSignal;
     }
 

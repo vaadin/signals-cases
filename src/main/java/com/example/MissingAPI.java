@@ -7,7 +7,6 @@ import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.flow.signals.shared.SharedListSignal;
@@ -125,7 +124,7 @@ public class MissingAPI {
      *            {@code null}.
      */
     public static void tabsSyncSelectedIndex(Tabs tabs,
-            WritableSignal<Integer> numberSignal) {
+            ValueSignal<Integer> numberSignal) {
         ComponentEffect.effect(tabs, () -> {
             Integer index = numberSignal.get();
             if (index != null) {

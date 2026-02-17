@@ -5,7 +5,6 @@ import java.util.Set;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.spring.security.AuthenticationContext;
@@ -74,7 +73,7 @@ public class CurrentUserSignal {
         }
     }
 
-    private final WritableSignal<UserInfo> userSignal;
+    private final ValueSignal<UserInfo> userSignal;
     private final AuthenticationContext authenticationContext;
 
     public CurrentUserSignal(AuthenticationContext authenticationContext) {
@@ -86,7 +85,7 @@ public class CurrentUserSignal {
      * Get the signal holding current user information. This signal updates when
      * authentication state changes.
      */
-    public WritableSignal<UserInfo> getUserSignal() {
+    public ValueSignal<UserInfo> getUserSignal() {
         return userSignal;
     }
 

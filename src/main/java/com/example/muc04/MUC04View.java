@@ -152,7 +152,7 @@ public class MUC04View extends VerticalLayout {
     }
 
     private TextField createLockedField(String fieldName, String label,
-            com.vaadin.flow.signals.WritableSignal<String> signal) {
+            com.vaadin.flow.signals.shared.SharedValueSignal<String> signal) {
         TextField field = new TextField(label);
         field.setWidthFull();
 

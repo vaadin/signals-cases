@@ -22,7 +22,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
@@ -927,7 +926,7 @@ public class UseCase17View extends VerticalLayout {
     }
 
     private <T extends Component> ComboBox<T> createComponentSelector(
-            String label, List<T> items, WritableSignal<T> signal) {
+            String label, List<T> items, ValueSignal<T> signal) {
         ComboBox<T> combo = new ComboBox<>(label);
         combo.setItems(items);
         combo.setItemLabelGenerator(Component::getName);

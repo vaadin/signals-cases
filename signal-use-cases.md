@@ -92,24 +92,23 @@ Signals provide a reactive, declarative approach to building UIs where component
 
 ### UC 6: Shopping Cart with Real-time Totals
 
-**Description**: Shopping cart with add/remove items, quantity adjustment, and reactive totals (subtotal, tax, total). **Demonstrates two-way mapped signals** for inline quantity editing.
+**Description**: Shopping cart with add/remove items, quantity adjustment, and reactive totals (subtotal, tax, total). **Demonstrates two-way bindings** with `map` + `updater` for inline quantity editing.
 
 **Key Patterns**:
 - List modification signals
 - Aggregate computations
 - Multiple derived totals
-- **Two-way mapped signals** for cart item quantity (`itemSignal.map(CartItem::quantity, CartItem::withQuantity)`)
+- **Two-way bindings** for cart item quantity using `signal.map(getter)` + `signal.updater(merger)`
 
 **Route**: `/use-case-6`
 
-**Canonical Example - Two-Way Mapped Signals:**
+**Canonical Example - Two-Way Bindings with map + updater:**
 ```java
 // In createCartItemRow():
-WritableSignal<Integer> quantitySignal = itemSignal.map(
-    CartItem::quantity,      // getter
-    CartItem::withQuantity   // merger (creates new CartItem)
+quantityField.bindValue(
+    itemSignal.map(CartItem::quantity),       // read: CartItem -> Integer
+    itemSignal.updater(CartItem::withQuantity) // write: (CartItem, Integer) -> CartItem
 );
-quantityField.bindValue(quantitySignal, quantitySignal::set);
 ```
 
 ---
@@ -336,14 +335,14 @@ quantityField.bindValue(quantitySignal, quantitySignal::set);
 
 ---
 
-### UC 22: Two-Way Mapped Signals
+### UC 22: Two-Way Bindings with map + updater
 
-**Description**: Comprehensive demonstration of the `WritableSignal.map(getter, merger)` API for two-way computed signals. Shows how to bind form fields directly to immutable record properties with automatic bidirectional synchronization.
+**Description**: Comprehensive demonstration of the `signal.map(getter)` + `signal.updater(merger)` pattern for two-way field bindings. Shows how to bind form fields directly to immutable record properties with automatic bidirectional synchronization.
 
 **Key Patterns**:
-- **Two-way mapped signals** - `WritableSignal.map(getter, merger)` creates derived signals that can read AND write
-- **Direct field mapping** - Map a record signal to individual property signals
-- **Nested mapping** - Chain mappings for nested records (Person → Address → City)
+- **Two-way bindings** - `signal.map(getter)` for reading, `signal.updater(merger)` for writing
+- **Direct field mapping** - Map a record signal to read a property, updater to write it back
+- **Nested mapping** - Compose updaters for nested records (Person → Address → City)
 - **Immutable records** - Uses `with*` methods to create updated records
 - **Single source of truth** - One signal holds the entire state
 
@@ -371,23 +370,19 @@ quantityField.bindValue(quantitySignal, quantitySignal::set);
 // Parent signal (single source of truth)
 var personSignal = new ValueSignal<>(Person.empty());
 
-// Direct field mapping
-WritableSignal<String> firstNameSignal = personSignal.map(
-    Person::firstName,      // getter: Person -> String
-    Person::withFirstName   // merger: (Person, String) -> Person
+// Direct field binding with map (read) + updater (write)
+textField.bindValue(
+    personSignal.map(Person::firstName),        // read: Person -> String
+    personSignal.updater(Person::withFirstName)  // write: (Person, String) -> Person
 );
-textField.bindValue(firstNameSignal, firstNameSignal::set);
 
 // Nested mapping (Person -> Address -> City)
-WritableSignal<Address> addressSignal = personSignal.map(
-    Person::address,
-    Person::withAddress
+Signal<Address> addressSignal = personSignal.map(Person::address);
+cityField.bindValue(
+    addressSignal.map(Address::city),
+    personSignal.updater((person, city) ->
+        person.withAddress(person.address().withCity(city)))
 );
-WritableSignal<String> citySignal = addressSignal.map(
-    Address::city,
-    Address::withCity
-);
-cityField.bindValue(citySignal, citySignal::set);
 ```
 
 **When to Use:**
@@ -499,7 +494,7 @@ cityField.bindValue(citySignal, citySignal::set);
 - `new ValueSignal<>()` - Creating writable signals
 - `signal.get()` / `signal.set()` - Getting/setting signal values
 - `signal.map()` - Transforming signal values (one-way)
-- `WritableSignal.map(getter, merger)` - **Two-way mapped signals** (see UC06, UC22)
+- `signal.map(getter)` + `signal.updater(merger)` - **Two-way bindings** (see UC06, UC22)
 - Computed signals combining multiple sources
 
 ### Component Bindings
@@ -514,7 +509,7 @@ cityField.bindValue(citySignal, citySignal::set);
 - `bindHelperText()` - Field feedback text
 
 ### Advanced Patterns
-- **Two-way mapped signals** - Bidirectional field-to-record binding (UC06, UC22)
+- **Two-way bindings** - Bidirectional field-to-record binding via `map` + `updater` (UC06, UC22)
 - Application-scoped signals (Spring @Component)
 - Browser event integration (window resize)
 - Spring Security integration
@@ -559,9 +554,9 @@ Multi-user use cases (MUC01-04, MUC06-07) share signals across sessions:
 - Added UC23 (Real-time Dashboard)
 
 **2026-02-02 Update:**
-- Added UC22 (Two-Way Mapped Signals) - dedicated demonstration of `WritableSignal.map(getter, merger)` API
-- Updated UC06 documentation to highlight its use of two-way mapped signals
-- Documented the two-way mapped signals pattern in Signal API Features section
+- Added UC22 (Two-Way Bindings) - dedicated demonstration of `signal.map(getter)` + `signal.updater(merger)` pattern
+- Updated UC06 documentation to highlight its use of two-way bindings
+- Documented the two-way binding pattern in Signal API Features section
 
 **2026-01-20 Update:**
 - Removed UC3 (Permission-Based UI) - redundant with UC2/UC11/UC13

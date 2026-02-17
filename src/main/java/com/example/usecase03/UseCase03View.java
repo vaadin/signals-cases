@@ -22,7 +22,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-03", layout = MainLayout.class)
@@ -310,13 +309,11 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500");
 
         Slider xSlider = new Slider("X", 0, 500);
-        var rectXDoubleSignal = mapIntegerToDoubleSignal(rectXSignal);
-        xSlider.bindValue(rectXDoubleSignal, rectXDoubleSignal::set);
+        bindSliderToInteger(xSlider, rectXSignal);
         xSlider.setWidthFull();
 
         Slider ySlider = new Slider("Y", 0, 500);
-        var rectYDoubleSignal = mapIntegerToDoubleSignal(rectYSignal);
-        ySlider.bindValue(rectYDoubleSignal, rectYDoubleSignal::set);
+        bindSliderToInteger(ySlider, rectYSignal);
         ySlider.setWidthFull();
 
         // Size section
@@ -326,22 +323,15 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500").set("margin-top", "8px");
 
         Slider widthSlider = new Slider("Width", 50, 250);
-        var rectWidthDoubleSignal = mapIntegerToDoubleSignal(rectWidthSignal);
-        widthSlider.bindValue(rectWidthDoubleSignal,
-                rectWidthDoubleSignal::set);
+        bindSliderToInteger(widthSlider, rectWidthSignal);
         widthSlider.setWidthFull();
 
         Slider heightSlider = new Slider("Height", 30, 150);
-        var rectHeightDoubleSignal = mapIntegerToDoubleSignal(rectHeightSignal);
-        heightSlider.bindValue(rectHeightDoubleSignal,
-                rectHeightDoubleSignal::set);
+        bindSliderToInteger(heightSlider, rectHeightSignal);
         heightSlider.setWidthFull();
 
         Slider cornerRadiusSlider = new Slider("Corner Radius", 0, 50);
-        var rectCornerRadiusDoubleSignal = mapIntegerToDoubleSignal(
-                rectCornerRadiusSignal);
-        cornerRadiusSlider.bindValue(rectCornerRadiusDoubleSignal,
-                rectCornerRadiusDoubleSignal::set);
+        bindSliderToInteger(cornerRadiusSlider, rectCornerRadiusSignal);
         cornerRadiusSlider.setWidthFull();
 
         // Appearance section
@@ -370,10 +360,7 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500").set("margin-top", "8px");
 
         Slider rotationSlider = new Slider("Rotation", 0, 360);
-        var rectRotationDoubleSignal = mapIntegerToDoubleSignal(
-                rectRotationSignal);
-        rotationSlider.bindValue(rectRotationDoubleSignal,
-                rectRotationDoubleSignal::set);
+        bindSliderToInteger(rotationSlider, rectRotationSignal);
         rotationSlider.setWidthFull();
 
         fields.add(positionLabel, xSlider, ySlider, sizeLabel, widthSlider,
@@ -401,13 +388,11 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500");
 
         Slider cxSlider = new Slider("Center X", 0, 500);
-        var starCxDoubleSignal = mapIntegerToDoubleSignal(starCxSignal);
-        cxSlider.bindValue(starCxDoubleSignal, starCxDoubleSignal::set);
+        bindSliderToInteger(cxSlider, starCxSignal);
         cxSlider.setWidthFull();
 
         Slider cySlider = new Slider("Center Y", 0, 500);
-        var starCyDoubleSignal = mapIntegerToDoubleSignal(starCySignal);
-        cySlider.bindValue(starCyDoubleSignal, starCyDoubleSignal::set);
+        bindSliderToInteger(cySlider, starCySignal);
         cySlider.setWidthFull();
 
         // Shape section
@@ -417,14 +402,11 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500").set("margin-top", "8px");
 
         Slider pointsSlider = new Slider("Points", 3, 10);
-        var starPointsDoubleSignal = mapIntegerToDoubleSignal(starPointsSignal);
-        pointsSlider.bindValue(starPointsDoubleSignal,
-                starPointsDoubleSignal::set);
+        bindSliderToInteger(pointsSlider, starPointsSignal);
         pointsSlider.setWidthFull();
 
         Slider sizeSlider = new Slider("Size", 30, 80);
-        var starSizeDoubleSignal = mapIntegerToDoubleSignal(starSizeSignal);
-        sizeSlider.bindValue(starSizeDoubleSignal, starSizeDoubleSignal::set);
+        bindSliderToInteger(sizeSlider, starSizeSignal);
         sizeSlider.setWidthFull();
 
         // Appearance section
@@ -453,10 +435,7 @@ public class UseCase03View extends VerticalLayout {
                 .set("font-weight", "500").set("margin-top", "8px");
 
         Slider rotationSlider = new Slider("Rotation", 0, 360);
-        var starRotationDoubleSignal = mapIntegerToDoubleSignal(
-                starRotationSignal);
-        rotationSlider.bindValue(starRotationDoubleSignal,
-                starRotationDoubleSignal::set);
+        bindSliderToInteger(rotationSlider, starRotationSignal);
         rotationSlider.setWidthFull();
 
         fields.add(positionLabel, cxSlider, cySlider, shapeLabel, pointsSlider,
@@ -565,10 +544,11 @@ public class UseCase03View extends VerticalLayout {
         starOpacitySignal.set(1.0);
     }
 
-    private WritableSignal<Double> mapIntegerToDoubleSignal(
-            WritableSignal<Integer> integerSignal) {
-        return integerSignal.map(Integer::doubleValue,
-                (Integer oldValue, Double newValue) -> newValue.intValue());
+    private void bindSliderToInteger(Slider slider,
+            ValueSignal<Integer> integerSignal) {
+        slider.bindValue(integerSignal.map(Integer::doubleValue),
+                integerSignal.updater(
+                        (current, doubleValue) -> doubleValue.intValue()));
     }
 
 }
