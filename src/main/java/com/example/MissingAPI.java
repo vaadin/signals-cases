@@ -68,7 +68,7 @@ public class MissingAPI {
      */
     public static <T> void bindItems(VirtualList<T> virtualList,
             Signal<List<T>> signal) {
-        ComponentEffect.effect(virtualList, () -> {
+        Effect.effect(virtualList, () -> {
             List<T> items = signal.get();
             if (items != null) {
                 virtualList.setItems(items);
@@ -85,7 +85,7 @@ public class MissingAPI {
      */
     public static <T> void bindItems(VirtualList<T> virtualList,
             SharedListSignal<T> listSignal) {
-        ComponentEffect.effect(virtualList, () -> {
+        Effect.effect(virtualList, () -> {
             List<SharedValueSignal<T>> signals = listSignal.get();
             // Read each individual signal to register dependency
             List<T> items = signals.stream().map(SharedValueSignal::get)
@@ -101,7 +101,7 @@ public class MissingAPI {
      */
     public static <T> void bindItems(VirtualList<T> virtualList,
             ListSignal<T> listSignal) {
-        ComponentEffect.effect(virtualList, () -> {
+        Effect.effect(virtualList, () -> {
             List<ValueSignal<T>> signals = listSignal.get();
             // Read each individual signal to register dependency
             List<T> items = signals.stream().map(ValueSignal::get).toList();
