@@ -18,7 +18,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-22", layout = MainLayout.class)
@@ -34,8 +33,8 @@ public class UseCase22View extends VerticalLayout {
         var title = new H2("Use Case 22: Two-Way Mapped Signals");
 
         var description = new Paragraph(
-                "This use case demonstrates the WritableSignal.map(getter, merger) API for two-way computed signals. "
-                        + "Each form field is bound to a mapped signal that reads from and writes to the parent record. "
+                "This use case demonstrates the signal.map(getter) + signal.updater(merger) pattern for two-way field bindings. "
+                        + "Each form field reads from a mapped signal and writes back via an updater on the parent signal. "
                         + "Changes propagate bidirectionally: editing a field updates the record, and the record state is always consistent.");
 
         // Main person signal - the single source of truth
@@ -67,7 +66,7 @@ public class UseCase22View extends VerticalLayout {
     }
 
     private VerticalLayout createPersonalInfoSection(
-            WritableSignal<Person> personSignal) {
+            ValueSignal<Person> personSignal) {
         var section = new VerticalLayout();
         section.setSpacing(true);
         section.setPadding(true);
@@ -80,23 +79,20 @@ public class UseCase22View extends VerticalLayout {
         // First name - direct field mapping
         var firstNameField = new TextField("First Name");
         firstNameField.setWidthFull();
-        WritableSignal<String> firstNameSignal = personSignal
-                .map(Person::firstName, Person::withFirstName);
-        firstNameField.bindValue(firstNameSignal, firstNameSignal::set);
+        firstNameField.bindValue(personSignal.map(Person::firstName),
+                personSignal.updater(Person::withFirstName));
 
         // Last name - direct field mapping
         var lastNameField = new TextField("Last Name");
         lastNameField.setWidthFull();
-        WritableSignal<String> lastNameSignal = personSignal
-                .map(Person::lastName, Person::withLastName);
-        lastNameField.bindValue(lastNameSignal, lastNameSignal::set);
+        lastNameField.bindValue(personSignal.map(Person::lastName),
+                personSignal.updater(Person::withLastName));
 
         // Email - direct field mapping
         var emailField = new TextField("Email");
         emailField.setWidthFull();
-        WritableSignal<String> emailSignal = personSignal.map(Person::email,
-                Person::withEmail);
-        emailField.bindValue(emailSignal, emailSignal::set);
+        emailField.bindValue(personSignal.map(Person::email),
+                personSignal.updater(Person::withEmail));
 
         // Age - integer field mapping
         var ageField = new IntegerField("Age");
@@ -104,9 +100,8 @@ public class UseCase22View extends VerticalLayout {
         ageField.setMin(0);
         ageField.setMax(150);
         ageField.setStepButtonsVisible(true);
-        WritableSignal<Integer> ageSignal = personSignal.map(Person::age,
-                Person::withAge);
-        ageField.bindValue(ageSignal, ageSignal::set);
+        ageField.bindValue(personSignal.map(Person::age),
+                personSignal.updater(Person::withAge));
 
         // Computed full name display
         var fullNameLabel = new Span();
@@ -123,7 +118,7 @@ public class UseCase22View extends VerticalLayout {
     }
 
     private VerticalLayout createAddressSection(
-            WritableSignal<Person> personSignal) {
+            ValueSignal<Person> personSignal) {
         var section = new VerticalLayout();
         section.setSpacing(true);
         section.setPadding(true);
@@ -133,34 +128,33 @@ public class UseCase22View extends VerticalLayout {
         var sectionTitle = new H3("Address (Nested Mapping)");
         sectionTitle.getStyle().set("margin-top", "0");
 
-        // First, map Person -> Address
-        WritableSignal<Address> addressSignal = personSignal
-                .map(Person::address, Person::withAddress);
+        // Read-only mapped signal for Address
+        Signal<Address> addressSignal = personSignal.map(Person::address);
 
-        // Then map Address -> individual fields (nested two-way mapping)
+        // Map Address -> individual fields (read via map, write via updater)
         var streetField = new TextField("Street");
         streetField.setWidthFull();
-        WritableSignal<String> streetSignal = addressSignal.map(Address::street,
-                Address::withStreet);
-        streetField.bindValue(streetSignal, streetSignal::set);
+        streetField.bindValue(addressSignal.map(Address::street),
+                personSignal.updater((person, street) -> person
+                        .withAddress(person.address().withStreet(street))));
 
         var cityField = new TextField("City");
         cityField.setWidthFull();
-        WritableSignal<String> citySignal = addressSignal.map(Address::city,
-                Address::withCity);
-        cityField.bindValue(citySignal, citySignal::set);
+        cityField.bindValue(addressSignal.map(Address::city),
+                personSignal.updater((person, city) -> person
+                        .withAddress(person.address().withCity(city))));
 
         var zipCodeField = new TextField("ZIP Code");
         zipCodeField.setWidthFull();
-        WritableSignal<String> zipCodeSignal = addressSignal
-                .map(Address::zipCode, Address::withZipCode);
-        zipCodeField.bindValue(zipCodeSignal, zipCodeSignal::set);
+        zipCodeField.bindValue(addressSignal.map(Address::zipCode),
+                personSignal.updater((person, zip) -> person
+                        .withAddress(person.address().withZipCode(zip))));
 
         var countryField = new TextField("Country");
         countryField.setWidthFull();
-        WritableSignal<String> countrySignal = addressSignal
-                .map(Address::country, Address::withCountry);
-        countryField.bindValue(countrySignal, countrySignal::set);
+        countryField.bindValue(addressSignal.map(Address::country),
+                personSignal.updater((person, country) -> person
+                        .withAddress(person.address().withCountry(country))));
 
         // Computed formatted address
         var formattedAddressLabel = new Span();
@@ -178,7 +172,7 @@ public class UseCase22View extends VerticalLayout {
         return section;
     }
 
-    private Div createStateDisplay(WritableSignal<Person> personSignal) {
+    private Div createStateDisplay(Signal<Person> personSignal) {
         var stateBox = new Div();
         stateBox.getStyle().set("background-color", "#e8f5e9")
                 .set("padding", "1.5em").set("border-radius", "8px")
@@ -214,28 +208,24 @@ public class UseCase22View extends VerticalLayout {
                 .set("font-size", "0.85em");
         codeExample.setText(
                 """
-                        // Direct field mapping
-                        WritableSignal<String> firstNameSignal = personSignal.map(
-                            Person::firstName,      // getter: Person -> String
-                            Person::withFirstName   // merger: (Person, String) -> Person
+                        // Direct field binding with map + updater
+                        textField.bindValue(
+                            personSignal.map(Person::firstName),      // read: Person -> String
+                            personSignal.updater(Person::withFirstName) // write: (Person, String) -> Person
                         );
-                        textField.bindValue(firstNameSignal);
 
                         // Nested mapping (Person -> Address -> City)
-                        WritableSignal<Address> addressSignal = personSignal.map(
-                            Person::address,
-                            Person::withAddress
-                        );
-                        WritableSignal<String> citySignal = addressSignal.map(
-                            Address::city,
-                            Address::withCity
-                        );
-                        cityField.bindValue(citySignal);""");
+                        Signal<Address> addressSignal = personSignal.map(Person::address);
+                        cityField.bindValue(
+                            addressSignal.map(Address::city),
+                            personSignal.updater((person, city) ->
+                                person.withAddress(person.address().withCity(city)))
+                        );""");
 
         var explanation = new Paragraph(
-                "The two-way mapped signal pattern uses WritableSignal.map(getter, merger) to create "
-                        + "derived signals that can both read AND write. When the field changes, it calls the merger "
-                        + "function to create a new immutable record, which updates the parent signal. "
+                "The two-way binding pattern uses signal.map(getter) for reading and "
+                        + "signal.updater(merger) for writing. When the field changes, the updater "
+                        + "function creates a new immutable record, which updates the parent signal. "
                         + "This eliminates manual synchronization code and keeps your data model immutable.");
 
         var whenToUse = new H3("When to Use");

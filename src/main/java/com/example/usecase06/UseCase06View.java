@@ -23,7 +23,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
@@ -253,10 +252,9 @@ public class UseCase06View extends VerticalLayout {
         quantityField.setWidth("120px");
         quantityField.setStepButtonsVisible(true);
 
-        // Two-way mapped signal for quantity
-        WritableSignal<Integer> quantitySignal = itemSignal
-                .map(CartItem::quantity, CartItem::withQuantity);
-        quantityField.bindValue(quantitySignal, quantitySignal::set);
+        // Two-way binding for quantity using map (read) + updater (write)
+        quantityField.bindValue(itemSignal.map(CartItem::quantity),
+                itemSignal.updater(CartItem::withQuantity));
 
         // Handle removal when quantity drops below 1
         quantityField.addValueChangeListener(e -> {

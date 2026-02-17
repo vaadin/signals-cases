@@ -2,8 +2,8 @@ package com.example.muc02;
 
 import org.springframework.stereotype.Component;
 
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.shared.SharedMapSignal;
+import com.vaadin.flow.signals.shared.SharedValueSignal;
 
 /**
  * Application-scoped signals for MUC02: Cursor Positions
@@ -31,7 +31,7 @@ public class MUC02Signals {
         return sessionCursorsSignal;
     }
 
-    public WritableSignal<CursorPosition> getCursorSignalForUser(
+    public SharedValueSignal<CursorPosition> getCursorSignalForUser(
             String username, String sessionId) {
         String sessionKey = username + ":" + sessionId;
         sessionCursorsSignal.putIfAbsent(sessionKey, new CursorPosition(0, 0));

@@ -3,7 +3,6 @@ package com.example.preferences;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
@@ -20,7 +19,7 @@ public class UserPreferences {
                                                                          // theme
                                                                          // default
 
-    private final WritableSignal<String> backgroundColorSignal;
+    private final ValueSignal<String> backgroundColorSignal;
 
     /**
      * No-args constructor to allow Spring to instantiate the bean while
@@ -33,7 +32,7 @@ public class UserPreferences {
     /**
      * Optional constructor for tests or advanced wiring.
      */
-    public UserPreferences(WritableSignal<String> backgroundColorSignal) {
+    public UserPreferences(ValueSignal<String> backgroundColorSignal) {
         this.backgroundColorSignal = backgroundColorSignal != null
                 ? backgroundColorSignal
                 : new ValueSignal<>(DEFAULT_COLOR);
@@ -42,7 +41,7 @@ public class UserPreferences {
     /**
      * Accessor used by views/layouts for binding.
      */
-    public WritableSignal<String> backgroundColorSignal() {
+    public ValueSignal<String> backgroundColorSignal() {
         return backgroundColorSignal;
     }
 
