@@ -92,9 +92,10 @@ public class UseCase07View extends VerticalLayout {
             var invoices = invoiceListSignal.get().stream()
                     .map(ValueSignal::peek).toList();
             invoiceGrid.setItems(invoices);
-            invoiceListSignal.get().forEach(signal -> {
-                signal.get(); // register dependency
-            });
+            invoiceListSignal.get().forEach(signal ->
+                    Signal.effect(invoiceGrid, () -> {
+                        invoiceGrid.getDataProvider().refreshItem(signal.get());
+                    }));
         });
         invoiceGrid.asSingleSelect().addValueChangeListener(e -> {
             Invoice selected = e.getValue();
@@ -186,9 +187,13 @@ public class UseCase07View extends VerticalLayout {
                     .map(ValueSignal::peek).toList();
             lineItemsGrid.setItems(lineItems);
             updateFooterTotal(lineItemsGrid);
-            lineItemsSignal.get().forEach(signal -> {
-                signal.get(); // register dependency
-            });
+            lineItemsSignal.get().forEach(signal ->
+                    Signal.effect(lineItemsGrid, () -> {
+                        // refresh the item in the grid
+                        lineItemsGrid.getDataProvider().refreshItem(signal.get());
+                        // update footer total
+                        updateFooterTotal(lineItemsGrid);
+                    }));
         });
 
         Signal.effect(lineItemsGrid, () -> {
@@ -237,6 +242,8 @@ public class UseCase07View extends VerticalLayout {
                         .findFirst().ifPresent(signal -> {
                             signal.set(
                                     details.getLineItemById(lineItem.getId()));
+                            // keep editor open after update
+                            lineItemsGrid.getEditor().editItem(signal.get());
                         });
             } else if (status.hasErrors()) {
                 Notification.show("Line item has validation errors.");
