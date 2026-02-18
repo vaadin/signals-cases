@@ -8,7 +8,6 @@ import java.util.List;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
@@ -89,7 +88,7 @@ public class UseCase07View extends VerticalLayout {
         invoiceGrid = new Grid<>(Invoice.class);
         invoiceGrid.setColumns("id", "customerName", "dueDate", "total",
                 "status");
-        ComponentEffect.effect(invoiceGrid, () -> {
+        Signal.effect(invoiceGrid, () -> {
             var invoices = invoiceListSignal.get().stream()
                     .map(ValueSignal::peek).toList();
             invoiceGrid.setItems(invoices);
@@ -128,7 +127,7 @@ public class UseCase07View extends VerticalLayout {
                 Invoice::setCustomerName);
         invoiceBinder.forField(dueDate).bind(Invoice::getDueDate,
                 Invoice::setDueDate);
-        ComponentEffect.effect(this, () -> invoiceBinder
+        Signal.effect(this, () -> invoiceBinder
                 .setBean(invoiceDetailsSignal.get().getInvoice()));
         invoiceBinder.addValueChangeListener(event -> {
             var status = invoiceBinder.validate();
@@ -152,7 +151,7 @@ public class UseCase07View extends VerticalLayout {
         detailsBinder.forField(customerAddress).bind(
                 InvoiceDetails::getCustomerAddress,
                 InvoiceDetails::setCustomerAddress);
-        ComponentEffect.effect(this,
+        Signal.effect(this,
                 () -> detailsBinder.setBean(invoiceDetailsSignal.get()));
         detailsBinder.addValueChangeListener(event -> {
             var status = detailsBinder.validate();
@@ -182,7 +181,7 @@ public class UseCase07View extends VerticalLayout {
             return button;
         });
 
-        ComponentEffect.effect(lineItemsGrid, () -> {
+        Signal.effect(lineItemsGrid, () -> {
             var lineItems = lineItemsSignal.get().stream()
                     .map(ValueSignal::peek).toList();
             lineItemsGrid.setItems(lineItems);
@@ -192,7 +191,7 @@ public class UseCase07View extends VerticalLayout {
             });
         });
 
-        ComponentEffect.effect(lineItemsGrid, () -> {
+        Signal.effect(lineItemsGrid, () -> {
             List<LineItem> items = invoiceDetailsSignal.get().getLineItems();
             lineItemsSignal.clear();
             items.forEach(lineItemsSignal::insertLast);
@@ -220,7 +219,7 @@ public class UseCase07View extends VerticalLayout {
         lineItemBinder.forField(unitPriceField).bind(LineItem::getUnitPrice,
                 LineItem::setUnitPrice);
 
-        ComponentEffect.effect(this,
+        Signal.effect(this,
                 () -> lineItemBinder.setBean(selectedLineItemSignal.get()));
         lineItemBinder.addValueChangeListener(event -> {
             var status = lineItemBinder.validate();

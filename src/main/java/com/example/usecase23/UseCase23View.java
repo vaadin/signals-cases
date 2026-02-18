@@ -1,18 +1,8 @@
 package com.example.usecase23;
 
-import com.vaadin.copilot.shaded.guava.util.concurrent.AtomicDouble;
-import jakarta.annotation.security.PermitAll;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-
 import com.example.usecase23.ServiceHealth.Status;
 import com.example.views.MainLayout;
-
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.board.Board;
 import com.vaadin.flow.component.charts.Chart;
@@ -47,6 +37,11 @@ import com.vaadin.flow.theme.lumo.LumoUtility.FontSize;
 import com.vaadin.flow.theme.lumo.LumoUtility.FontWeight;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
+import jakarta.annotation.security.PermitAll;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 @PageTitle("Use Case 23: Real-time Dashboard")
 @Route(value = "use-case-23", layout = MainLayout.class)
@@ -138,7 +133,7 @@ public class UseCase23View extends Main {
         bindData(chart, newYorkSeries, newYorkTimelineSignal);
         bindData(chart, tokyoSeries, tokyoTimelineSignal);
 
-        ComponentEffect.effect(chart,
+        Signal.effect(chart,
                 () -> xAxis.setCategories(timelineCategoriesSignal.get()
                         .stream().map(Signal::get).toArray(String[]::new)));
 
@@ -148,7 +143,7 @@ public class UseCase23View extends Main {
         conf.addSeries(tokyoSeries);
 
         // Trigger chart redraw when any timeline signal changes
-        ComponentEffect.effect(chart, () -> {
+        Signal.effect(chart, () -> {
             berlinTimelineSignal.get();
             londonTimelineSignal.get();
             newYorkTimelineSignal.get();
@@ -165,7 +160,7 @@ public class UseCase23View extends Main {
 
     private static void bindData(Chart chart, ListSeries series,
             ListSignal<Number> signal) {
-        ComponentEffect.effect(chart, () -> {
+        Signal.effect(chart, () -> {
             series.setData(signal.get().stream().map(Signal::get)
                     .toArray(Number[]::new));
             // TODO issue of getting the values from ListSignal instead of
@@ -186,7 +181,7 @@ public class UseCase23View extends Main {
         grid.addColumn(new ComponentRenderer<>(signal -> {
             Span status = new Span();
 
-            ComponentEffect.effect(status, () -> {
+            Signal.effect(status, () -> {
                 ServiceHealth serviceHealth = signal.get();
                 String statusTextInner = getStatusDisplayName(serviceHealth);
                 status.getElement().setAttribute("aria-label",
@@ -215,7 +210,7 @@ public class UseCase23View extends Main {
         // Add it all together
         VerticalLayout serviceHealth = new VerticalLayout(header, grid);
 
-        ComponentEffect.effect(grid, () -> {
+        Signal.effect(grid, () -> {
             grid.setItems(serviceHealthSignal.get());
             // TODO not this, update each signal individually
         });
@@ -247,7 +242,7 @@ public class UseCase23View extends Main {
         responseSeries.add(new DataSeriesItem("System 6", 12.5));
         conf.addSeries(responseSeries);
 
-        ComponentEffect.effect(chart, () -> {
+        Signal.effect(chart, () -> {
             var responseValues = responseSignal.get();
             responseSeries.get(0).setY(responseValues.get(0).get());
             responseSeries.get(1).setY(responseValues.get(1).get());
@@ -382,18 +377,27 @@ public class UseCase23View extends Main {
     }
 
     private static final class HighlightCard extends VerticalLayout {
-        private double lastNumeric;
+        record Change(double previous, double current) {}
 
         private HighlightCard(String title, ValueSignal<Number> signal,
                 Function<Number, String> format) {
 
-            // Computed signal for percentage change
-            lastNumeric = signal.peek().doubleValue();
-            Signal<Double> percentageSignal = signal.map(newValue -> {
-                double percentageChange = calculatePercentageChange(newValue, lastNumeric);
-                lastNumeric = newValue.doubleValue();
-                return percentageChange;
+            // previous-current value holder
+            ValueSignal<Change> changeSignal = new ValueSignal<>(
+                new Change(signal.peek().doubleValue(), signal.peek().doubleValue())
+            );
+
+            // update previous value when the main signal changes
+            Signal.effect(this, () -> {
+                double current = signal.get().doubleValue();
+                double previous = changeSignal.peek().current();
+                changeSignal.set(new Change(previous, current));
             });
+
+            // Computed signal for percentage change
+            Signal<Double> percentageSignal = changeSignal.map(change ->
+                calculatePercentageChange(change.current(), change.previous())
+            );
 
             // Computed signals using method references
             Signal<String> prefixSignal = percentageSignal.map(this::getPrefix);
@@ -441,13 +445,11 @@ public class UseCase23View extends Main {
             return percentage < 0 ? VaadinIcon.ARROW_DOWN : VaadinIcon.ARROW_UP;
         }
 
-        private double calculatePercentageChange(Number current,
-                Number previous) {
-            if (previous == null) {
+        private double calculatePercentageChange(double current, double previous) {
+            if (previous == 0.0) {
                 return 0.0;
             }
-            double percent = ((current.doubleValue() - previous.doubleValue())
-                    / Math.abs(previous.doubleValue())) * 100.0;
+            double percent = ((current - previous) / Math.abs(previous)) * 100.0;
             return Math.round(percent * 10.0) / 10.0;
         }
     }

@@ -7,7 +7,6 @@ import java.util.Map;
 
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
@@ -245,7 +244,7 @@ public class UseCase16View extends VerticalLayout
 
     private void setupSignalSubscriptions() {
         // When signals change, update URL (except during initialization)
-        ComponentEffect.effect(this, () -> {
+        Signal.effect(this, () -> {
             // Access signals to track them
             searchQuerySignal.get();
             categorySignal.get();
