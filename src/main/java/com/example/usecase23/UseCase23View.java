@@ -14,7 +14,6 @@ import com.example.usecase23.ServiceHealth.Status;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.board.Board;
 import com.vaadin.flow.component.charts.Chart;
@@ -147,7 +146,7 @@ public class UseCase23View extends Main {
         bindData(chart, newYorkSeries, newYorkTimelineSignal);
         bindData(chart, tokyoSeries, tokyoTimelineSignal);
 
-        ComponentEffect.effect(chart,
+        Signal.effect(chart,
                 () -> xAxis.setCategories(timelineCategoriesSignal.get()
                         .stream().map(Signal::get).toArray(String[]::new)));
 
@@ -167,7 +166,7 @@ public class UseCase23View extends Main {
 
     private static void bindData(Chart chart, ListSeries series,
             ListSignal<Number> signal) {
-        ComponentEffect.effect(chart, () -> {
+        Signal.effect(chart, () -> {
             series.setData(signal.get().stream().map(Signal::get)
                     .toArray(Number[]::new));
             // TODO issue of getting the values from ListSignal instead of
@@ -188,7 +187,7 @@ public class UseCase23View extends Main {
         grid.addColumn(new ComponentRenderer<>(signal -> {
             Span status = new Span();
 
-            ComponentEffect.effect(status, () -> {
+            Signal.effect(status, () -> {
                 ServiceHealth serviceHealth = signal.get();
                 String statusTextInner = getStatusDisplayName(serviceHealth);
                 status.getElement().setAttribute("aria-label",
@@ -206,7 +205,7 @@ public class UseCase23View extends Main {
         grid.addColumn(new ComponentRenderer<>(signal -> {
             var input = new Span(String.valueOf(signal.get().getInput()));
 
-            ComponentEffect.effect(input, () -> input
+            Signal.effect(input, () -> input
                     .setText(String.valueOf(signal.get().getInput())));
             return input;
         })).setHeader("Input").setAutoWidth(true)
@@ -214,7 +213,7 @@ public class UseCase23View extends Main {
         grid.addColumn(new ComponentRenderer<>(signal -> {
             var output = new Span(String.valueOf(signal.get().getOutput()));
 
-            ComponentEffect.effect(output, () -> output
+            Signal.effect(output, () -> output
                     .setText(String.valueOf(signal.get().getOutput())));
             return output;
         })).setHeader("Output").setAutoWidth(true)
@@ -223,7 +222,7 @@ public class UseCase23View extends Main {
         // Add it all together
         VerticalLayout serviceHealth = new VerticalLayout(header, grid);
 
-        ComponentEffect.effect(grid, () -> {
+        Signal.effect(grid, () -> {
             grid.setItems(serviceHealthSignal.get());
             // TODO not this, update each signal individually
         });
@@ -253,7 +252,7 @@ public class UseCase23View extends Main {
         responseSeries.add(new DataSeriesItem("System 6", 12.5));
         conf.addSeries(responseSeries);
 
-        ComponentEffect.effect(chart, () -> {
+        Signal.effect(chart, () -> {
             var responseValues = responseSignal.get();
             responseSeries.get(0).setY(responseValues.get(0).get());
             responseSeries.get(1).setY(responseValues.get(1).get());
@@ -437,7 +436,7 @@ public class UseCase23View extends Main {
 
             valueSpan = new Span(format.apply(signal.get()));
             valueSpan.addClassNames(FontWeight.SEMIBOLD, FontSize.XXXLARGE);
-            ComponentEffect.effect(valueSpan, () -> update(signal.get()));
+            Signal.effect(valueSpan, () -> update(signal.get()));
 
             badge = new Span();
 

@@ -391,8 +391,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         messageList.setHeightFull();
         messageList.setMarkdown(true);
 
-        // Reactively update message list using ComponentEffect
-        com.vaadin.flow.component.ComponentEffect.effect(messageList, () -> {
+        // Reactively update message list using Signal.effect
+        Signal.effect(messageList, () -> {
             var msgSignals = chatMessagesSignal.get();
             if (msgSignals != null) {
                 CurrentUserSignal.UserInfo userInfo = currentUserSignal

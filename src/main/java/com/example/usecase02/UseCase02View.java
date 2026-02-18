@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -22,6 +21,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-02", layout = MainLayout.class)
@@ -184,7 +184,7 @@ public class UseCase02View extends VerticalLayout {
         resultDisplay.add(new H3("Collected Form Data"), resultText);
         Results results = new Results();
         resultText.bindText(results.text);
-        ComponentEffect.effect(resultText, () -> {
+        Signal.effect(resultText, () -> {
             results.text.get();
             Notification.show("Form data displayed below", 2000,
                     Notification.Position.BOTTOM_START);

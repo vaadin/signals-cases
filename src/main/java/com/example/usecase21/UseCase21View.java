@@ -6,7 +6,6 @@ import java.util.Locale;
 
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -104,17 +103,17 @@ public class UseCase21View extends VerticalLayout {
         // Name field
         TextField nameField = new TextField();
         nameField.setWidthFull();
-        ComponentEffect.effect(nameField,
+        Signal.effect(nameField,
                 () -> nameField.setLabel(t.t("uc21.sampleForm.nameLabel").get()));
-        ComponentEffect.effect(nameField,
+        Signal.effect(nameField,
                 () -> nameField.setPlaceholder(t.t("uc21.sampleForm.namePlaceholder").get()));
 
         // Email field
         EmailField emailField = new EmailField();
         emailField.setWidthFull();
-        ComponentEffect.effect(emailField,
+        Signal.effect(emailField,
                 () -> emailField.setLabel(t.t("uc21.sampleForm.emailLabel").get()));
-        ComponentEffect.effect(emailField,
+        Signal.effect(emailField,
                 () -> emailField.setPlaceholder(t.t("uc21.sampleForm.emailPlaceholder").get()));
 
         // Buttons

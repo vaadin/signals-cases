@@ -2,12 +2,10 @@ package com.example;
 
 import java.util.List;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.impl.Effect;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.flow.signals.shared.SharedListSignal;
@@ -23,7 +21,7 @@ public class MissingAPI {
      * Binds a Grid's items to a Signal containing a List.
      */
     public static <T> void bindItems(Grid<T> grid, Signal<List<T>> signal) {
-        Effect.effect(grid, () -> {
+        Signal.effect(grid, () -> {
             List<T> items = signal.get();
             if (items != null) {
                 grid.setItems(items);
@@ -40,7 +38,7 @@ public class MissingAPI {
      */
     public static <T> void bindItems(Grid<T> grid,
             SharedListSignal<T> listSignal) {
-        Effect.effect(grid, () -> {
+        Signal.effect(grid, () -> {
             List<SharedValueSignal<T>> signals = listSignal.get();
             // Read each individual signal to register dependency
             List<T> items = signals.stream().map(SharedValueSignal::get)
@@ -55,7 +53,7 @@ public class MissingAPI {
      * Grid updates when any item changes.
      */
     public static <T> void bindItems(Grid<T> grid, ListSignal<T> listSignal) {
-        Effect.effect(grid, () -> {
+        Signal.effect(grid, () -> {
             List<ValueSignal<T>> signals = listSignal.get();
             // Read each individual signal to register dependency
             List<T> items = signals.stream().map(ValueSignal::get).toList();
@@ -68,7 +66,7 @@ public class MissingAPI {
      */
     public static <T> void bindItems(VirtualList<T> virtualList,
             Signal<List<T>> signal) {
-        ComponentEffect.effect(virtualList, () -> {
+        Signal.effect(virtualList, () -> {
             List<T> items = signal.get();
             if (items != null) {
                 virtualList.setItems(items);
@@ -85,7 +83,7 @@ public class MissingAPI {
      */
     public static <T> void bindItems(VirtualList<T> virtualList,
             SharedListSignal<T> listSignal) {
-        ComponentEffect.effect(virtualList, () -> {
+        Signal.effect(virtualList, () -> {
             List<SharedValueSignal<T>> signals = listSignal.get();
             // Read each individual signal to register dependency
             List<T> items = signals.stream().map(SharedValueSignal::get)
@@ -101,7 +99,7 @@ public class MissingAPI {
      */
     public static <T> void bindItems(VirtualList<T> virtualList,
             ListSignal<T> listSignal) {
-        ComponentEffect.effect(virtualList, () -> {
+        Signal.effect(virtualList, () -> {
             List<ValueSignal<T>> signals = listSignal.get();
             // Read each individual signal to register dependency
             List<T> items = signals.stream().map(ValueSignal::get).toList();
@@ -115,7 +113,7 @@ public class MissingAPI {
     public static <T> void bindItems(
             com.vaadin.flow.component.combobox.ComboBox<T> comboBox,
             Signal<List<T>> signal) {
-        Effect.effect(comboBox, () -> {
+        Signal.effect(comboBox, () -> {
             List<T> items = signal.get();
             if (items != null) {
                 comboBox.setItems(items);
@@ -131,7 +129,7 @@ public class MissingAPI {
      */
     public static void bindBrowserTitle(com.vaadin.flow.component.UI ui,
             Signal<String> signal) {
-        Effect.effect(ui, () -> {
+        Signal.effect(ui, () -> {
             String title = signal.get();
             if (title != null) {
                 ui.getPage().setTitle(title);
@@ -158,7 +156,7 @@ public class MissingAPI {
      */
     public static void tabsSyncSelectedIndex(Tabs tabs,
             ValueSignal<Integer> numberSignal) {
-        Effect.effect(tabs, () -> {
+        Signal.effect(tabs, () -> {
             Integer index = numberSignal.get();
             if (index != null) {
                 tabs.setSelectedIndex(index);
