@@ -1,5 +1,6 @@
 package com.example.usecase02;
 
+import com.vaadin.flow.signals.Signal;
 import jakarta.annotation.security.PermitAll;
 
 import java.util.List;
@@ -21,7 +22,6 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-02", layout = MainLayout.class)
