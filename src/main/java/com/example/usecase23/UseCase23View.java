@@ -180,29 +180,29 @@ public class UseCase23View extends Main {
 
         grid.addColumn(new ComponentRenderer<>(signal -> {
             Span status = new Span();
-
-            Signal.effect(status, () -> {
-                ServiceHealth serviceHealth = signal.get();
-                String statusTextInner = getStatusDisplayName(serviceHealth);
-                status.getElement().setAttribute("aria-label",
-                        "Status: " + statusTextInner);
-                status.getElement().setAttribute("title",
-                        "Status: " + statusTextInner);
-                status.getElement().getThemeList().clear();
-                status.getElement().getThemeList()
-                        .add(getStatusTheme(serviceHealth));
-            });
+            Signal<String> statusText = Signal.computed(() -> getStatusDisplayName(signal.get()));
+            status.getElement().bindAttribute("aria-label",
+                    () -> "Status: " + statusText.get());
+            status.getElement().bindAttribute("title",
+                    () -> "Status: " + statusText.get());
+            status.getElement().getThemeList().add("badge");
+            status.getElement().getThemeList().add("primary");
+            status.getElement().getThemeList().bind("success",
+                    () -> signal.get().getStatus() == Status.EXCELLENT);
+            status.getElement().getThemeList().bind("error",
+                    () -> signal.get().getStatus() == Status.FAILING);
             return status;
         })).setHeader("").setFlexGrow(0).setAutoWidth(true);
-        grid.addColumn(signal -> signal.get().getCity()).setHeader("City")
+        grid.addColumn(signal -> signal.get().getCity())
+                .setHeader("City")
                 .setFlexGrow(1);
         grid.addColumn(new ComponentRenderer<>(signal ->
-                new Span(() -> String.valueOf(signal.get().getInput())
-        )).setHeader("Input").setAutoWidth(true)
+                        new Span(() -> String.valueOf(signal.get().getInput()))))
+                .setHeader("Input").setAutoWidth(true)
                 .setTextAlign(ColumnTextAlign.END);
         grid.addColumn(new ComponentRenderer<>(signal ->
-            return new Span(() -> String.valueOf(signal.get().getOutput()))
-        )).setHeader("Output").setAutoWidth(true)
+                        new Span(() -> String.valueOf(signal.get().getOutput()))))
+                .setHeader("Output").setAutoWidth(true)
                 .setTextAlign(ColumnTextAlign.END);
 
         // Add it all together
@@ -293,17 +293,6 @@ public class UseCase23View extends Main {
         } else {
             return status.toString();
         }
-    }
-
-    private String getStatusTheme(ServiceHealth serviceHealth) {
-        Status status = serviceHealth.getStatus();
-        String theme = "badge primary small";
-        if (status == Status.EXCELLENT) {
-            theme += " success";
-        } else if (status == Status.FAILING) {
-            theme += " error";
-        }
-        return theme;
     }
 
     /**
