@@ -83,8 +83,7 @@ public class UseCase01View extends VerticalLayout {
         confirmField.bindValue(confirmPasswordSignal,
                 confirmPasswordSignal::set);
         confirmField.setErrorMessage("Passwords do not match");
-        confirmField.bindInvalid(
-                isConfirmValidSignal.map(valid -> !valid));
+        confirmField.bindInvalid(isConfirmValidSignal.map(valid -> !valid));
 
         // Submit button with multiple signal bindings
         Button submitButton = new Button();
@@ -106,8 +105,9 @@ public class UseCase01View extends VerticalLayout {
         // Bind theme variant
         submitButton.bindThemeVariant(ButtonVariant.LUMO_SUCCESS,
                 submissionStateSignal.map(SubmissionState.SUCCESS::equals));
-        submitButton.bindThemeVariant(ButtonVariant.LUMO_PRIMARY, submissionStateSignal
-                .map(state -> state != SubmissionState.SUCCESS));
+        submitButton.bindThemeVariant(ButtonVariant.LUMO_PRIMARY,
+                submissionStateSignal
+                        .map(state -> state != SubmissionState.SUCCESS));
 
         submitButton.addClickListener(e -> {
             submissionStateSignal.set(SubmissionState.SUBMITTING);
