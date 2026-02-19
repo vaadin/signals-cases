@@ -7,7 +7,6 @@ import java.util.List;
 
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.ComponentEffect;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -22,7 +21,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
@@ -927,7 +925,7 @@ public class UseCase17View extends VerticalLayout {
     }
 
     private <T extends Component> ComboBox<T> createComponentSelector(
-            String label, List<T> items, WritableSignal<T> signal) {
+            String label, List<T> items, ValueSignal<T> signal) {
         ComboBox<T> combo = new ComboBox<>(label);
         combo.setItems(items);
         combo.setItemLabelGenerator(Component::getName);
@@ -951,7 +949,7 @@ public class UseCase17View extends VerticalLayout {
 
         ListSignal<Component> selectedComponentsSignal = new ListSignal<>();
 
-        ComponentEffect.effect(summary, () -> {
+        Signal.effect(summary, () -> {
             selectedComponentsSignal.clear();
             if (cpuSignal.get() != null)
                 selectedComponentsSignal.insertLast(cpuSignal.get());
@@ -1104,7 +1102,7 @@ public class UseCase17View extends VerticalLayout {
 
         ListSignal<String> compatibilityStatusSignal = new ListSignal<>();
 
-        ComponentEffect.effect(checksContainer, () -> {
+        Signal.effect(checksContainer, () -> {
             compatibilityStatusSignal.clear();
             compatibilityStatusSignal
                     .insertLast(formatCheck("CPU socket matches motherboard",

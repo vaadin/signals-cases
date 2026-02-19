@@ -31,7 +31,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.flow.signals.shared.SharedListSignal;
 import com.vaadin.flow.signals.shared.SharedValueSignal;
@@ -344,33 +343,28 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
 
         FormLayout formLayout = new FormLayout();
 
-        // Create two-way mapped signals for each field
-        WritableSignal<String> titleSignal = taskSignal.map(Task::title,
-                Task::withTitle);
-        WritableSignal<String> descriptionSignal = taskSignal
-                .map(Task::description, Task::withDescription);
-        WritableSignal<Task.TaskStatus> statusSignal = taskSignal
-                .map(Task::status, Task::withStatus);
-        WritableSignal<LocalDate> dueDateSignal = taskSignal.map(Task::dueDate,
-                Task::withDueDate);
-
+        // Bind fields using map (read) + updater (write)
         TextField titleField = new TextField("Title");
         titleField.setWidthFull();
-        titleField.bindValue(titleSignal, titleSignal::set);
+        titleField.bindValue(taskSignal.map(Task::title),
+                taskSignal.updater(Task::withTitle));
 
         TextArea descriptionField = new TextArea("Description");
         descriptionField.setWidthFull();
         descriptionField.setMaxHeight("100px");
-        descriptionField.bindValue(descriptionSignal, descriptionSignal::set);
+        descriptionField.bindValue(taskSignal.map(Task::description),
+                taskSignal.updater(Task::withDescription));
 
         ComboBox<Task.TaskStatus> statusCombo = new ComboBox<>("Status");
         statusCombo.setItems(Task.TaskStatus.values());
         statusCombo.setWidthFull();
-        statusCombo.bindValue(statusSignal, statusSignal::set);
+        statusCombo.bindValue(taskSignal.map(Task::status),
+                taskSignal.updater(Task::withStatus));
 
         DatePicker dueDatePicker = new DatePicker("Due Date");
         dueDatePicker.setWidthFull();
-        dueDatePicker.bindValue(dueDateSignal, dueDateSignal::set);
+        dueDatePicker.bindValue(taskSignal.map(Task::dueDate),
+                taskSignal.updater(Task::withDueDate));
 
         formLayout.add(titleField, descriptionField, statusCombo,
                 dueDatePicker);
@@ -397,8 +391,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         messageList.setHeightFull();
         messageList.setMarkdown(true);
 
-        // Reactively update message list using ComponentEffect
-        com.vaadin.flow.component.ComponentEffect.effect(messageList, () -> {
+        // Reactively update message list using Signal.effect
+        Signal.effect(messageList, () -> {
             var msgSignals = chatMessagesSignal.get();
             if (msgSignals != null) {
                 CurrentUserSignal.UserInfo userInfo = currentUserSignal

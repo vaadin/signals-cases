@@ -2,7 +2,6 @@ package com.example.muc03;
 
 import org.springframework.stereotype.Component;
 
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.shared.SharedMapSignal;
 import com.vaadin.flow.signals.shared.SharedValueSignal;
 
@@ -31,23 +30,23 @@ public class MUC03Signals {
         return leaderboardSignal;
     }
 
-    public WritableSignal<Boolean> getButtonVisibleSignal() {
+    public SharedValueSignal<Boolean> getButtonVisibleSignal() {
         return buttonVisibleSignal;
     }
 
-    public WritableSignal<Integer> getButtonLeftSignal() {
+    public SharedValueSignal<Integer> getButtonLeftSignal() {
         return buttonLeftSignal;
     }
 
-    public WritableSignal<Integer> getButtonTopSignal() {
+    public SharedValueSignal<Integer> getButtonTopSignal() {
         return buttonTopSignal;
     }
 
-    public WritableSignal<Integer> getClicksRemainingSignal() {
+    public SharedValueSignal<Integer> getClicksRemainingSignal() {
         return clicksRemainingSignal;
     }
 
-    public WritableSignal<Integer> getRoundNumberSignal() {
+    public SharedValueSignal<Integer> getRoundNumberSignal() {
         return roundNumberSignal;
     }
 

@@ -21,7 +21,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.WritableSignal;
 import com.vaadin.flow.signals.shared.SharedValueSignal;
 
 /**
@@ -42,7 +41,7 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
 public class MUC02View extends VerticalLayout {
 
     private final String currentUser;
-    private WritableSignal<MUC02Signals.CursorPosition> myCursorSignal;
+    private SharedValueSignal<MUC02Signals.CursorPosition> myCursorSignal;
     private final MUC02Signals muc02Signals;
     private final UserSessionRegistry userSessionRegistry;
     private String sessionId;
@@ -128,7 +127,7 @@ public class MUC02View extends VerticalLayout {
                 .set("padding", "1em").set("border-radius", "4px")
                 .set("margin-top", "1em").set("font-style", "italic");
         infoBox.add(new Paragraph(
-                "💡 Each user's cursor position is stored in a WritableSignal in a static shared Map. "
+                "💡 Each user's cursor position is stored in a SharedValueSignal in a shared Map. "
                         + "All users read all signals to display cursor indicators. This pattern enables "
                         + "real-time collaborative awareness without complex synchronization code. "
                         + "With Vaadin Push, updates propagate automatically to all connected clients."));

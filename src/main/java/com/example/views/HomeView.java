@@ -30,7 +30,7 @@ public class HomeView extends VerticalLayout {
 
         // Introduction
         Paragraph intro = new Paragraph(
-                "This application demonstrates 28 use cases (22 single-user + 6 multi-user) for the Vaadin Signal API. "
+                "This application demonstrates 29 use cases (23 single-user + 6 multi-user) for the Vaadin Signal API. "
                         + "Each use case validates different aspects of the reactive programming model, from basic "
                         + "one-way bindings to complex forms, AI integration, and multi-user collaboration.");
 
@@ -53,10 +53,10 @@ public class HomeView extends VerticalLayout {
         stats.setSpacing(false);
         stats.setPadding(false);
         stats.add(
-                createStat("28",
-                        "Total use cases (22 single-user + 6 multi-user)"),
-                createStat("22",
-                        "Single-user use cases across 13 categories"),
+                createStat("29",
+                        "Total use cases (23 single-user + 6 multi-user)"),
+                createStat("23",
+                        "Single-user use cases across 14 categories"),
                 createStat("6",
                         "Multi-user collaboration use cases"));
 
@@ -93,6 +93,9 @@ public class HomeView extends VerticalLayout {
                 createCategory("i18n, Mapping & Dashboard",
                         "UC21-23",
                         "Reactive i18n, two-way mapped signals, real-time dashboard"),
+                createCategory("VirtualList",
+                        "UC24",
+                        "VirtualList with signal data source, notification inbox"),
                 createCategory("Multi-User Collaboration",
                         "MUC01-04, MUC06-07",
                         "Chat, cursors, click race game, locking, shared tasks, shared LLM tasks"));

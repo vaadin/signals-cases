@@ -15,9 +15,9 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -25,17 +25,14 @@ import com.vaadin.flow.router.Route;
 /**
  * Multi-User Case 1: Shared Chat/Message List
  *
- * Demonstrates a collaborative chat-like interface with: - Append-only shared
+ * Demonstrates a collaborative chat interface with: - Append-only shared
  * message list signal - Multiple users adding messages - Server-side signal
  * source with Push updates - Each user can only append, not modify history
  *
- * Key Patterns: - Shared Signal<List<Message>> across sessions - Append-only
- * operations - Server-side signal coordination - Push-based real-time updates
- *
- * Note: This is a simulation using local state. In production: - Signal would
- * be server-side (e.g., Spring @Component with @VaadinSessionScope) - Updates
- * would use Vaadin Push to broadcast to all clients - Message persistence would
- * be in database
+ * Key Patterns: - Application-scoped SharedListSignal&lt;Message&gt; across
+ * sessions - Append-only operations (insertLast) - Server-side signal
+ * coordination via Spring @Component - Push-based real-time updates to all
+ * connected clients
  */
 @Route(value = "muc-01", layout = MainLayout.class)
 @PageTitle("MUC 1: Shared Chat")
@@ -69,8 +66,8 @@ public class MUC01View extends VerticalLayout {
 
         Paragraph description = new Paragraph(
                 "This use case demonstrates a collaborative chat with an append-only shared message list. "
-                        + "In production, this would use server-side signals with Push to broadcast messages to all users. "
-                        + "Try opening this page in multiple browser windows (different users) to see simulated collaboration.");
+                        + "Messages are stored in an application-scoped SharedListSignal and broadcast to all users via Push. "
+                        + "Try opening this page in multiple browser windows (different users) to see real-time collaboration.");
 
         // Active users display
         ActiveUsersDisplay activeUsersDisplay = new ActiveUsersDisplay(
@@ -89,25 +86,25 @@ public class MUC01View extends VerticalLayout {
                 msgSignal -> createMessageComponent(msgSignal.get()));
 
         // Message input
-        H3 inputTitle = new H3("Send Message");
-        TextArea messageInput = new TextArea();
-        messageInput.setPlaceholder("Type your message...");
+        TextField messageInput = new TextField();
+        messageInput.setPlaceholder("Type your message and press Enter...");
         messageInput.setWidthFull();
         messageInput.setMaxLength(500);
 
-        HorizontalLayout sendLayout = new HorizontalLayout();
-        sendLayout.setWidthFull();
-
-        Button sendButton = new Button("Send Message", event -> {
+        Runnable sendMessage = () -> {
             String text = messageInput.getValue();
             if (text != null && !text.trim().isEmpty() && sessionId != null) {
-                // Look up current display name
                 String displayName = getCurrentDisplayName();
                 muc01Signals.appendMessage(new MUC01Signals.Message(currentUser,
                         displayName, text.trim()));
                 messageInput.clear();
             }
-        });
+        };
+
+        messageInput.addKeyPressListener(Key.ENTER, event -> sendMessage.run());
+
+        Button sendButton = new Button("Send Message",
+                event -> sendMessage.run());
         sendButton.addThemeName("primary");
 
         Button clearButton = new Button("Clear All Messages", event -> {
@@ -116,29 +113,16 @@ public class MUC01View extends VerticalLayout {
         clearButton.addThemeName("error");
         clearButton.addThemeName("small");
 
-        sendLayout.add(sendButton, clearButton);
-
-        // Info box
-        Div infoBox = new Div();
-        infoBox.getStyle().set("background-color", "#e0f7fa")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("margin-top", "1em").set("font-style", "italic");
-
+        // Message count
         Div messageCount = new Div();
         messageCount.bindText(muc01Signals.getMessagesSignal()
-                .map(messages -> "💬 Total messages: " + messages.size()));
-
-        infoBox.add(new Paragraph("💡 In production implementation:\n"
-                + "• Signal is application-scoped Spring component (injected)\n"
-                + "• Vaadin Push would broadcast updates to all connected clients\n"
-                + "• Messages would be persisted to database\n"
-                + "• Authorization would prevent editing others' messages\n"
-                + "• Signal API handles all synchronization automatically"),
-                messageCount);
+                .map(messages -> "Total messages: " + messages.size()));
+        messageCount.getStyle().set("color", "var(--lumo-secondary-text-color)")
+                .set("font-size", "var(--lumo-font-size-s)");
 
         add(title, description, activeUsersDisplay, new H3("Messages"),
-                messagesContainer, inputTitle, messageInput, sendLayout,
-                infoBox);
+                messagesContainer, messageCount, messageInput, sendButton,
+                clearButton);
     }
 
     @Override

@@ -17,7 +17,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.signals.WritableSignal;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-20", layout = MainLayout.class)
 @PageTitle("Use Case 20: Session-scoped User Preferences")
@@ -51,7 +51,7 @@ public class UseCase20View extends VerticalLayout {
 
         // Local signal mirroring the session-scoped preference for binding
         // convenience
-        WritableSignal<String> colorSignal = preferences
+        ValueSignal<String> colorSignal = preferences
                 .backgroundColorSignal();
 
         // Color selection control
