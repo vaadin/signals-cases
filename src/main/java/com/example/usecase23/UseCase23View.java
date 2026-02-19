@@ -196,15 +196,13 @@ public class UseCase23View extends Main {
         })).setHeader("").setFlexGrow(0).setAutoWidth(true);
         grid.addColumn(signal -> signal.get().getCity()).setHeader("City")
                 .setFlexGrow(1);
-        grid.addColumn(new ComponentRenderer<>(signal -> {
-            var input = new Span(signal.map(sh -> String.valueOf(sh.getInput())));
-            return input;
-        })).setHeader("Input").setAutoWidth(true)
+        grid.addColumn(new ComponentRenderer<>(signal ->
+                new Span(() -> String.valueOf(signal.get().getInput())
+        )).setHeader("Input").setAutoWidth(true)
                 .setTextAlign(ColumnTextAlign.END);
-        grid.addColumn(new ComponentRenderer<>(signal -> {
-            var output = new Span(signal.map(sh -> String.valueOf(sh.getOutput())));
-            return output;
-        })).setHeader("Output").setAutoWidth(true)
+        grid.addColumn(new ComponentRenderer<>(signal ->
+            return new Span(() -> String.valueOf(signal.get().getOutput()))
+        )).setHeader("Output").setAutoWidth(true)
                 .setTextAlign(ColumnTextAlign.END);
 
         // Add it all together
