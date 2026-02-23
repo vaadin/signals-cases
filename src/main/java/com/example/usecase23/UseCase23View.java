@@ -138,8 +138,9 @@ public class UseCase23View extends Main {
         bindData(chart, newYorkSeries, newYorkTimelineSignal);
         bindData(chart, tokyoSeries, tokyoTimelineSignal);
 
-        Signal.effect(chart, () -> xAxis.setCategories(timelineCategoriesSignal
-                .get().stream().map(Signal::get).toArray(String[]::new)));
+        Signal.effect(chart,
+                () -> xAxis.setCategories(timelineCategoriesSignal.get()
+                        .stream().map(Signal::get).toArray(String[]::new)));
 
         conf.addSeries(berlinSeries);
         conf.addSeries(londonSeries);

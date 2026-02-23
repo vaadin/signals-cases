@@ -41,7 +41,7 @@ public class MissingAPI {
     public static <T> void bindItems(@NonNull Grid<T> grid,
             SharedListSignal<T> listSignal) {
         Signal.effect(grid, () -> {
-            var signals = listSignal.get();
+            List<SharedValueSignal<T>> signals = listSignal.get();
             // Read each individual signal to register dependency
             List<T> items = signals.stream().map(SharedValueSignal::get)
                     .toList();

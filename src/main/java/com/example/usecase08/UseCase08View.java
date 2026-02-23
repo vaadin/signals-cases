@@ -107,12 +107,10 @@ public class UseCase08View extends VerticalLayout {
         planSelect.setRequired(true);
 
         Span planDescription = new Span();
-        planDescription.bindText(planSignal.map(plan -> {
-            return switch (plan) {
-            case STARTER -> "Perfect for small teams - $29/month";
-            case PROFESSIONAL -> "For growing businesses - $99/month";
-            case ENTERPRISE -> "Custom solutions - Contact sales";
-            };
+        planDescription.bindText(planSignal.map(plan -> switch (plan) {
+        case STARTER -> "Perfect for small teams - $29/month";
+        case PROFESSIONAL -> "For growing businesses - $99/month";
+        case ENTERPRISE -> "Custom solutions - Contact sales";
         }));
 
         step3Layout.add(planSelect, planDescription);
@@ -136,32 +134,26 @@ public class UseCase08View extends VerticalLayout {
                 currentStepSignal.map(step -> step == Step.REVIEW));
 
         Signal<Boolean> step1ValidSignal = Signal.computed(() -> {
-            Boolean firstNameValid = firstNameSignal
+            boolean firstNameValid = firstNameSignal
                     .map(isValid(firstNameField)).get();
-            Boolean lastNameValid = lastNameSignal.map(isValid(lastNameField))
+            boolean lastNameValid = lastNameSignal.map(isValid(lastNameField))
                     .get();
-            Boolean emailValid = emailSignal.map(isValid(emailField)).get();
-            return firstNameValid
-                    && lastNameValid
-                    && emailValid;
+            boolean emailValid = emailSignal.map(isValid(emailField)).get();
+            return firstNameValid && lastNameValid && emailValid;
         });
 
         Signal<Boolean> step2ValidSignal = Signal.computed(() -> {
-            Boolean companyNameValid = companyNameSignal
+            boolean companyNameValid = companyNameSignal
                     .map(isValid(companyNameField)).get();
-            Boolean companySizeValid = companySizeSignal
+            boolean companySizeValid = companySizeSignal
                     .map(isValid(companySizeSelect)).get();
-            Boolean industryValid = industrySignal.map(isValid(industrySelect))
+            boolean industryValid = industrySignal.map(isValid(industrySelect))
                     .get();
-            return companyNameValid
-                    && companySizeValid
-                    && industryValid;
+            return companyNameValid && companySizeValid && industryValid;
         });
 
-        Signal<Boolean> step3ValidSignal = Signal.computed(() -> {
-            Boolean valid = planSignal.map(isValid(planSelect)).get();
-            return valid;
-        });
+        Signal<Boolean> step3ValidSignal = Signal
+                .computed(() -> planSignal.map(isValid(planSelect)).get());
 
         // Navigation buttons
         HorizontalLayout navigationLayout = new HorizontalLayout();

@@ -2,8 +2,6 @@ package com.example.usecase03;
 
 import jakarta.annotation.security.PermitAll;
 
-import java.util.List;
-
 import com.example.MissingAPI;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.NonNull;
@@ -90,9 +88,7 @@ public class UseCase03View extends VerticalLayout {
                         + "(19 writable + 4 computed = 23 signals total).");
         description.getStyle().set("margin-top", "0.5em");
 
-        List<@Nullable String> shapeNames = new java.util.ArrayList<>();
-        System.out.println(shapeNames.get(0).charAt(0));
-         // Main content: controls on left, canvas on right
+        // Main content: controls on left, canvas on right
         HorizontalLayout mainContent = new HorizontalLayout();
         mainContent.setWidthFull();
         mainContent.setSpacing(true);

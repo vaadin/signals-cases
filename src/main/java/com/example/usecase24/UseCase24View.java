@@ -66,16 +66,14 @@ public class UseCase24View extends VerticalLayout {
             String typeFilter = typeFilterSignal.get();
             String readFilter = readFilterSignal.get();
 
-            String tf = typeFilter;
-            String rf = readFilter;
             return notificationsSignal.get().stream()
                     .map(ValueSignal::get)
-                    .filter(n -> tf.equals("All")
-                            || n.type().name().equals(tf))
+                    .filter(n -> typeFilter.equals("All")
+                            || n.type().name().equals(typeFilter))
                     .filter(n -> {
-                        if (rf.equals("Unread")) {
+                        if (readFilter.equals("Unread")) {
                             return !n.read();
-                        } else if (rf.equals("Read")) {
+                        } else if (readFilter.equals("Read")) {
                             return n.read();
                         }
                         return true;
@@ -91,10 +89,10 @@ public class UseCase24View extends VerticalLayout {
                         .filter(n -> !n.read()).count());
 
         Signal<String> countLabelSignal = Signal.computed(() -> {
-            int filteredSize = filteredSignal.get().size();
-            long unreadVal = unreadCountSignal.get();
-            return "Showing " + filteredSize + " notification"
-                    + (filteredSize != 1 ? "s" : "") + " (" + unreadVal
+            int filtered = filteredSignal.get().size();
+            long unread = unreadCountSignal.get();
+            return "Showing " + filtered + " notification"
+                    + (filtered != 1 ? "s" : "") + " (" + unread
                     + " unread)";
         });
 

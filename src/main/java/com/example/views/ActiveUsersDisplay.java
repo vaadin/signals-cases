@@ -102,7 +102,8 @@ public class ActiveUsersDisplay extends Div {
             var users = userSessionRegistry.getActiveUsersSignal().get();
             if (viewRoute != null) {
                 return users.stream()
-                        .filter(userSignal -> viewRoute.equals(userSignal.get().currentView()))
+                        .filter(userSignal -> viewRoute
+                                .equals(userSignal.get().currentView()))
                         .toList();
             }
             return users;
