@@ -26,6 +26,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.impl.UsageTracker;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
@@ -309,8 +310,10 @@ public class UseCase16View extends VerticalLayout
     }
 
     private void updateFilteredResults() {
-        String query = searchQuerySignal.get();
-        String category = categorySignal.get();
+        String query = UsageTracker.isActive() ? searchQuerySignal.get()
+                : searchQuerySignal.peek();
+        String category = UsageTracker.isActive() ? categorySignal.get()
+                : categorySignal.peek();
 
         filteredArticlesSignal.clear();
         ALL_ARTICLES.stream()

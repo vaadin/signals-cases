@@ -51,7 +51,7 @@ public class MUC02View extends VerticalLayout {
             MUC02Signals muc02Signals,
             UserSessionRegistry userSessionRegistry) {
         CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
-                .get();
+                .peek();
         if (userInfo == null || !userInfo.isAuthenticated()) {
             throw new IllegalStateException(
                     "User must be authenticated to access this view");

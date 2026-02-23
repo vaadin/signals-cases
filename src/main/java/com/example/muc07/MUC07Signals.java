@@ -29,7 +29,7 @@ public class MUC07Signals {
 
     @PostConstruct
     public void initializeSampleLLMTasks() {
-        if (llmTasksSignal.get().isEmpty()) {
+        if (llmTasksSignal.peek().isEmpty()) {
             llmTasksSignal.insertLast(Task
                     .create("Review pull requests",
                             "Review and merge pending pull requests")

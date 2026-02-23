@@ -58,7 +58,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
         // Get current user info
         CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
-                .get();
+                .peek();
         if (userInfo != null && userInfo.isAuthenticated()) {
             this.currentUser = userInfo.getUsername();
         }
@@ -134,7 +134,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         localeSelector.getStyle().set("margin-right", "1em");
 
         // Initialize selected value from UI locale signal
-        Locale currentLocale = UI.getCurrent().localeSignal().get();
+        Locale currentLocale = UI.getCurrent().localeSignal().peek();
         String initialSelection = localeMap.entrySet().stream()
                 .filter(e -> e.getValue().getLanguage()
                         .equals(currentLocale.getLanguage()))
