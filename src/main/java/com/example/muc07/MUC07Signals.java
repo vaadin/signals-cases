@@ -2,6 +2,8 @@ package com.example.muc07;
 
 import jakarta.annotation.PostConstruct;
 
+import java.time.LocalDate;
+
 import com.example.usecase18.ChatMessageData;
 import com.example.usecase18.Task;
 import org.springframework.stereotype.Component;
@@ -33,16 +35,16 @@ public class MUC07Signals {
             llmTasksSignal.insertLast(Task
                     .create("Review pull requests",
                             "Review and merge pending pull requests")
-                    .withDueDate(java.time.LocalDate.now().plusDays(2)));
+                    .withDueDate(LocalDate.now().plusDays(2)));
             llmTasksSignal.insertLast(Task
                     .create("Write unit tests",
                             "Add unit tests for new features")
                     .withStatus(Task.TaskStatus.IN_PROGRESS)
-                    .withDueDate(java.time.LocalDate.now().plusDays(5)));
+                    .withDueDate(LocalDate.now().plusDays(5)));
             llmTasksSignal.insertLast(Task
                     .create("Deploy to staging",
                             "Deploy latest changes to staging environment")
-                    .withDueDate(java.time.LocalDate.now().plusDays(7)));
+                    .withDueDate(LocalDate.now().plusDays(7)));
         }
     }
 }

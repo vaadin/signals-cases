@@ -2,6 +2,8 @@ package com.example.muc06;
 
 import jakarta.annotation.PostConstruct;
 
+import java.time.LocalDate;
+
 import org.springframework.stereotype.Component;
 
 import com.vaadin.flow.signals.shared.SharedListSignal;
@@ -27,13 +29,13 @@ public class MUC06Signals {
     public void initializeSampleTasks() {
         if (tasksSignal.peek().isEmpty()) {
             tasksSignal.insertLast(new Task("task-1", "Review pull requests",
-                    false, java.time.LocalDate.now()));
+                    false, LocalDate.now()));
             tasksSignal.insertLast(new Task("task-2", "Update documentation",
-                    true, java.time.LocalDate.now().plusDays(1)));
+                    true, LocalDate.now().plusDays(1)));
             tasksSignal.insertLast(new Task("task-3", "Fix bug #123", false,
-                    java.time.LocalDate.now().plusDays(2)));
+                    LocalDate.now().plusDays(2)));
             tasksSignal.insertLast(new Task("task-4", "Prepare demo", false,
-                    java.time.LocalDate.now().plusWeeks(1)));
+                    LocalDate.now().plusWeeks(1)));
         }
     }
 }

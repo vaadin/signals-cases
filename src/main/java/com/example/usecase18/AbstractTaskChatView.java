@@ -3,6 +3,7 @@ package com.example.usecase18;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.function.Function;
 
 import org.jspecify.annotations.Nullable;
 
@@ -503,7 +504,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
     }
 
     private void updateTaskField(String taskId,
-            java.util.function.Function<Task, Task> updater) {
+            Function<Task, Task> updater) {
         tasksSignal.get().stream()
                 .filter(sig -> sig.get().id().equals(taskId))
                 .findFirst()

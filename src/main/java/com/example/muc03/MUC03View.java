@@ -2,6 +2,7 @@ package com.example.muc03;
 
 import jakarta.annotation.security.PermitAll;
 
+import java.util.Map;
 import java.util.Random;
 
 import com.example.security.CurrentUserSignal;
@@ -162,7 +163,7 @@ public class MUC03View extends VerticalLayout {
                                 Integer v2 = e2.getValue().get();
                                 return Integer.compare(v2, v1);
                             })
-                            .map(java.util.Map.Entry::getValue).toList();
+                            .map(Map.Entry::getValue).toList();
                 }), this::createLeaderboardItem);
 
         // Info box

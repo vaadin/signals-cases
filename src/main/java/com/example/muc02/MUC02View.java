@@ -2,6 +2,8 @@ package com.example.muc02;
 
 import jakarta.annotation.security.PermitAll;
 
+import java.util.Map;
+
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
@@ -165,7 +167,7 @@ public class MUC02View extends VerticalLayout {
             return cursors.entrySet().stream()
                     .filter(entry -> sessionId == null
                             || !entry.getKey().equals(ownKey))
-                    .map(java.util.Map.Entry::getValue).toList();
+                    .map(Map.Entry::getValue).toList();
         }), this::createCursorIndicator);
     }
 
