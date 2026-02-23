@@ -2,8 +2,6 @@ package com.example;
 
 import java.util.List;
 
-import org.jspecify.annotations.NonNull;
-
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.virtuallist.VirtualList;
@@ -38,7 +36,7 @@ public class MissingAPI {
      * individual ValueSignals within the ListSignal by reading each one, so the
      * Grid updates when any item changes.
      */
-    public static <T> void bindItems(@NonNull Grid<T> grid,
+    public static <T> void bindItems(Grid<T> grid,
             SharedListSignal<T> listSignal) {
         Signal.effect(grid, () -> {
             List<SharedValueSignal<T>> signals = listSignal.get();
@@ -54,7 +52,7 @@ public class MissingAPI {
      * individual ValueSignals within the ListSignal by reading each one, so the
      * Grid updates when any item changes.
      */
-    public static <T> void bindItems(@NonNull Grid<T> grid, ListSignal<T> listSignal) {
+    public static <T> void bindItems(Grid<T> grid, ListSignal<T> listSignal) {
         Signal.effect(grid, () -> {
             List<ValueSignal<T>> signals = listSignal.get();
             // Read each individual signal to register dependency

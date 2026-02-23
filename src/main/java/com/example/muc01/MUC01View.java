@@ -7,6 +7,7 @@ import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
 import com.example.views.ActiveUsersDisplay;
 import com.example.views.MainLayout;
+import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Key;
@@ -43,7 +44,7 @@ public class MUC01View extends VerticalLayout {
     private final String currentUser;
     private final MUC01Signals muc01Signals;
     private final UserSessionRegistry userSessionRegistry;
-    private @org.jspecify.annotations.Nullable String sessionId;
+    private @Nullable String sessionId;
 
     public MUC01View(CurrentUserSignal currentUserSignal,
             MUC01Signals muc01Signals,
