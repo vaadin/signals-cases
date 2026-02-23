@@ -5,13 +5,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.function.Function;
 
-import org.jspecify.annotations.Nullable;
-
 import com.example.MissingAPI;
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
 import com.example.views.MainLayout;
+import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
@@ -89,7 +88,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         totalTasksSignal = tasksSignal.map(List::size);
         completedTasksSignal = Signal.computed(() -> (int) tasksSignal.get()
                 .stream().filter(t -> t.get().isCompleted()).count());
-        pendingTasksSignal = Signal.computed(() -> totalTasksSignal.get() - completedTasksSignal.get());
+        pendingTasksSignal = Signal.computed(
+                () -> totalTasksSignal.get() - completedTasksSignal.get());
 
         // Build UI - Statistics on top, then AI and Grid side by side
         HorizontalLayout statsSection = buildStatisticsSection();
@@ -122,7 +122,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
 
         var users = userSessionRegistry.getActiveUsersSignal().get();
         var displayNames = userSessionRegistry.getDisplayNamesSignal().get();
-        if (displayNames == null) return username;
+        if (displayNames == null)
+            return username;
 
         // Find matching session key for current user
         String sessionKey = username + ":" + sessionId;
@@ -336,8 +337,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
     private void openEditDialog(Task task) {
         // Find the signal for this task
         var taskSignalOpt = tasksSignal.get().stream()
-                .filter(sig -> sig.get().id().equals(task.id()))
-                .findFirst();
+                .filter(sig -> sig.get().id().equals(task.id())).findFirst();
 
         if (taskSignalOpt.isEmpty()) {
             return;
@@ -354,28 +354,24 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         // Bind fields using map (read) + updater (write)
         TextField titleField = new TextField("Title");
         titleField.setWidthFull();
-        titleField.bindValue(
-                taskSignal.map(Task::title),
+        titleField.bindValue(taskSignal.map(Task::title),
                 taskSignal.updater(Task::withTitle));
 
         TextArea descriptionField = new TextArea("Description");
         descriptionField.setWidthFull();
         descriptionField.setMaxHeight("100px");
-        descriptionField.bindValue(
-                taskSignal.map(Task::description),
+        descriptionField.bindValue(taskSignal.map(Task::description),
                 taskSignal.updater(Task::withDescription));
 
         ComboBox<Task.TaskStatus> statusCombo = new ComboBox<>("Status");
         statusCombo.setItems(Task.TaskStatus.values());
         statusCombo.setWidthFull();
-        statusCombo.bindValue(
-                taskSignal.map(Task::status),
+        statusCombo.bindValue(taskSignal.map(Task::status),
                 taskSignal.updater(Task::withStatus));
 
         DatePicker dueDatePicker = new DatePicker("Due Date");
         dueDatePicker.setWidthFull();
-        dueDatePicker.bindValue(
-                taskSignal.map(Task::dueDate),
+        dueDatePicker.bindValue(taskSignal.map(Task::dueDate),
                 taskSignal.updater(Task::withDueDate));
 
         formLayout.add(titleField, descriptionField, statusCombo,
@@ -412,8 +408,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
             var items = msgSignals.stream().map(msgSignal -> {
                 ChatMessageData msg = msgSignal.get();
                 MessageListItem item = new MessageListItem(
-                        msg.content().isBlank() ? "_typing..._"
-                                : msg.content(),
+                        msg.content().isBlank() ? "_typing..._" : msg.content(),
                         msg.timestamp(), msg.role());
 
                 if (msg.role().equals("You") && userInfo != null
@@ -421,15 +416,13 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
                     item.setUserColorIndex(0);
                     String displayName = getCurrentDisplayName();
                     String username = userInfo.getUsername();
-                    if (displayName != null
-                            && !displayName.isBlank()) {
+                    if (displayName != null && !displayName.isBlank()) {
                         item.setUserName(displayName);
                     }
                     if (username != null && !username.isBlank()) {
                         String userImage = MainLayout
                                 .getProfilePicturePath(username);
-                        if (userImage != null
-                                && !userImage.isBlank()) {
+                        if (userImage != null && !userImage.isBlank()) {
                             item.setUserImage(userImage);
                         }
                     }
@@ -503,12 +496,9 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
                 });
     }
 
-    private void updateTaskField(String taskId,
-            Function<Task, Task> updater) {
-        tasksSignal.get().stream()
-                .filter(sig -> sig.get().id().equals(taskId))
-                .findFirst()
-                .ifPresent(sig -> {
+    private void updateTaskField(String taskId, Function<Task, Task> updater) {
+        tasksSignal.get().stream().filter(sig -> sig.get().id().equals(taskId))
+                .findFirst().ifPresent(sig -> {
                     Task t = sig.get();
                     sig.set(updater.apply(t));
                 });
@@ -518,8 +508,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         return new TaskContext() {
             @Override
             public java.util.List<Task> getAllTasks() {
-                return tasksSignal.get().stream()
-                        .map(SharedValueSignal::get)
+                return tasksSignal.get().stream().map(SharedValueSignal::get)
                         .toList();
             }
 

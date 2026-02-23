@@ -545,17 +545,22 @@ public class UseCase17View extends VerticalLayout {
         gpuPowerSignal = gpuSignal.map(GPU::getPowerConsumption);
 
         totalPowerSignal = Signal
-                .computed(() -> cpuPowerSignal.get() + gpuPowerSignal.get()
-                        + 50 // Motherboard, RAM, storage, fans (estimated)
+                .computed(() -> cpuPowerSignal.get() + gpuPowerSignal.get() + 50 // Motherboard,
+                                                                                 // RAM,
+                                                                                 // storage,
+                                                                                 // fans
+                                                                                 // (estimated)
                 );
 
         recommendedPsuWattageSignal = totalPowerSignal
                 .map(power -> (int) (power * 1.3) // 30% headroom
                 );
 
-        psuSufficiencySignal = Signal.computed(() -> psuSignal.get().getWattage() >= totalPowerSignal.get());
+        psuSufficiencySignal = Signal.computed(
+                () -> psuSignal.get().getWattage() >= totalPowerSignal.get());
 
-        powerMarginSignal = Signal.computed(() -> psuSignal.get().getWattage() - totalPowerSignal.get());
+        powerMarginSignal = Signal.computed(
+                () -> psuSignal.get().getWattage() - totalPowerSignal.get());
     }
 
     private void initializeCompatibilitySignals() {

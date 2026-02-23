@@ -4,7 +4,6 @@ import jakarta.annotation.security.PermitAll;
 
 import com.example.MissingAPI;
 import com.example.views.MainLayout;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.button.Button;
@@ -493,13 +492,13 @@ public class UseCase03View extends VerticalLayout {
      * Generate SVG polygon points for a star shape.
      *
      * @param numPoints
-     *                  Number of points on the star (3-10)
+     *            Number of points on the star (3-10)
      * @param size
-     *                  Outer radius of the star
+     *            Outer radius of the star
      * @param cx
-     *                  Center X coordinate
+     *            Center X coordinate
      * @param cy
-     *                  Center Y coordinate
+     *            Center Y coordinate
      * @return SVG points attribute string
      */
     private String generateStarPoints(int numPoints, int size, int cx, int cy) {

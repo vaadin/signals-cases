@@ -164,7 +164,8 @@ public class UseCase08View extends VerticalLayout {
             case COMPANY_INFO -> currentStepSignal.set(Step.PERSONAL_INFO);
             case PLAN_SELECTION -> currentStepSignal.set(Step.COMPANY_INFO);
             case REVIEW -> currentStepSignal.set(Step.PLAN_SELECTION);
-            default -> { }
+            default -> {
+            }
             }
         });
         previousButton.bindVisible(
@@ -176,7 +177,8 @@ public class UseCase08View extends VerticalLayout {
             case PERSONAL_INFO -> currentStepSignal.set(Step.COMPANY_INFO);
             case COMPANY_INFO -> currentStepSignal.set(Step.PLAN_SELECTION);
             case PLAN_SELECTION -> currentStepSignal.set(Step.REVIEW);
-            default -> { }
+            default -> {
+            }
             }
         });
         nextButton.bindVisible(

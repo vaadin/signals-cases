@@ -54,7 +54,8 @@ public class InvoiceService {
                         "Overdue"));
     }
 
-    private @Nullable InvoiceDetails loadInitialInvoiceDetails(String invoiceId) {
+    private @Nullable InvoiceDetails loadInitialInvoiceDetails(
+            String invoiceId) {
         Invoice invoice = invoices.stream()
                 .filter(inv -> invoiceId.equals(inv.getId())).findFirst()
                 .orElseThrow();
@@ -211,18 +212,15 @@ public class InvoiceService {
     }
 
     private void updateInvoiceTotal(Invoice invoice) {
-        BigDecimal newTotal = invoiceDetails.stream()
-                .filter(details -> {
-                    Invoice inv = details.getInvoice();
-                    return inv != null && invoice.getId() != null
-                            && invoice.getId().equals(inv.getId());
-                })
-                .findFirst().map(InvoiceDetails::getLineItems).orElse(List.of())
+        BigDecimal newTotal = invoiceDetails.stream().filter(details -> {
+            Invoice inv = details.getInvoice();
+            return inv != null && invoice.getId() != null
+                    && invoice.getId().equals(inv.getId());
+        }).findFirst().map(InvoiceDetails::getLineItems).orElse(List.of())
                 .stream().map(li -> {
                     BigDecimal total = li.getTotal();
                     return total != null ? total : BigDecimal.ZERO;
-                })
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                }).reduce(BigDecimal.ZERO, BigDecimal::add);
         invoice.setTotal(newTotal);
         updateInvoice(invoice);
     }

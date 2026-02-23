@@ -17,7 +17,6 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.binder.BinderValidationStatus;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -127,19 +126,24 @@ public class UseCase09View extends VerticalLayout {
                         "Please fix validation errors before submitting.");
             }
         });
-        submitButton.bindEnabled(
-                binder.getValidationStatus().map(status -> status != null && status.isOk()));
+        submitButton.bindEnabled(binder.getValidationStatus()
+                .map(status -> status != null && status.isOk()));
 
         // Form status
         Div statusDiv = new Div();
         Span statusLabel = new Span();
         statusLabel.bindText(binder.getValidationStatus()
-                .map(status -> status != null && status.isOk() ? "Form is valid - Ready to submit"
+                .map(status -> status != null && status.isOk()
+                        ? "Form is valid - Ready to submit"
                         : "Please complete all required fields correctly"));
-        statusLabel.getStyle().bind("color", binder.getValidationStatus()
-                .map(status -> status != null && status.isOk() ? "green" : "orange"));
-        statusLabel.getStyle().bind("font-weight", binder.getValidationStatus()
-                .map(status -> status != null && status.isOk() ? "bold" : "normal"));
+        statusLabel.getStyle().bind("color",
+                binder.getValidationStatus()
+                        .map(status -> status != null && status.isOk() ? "green"
+                                : "orange"));
+        statusLabel.getStyle().bind("font-weight",
+                binder.getValidationStatus()
+                        .map(status -> status != null && status.isOk() ? "bold"
+                                : "normal"));
         statusDiv.add(statusLabel);
 
         add(title, description, usernameField, emailField, passwordField,

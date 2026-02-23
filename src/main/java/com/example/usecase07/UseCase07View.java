@@ -253,8 +253,8 @@ public class UseCase07View extends VerticalLayout {
                 if (beanInvoice == null) {
                     return;
                 }
-                InvoiceDetails details = invoiceService.updateLineItem(
-                        beanInvoice, lineItem);
+                InvoiceDetails details = invoiceService
+                        .updateLineItem(beanInvoice, lineItem);
                 // update invoiceListSignal's matching ValueSignal value for the
                 // changed invoice
                 Invoice detailsInvoice = details.getInvoice();
@@ -303,8 +303,9 @@ public class UseCase07View extends VerticalLayout {
 
         // Payment status
         Span paymentStatus = new Span();
-        paymentStatus.bindText(invoiceDetailsSignal.map(
-                details -> "Payment Status: " + (details != null ? details.getPaymentStatus() : "")));
+        paymentStatus
+                .bindText(invoiceDetailsSignal.map(details -> "Payment Status: "
+                        + (details != null ? details.getPaymentStatus() : "")));
         paymentStatus.getStyle().set("font-weight", "bold");
 
         detailsPanel.add(customerInfo, new H3("Line Items"),
@@ -317,9 +318,8 @@ public class UseCase07View extends VerticalLayout {
         }));
         detailsPanel.addAndExpand(lineItemsGrid);
         detailsPanel.add(paymentStatus);
-        detailsPanel
-                .bindVisible(invoiceDetailsSignal.map(details -> details != null
-                        && details.getInvoice() != null
+        detailsPanel.bindVisible(invoiceDetailsSignal
+                .map(details -> details != null && details.getInvoice() != null
                         && details.getInvoice().getId() != null
                         && details != EMPTY_DETAILS));
 
@@ -354,14 +354,12 @@ public class UseCase07View extends VerticalLayout {
 
     private void updateFooterTotal(Grid<LineItem> lineItemsGrid) {
         lineItemsGrid.getColumnByKey("total")
-                .setFooter("Total: "
-                        + lineItemsSignal.peek().stream().map(ValueSignal::peek)
-                                .filter(item -> item != null)
-                                .toList().stream().map(li -> {
-                                    BigDecimal total = li.getTotal();
-                                    return total != null ? total : BigDecimal.ZERO;
-                                })
-                                .reduce(BigDecimal.ZERO, BigDecimal::add));
+                .setFooter("Total: " + lineItemsSignal.peek().stream()
+                        .map(ValueSignal::peek).filter(item -> item != null)
+                        .toList().stream().map(li -> {
+                            BigDecimal total = li.getTotal();
+                            return total != null ? total : BigDecimal.ZERO;
+                        }).reduce(BigDecimal.ZERO, BigDecimal::add));
     }
 
     private void addNewInvoice() {
@@ -375,8 +373,7 @@ public class UseCase07View extends VerticalLayout {
         if (invoice == null || invoice.getId() == null) {
             return;
         }
-        LineItem item = invoiceService
-                .createNewEmptyLineItem(invoice.getId());
+        LineItem item = invoiceService.createNewEmptyLineItem(invoice.getId());
         lineItemsSignal.insertLast(item);
     }
 
@@ -386,6 +383,6 @@ public class UseCase07View extends VerticalLayout {
                 .findFirst().ifPresent(lineItemsSignal::remove);
         // need to also update the invoice total in the invoice list
         updateInvoiceListSignalItem(
-                invoiceService.fetchInvoice(invoice.getId()));
+                invoiceService.fetchInvoice(value.getInvoice().getId()));
     }
 }

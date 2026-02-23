@@ -134,8 +134,10 @@ public class UseCase16View extends VerticalLayout
             String baseUrl = getBaseUrl();
             String query = searchQuerySignal.get();
             String category = categorySignal.get();
-            if (query == null) query = "";
-            if (category == null) category = "All";
+            if (query == null)
+                query = "";
+            if (category == null)
+                category = "All";
 
             StringBuilder url = new StringBuilder(baseUrl);
             if (!query.isEmpty() || !category.equals("All")) {

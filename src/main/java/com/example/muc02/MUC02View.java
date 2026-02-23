@@ -9,6 +9,7 @@ import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
 import com.example.views.ActiveUsersDisplay;
 import com.example.views.MainLayout;
+import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -22,8 +23,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import org.jspecify.annotations.Nullable;
-
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.shared.SharedValueSignal;
 
@@ -57,7 +56,8 @@ public class MUC02View extends VerticalLayout {
         CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
                 .peek();
         String username = userInfo != null ? userInfo.getUsername() : null;
-        if (userInfo == null || !userInfo.isAuthenticated() || username == null) {
+        if (userInfo == null || !userInfo.isAuthenticated()
+                || username == null) {
             throw new IllegalStateException(
                     "User must be authenticated to access this view");
         }
@@ -180,7 +180,8 @@ public class MUC02View extends VerticalLayout {
         var users = userSessionRegistry.getActiveUsersSignal().get();
         var displayNames = userSessionRegistry.getDisplayNamesSignal().get();
         java.util.Map<String, String> map = new java.util.HashMap<>();
-        if (displayNames == null) return map;
+        if (displayNames == null)
+            return map;
         for (int i = 0; i < users.size() && i < displayNames.size(); i++) {
             var userInfo = users.get(i).get();
             if (userInfo != null) {
@@ -240,10 +241,10 @@ public class MUC02View extends VerticalLayout {
                 .set("transform", "translate(-50%, -50%)")
                 .set("z-index", "1000");
 
-        cursorIndicator.getStyle().bind("left", positionSignal
-                .map(pos -> pos.x() + "px"));
-        cursorIndicator.getStyle().bind("top", positionSignal
-                .map(pos -> pos.y() + "px"));
+        cursorIndicator.getStyle().bind("left",
+                positionSignal.map(pos -> pos.x() + "px"));
+        cursorIndicator.getStyle().bind("top",
+                positionSignal.map(pos -> pos.y() + "px"));
 
         Div label = new Div();
         label.setText(displayName);

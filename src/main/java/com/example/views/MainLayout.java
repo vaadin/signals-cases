@@ -78,9 +78,10 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         activeUsersDisplay.getStyle().set("margin-left", "auto")
                 .set("margin-right", "1em");
 
-        Span activeUsersLabel = new Span(
-                userSessionRegistry.getDisplayNamesSignal()
-                        .map(displayNames -> displayNames == null || displayNames.isEmpty() ? ""
+        Span activeUsersLabel = new Span(userSessionRegistry
+                .getDisplayNamesSignal()
+                .map(displayNames -> displayNames == null
+                        || displayNames.isEmpty() ? ""
                                 : "👥 " + displayNames.size() + " online:"));
         activeUsersLabel.getStyle()
                 .set("color", "var(--lumo-secondary-text-color)")
@@ -163,25 +164,31 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         Avatar userAvatar = new Avatar();
         userAvatar.getElement().bindProperty("name", currentUserSignal
                 .getUserSignal()
-                .map(user -> user.isAuthenticated() && user.getUsername() != null ? user.getUsername() : ""), null);
-        userAvatar.getElement().bindProperty("img",
-                currentUserSignal.getUserSignal()
-                        .map(user -> user.isAuthenticated() && user.getUsername() != null
+                .map(user -> user.isAuthenticated()
+                        && user.getUsername() != null ? user.getUsername()
+                                : ""),
+                null);
+        userAvatar.getElement().bindProperty("img", currentUserSignal
+                .getUserSignal()
+                .map(user -> user.isAuthenticated()
+                        && user.getUsername() != null
                                 ? getProfilePicturePath(user.getUsername())
-                                : ""), null);
+                                : ""),
+                null);
         userAvatar.bindVisible(currentUserSignal.getUserSignal()
                 .map(user -> user.isAuthenticated()));
 
         Span userName = new Span(currentUserSignal.getUserSignal()
-                .map(user -> user.isAuthenticated() && user.getUsername() != null ? user.getUsername() : ""));
+                .map(user -> user.isAuthenticated()
+                        && user.getUsername() != null ? user.getUsername()
+                                : ""));
         userName.getStyle().set("color", "var(--lumo-secondary-text-color)")
                 .set("font-size", "var(--lumo-font-size-s)");
 
         userDisplay.add(userAvatar, userName);
 
         // Logout button
-        Button logoutButton = new Button("Logout",
-                event -> performLogout());
+        Button logoutButton = new Button("Logout", event -> performLogout());
         logoutButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
         addToNavbar(toggle, title, activeUsersDisplay, nicknameField,
@@ -304,12 +311,13 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         updateSourceCodeLink(event.getNavigationTarget());
     }
 
-    @SuppressWarnings("NullAway") // Spring Security's logout() handles null response/auth
+    @SuppressWarnings("NullAway") // Spring Security's logout() handles null
+                                  // response/auth
     private void performLogout() {
         SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
         logoutHandler.logout(
-                VaadinServletRequest.getCurrent().getHttpServletRequest(),
-                null, null);
+                VaadinServletRequest.getCurrent().getHttpServletRequest(), null,
+                null);
         getUI().ifPresent(ui -> ui.getPage().setLocation("/login"));
     }
 

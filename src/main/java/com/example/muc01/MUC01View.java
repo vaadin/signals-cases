@@ -52,7 +52,8 @@ public class MUC01View extends VerticalLayout {
         CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
                 .peek();
         String username = userInfo != null ? userInfo.getUsername() : null;
-        if (userInfo == null || !userInfo.isAuthenticated() || username == null) {
+        if (userInfo == null || !userInfo.isAuthenticated()
+                || username == null) {
             throw new IllegalStateException(
                     "User must be authenticated to access this view");
         }
@@ -189,13 +190,15 @@ public class MUC01View extends VerticalLayout {
 
         var users = userSessionRegistry.getActiveUsersSignal().get();
         var displayNames = userSessionRegistry.getDisplayNamesSignal().get();
-        if (displayNames == null) return currentUser;
+        if (displayNames == null)
+            return currentUser;
 
         // Find matching session key for current user
         String sessionKey = currentUser + ":" + sessionId;
         for (int i = 0; i < users.size() && i < displayNames.size(); i++) {
             var userInfo = users.get(i).get();
-            if (userInfo != null && sessionKey.equals(userInfo.getCompositeKey())) {
+            if (userInfo != null
+                    && sessionKey.equals(userInfo.getCompositeKey())) {
                 return displayNames.get(i);
             }
         }

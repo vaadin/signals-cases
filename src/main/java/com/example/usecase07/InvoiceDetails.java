@@ -14,8 +14,9 @@ public class InvoiceDetails {
     public InvoiceDetails() {
     }
 
-    public InvoiceDetails(@Nullable Invoice invoice, @Nullable String customerEmail,
-            @Nullable String customerAddress, @Nullable List<LineItem> lineItems,
+    public InvoiceDetails(@Nullable Invoice invoice,
+            @Nullable String customerEmail, @Nullable String customerAddress,
+            @Nullable List<LineItem> lineItems,
             @Nullable String paymentStatus) {
         this.invoice = invoice;
         this.customerEmail = customerEmail;

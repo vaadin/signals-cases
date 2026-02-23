@@ -238,27 +238,25 @@ public class UseCase14View extends VerticalLayout {
         // The @Async annotation causes Spring to execute this in a separate
         // thread
         boolean fail = shouldFailSignal.get();
-        analyticsService.fetchReportData(fail)
-                .thenCompose(rawData -> {
-                    // Signals are thread-safe - update directly from background
-                    // thread
-                    loadingMessageSignal.set("Generating report... (2/2)");
+        analyticsService.fetchReportData(fail).thenCompose(rawData -> {
+            // Signals are thread-safe - update directly from background
+            // thread
+            loadingMessageSignal.set("Generating report... (2/2)");
 
-                    boolean fail2 = shouldFailSignal.get();
-                    // Step 2: Process the fetched data into a report
-                    return analyticsService.generateReportFromData(rawData,
-                            fail2);
-                }).thenAccept(report -> {
-                    // Signals are thread-safe - update directly from background
-                    // thread
-                    reportDataSignal.set(report);
-                    stateSignal.set(LoadingState.State.SUCCESS);
-                }).exceptionally(error -> {
-                    // Signals are thread-safe - update directly from background
-                    // thread
-                    stateSignal.set(LoadingState.State.ERROR);
-                    return null;
-                });
+            boolean fail2 = shouldFailSignal.get();
+            // Step 2: Process the fetched data into a report
+            return analyticsService.generateReportFromData(rawData, fail2);
+        }).thenAccept(report -> {
+            // Signals are thread-safe - update directly from background
+            // thread
+            reportDataSignal.set(report);
+            stateSignal.set(LoadingState.State.SUCCESS);
+        }).exceptionally(error -> {
+            // Signals are thread-safe - update directly from background
+            // thread
+            stateSignal.set(LoadingState.State.ERROR);
+            return null;
+        });
     }
 
     private Card createMetricCardWithSignal(String label,

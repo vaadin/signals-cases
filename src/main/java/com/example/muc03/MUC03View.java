@@ -10,6 +10,7 @@ import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
 import com.example.views.ActiveUsersDisplay;
 import com.example.views.MainLayout;
+import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -24,8 +25,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
-import org.jspecify.annotations.Nullable;
-
 import com.vaadin.flow.router.Route;
 
 /**
@@ -57,7 +56,8 @@ public class MUC03View extends VerticalLayout {
         CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
                 .peek();
         String username = userInfo != null ? userInfo.getUsername() : null;
-        if (userInfo == null || !userInfo.isAuthenticated() || username == null) {
+        if (userInfo == null || !userInfo.isAuthenticated()
+                || username == null) {
             throw new IllegalStateException(
                     "User must be authenticated to access this view");
         }
@@ -79,17 +79,16 @@ public class MUC03View extends VerticalLayout {
         Div roundStatus = new Div();
         roundStatus.getStyle().set("font-size", "1.2em")
                 .set("font-weight", "bold").set("margin-bottom", "0.5em");
-        roundStatus.bindText(muc03Signals.getRoundNumberSignal()
-                .map(round -> {
-                    int r = round;
-                    return r == 0 ? "Click START to begin" : "Round " + r;
-                }));
+        roundStatus.bindText(muc03Signals.getRoundNumberSignal().map(round -> {
+            int r = round;
+            return r == 0 ? "Click START to begin" : "Round " + r;
+        }));
 
         Div clicksStatus = new Div();
         clicksStatus.getStyle().set("font-size", "1em").set("color",
                 "var(--lumo-secondary-text-color)");
-        clicksStatus.bindText(muc03Signals.getClicksRemainingSignal().map(
-                clicks -> {
+        clicksStatus.bindText(
+                muc03Signals.getClicksRemainingSignal().map(clicks -> {
                     int c = clicks;
                     return c > 0 ? "Targets remaining: " + c : "";
                 }));
@@ -157,13 +156,11 @@ public class MUC03View extends VerticalLayout {
                     scoreKeyMap.clear();
                     scores.forEach(
                             (key, signal) -> scoreKeyMap.put(signal, key));
-                    return scores.entrySet().stream()
-                            .sorted((e1, e2) -> {
-                                Integer v1 = e1.getValue().get();
-                                Integer v2 = e2.getValue().get();
-                                return Integer.compare(v2, v1);
-                            })
-                            .map(Map.Entry::getValue).toList();
+                    return scores.entrySet().stream().sorted((e1, e2) -> {
+                        Integer v1 = e1.getValue().get();
+                        Integer v2 = e2.getValue().get();
+                        return Integer.compare(v2, v1);
+                    }).map(Map.Entry::getValue).toList();
                 }), this::createLeaderboardItem);
 
         // Info box
@@ -189,7 +186,8 @@ public class MUC03View extends VerticalLayout {
     }
 
     private void handleButtonClick() {
-        if (sessionId == null) return;
+        if (sessionId == null)
+            return;
         // Atomic operation: Only first click counts (handled by
         // CollaborativeSignals)
         boolean moreClicksRemain = muc03Signals.awardPoint(currentUser,
@@ -250,7 +248,8 @@ public class MUC03View extends VerticalLayout {
             for (int i = 0; i < users.size() && i < displayNames.size(); i++) {
                 var userInfo = users.get(i).get();
                 if (userInfo != null) {
-                    displayNameMap.put(userInfo.getCompositeKey(), displayNames.get(i));
+                    displayNameMap.put(userInfo.getCompositeKey(),
+                            displayNames.get(i));
                 }
             }
         }

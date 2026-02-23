@@ -3,11 +3,10 @@ package com.example.security;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-
-import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.spring.security.AuthenticationContext;
 

@@ -55,49 +55,35 @@ public class HomeView extends VerticalLayout {
         stats.add(
                 createStat("29",
                         "Total use cases (23 single-user + 6 multi-user)"),
-                createStat("23",
-                        "Single-user use cases across 14 categories"),
-                createStat("6",
-                        "Multi-user collaboration use cases"));
+                createStat("23", "Single-user use cases across 14 categories"),
+                createStat("6", "Multi-user collaboration use cases"));
 
         // Categories
         H2 categoriesTitle = new H2("Use Case Categories");
         VerticalLayout categories = new VerticalLayout();
         categories.setSpacing(false);
         categories.setPadding(false);
-        categories.add(
-                createCategory("Basic Reactivity",
-                        "UC01-02",
-                        "Dynamic button state, progressive disclosure with nested conditions"),
-                createCategory("SVG / Graphics",
-                        "UC03",
+        categories.add(createCategory("Basic Reactivity", "UC01-02",
+                "Dynamic button state, progressive disclosure with nested conditions"),
+                createCategory("SVG / Graphics", "UC03",
                         "Interactive SVG shape editor with attribute binding"),
-                createCategory("Lists & Grids",
-                        "UC04, UC06-07",
+                createCategory("Lists & Grids", "UC04, UC06-07",
                         "Filtered data grid, shopping cart, master-detail invoice"),
-                createCategory("Forms",
-                        "UC05, UC08-09",
+                createCategory("Forms", "UC05, UC08-09",
                         "Cascading selector, multi-step wizard, Binder integration"),
-                createCategory("Browser Integration",
-                        "UC11-13",
+                createCategory("Browser Integration", "UC11-13",
                         "Responsive layout, dynamic view title, current user signal"),
-                createCategory("Async & Search",
-                        "UC14-16",
+                createCategory("Async & Search", "UC14-16",
                         "Async data loading, debounced search, URL state integration"),
-                createCategory("Complex State & AI",
-                        "UC17-18",
+                createCategory("Complex State & AI", "UC17-18",
                         "Custom PC builder (~70 signals), LLM-powered task management"),
-                createCategory("Parallel Loading & Preferences",
-                        "UC19-20",
+                createCategory("Parallel Loading & Preferences", "UC19-20",
                         "Parallel data loading with individual spinners, user preferences"),
-                createCategory("i18n, Mapping & Dashboard",
-                        "UC21-23",
+                createCategory("i18n, Mapping & Dashboard", "UC21-23",
                         "Reactive i18n, two-way mapped signals, real-time dashboard"),
-                createCategory("VirtualList",
-                        "UC24",
+                createCategory("VirtualList", "UC24",
                         "VirtualList with signal data source, notification inbox"),
-                createCategory("Multi-User Collaboration",
-                        "MUC01-04, MUC06-07",
+                createCategory("Multi-User Collaboration", "MUC01-04, MUC06-07",
                         "Chat, cursors, click race game, locking, shared tasks, shared LLM tasks"));
 
         // Documentation Link

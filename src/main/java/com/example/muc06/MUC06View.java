@@ -59,7 +59,8 @@ public class MUC06View extends VerticalLayout {
         CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
                 .peek();
         String username = userInfo != null ? userInfo.getUsername() : null;
-        if (userInfo == null || !userInfo.isAuthenticated() || username == null) {
+        if (userInfo == null || !userInfo.isAuthenticated()
+                || username == null) {
             throw new IllegalStateException(
                     "User must be authenticated to access this view");
         }
@@ -89,12 +90,10 @@ public class MUC06View extends VerticalLayout {
         Signal<Integer> totalSignal = tasksSignal.map(java.util.List::size);
         Signal<Integer> completedSignal = Signal
                 .computed(() -> (int) tasksSignal.get().stream()
-                        .filter(t -> t.get().completed())
-                        .count());
-        Signal<Integer> pendingSignal = Signal
-                .computed(() -> {
-                    return totalSignal.get() - completedSignal.get();
-                });
+                        .filter(t -> t.get().completed()).count());
+        Signal<Integer> pendingSignal = Signal.computed(() -> {
+            return totalSignal.get() - completedSignal.get();
+        });
 
         // User count display
         ActiveUsersDisplay userCountBox = new ActiveUsersDisplay(

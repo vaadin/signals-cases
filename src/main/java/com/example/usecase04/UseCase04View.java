@@ -53,7 +53,8 @@ public class UseCase04View extends VerticalLayout {
                 category = "All";
             }
             String rawSearch = searchTermSignal.get();
-            String searchTerm = rawSearch != null ? rawSearch.toLowerCase() : "";
+            String searchTerm = rawSearch != null ? rawSearch.toLowerCase()
+                    : "";
             Boolean inStockOnlyValue = inStockOnlySignal.get();
             boolean inStockOnly = inStockOnlyValue != null && inStockOnlyValue;
 

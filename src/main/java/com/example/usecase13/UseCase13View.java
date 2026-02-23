@@ -106,8 +106,7 @@ public class UseCase13View extends VerticalLayout {
 
         // Reactively bind children to active users list
         userListContainer.bindChildren(
-                userSessionRegistry.getActiveUsersSignal(),
-                userSignal -> {
+                userSessionRegistry.getActiveUsersSignal(), userSignal -> {
                     UserInfo user = userSignal.get();
                     if (user == null) {
                         return new Div();
@@ -197,12 +196,11 @@ public class UseCase13View extends VerticalLayout {
 
         // Add session number if multiple sessions for same user
         long sessionCount = userSessionRegistry.getActiveUsersSignal().get()
-                .stream()
-                .filter(us -> {
+                .stream().filter(us -> {
                     UserInfo info = us.get();
-                    return info != null && info.username().equals(userInfo.username());
-                })
-                .count();
+                    return info != null
+                            && info.username().equals(userInfo.username());
+                }).count();
 
         if (sessionCount > 1) {
             // Find this session's number
@@ -252,7 +250,8 @@ public class UseCase13View extends VerticalLayout {
         Span viewIcon = new Span("📍");
         String currentView = userInfo.currentView();
         Span viewText = new Span(
-                "Viewing: " + (currentView != null ? formatViewName(currentView) : "Unknown"));
+                "Viewing: " + (currentView != null ? formatViewName(currentView)
+                        : "Unknown"));
         viewText.getStyle().set("font-size", "var(--lumo-font-size-s)");
 
         viewRow.add(viewIcon, viewText);

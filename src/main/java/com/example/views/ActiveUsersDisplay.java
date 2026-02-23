@@ -70,7 +70,8 @@ public class ActiveUsersDisplay extends Div {
      *            if true, shows a colored left border
      */
     public ActiveUsersDisplay(UserSessionRegistry userSessionRegistry,
-            String labelText, @Nullable String viewRoute, boolean showAccentBorder) {
+            String labelText, @Nullable String viewRoute,
+            boolean showAccentBorder) {
         // Container styling
         getStyle().set("background-color", "#fff3e0").set("padding", "0.75em")
                 .set("border-radius", "4px").set("margin-bottom", "1em")

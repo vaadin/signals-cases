@@ -7,8 +7,7 @@ import org.jspecify.annotations.Nullable;
  */
 public record UserInfo(String username, String sessionId,
         @Nullable String currentView, @Nullable String nickname,
-        long sessionStartTime, boolean isTabActive,
-        long lastInteractionTime) {
+        long sessionStartTime, boolean isTabActive, long lastInteractionTime) {
 
     // Constructor with current view and nickname (legacy compatibility)
     public UserInfo(String username, String sessionId,

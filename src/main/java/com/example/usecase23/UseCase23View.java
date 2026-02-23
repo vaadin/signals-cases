@@ -9,8 +9,6 @@ import java.util.function.Function;
 
 import com.example.usecase23.ServiceHealth.Status;
 import com.example.views.MainLayout;
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.Component;
@@ -141,9 +139,8 @@ public class UseCase23View extends Main {
         bindData(chart, newYorkSeries, newYorkTimelineSignal);
         bindData(chart, tokyoSeries, tokyoTimelineSignal);
 
-        Signal.effect(chart,
-                () -> xAxis.setCategories(timelineCategoriesSignal.get()
-                        .stream().map(Signal::get).toArray(String[]::new)));
+        Signal.effect(chart, () -> xAxis.setCategories(timelineCategoriesSignal
+                .get().stream().map(Signal::get).toArray(String[]::new)));
 
         conf.addSeries(berlinSeries);
         conf.addSeries(londonSeries);
@@ -251,7 +248,8 @@ public class UseCase23View extends Main {
         conf.addSeries(responseSeries);
 
         Signal.effect(chart, () -> {
-            if (responseSeries == null) return;
+            if (responseSeries == null)
+                return;
             var responseValues = responseSignal.get();
             responseSeries.get(0).setY(responseValues.get(0).get());
             responseSeries.get(1).setY(responseValues.get(1).get());

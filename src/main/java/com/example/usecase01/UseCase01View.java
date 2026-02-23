@@ -83,33 +83,32 @@ public class UseCase01View extends VerticalLayout {
         confirmField.bindValue(confirmPasswordSignal,
                 confirmPasswordSignal::set);
         confirmField.setErrorMessage("Passwords do not match");
-        confirmField.bindInvalid(
-                isConfirmValidSignal.map(valid -> !valid));
+        confirmField.bindInvalid(isConfirmValidSignal.map(valid -> !valid));
 
         // Submit button with multiple signal bindings
         Button submitButton = new Button();
 
         // Bind enabled state: enabled when valid AND not submitting
-        submitButton.bindEnabled(Signal
-                .computed(() -> isValidSignal.get()
-                        && submissionStateSignal.get() != SubmissionState.SUBMITTING));
+        submitButton.bindEnabled(Signal.computed(() -> isValidSignal.get()
+                && submissionStateSignal.get() != SubmissionState.SUBMITTING));
 
         // Bind button text based on submission state
-        submitButton
-                .bindText(submissionStateSignal.map(state -> {
-                    return switch (state) {
-                    case IDLE -> "Create Account";
-                    case SUBMITTING -> "Creating...";
-                    case SUCCESS -> "Success!";
-                    case ERROR -> "Retry";
-                    };
-                }));
+        submitButton.bindText(submissionStateSignal.map(state -> {
+            return switch (state) {
+            case IDLE -> "Create Account";
+            case SUBMITTING -> "Creating...";
+            case SUCCESS -> "Success!";
+            case ERROR -> "Retry";
+            };
+        }));
 
         // Bind theme variant
         submitButton.bindThemeVariant(ButtonVariant.LUMO_SUCCESS,
-                submissionStateSignal.map(state -> SubmissionState.SUCCESS.equals(state)));
-        submitButton.bindThemeVariant(ButtonVariant.LUMO_PRIMARY, submissionStateSignal
-                .map(state -> state != SubmissionState.SUCCESS));
+                submissionStateSignal
+                        .map(state -> SubmissionState.SUCCESS.equals(state)));
+        submitButton.bindThemeVariant(ButtonVariant.LUMO_PRIMARY,
+                submissionStateSignal
+                        .map(state -> state != SubmissionState.SUCCESS));
 
         submitButton.addClickListener(e -> {
             submissionStateSignal.set(SubmissionState.SUBMITTING);

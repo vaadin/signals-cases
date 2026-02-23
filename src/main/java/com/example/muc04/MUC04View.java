@@ -7,6 +7,7 @@ import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
 import com.example.views.ActiveUsersDisplay;
 import com.example.views.MainLayout;
+import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
@@ -22,8 +23,6 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import org.jspecify.annotations.Nullable;
-
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
@@ -55,7 +54,8 @@ public class MUC04View extends VerticalLayout {
         CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
                 .peek();
         String username = userInfo != null ? userInfo.getUsername() : null;
-        if (userInfo == null || !userInfo.isAuthenticated() || username == null) {
+        if (userInfo == null || !userInfo.isAuthenticated()
+                || username == null) {
             throw new IllegalStateException(
                     "User must be authenticated to access this view");
         }
@@ -185,8 +185,7 @@ public class MUC04View extends VerticalLayout {
                         return "Available to edit";
                     }
                     MUC04Signals.FieldLock lock = lockSignal.get();
-                    if (sessionId != null
-                            && lock.username().equals(currentUser)
+                    if (sessionId != null && lock.username().equals(currentUser)
                             && lock.sessionId().equals(sessionId)) {
                         return "You are editing this field";
                     } else {
@@ -250,8 +249,8 @@ public class MUC04View extends VerticalLayout {
                         isCurrentSession ? "#fff3e0" : "transparent")
                 .set("border-radius", "4px");
 
-        Image avatar = new Image(
-                MainLayout.getProfilePicturePath(lockUsername), "");
+        Image avatar = new Image(MainLayout.getProfilePicturePath(lockUsername),
+                "");
         avatar.setWidth("32px");
         avatar.setHeight("32px");
         avatar.getStyle().set("border-radius", "50%").set("object-fit",
