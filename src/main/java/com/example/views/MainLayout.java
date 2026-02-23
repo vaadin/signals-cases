@@ -9,6 +9,7 @@ import com.example.preferences.UserPreferences;
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -44,8 +45,8 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
     private final CurrentUserSignal currentUserSignal;
     private final UserSessionRegistry userSessionRegistry;
     private final UserPreferences userPreferences;
-    private String currentUser;
-    private String sessionId;
+    private @Nullable String currentUser;
+    private @Nullable String sessionId;
     private TextField nicknameField;
     private Anchor sourceCodeLink;
 
@@ -79,7 +80,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
         Span activeUsersLabel = new Span(
                 userSessionRegistry.getDisplayNamesSignal()
-                        .map(displayNames -> displayNames.isEmpty() ? ""
+                        .map(displayNames -> displayNames == null || displayNames.isEmpty() ? ""
                                 : "👥 " + displayNames.size() + " online:"));
         activeUsersLabel.getStyle()
                 .set("color", "var(--lumo-secondary-text-color)")
@@ -91,12 +92,15 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         avatarsContainer.bindChildren(
                 userSessionRegistry.getActiveUsersSignal(), userSignal -> {
                     var user = userSignal.get();
+                    if (user == null) {
+                        return new Avatar();
+                    }
                     var users = userSessionRegistry.getActiveUsersSignal()
                             .get();
                     var displayNames = userSessionRegistry
                             .getDisplayNamesSignal().get();
                     int index = users.indexOf(userSignal);
-                    String displayName = index >= 0
+                    String displayName = displayNames != null && index >= 0
                             && index < displayNames.size()
                                     ? displayNames.get(index)
                                     : user.username();
@@ -159,32 +163,25 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         Avatar userAvatar = new Avatar();
         userAvatar.getElement().bindProperty("name", currentUserSignal
                 .getUserSignal()
-                .map(user -> user.isAuthenticated() ? user.getUsername() : ""),
-                null);
+                .map(user -> user.isAuthenticated() && user.getUsername() != null ? user.getUsername() : ""), null);
         userAvatar.getElement().bindProperty("img",
                 currentUserSignal.getUserSignal()
-                        .map(user -> user.isAuthenticated()
+                        .map(user -> user.isAuthenticated() && user.getUsername() != null
                                 ? getProfilePicturePath(user.getUsername())
-                                : ""),
-                null);
+                                : ""), null);
         userAvatar.bindVisible(currentUserSignal.getUserSignal()
                 .map(user -> user.isAuthenticated()));
 
         Span userName = new Span(currentUserSignal.getUserSignal()
-                .map(user -> user.isAuthenticated() ? user.getUsername() : ""));
+                .map(user -> user.isAuthenticated() && user.getUsername() != null ? user.getUsername() : ""));
         userName.getStyle().set("color", "var(--lumo-secondary-text-color)")
                 .set("font-size", "var(--lumo-font-size-s)");
 
         userDisplay.add(userAvatar, userName);
 
         // Logout button
-        Button logoutButton = new Button("Logout", event -> {
-            SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
-            logoutHandler.logout(
-                    VaadinServletRequest.getCurrent().getHttpServletRequest(),
-                    null, null);
-            getUI().ifPresent(ui -> ui.getPage().setLocation("/login"));
-        });
+        Button logoutButton = new Button("Logout",
+                event -> performLogout());
         logoutButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
         addToNavbar(toggle, title, activeUsersDisplay, nicknameField,
@@ -307,6 +304,15 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         updateSourceCodeLink(event.getNavigationTarget());
     }
 
+    @SuppressWarnings("NullAway") // Spring Security's logout() handles null response/auth
+    private void performLogout() {
+        SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
+        logoutHandler.logout(
+                VaadinServletRequest.getCurrent().getHttpServletRequest(),
+                null, null);
+        getUI().ifPresent(ui -> ui.getPage().setLocation("/login"));
+    }
+
     private void updateSourceCodeLink(Class<?> viewClass) {
         if (sourceCodeLink == null || viewClass == null) {
             return;
@@ -330,7 +336,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
      * Get the profile picture path for a username. Images are stored in
      * src/main/resources/META-INF/resources/profile-pictures/
      */
-    public static String getProfilePicturePath(String username) {
+    public static String getProfilePicturePath(@Nullable String username) {
         if (username == null) {
             return "";
         }

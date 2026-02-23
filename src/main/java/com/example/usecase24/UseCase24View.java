@@ -42,7 +42,8 @@ public class UseCase24View extends VerticalLayout {
         setSpacing(true);
         setPadding(true);
 
-        var title = new H2("Use Case 24: VirtualList with Signal Data Source");
+        var title = new H2(
+                "Use Case 24: VirtualList with Signal Data Source");
 
         var description = new Paragraph(
                 "This use case demonstrates a VirtualList bound to a signal-based data source. "
@@ -65,30 +66,36 @@ public class UseCase24View extends VerticalLayout {
             String typeFilter = typeFilterSignal.get();
             String readFilter = readFilterSignal.get();
 
-            return notificationsSignal.get().stream().map(ValueSignal::get)
-                    .filter(n -> typeFilter.equals("All")
-                            || n.type().name().equals(typeFilter))
+            String tf = typeFilter;
+            String rf = readFilter;
+            return notificationsSignal.get().stream()
+                    .map(ValueSignal::get)
+                    .filter(n -> tf.equals("All")
+                            || n.type().name().equals(tf))
                     .filter(n -> {
-                        if (readFilter.equals("Unread")) {
+                        if (rf.equals("Unread")) {
                             return !n.read();
-                        } else if (readFilter.equals("Read")) {
+                        } else if (rf.equals("Read")) {
                             return n.read();
                         }
                         return true;
-                    }).sorted((a, b) -> b.timestamp().compareTo(a.timestamp()))
+                    })
+                    .sorted((a, b) -> b.timestamp().compareTo(a.timestamp()))
                     .toList();
         });
 
         // Aggregate signals
-        Signal<Long> unreadCountSignal = Signal
-                .computed(() -> notificationsSignal.get().stream()
-                        .map(ValueSignal::get).filter(n -> !n.read()).count());
+        Signal<Long> unreadCountSignal = Signal.computed(
+                () -> notificationsSignal.get().stream()
+                        .map(ValueSignal::get)
+                        .filter(n -> !n.read()).count());
 
         Signal<String> countLabelSignal = Signal.computed(() -> {
-            int filtered = filteredSignal.get().size();
-            long unread = unreadCountSignal.get();
-            return "Showing " + filtered + " notification"
-                    + (filtered != 1 ? "s" : "") + " (" + unread + " unread)";
+            int filteredSize = filteredSignal.get().size();
+            long unreadVal = unreadCountSignal.get();
+            return "Showing " + filteredSize + " notification"
+                    + (filteredSize != 1 ? "s" : "") + " (" + unreadVal
+                    + " unread)";
         });
 
         // Filter row
@@ -148,7 +155,8 @@ public class UseCase24View extends VerticalLayout {
         clearAllButton.addThemeName("small");
         clearAllButton.addThemeName("error");
 
-        var actionRow = new HorizontalLayout(markAllReadButton, clearAllButton);
+        var actionRow = new HorizontalLayout(markAllReadButton,
+                clearAllButton);
         actionRow.setSpacing(true);
 
         // Header row with count and unread badge
@@ -157,14 +165,16 @@ public class UseCase24View extends VerticalLayout {
         countLabel.getStyle().set("color", "var(--lumo-secondary-text-color)");
 
         var unreadBadge = new Span();
-        unreadBadge.bindText(unreadCountSignal.map(c -> c + " unread"));
-        unreadBadge.getStyle()
-                .set("background-color", "var(--lumo-primary-color)")
-                .set("color", "white").set("padding", "0.25em 0.75em")
+        unreadBadge.bindText(
+                unreadCountSignal.map(c -> c + " unread"));
+        unreadBadge.getStyle().set("background-color",
+                "var(--lumo-primary-color)").set("color", "white")
+                .set("padding", "0.25em 0.75em")
                 .set("border-radius", "1em")
                 .set("font-size", "var(--lumo-font-size-s)")
                 .set("font-weight", "bold");
-        unreadBadge.bindVisible(unreadCountSignal.map(c -> c > 0));
+        unreadBadge.bindVisible(
+                unreadCountSignal.map(c -> c > 0));
 
         var headerRow = new HorizontalLayout(countLabel, unreadBadge);
         headerRow.setAlignItems(Alignment.CENTER);
@@ -183,10 +193,12 @@ public class UseCase24View extends VerticalLayout {
         // Empty state
         var emptyState = new Paragraph(
                 "No notifications to display. Try adjusting your filters or adding new notifications.");
-        emptyState.getStyle().set("text-align", "center").set("padding", "2em")
+        emptyState.getStyle().set("text-align", "center")
+                .set("padding", "2em")
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-style", "italic");
-        emptyState.bindVisible(filteredSignal.map(List::isEmpty));
+        emptyState.bindVisible(
+                filteredSignal.map(List::isEmpty));
 
         // Info box
         var infoBox = new Div();
@@ -208,8 +220,10 @@ public class UseCase24View extends VerticalLayout {
             ListSignal<Notification> notificationsSignal) {
         var card = new Div();
         card.getStyle().set("display", "flex").set("align-items", "flex-start")
-                .set("gap", "1em").set("padding", "1em")
-                .set("margin", "0.25em 0").set("border-radius", "8px")
+                .set("gap", "1em")
+                .set("padding", "1em")
+                .set("margin", "0.25em 0")
+                .set("border-radius", "8px")
                 .set("border-left",
                         "4px solid " + getTypeColor(notification.type()));
 
@@ -237,25 +251,29 @@ public class UseCase24View extends VerticalLayout {
         var typeBadge = new Span(notification.type().name());
         typeBadge.getStyle()
                 .set("background-color", getTypeColor(notification.type()))
-                .set("color", "white").set("padding", "0.1em 0.5em")
+                .set("color", "white")
+                .set("padding", "0.1em 0.5em")
                 .set("border-radius", "0.75em")
                 .set("font-size", "var(--lumo-font-size-xs)")
                 .set("margin-left", "0.5em");
 
         var titleRow = new Div(titleSpan, typeBadge);
-        titleRow.getStyle().set("display", "flex").set("align-items", "center")
+        titleRow.getStyle().set("display", "flex")
+                .set("align-items", "center")
                 .set("margin-bottom", "0.25em");
 
         // Message
         var messageSpan = new Span(notification.message());
-        messageSpan.getStyle().set("color", "var(--lumo-secondary-text-color)")
+        messageSpan.getStyle()
+                .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-size", "var(--lumo-font-size-s)")
                 .set("display", "block").set("margin-bottom", "0.5em");
 
         // Timestamp
         var timestampSpan = new Span(
                 notification.timestamp().format(TIME_FORMAT));
-        timestampSpan.getStyle().set("color", "var(--lumo-tertiary-text-color)")
+        timestampSpan.getStyle()
+                .set("color", "var(--lumo-tertiary-text-color)")
                 .set("font-size", "var(--lumo-font-size-xs)")
                 .set("display", "block");
 
@@ -263,25 +281,27 @@ public class UseCase24View extends VerticalLayout {
 
         // Actions
         var actions = new Div();
-        actions.getStyle().set("display", "flex")
-                .set("flex-direction", "column").set("gap", "0.25em")
-                .set("flex-shrink", "0");
+        actions.getStyle().set("display", "flex").set("flex-direction", "column")
+                .set("gap", "0.25em").set("flex-shrink", "0");
 
         var toggleReadButton = new Button(
                 notification.read() ? "Mark Unread" : "Mark Read", e -> {
                     notificationsSignal.get().stream()
                             .filter(signal -> signal.get().id()
                                     .equals(notification.id()))
-                            .findFirst().ifPresent(signal -> signal.set(signal
-                                    .get().withRead(!notification.read())));
+                            .findFirst()
+                            .ifPresent(signal -> signal.set(signal.get()
+                                    .withRead(!notification.read())));
                 });
         toggleReadButton.addThemeName("small");
         toggleReadButton.addThemeName("tertiary");
 
         var dismissButton = new Button("Dismiss", e -> {
-            notificationsSignal.get().stream().filter(
-                    signal -> signal.get().id().equals(notification.id()))
-                    .findFirst().ifPresent(notificationsSignal::remove);
+            notificationsSignal.get().stream()
+                    .filter(signal -> signal.get().id()
+                            .equals(notification.id()))
+                    .findFirst()
+                    .ifPresent(notificationsSignal::remove);
         });
         dismissButton.addThemeName("small");
         dismissButton.addThemeName("tertiary");

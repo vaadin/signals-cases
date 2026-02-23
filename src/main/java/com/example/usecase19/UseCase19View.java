@@ -199,7 +199,8 @@ public class UseCase19View extends VerticalLayout {
         card.getStyle().set("flex", "1 1 300px").set("min-width", "300px");
 
         // Header with item name
-        Signal<String> nameSignal = itemSignal.map(DataItem::name);
+        Signal<String> nameSignal = itemSignal
+                .map(DataItem::name);
         Span titleSpan = new Span();
         titleSpan.bindText(nameSignal);
         card.setTitle(titleSpan);
@@ -267,8 +268,8 @@ public class UseCase19View extends VerticalLayout {
                 .set("font-size", "0.875em");
 
         Span dataText = new Span();
-        dataText.bindText(
-                itemSignal.map(item -> item.data() != null ? item.data() : ""));
+        dataText.bindText(itemSignal.map(
+                item -> item.data() != null ? item.data() : ""));
         dataContent.add(dataText);
 
         successContent.add(successHeader, dataContent);
@@ -318,13 +319,11 @@ public class UseCase19View extends VerticalLayout {
         card.add(idleContent, loadingContent, successContent, errorContent);
 
         // Card styling based on state
-        Signal<String> borderColorSignal = itemSignal.map(item -> {
-            return switch (item.state()) {
+        Signal<String> borderColorSignal = itemSignal.map(item -> switch (item.state()) {
             case IDLE -> "var(--lumo-contrast-20pct)";
             case LOADING -> "var(--lumo-primary-color)";
             case SUCCESS -> "var(--lumo-success-color)";
             case ERROR -> "var(--lumo-error-color)";
-            };
         });
 
         // Apply border color using Signal.effect

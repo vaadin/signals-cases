@@ -237,15 +237,17 @@ public class UseCase14View extends VerticalLayout {
         // Step 1: Fetch raw data from data sources
         // The @Async annotation causes Spring to execute this in a separate
         // thread
-        analyticsService.fetchReportData(shouldFailSignal.get())
+        boolean fail = shouldFailSignal.get();
+        analyticsService.fetchReportData(fail)
                 .thenCompose(rawData -> {
                     // Signals are thread-safe - update directly from background
                     // thread
                     loadingMessageSignal.set("Generating report... (2/2)");
 
+                    boolean fail2 = shouldFailSignal.get();
                     // Step 2: Process the fetched data into a report
                     return analyticsService.generateReportFromData(rawData,
-                            shouldFailSignal.get());
+                            fail2);
                 }).thenAccept(report -> {
                     // Signals are thread-safe - update directly from background
                     // thread

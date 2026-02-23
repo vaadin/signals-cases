@@ -62,8 +62,9 @@ public class UseCase05View extends VerticalLayout {
         citySelect.setItems(List.of()); // Initialize with empty items
         MissingAPI.bindItems(citySelect, stateSignal.map(state -> {
             citySignal.set(""); // Reset city when state changes
-            return state != null && !state.isEmpty()
-                    ? loadCities(countrySignal.get(), state)
+            String country = countrySignal.get();
+            return state != null && !state.isEmpty() && country != null
+                    ? loadCities(country, state)
                     : List.of();
         }));
         citySelect.bindValue(citySignal, citySignal::set);

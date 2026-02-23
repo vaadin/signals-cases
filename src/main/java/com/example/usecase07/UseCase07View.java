@@ -79,8 +79,9 @@ public class UseCase07View extends VerticalLayout {
         // Computed signal for invoice details
         Signal<InvoiceDetails> invoiceDetailsSignal = Signal.computed(() -> {
             Invoice selected = selectedInvoiceSignal.get();
-            return (selected != null && !selected.getId().isEmpty())
-                    ? invoiceService.fetchInvoiceDetails(selected.getId())
+            String selectedId = selected != null ? selected.getId() : null;
+            return (selectedId != null && !selectedId.isEmpty())
+                    ? invoiceService.fetchInvoiceDetails(selectedId)
                     : EMPTY_DETAILS;
         });
 
@@ -128,8 +129,12 @@ public class UseCase07View extends VerticalLayout {
                 Invoice::setCustomerName);
         invoiceBinder.forField(dueDate).bind(Invoice::getDueDate,
                 Invoice::setDueDate);
-        Signal.effect(this, () -> invoiceBinder
-                .setBean(invoiceDetailsSignal.get().getInvoice()));
+        Signal.effect(this, () -> {
+            InvoiceDetails details = invoiceDetailsSignal.get();
+            if (details != null) {
+                invoiceBinder.setBean(details.getInvoice());
+            }
+        });
         invoiceBinder.addValueChangeListener(event -> {
             var status = invoiceBinder.validate();
             if (status.isOk()) {
@@ -152,8 +157,12 @@ public class UseCase07View extends VerticalLayout {
         detailsBinder.forField(customerAddress).bind(
                 InvoiceDetails::getCustomerAddress,
                 InvoiceDetails::setCustomerAddress);
-        Signal.effect(this,
-                () -> detailsBinder.setBean(invoiceDetailsSignal.get()));
+        Signal.effect(this, () -> {
+            InvoiceDetails details = invoiceDetailsSignal.get();
+            if (details != null) {
+                detailsBinder.setBean(details);
+            }
+        });
         detailsBinder.addValueChangeListener(event -> {
             var status = detailsBinder.validate();
             if (status.isOk()) {
@@ -176,7 +185,10 @@ public class UseCase07View extends VerticalLayout {
             Button button = new Button();
             button.setTooltipText("Remove Line Item");
             button.addClickListener(e -> {
-                removeLineItem(invoiceDetailsSignal.get(), lineItem);
+                InvoiceDetails details = invoiceDetailsSignal.get();
+                if (details != null) {
+                    removeLineItem(details, lineItem);
+                }
             });
             button.setIcon(VaadinIcon.CLOSE.create());
             return button;
@@ -198,9 +210,14 @@ public class UseCase07View extends VerticalLayout {
         });
 
         Signal.effect(lineItemsGrid, () -> {
-            List<LineItem> items = invoiceDetailsSignal.get().getLineItems();
+            InvoiceDetails details = invoiceDetailsSignal.get();
             lineItemsSignal.clear();
-            items.forEach(lineItemsSignal::insertLast);
+            if (details != null) {
+                List<LineItem> items = details.getLineItems();
+                if (items != null) {
+                    items.forEach(lineItemsSignal::insertLast);
+                }
+            }
         });
 
         // Line item editor fields
@@ -231,26 +248,38 @@ public class UseCase07View extends VerticalLayout {
             var status = lineItemBinder.validate();
             if (status.isOk()) {
                 LineItem lineItem = lineItemBinder.getBean();
+                InvoiceDetails bean = detailsBinder.getBean();
+                Invoice beanInvoice = bean != null ? bean.getInvoice() : null;
+                if (beanInvoice == null) {
+                    return;
+                }
                 InvoiceDetails details = invoiceService.updateLineItem(
-                        detailsBinder.getBean().getInvoice(), lineItem);
+                        beanInvoice, lineItem);
                 // update invoiceListSignal's matching ValueSignal value for the
                 // changed invoice
-                updateInvoiceListSignalItem(details.getInvoice());
+                Invoice detailsInvoice = details.getInvoice();
+                if (detailsInvoice != null) {
+                    updateInvoiceListSignalItem(detailsInvoice);
+                }
                 // update lineItemsSignal's matching ValueSignal value for the
                 // changed line item
                 lineItemsSignal.peek().stream().filter(
                         signal -> signal.peek().getId() == lineItem.getId())
                         .findFirst().ifPresent(signal -> {
-                            signal.modify(target -> {
-                                LineItem source = details
-                                        .getLineItemById(lineItem.getId());
-                                target.setDescription(source.getDescription());
-                                target.setQuantity(source.getQuantity());
-                                target.setUnitPrice(source.getUnitPrice());
-                                target.setTotal(source.getTotal());
-                            });
-                            // keep editor open after update
-                            lineItemsGrid.getEditor().editItem(signal.peek());
+                            LineItem source = details
+                                    .getLineItemById(lineItem.getId());
+                            if (source != null) {
+                                signal.modify(target -> {
+                                    target.setDescription(
+                                            source.getDescription());
+                                    target.setQuantity(source.getQuantity());
+                                    target.setUnitPrice(source.getUnitPrice());
+                                    target.setTotal(source.getTotal());
+                                });
+                                // keep editor open after update
+                                lineItemsGrid.getEditor()
+                                        .editItem(signal.peek());
+                            }
                         });
             } else if (status.hasErrors()) {
                 Notification.show("Line item has validation errors.");
@@ -275,17 +304,22 @@ public class UseCase07View extends VerticalLayout {
         // Payment status
         Span paymentStatus = new Span();
         paymentStatus.bindText(invoiceDetailsSignal.map(
-                details -> "Payment Status: " + details.getPaymentStatus()));
+                details -> "Payment Status: " + (details != null ? details.getPaymentStatus() : "")));
         paymentStatus.getStyle().set("font-weight", "bold");
 
         detailsPanel.add(customerInfo, new H3("Line Items"),
                 new Span("(Double-click a cell to edit)"));
-        detailsPanel.add(new Button("Add Line Item",
-                e -> addNewLineItem(invoiceDetailsSignal.get())));
+        detailsPanel.add(new Button("Add Line Item", e -> {
+            InvoiceDetails details = invoiceDetailsSignal.get();
+            if (details != null) {
+                addNewLineItem(details);
+            }
+        }));
         detailsPanel.addAndExpand(lineItemsGrid);
         detailsPanel.add(paymentStatus);
         detailsPanel
                 .bindVisible(invoiceDetailsSignal.map(details -> details != null
+                        && details.getInvoice() != null
                         && details.getInvoice().getId() != null
                         && details != EMPTY_DETAILS));
 
@@ -322,7 +356,11 @@ public class UseCase07View extends VerticalLayout {
         lineItemsGrid.getColumnByKey("total")
                 .setFooter("Total: "
                         + lineItemsSignal.peek().stream().map(ValueSignal::peek)
-                                .toList().stream().map(LineItem::getTotal)
+                                .filter(item -> item != null)
+                                .toList().stream().map(li -> {
+                                    BigDecimal total = li.getTotal();
+                                    return total != null ? total : BigDecimal.ZERO;
+                                })
                                 .reduce(BigDecimal.ZERO, BigDecimal::add));
     }
 
@@ -333,8 +371,12 @@ public class UseCase07View extends VerticalLayout {
     }
 
     private void addNewLineItem(InvoiceDetails details) {
+        Invoice invoice = details.getInvoice();
+        if (invoice == null || invoice.getId() == null) {
+            return;
+        }
         LineItem item = invoiceService
-                .createNewEmptyLineItem(details.getInvoice().getId());
+                .createNewEmptyLineItem(invoice.getId());
         lineItemsSignal.insertLast(item);
     }
 
@@ -344,6 +386,6 @@ public class UseCase07View extends VerticalLayout {
                 .findFirst().ifPresent(lineItemsSignal::remove);
         // need to also update the invoice total in the invoice list
         updateInvoiceListSignalItem(
-                invoiceService.fetchInvoice(value.getInvoice().getId()));
+                invoiceService.fetchInvoice(invoice.getId()));
     }
 }

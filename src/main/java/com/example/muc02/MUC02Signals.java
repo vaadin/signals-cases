@@ -1,5 +1,6 @@
 package com.example.muc02;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import com.vaadin.flow.signals.shared.SharedMapSignal;
@@ -31,11 +32,12 @@ public class MUC02Signals {
         return sessionCursorsSignal;
     }
 
-    public SharedValueSignal<CursorPosition> getCursorSignalForUser(
+    public @Nullable SharedValueSignal<CursorPosition> getCursorSignalForUser(
             String username, String sessionId) {
         String sessionKey = username + ":" + sessionId;
         sessionCursorsSignal.putIfAbsent(sessionKey, new CursorPosition(0, 0));
-        return sessionCursorsSignal.get().get(sessionKey);
+        var cursors = sessionCursorsSignal.get();
+        return cursors != null ? cursors.get(sessionKey) : null;
     }
 
     public void unregisterCursor(String username, String sessionId) {

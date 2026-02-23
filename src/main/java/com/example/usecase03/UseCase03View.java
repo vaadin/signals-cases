@@ -2,8 +2,12 @@ package com.example.usecase03;
 
 import jakarta.annotation.security.PermitAll;
 
+import java.util.List;
+
 import com.example.MissingAPI;
 import com.example.views.MainLayout;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -68,8 +72,8 @@ public class UseCase03View extends VerticalLayout {
     private final ValueSignal<Integer> selectedShapeSignal = new ValueSignal<>(
             0);
 
-    private Element rectElement;
-    private Element starElement;
+    private @Nullable Element rectElement;
+    private @Nullable Element starElement;
 
     public UseCase03View() {
         setSpacing(true);
@@ -86,7 +90,9 @@ public class UseCase03View extends VerticalLayout {
                         + "(19 writable + 4 computed = 23 signals total).");
         description.getStyle().set("margin-top", "0.5em");
 
-        // Main content: controls on left, canvas on right
+        List<@Nullable String> shapeNames = new java.util.ArrayList<>();
+        System.out.println(shapeNames.get(0).charAt(0));
+         // Main content: controls on left, canvas on right
         HorizontalLayout mainContent = new HorizontalLayout();
         mainContent.setWidthFull();
         mainContent.setSpacing(true);
@@ -491,13 +497,13 @@ public class UseCase03View extends VerticalLayout {
      * Generate SVG polygon points for a star shape.
      *
      * @param numPoints
-     *            Number of points on the star (3-10)
+     *                  Number of points on the star (3-10)
      * @param size
-     *            Outer radius of the star
+     *                  Outer radius of the star
      * @param cx
-     *            Center X coordinate
+     *                  Center X coordinate
      * @param cy
-     *            Center Y coordinate
+     *                  Center Y coordinate
      * @return SVG points attribute string
      */
     private String generateStarPoints(int numPoints, int size, int cx, int cy) {

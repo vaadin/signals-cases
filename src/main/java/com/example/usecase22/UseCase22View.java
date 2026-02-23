@@ -135,26 +135,22 @@ public class UseCase22View extends VerticalLayout {
         var streetField = new TextField("Street");
         streetField.setWidthFull();
         streetField.bindValue(addressSignal.map(Address::street),
-                personSignal.updater((person, street) -> person
-                        .withAddress(person.address().withStreet(street))));
+                personSignal.updater((person, street) -> person.withAddress(person.address().withStreet(street))));
 
         var cityField = new TextField("City");
         cityField.setWidthFull();
         cityField.bindValue(addressSignal.map(Address::city),
-                personSignal.updater((person, city) -> person
-                        .withAddress(person.address().withCity(city))));
+                personSignal.updater((person, city) -> person.withAddress(person.address().withCity(city))));
 
         var zipCodeField = new TextField("ZIP Code");
         zipCodeField.setWidthFull();
         zipCodeField.bindValue(addressSignal.map(Address::zipCode),
-                personSignal.updater((person, zip) -> person
-                        .withAddress(person.address().withZipCode(zip))));
+                personSignal.updater((person, zip) -> person.withAddress(person.address().withZipCode(zip))));
 
         var countryField = new TextField("Country");
         countryField.setWidthFull();
         countryField.bindValue(addressSignal.map(Address::country),
-                personSignal.updater((person, country) -> person
-                        .withAddress(person.address().withCountry(country))));
+                personSignal.updater((person, country) -> person.withAddress(person.address().withCountry(country))));
 
         // Computed formatted address
         var formattedAddressLabel = new Span();
@@ -185,8 +181,10 @@ public class UseCase22View extends VerticalLayout {
         stateDisplay.getStyle().set("background-color", "#f5f5f5")
                 .set("padding", "1em").set("border-radius", "4px")
                 .set("overflow-x", "auto").set("font-size", "0.9em");
-        stateDisplay.bindText(
-                Signal.computed(() -> formatPersonAsJson(personSignal.get())));
+        stateDisplay.bindText(Signal.computed(() -> {
+            Person p = personSignal.get();
+            return formatPersonAsJson(p);
+        }));
 
         stateBox.add(stateTitle, stateDisplay);
         return stateBox;

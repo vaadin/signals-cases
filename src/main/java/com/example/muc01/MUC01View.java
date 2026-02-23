@@ -43,18 +43,19 @@ public class MUC01View extends VerticalLayout {
     private final String currentUser;
     private final MUC01Signals muc01Signals;
     private final UserSessionRegistry userSessionRegistry;
-    private String sessionId;
+    private @org.jspecify.annotations.Nullable String sessionId;
 
     public MUC01View(CurrentUserSignal currentUserSignal,
             MUC01Signals muc01Signals,
             UserSessionRegistry userSessionRegistry) {
         CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
                 .peek();
-        if (userInfo == null || !userInfo.isAuthenticated()) {
+        String username = userInfo != null ? userInfo.getUsername() : null;
+        if (userInfo == null || !userInfo.isAuthenticated() || username == null) {
             throw new IllegalStateException(
                     "User must be authenticated to access this view");
         }
-        this.currentUser = userInfo.getUsername();
+        this.currentUser = username;
         this.muc01Signals = muc01Signals;
         this.userSessionRegistry = userSessionRegistry;
 
@@ -83,7 +84,10 @@ public class MUC01View extends VerticalLayout {
 
         // Bind message list to UI
         messagesContainer.bindChildren(muc01Signals.getMessagesSignal(),
-                msgSignal -> createMessageComponent(msgSignal.get()));
+                msgSignal -> {
+                    MUC01Signals.Message msg = msgSignal.get();
+                    return createMessageComponent(msg);
+                });
 
         // Message input
         TextField messageInput = new TextField();
@@ -184,11 +188,13 @@ public class MUC01View extends VerticalLayout {
 
         var users = userSessionRegistry.getActiveUsersSignal().get();
         var displayNames = userSessionRegistry.getDisplayNamesSignal().get();
+        if (displayNames == null) return currentUser;
 
         // Find matching session key for current user
         String sessionKey = currentUser + ":" + sessionId;
         for (int i = 0; i < users.size() && i < displayNames.size(); i++) {
-            if (sessionKey.equals(users.get(i).get().getCompositeKey())) {
+            var userInfo = users.get(i).get();
+            if (userInfo != null && sessionKey.equals(userInfo.getCompositeKey())) {
                 return displayNames.get(i);
             }
         }

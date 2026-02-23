@@ -2,6 +2,7 @@ package com.example.security;
 
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -19,11 +20,11 @@ import com.vaadin.flow.spring.security.AuthenticationContext;
 public class CurrentUserSignal {
 
     public static class UserInfo {
-        private final String username;
+        private final @Nullable String username;
         private final Set<String> roles;
         private final boolean authenticated;
 
-        public UserInfo(String username, Set<String> roles,
+        public UserInfo(@Nullable String username, Set<String> roles,
                 boolean authenticated) {
             this.username = username;
             this.roles = roles;
@@ -39,7 +40,7 @@ public class CurrentUserSignal {
             return new UserInfo(username, roles, true);
         }
 
-        public String getUsername() {
+        public @Nullable String getUsername() {
             return username;
         }
 

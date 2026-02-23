@@ -4,12 +4,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import org.jspecify.annotations.Nullable;
+
 public class Invoice {
-    private String id;
-    private String customerName;
-    private LocalDate dueDate;
-    private BigDecimal total;
-    private String status;
+    private @Nullable String id;
+    private @Nullable String customerName;
+    private @Nullable LocalDate dueDate;
+    private @Nullable BigDecimal total;
+    private @Nullable String status;
 
     public Invoice() {
     }
@@ -23,43 +25,43 @@ public class Invoice {
         this.status = status;
     }
 
-    public String getId() {
+    public @Nullable String getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(@Nullable String id) {
         this.id = id;
     }
 
-    public String getCustomerName() {
+    public @Nullable String getCustomerName() {
         return customerName;
     }
 
-    public void setCustomerName(String customerName) {
+    public void setCustomerName(@Nullable String customerName) {
         this.customerName = customerName;
     }
 
-    public LocalDate getDueDate() {
+    public @Nullable LocalDate getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(LocalDate dueDate) {
+    public void setDueDate(@Nullable LocalDate dueDate) {
         this.dueDate = dueDate;
     }
 
-    public BigDecimal getTotal() {
+    public @Nullable BigDecimal getTotal() {
         return total;
     }
 
-    public void setTotal(BigDecimal total) {
+    public void setTotal(@Nullable BigDecimal total) {
         this.total = total;
     }
 
-    public String getStatus() {
+    public @Nullable String getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(@Nullable String status) {
         this.status = status;
     }
 

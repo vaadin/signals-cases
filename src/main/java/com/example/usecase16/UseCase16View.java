@@ -134,6 +134,8 @@ public class UseCase16View extends VerticalLayout
             String baseUrl = getBaseUrl();
             String query = searchQuerySignal.get();
             String category = categorySignal.get();
+            if (query == null) query = "";
+            if (category == null) category = "All";
 
             StringBuilder url = new StringBuilder(baseUrl);
             if (!query.isEmpty() || !category.equals("All")) {
@@ -213,6 +215,9 @@ public class UseCase16View extends VerticalLayout
 
     private Div createArticleCard(ValueSignal<Article> articleSignal) {
         var article = articleSignal.get();
+        if (article == null) {
+            return new Div();
+        }
         Div card = new Div();
         card.getStyle().set("background-color", "#ffffff")
                 .set("border", "1px solid var(--lumo-contrast-20pct)")

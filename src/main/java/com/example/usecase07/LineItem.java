@@ -3,12 +3,14 @@ package com.example.usecase07;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+import org.jspecify.annotations.Nullable;
+
 public class LineItem {
     private int id;
-    private String description;
+    private @Nullable String description;
     private int quantity;
-    private BigDecimal unitPrice;
-    private BigDecimal total;
+    private @Nullable BigDecimal unitPrice;
+    private @Nullable BigDecimal total;
 
     public LineItem() {
     }
@@ -26,11 +28,11 @@ public class LineItem {
         return id;
     }
 
-    public String getDescription() {
+    public @Nullable String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(@Nullable String description) {
         this.description = description;
     }
 
@@ -42,19 +44,19 @@ public class LineItem {
         this.quantity = quantity;
     }
 
-    public BigDecimal getUnitPrice() {
+    public @Nullable BigDecimal getUnitPrice() {
         return unitPrice;
     }
 
-    public void setUnitPrice(BigDecimal unitPrice) {
+    public void setUnitPrice(@Nullable BigDecimal unitPrice) {
         this.unitPrice = unitPrice != null ? unitPrice : BigDecimal.ZERO;
     }
 
-    public BigDecimal getTotal() {
+    public @Nullable BigDecimal getTotal() {
         return total;
     }
 
-    public void setTotal(BigDecimal total) {
+    public void setTotal(@Nullable BigDecimal total) {
         this.total = total != null ? total : BigDecimal.ZERO;
     }
 

@@ -56,14 +56,18 @@ public class MUC03Signals {
     }
 
     public synchronized boolean awardPoint(String username, String sessionId) {
-        if (!buttonVisibleSignal.get() || clicksRemainingSignal.get() <= 0) {
+        if (!buttonVisibleSignal.get()) {
             return false; // Round already finished
+        }
+        int remaining0 = clicksRemainingSignal.get();
+        if (remaining0 <= 0) {
+            return false;
         }
 
         // Award the point
         String sessionKey = username + ":" + sessionId;
-        SharedValueSignal<Integer> scoreSignal = leaderboardSignal.get()
-                .get(sessionKey);
+        var scores = leaderboardSignal.get();
+        var scoreSignal = scores.get(sessionKey);
         if (scoreSignal != null) {
             scoreSignal.set(scoreSignal.get() + 1);
         } else {

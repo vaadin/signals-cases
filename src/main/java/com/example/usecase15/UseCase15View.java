@@ -103,7 +103,8 @@ public class UseCase15View extends VerticalLayout {
 
         searchField.bindValue(searchQuerySignal, searchQuerySignal::set);
         searchField.addValueChangeListener(e -> {
-            performSearch(searchQuerySignal.get());
+            String query = searchQuerySignal.get();
+            performSearch(query);
         });
 
         // Search stats
@@ -162,7 +163,8 @@ public class UseCase15View extends VerticalLayout {
         // Results
         Signal<String> resultsTitleSignal = Signal.computed(() -> {
             var results = searchResultsSignal.get();
-            if (results.isEmpty() && !searchQuerySignal.peek().isEmpty()) {
+            String currentQuery = searchQuerySignal.peek();
+            if (results.isEmpty() && !currentQuery.isEmpty()) {
                 return "No results found";
             } else if (!results.isEmpty()) {
                 return results.size() + " result"
@@ -230,7 +232,8 @@ public class UseCase15View extends VerticalLayout {
 
         // Set searching state
         isSearchingSignal.set(true);
-        searchCountSignal.set(searchCountSignal.peek() + 1);
+        Integer currentCount = searchCountSignal.peek();
+        searchCountSignal.set(currentCount + 1);
 
         // Simulate async search with delay
         CompletableFuture<Void> searchFuture = CompletableFuture
@@ -271,7 +274,7 @@ public class UseCase15View extends VerticalLayout {
         // Highlight matching text
         String query = searchQuerySignal.peek();
         nameDiv.getElement().setProperty("innerHTML",
-                highlightMatch(product.name(), query));
+                highlightMatch(product.name(), query != null ? query : ""));
 
         Div categoryDiv = new Div(product.category());
         categoryDiv.getStyle().set("font-size", "0.9em").set("color",

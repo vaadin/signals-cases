@@ -2,6 +2,7 @@ package com.example.service;
 
 import java.util.concurrent.CompletableFuture;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -54,7 +55,7 @@ public class AnalyticsService {
      * Represents an analytics report with key business metrics.
      */
     public static class AnalyticsReport {
-        private String period;
+        private @Nullable String period;
         private int totalRevenue;
         private int totalOrders;
         private double conversionRate;
@@ -84,7 +85,7 @@ public class AnalyticsService {
             return this == EMPTY || (period == null || period.isEmpty());
         }
 
-        public String getPeriod() {
+        public @Nullable String getPeriod() {
             return period;
         }
 

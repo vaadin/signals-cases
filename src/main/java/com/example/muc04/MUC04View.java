@@ -22,6 +22,8 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import org.jspecify.annotations.Nullable;
+
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
@@ -44,7 +46,7 @@ public class MUC04View extends VerticalLayout {
     private final String currentUser;
     private final MUC04Signals muc04Signals;
     private final UserSessionRegistry userSessionRegistry;
-    private String sessionId;
+    private @Nullable String sessionId;
     private final java.util.IdentityHashMap<com.vaadin.flow.signals.shared.SharedValueSignal<MUC04Signals.FieldLock>, String> lockKeyMap = new java.util.IdentityHashMap<>();
 
     public MUC04View(CurrentUserSignal currentUserSignal,
@@ -52,11 +54,12 @@ public class MUC04View extends VerticalLayout {
             UserSessionRegistry userSessionRegistry) {
         CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
                 .peek();
-        if (userInfo == null || !userInfo.isAuthenticated()) {
+        String username = userInfo != null ? userInfo.getUsername() : null;
+        if (userInfo == null || !userInfo.isAuthenticated() || username == null) {
             throw new IllegalStateException(
                     "User must be authenticated to access this view");
         }
-        this.currentUser = userInfo.getUsername();
+        this.currentUser = username;
         this.muc04Signals = muc04Signals;
         this.userSessionRegistry = userSessionRegistry;
 
@@ -182,9 +185,7 @@ public class MUC04View extends VerticalLayout {
                         return "Available to edit";
                     }
                     MUC04Signals.FieldLock lock = lockSignal.get();
-                    if (lock == null) {
-                        return "Available to edit";
-                    } else if (sessionId != null
+                    if (sessionId != null
                             && lock.username().equals(currentUser)
                             && lock.sessionId().equals(sessionId)) {
                         return "You are editing this field";
@@ -204,9 +205,9 @@ public class MUC04View extends VerticalLayout {
                         return true;
                     }
                     MUC04Signals.FieldLock lock = lockSignal.get();
-                    return lock == null || (sessionId != null
+                    return sessionId != null
                             && lock.username().equals(currentUser)
-                            && lock.sessionId().equals(sessionId));
+                            && lock.sessionId().equals(sessionId);
                 });
         field.bindEnabled(enabledSignal);
 
@@ -234,9 +235,11 @@ public class MUC04View extends VerticalLayout {
         String fieldLabel = formatFieldName(fieldName);
 
         MUC04Signals.FieldLock lock = lockSignal.get();
+        String lockUsername = lock.username();
+        String lockSessionId = lock.sessionId();
         boolean isCurrentSession = sessionId != null
-                && lock.username().equals(currentUser)
-                && lock.sessionId().equals(sessionId);
+                && lockUsername.equals(currentUser)
+                && lockSessionId.equals(sessionId);
 
         HorizontalLayout item = new HorizontalLayout();
         item.setSpacing(true);
@@ -248,14 +251,14 @@ public class MUC04View extends VerticalLayout {
                 .set("border-radius", "4px");
 
         Image avatar = new Image(
-                MainLayout.getProfilePicturePath(lock.username()), "");
+                MainLayout.getProfilePicturePath(lockUsername), "");
         avatar.setWidth("32px");
         avatar.setHeight("32px");
         avatar.getStyle().set("border-radius", "50%").set("object-fit",
                 "cover");
 
         Span label = new Span(
-                String.format("🔒 %s: %s", fieldLabel, lock.username()));
+                String.format("🔒 %s: %s", fieldLabel, lockUsername));
 
         item.add(avatar, label);
         return item;

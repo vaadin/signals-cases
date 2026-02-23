@@ -247,6 +247,7 @@ public class UseCase23View extends Main {
         conf.addSeries(responseSeries);
 
         Signal.effect(chart, () -> {
+            if (responseSeries == null) return;
             var responseValues = responseSignal.get();
             responseSeries.get(0).setY(responseValues.get(0).get());
             responseSeries.get(1).setY(responseValues.get(1).get());

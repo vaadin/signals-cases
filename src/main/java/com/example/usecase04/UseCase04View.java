@@ -49,12 +49,18 @@ public class UseCase04View extends VerticalLayout {
         // Computed signal for filtered products
         Signal<List<Product>> filteredProductsSignal = Signal.computed(() -> {
             String category = categoryFilterSignal.get();
-            String searchTerm = searchTermSignal.get().toLowerCase();
-            boolean inStockOnly = inStockOnlySignal.get();
+            if (category == null) {
+                category = "All";
+            }
+            String rawSearch = searchTermSignal.get();
+            String searchTerm = rawSearch != null ? rawSearch.toLowerCase() : "";
+            Boolean inStockOnlyValue = inStockOnlySignal.get();
+            boolean inStockOnly = inStockOnlyValue != null && inStockOnlyValue;
 
+            String finalCategory = category;
             return allProducts.stream()
-                    .filter(p -> category.equals("All")
-                            || p.category().equals(category))
+                    .filter(p -> finalCategory.equals("All")
+                            || p.category().equals(finalCategory))
                     .filter(p -> searchTerm.isEmpty()
                             || p.name().toLowerCase().contains(searchTerm)
                             || p.id().toLowerCase().contains(searchTerm))

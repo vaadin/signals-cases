@@ -23,6 +23,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
+import org.jspecify.annotations.Nullable;
+
 import com.vaadin.flow.router.Route;
 
 /**
@@ -45,7 +47,7 @@ public class MUC03View extends VerticalLayout {
     private final MUC03Signals muc03Signals;
     private final UserSessionRegistry userSessionRegistry;
     private final Random random = new Random();
-    private String sessionId;
+    private @Nullable String sessionId;
     private final java.util.IdentityHashMap<com.vaadin.flow.signals.shared.SharedValueSignal<Integer>, String> scoreKeyMap = new java.util.IdentityHashMap<>();
 
     public MUC03View(CurrentUserSignal currentUserSignal,
@@ -53,11 +55,12 @@ public class MUC03View extends VerticalLayout {
             UserSessionRegistry userSessionRegistry) {
         CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
                 .peek();
-        if (userInfo == null || !userInfo.isAuthenticated()) {
+        String username = userInfo != null ? userInfo.getUsername() : null;
+        if (userInfo == null || !userInfo.isAuthenticated() || username == null) {
             throw new IllegalStateException(
                     "User must be authenticated to access this view");
         }
-        this.currentUser = userInfo.getUsername();
+        this.currentUser = username;
         this.muc03Signals = muc03Signals;
         this.userSessionRegistry = userSessionRegistry;
 
@@ -76,14 +79,19 @@ public class MUC03View extends VerticalLayout {
         roundStatus.getStyle().set("font-size", "1.2em")
                 .set("font-weight", "bold").set("margin-bottom", "0.5em");
         roundStatus.bindText(muc03Signals.getRoundNumberSignal()
-                .map(round -> round == 0 ? "Click START to begin"
-                        : "Round " + round));
+                .map(round -> {
+                    int r = round;
+                    return r == 0 ? "Click START to begin" : "Round " + r;
+                }));
 
         Div clicksStatus = new Div();
         clicksStatus.getStyle().set("font-size", "1em").set("color",
                 "var(--lumo-secondary-text-color)");
         clicksStatus.bindText(muc03Signals.getClicksRemainingSignal().map(
-                clicks -> clicks > 0 ? "Targets remaining: " + clicks : ""));
+                clicks -> {
+                    int c = clicks;
+                    return c > 0 ? "Targets remaining: " + c : "";
+                }));
 
         // Game area
         Div gameArea = new Div();
@@ -149,8 +157,11 @@ public class MUC03View extends VerticalLayout {
                     scores.forEach(
                             (key, signal) -> scoreKeyMap.put(signal, key));
                     return scores.entrySet().stream()
-                            .sorted((e1, e2) -> Integer.compare(
-                                    e2.getValue().get(), e1.getValue().get()))
+                            .sorted((e1, e2) -> {
+                                Integer v1 = e1.getValue().get();
+                                Integer v2 = e2.getValue().get();
+                                return Integer.compare(v2, v1);
+                            })
                             .map(java.util.Map.Entry::getValue).toList();
                 }), this::createLeaderboardItem);
 
@@ -177,6 +188,7 @@ public class MUC03View extends VerticalLayout {
     }
 
     private void handleButtonClick() {
+        if (sessionId == null) return;
         // Atomic operation: Only first click counts (handled by
         // CollaborativeSignals)
         boolean moreClicksRemain = muc03Signals.awardPoint(currentUser,
@@ -211,13 +223,17 @@ public class MUC03View extends VerticalLayout {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         this.sessionId = SessionIdHelper.getCurrentSessionId();
-        muc03Signals.initializePlayerScore(currentUser, sessionId);
+        if (sessionId != null) {
+            muc03Signals.initializePlayerScore(currentUser, sessionId);
+        }
     }
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
-        muc03Signals.unregisterScore(currentUser, sessionId);
+        if (sessionId != null) {
+            muc03Signals.unregisterScore(currentUser, sessionId);
+        }
     }
 
     private HorizontalLayout createLeaderboardItem(
@@ -229,9 +245,13 @@ public class MUC03View extends VerticalLayout {
 
         // Build display name mapping
         java.util.Map<String, String> displayNameMap = new java.util.HashMap<>();
-        for (int i = 0; i < users.size() && i < displayNames.size(); i++) {
-            String key = users.get(i).get().getCompositeKey();
-            displayNameMap.put(key, displayNames.get(i));
+        if (displayNames != null) {
+            for (int i = 0; i < users.size() && i < displayNames.size(); i++) {
+                var userInfo = users.get(i).get();
+                if (userInfo != null) {
+                    displayNameMap.put(userInfo.getCompositeKey(), displayNames.get(i));
+                }
+            }
         }
 
         String displayName = displayNameMap.getOrDefault(sessionKey,

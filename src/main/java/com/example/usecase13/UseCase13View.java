@@ -107,8 +107,13 @@ public class UseCase13View extends VerticalLayout {
         // Reactively bind children to active users list
         userListContainer.bindChildren(
                 userSessionRegistry.getActiveUsersSignal(),
-                userSignal -> createUserCard(userSignal.get(),
-                        currentSessionId));
+                userSignal -> {
+                    UserInfo user = userSignal.get();
+                    if (user == null) {
+                        return new Div();
+                    }
+                    return createUserCard(user, currentSessionId);
+                });
 
         // Educational info box
         Div infoBox = new Div();
@@ -193,7 +198,10 @@ public class UseCase13View extends VerticalLayout {
         // Add session number if multiple sessions for same user
         long sessionCount = userSessionRegistry.getActiveUsersSignal().get()
                 .stream()
-                .filter(us -> us.get().username().equals(userInfo.username()))
+                .filter(us -> {
+                    UserInfo info = us.get();
+                    return info != null && info.username().equals(userInfo.username());
+                })
                 .count();
 
         if (sessionCount > 1) {
@@ -201,6 +209,9 @@ public class UseCase13View extends VerticalLayout {
             long sessionNumber = 0;
             for (var us : userSessionRegistry.getActiveUsersSignal().get()) {
                 UserInfo u = us.get();
+                if (u == null) {
+                    continue;
+                }
                 if (u.username().equals(userInfo.username())) {
                     sessionNumber++;
                     if (u.sessionId().equals(userInfo.sessionId())) {
@@ -239,8 +250,9 @@ public class UseCase13View extends VerticalLayout {
         viewRow.getStyle().set("gap", "0.5em");
 
         Span viewIcon = new Span("📍");
+        String currentView = userInfo.currentView();
         Span viewText = new Span(
-                "Viewing: " + formatViewName(userInfo.currentView()));
+                "Viewing: " + (currentView != null ? formatViewName(currentView) : "Unknown"));
         viewText.getStyle().set("font-size", "var(--lumo-font-size-s)");
 
         viewRow.add(viewIcon, viewText);

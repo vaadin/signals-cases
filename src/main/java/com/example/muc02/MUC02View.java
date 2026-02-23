@@ -20,6 +20,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import org.jspecify.annotations.Nullable;
+
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.shared.SharedValueSignal;
 
@@ -41,10 +43,10 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
 public class MUC02View extends VerticalLayout {
 
     private final String currentUser;
-    private SharedValueSignal<MUC02Signals.CursorPosition> myCursorSignal;
+    private @Nullable SharedValueSignal<MUC02Signals.CursorPosition> myCursorSignal;
     private final MUC02Signals muc02Signals;
     private final UserSessionRegistry userSessionRegistry;
-    private String sessionId;
+    private @Nullable String sessionId;
     private final java.util.IdentityHashMap<SharedValueSignal<MUC02Signals.CursorPosition>, String> cursorKeyMap = new java.util.IdentityHashMap<>();
 
     public MUC02View(CurrentUserSignal currentUserSignal,
@@ -52,11 +54,12 @@ public class MUC02View extends VerticalLayout {
             UserSessionRegistry userSessionRegistry) {
         CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
                 .peek();
-        if (userInfo == null || !userInfo.isAuthenticated()) {
+        String username = userInfo != null ? userInfo.getUsername() : null;
+        if (userInfo == null || !userInfo.isAuthenticated() || username == null) {
             throw new IllegalStateException(
                     "User must be authenticated to access this view");
         }
-        this.currentUser = userInfo.getUsername();
+        this.currentUser = username;
         this.muc02Signals = muc02Signals;
         this.userSessionRegistry = userSessionRegistry;
 
@@ -147,7 +150,9 @@ public class MUC02View extends VerticalLayout {
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
-        muc02Signals.unregisterCursor(currentUser, sessionId);
+        if (sessionId != null) {
+            muc02Signals.unregisterCursor(currentUser, sessionId);
+        }
     }
 
     private void renderAllCursors(Div container) {
@@ -173,8 +178,12 @@ public class MUC02View extends VerticalLayout {
         var users = userSessionRegistry.getActiveUsersSignal().get();
         var displayNames = userSessionRegistry.getDisplayNamesSignal().get();
         java.util.Map<String, String> map = new java.util.HashMap<>();
+        if (displayNames == null) return map;
         for (int i = 0; i < users.size() && i < displayNames.size(); i++) {
-            map.put(users.get(i).get().getCompositeKey(), displayNames.get(i));
+            var userInfo = users.get(i).get();
+            if (userInfo != null) {
+                map.put(userInfo.getCompositeKey(), displayNames.get(i));
+            }
         }
         return map;
     }
@@ -230,9 +239,9 @@ public class MUC02View extends VerticalLayout {
                 .set("z-index", "1000");
 
         cursorIndicator.getStyle().bind("left", positionSignal
-                .map(pos -> pos != null ? pos.x() + "px" : "0px"));
+                .map(pos -> pos.x() + "px"));
         cursorIndicator.getStyle().bind("top", positionSignal
-                .map(pos -> pos != null ? pos.y() + "px" : "0px"));
+                .map(pos -> pos.y() + "px"));
 
         Div label = new Div();
         label.setText(displayName);

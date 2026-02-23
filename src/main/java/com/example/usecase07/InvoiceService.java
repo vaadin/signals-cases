@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,8 +28,15 @@ public class InvoiceService {
     private final List<InvoiceDetails> invoiceDetails = new ArrayList<>();
     {
         invoices.addAll(loadInitialInvoices());
-        invoices.forEach(inv -> invoiceDetails
-                .add(loadInitialInvoiceDetails(inv.getId())));
+        invoices.forEach(inv -> {
+            String id = inv.getId();
+            if (id != null) {
+                InvoiceDetails details = loadInitialInvoiceDetails(id);
+                if (details != null) {
+                    invoiceDetails.add(details);
+                }
+            }
+        });
     }
 
     private List<Invoice> loadInitialInvoices() {
@@ -46,7 +54,7 @@ public class InvoiceService {
                         "Overdue"));
     }
 
-    private InvoiceDetails loadInitialInvoiceDetails(String invoiceId) {
+    private @Nullable InvoiceDetails loadInitialInvoiceDetails(String invoiceId) {
         Invoice invoice = invoices.stream()
                 .filter(inv -> invoiceId.equals(inv.getId())).findFirst()
                 .orElseThrow();
@@ -105,15 +113,20 @@ public class InvoiceService {
     public LineItem createNewEmptyLineItem(String invoiceId) {
         LineItem lineItem = new LineItem(lineItemIdCounter++, "", 0,
                 BigDecimal.ZERO, BigDecimal.ZERO);
-        invoiceDetails.stream().filter(
-                details -> details.getInvoice().getId().equals(invoiceId))
-                .findFirst().ifPresent(details -> {
-                    List<LineItem> updatedLineItems = new ArrayList<>(
-                            details.getLineItems());
-                    updatedLineItems.add(lineItem);
-                    details.setLineItems(updatedLineItems);
-                    updateInvoiceTotal(details.getInvoice());
-                });
+        invoiceDetails.stream().filter(details -> {
+            Invoice inv = details.getInvoice();
+            return inv != null && invoiceId.equals(inv.getId());
+        }).findFirst().ifPresent(details -> {
+            List<LineItem> lineItems = details.getLineItems();
+            List<LineItem> updatedLineItems = new ArrayList<>(
+                    lineItems != null ? lineItems : List.of());
+            updatedLineItems.add(lineItem);
+            details.setLineItems(updatedLineItems);
+            Invoice inv = details.getInvoice();
+            if (inv != null) {
+                updateInvoiceTotal(inv);
+            }
+        });
         return lineItem;
     }
 
@@ -122,20 +135,24 @@ public class InvoiceService {
     }
 
     public InvoiceDetails fetchInvoiceDetails(String invoiceId) {
-        return invoiceDetails.stream().filter(
-                details -> details.getInvoice().getId().equals(invoiceId))
-                .findFirst().orElseThrow();
+        return invoiceDetails.stream().filter(details -> {
+            Invoice inv = details.getInvoice();
+            return inv != null && invoiceId.equals(inv.getId());
+        }).findFirst().orElseThrow();
     }
 
     public void updateInvoice(Invoice invoice) {
         invoices.replaceAll(inv -> {
-            if (inv.getId().equals(invoice.getId())) {
+            String invId = inv.getId();
+            if (invId != null && invId.equals(invoice.getId())) {
                 return invoice;
             }
             return inv;
         });
         invoiceDetails.replaceAll(details -> {
-            if (details.getInvoice().getId().equals(invoice.getId())) {
+            Invoice detInv = details.getInvoice();
+            String detInvId = detInv != null ? detInv.getId() : null;
+            if (detInvId != null && detInvId.equals(invoice.getId())) {
                 return new InvoiceDetails(invoice, details.getCustomerEmail(),
                         details.getCustomerAddress(), details.getLineItems(),
                         details.getPaymentStatus());
@@ -146,8 +163,11 @@ public class InvoiceService {
 
     public void updateDetails(InvoiceDetails details) {
         invoiceDetails.replaceAll(oldDetails -> {
-            if (oldDetails.getInvoice().getId()
-                    .equals(details.getInvoice().getId())) {
+            Invoice oldInv = oldDetails.getInvoice();
+            Invoice newInv = details.getInvoice();
+            String oldId = oldInv != null ? oldInv.getId() : null;
+            String newId = newInv != null ? newInv.getId() : null;
+            if (oldId != null && oldId.equals(newId)) {
                 return details;
             }
             return oldDetails;
@@ -156,12 +176,19 @@ public class InvoiceService {
 
     public InvoiceDetails updateLineItem(Invoice invoice, LineItem lineItem) {
         invoiceDetails.replaceAll(oldDetails -> {
-            if (oldDetails.getInvoice().getId().equals(invoice.getId())) {
+            Invoice oldInv = oldDetails.getInvoice();
+            String oldId = oldInv != null ? oldInv.getId() : null;
+            if (oldId != null && oldId.equals(invoice.getId())) {
+                List<LineItem> oldLineItems = oldDetails.getLineItems();
                 List<LineItem> lineItems = new ArrayList<>(
-                        oldDetails.getLineItems());
+                        oldLineItems != null ? oldLineItems : List.of());
                 lineItems.replaceAll(li -> {
                     if (li.getId() == lineItem.getId()) {
-                        lineItem.setTotal(lineItem.getUnitPrice().multiply(
+                        BigDecimal unitPrice = lineItem.getUnitPrice();
+                        if (unitPrice == null) {
+                            unitPrice = BigDecimal.ZERO;
+                        }
+                        lineItem.setTotal(unitPrice.multiply(
                                 BigDecimal.valueOf(lineItem.getQuantity())));
                         return lineItem;
                     }
@@ -176,15 +203,25 @@ public class InvoiceService {
         // recalculate invoice total based on Line items.
         updateInvoiceTotal(invoice);
 
-        return fetchInvoiceDetails(invoice.getId());
+        String invoiceId = invoice.getId();
+        if (invoiceId == null) {
+            invoiceId = "";
+        }
+        return fetchInvoiceDetails(invoiceId);
     }
 
     private void updateInvoiceTotal(Invoice invoice) {
         BigDecimal newTotal = invoiceDetails.stream()
-                .filter(details -> details.getInvoice().getId()
-                        .equals(invoice.getId()))
+                .filter(details -> {
+                    Invoice inv = details.getInvoice();
+                    return inv != null && invoice.getId() != null
+                            && invoice.getId().equals(inv.getId());
+                })
                 .findFirst().map(InvoiceDetails::getLineItems).orElse(List.of())
-                .stream().map(LineItem::getTotal)
+                .stream().map(li -> {
+                    BigDecimal total = li.getTotal();
+                    return total != null ? total : BigDecimal.ZERO;
+                })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         invoice.setTotal(newTotal);
         updateInvoice(invoice);
@@ -192,14 +229,19 @@ public class InvoiceService {
 
     public void removeLineItem(String id, LineItem lineItem) {
         InvoiceDetails details = fetchInvoiceDetails(id);
-        List<LineItem> lineItems = new ArrayList<>(details.getLineItems());
+        List<LineItem> existingItems = details.getLineItems();
+        List<LineItem> lineItems = new ArrayList<>(
+                existingItems != null ? existingItems : List.of());
         lineItems.removeIf(li -> li.getId() == lineItem.getId());
         details.setLineItems(Collections.unmodifiableList(lineItems));
-        updateInvoiceTotal(details.getInvoice());
+        Invoice inv = details.getInvoice();
+        if (inv != null) {
+            updateInvoiceTotal(inv);
+        }
     }
 
     public Invoice fetchInvoice(String id) {
-        return invoices.stream().filter(inv -> inv.getId().equals(id))
+        return invoices.stream().filter(inv -> id.equals(inv.getId()))
                 .findFirst().orElseThrow();
     }
 }

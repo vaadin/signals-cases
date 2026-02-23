@@ -1,6 +1,7 @@
 package com.example.views;
 
 import com.example.signals.UserSessionRegistry;
+import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.html.Div;
@@ -69,7 +70,7 @@ public class ActiveUsersDisplay extends Div {
      *            if true, shows a colored left border
      */
     public ActiveUsersDisplay(UserSessionRegistry userSessionRegistry,
-            String labelText, String viewRoute, boolean showAccentBorder) {
+            String labelText, @Nullable String viewRoute, boolean showAccentBorder) {
         // Container styling
         getStyle().set("background-color", "#fff3e0").set("padding", "0.75em")
                 .set("border-radius", "4px").set("margin-bottom", "1em")
@@ -101,8 +102,7 @@ public class ActiveUsersDisplay extends Div {
             var users = userSessionRegistry.getActiveUsersSignal().get();
             if (viewRoute != null) {
                 return users.stream()
-                        .filter(userSignal -> viewRoute
-                                .equals(userSignal.get().currentView()))
+                        .filter(userSignal -> viewRoute.equals(userSignal.get().currentView()))
                         .toList();
             }
             return users;

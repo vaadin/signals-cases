@@ -49,8 +49,8 @@ public class UseCase08View extends VerticalLayout {
         var lastNameSignal = new ValueSignal<>("");
         var emailSignal = new ValueSignal<>("");
         var companyNameSignal = new ValueSignal<>("");
-        var companySizeSignal = new ValueSignal<>((String) null);
-        var industrySignal = new ValueSignal<>((String) null);
+        var companySizeSignal = new ValueSignal<>("");
+        var industrySignal = new ValueSignal<>("");
         var planSignal = new ValueSignal<>(Plan.STARTER);
 
         // Step 1: Personal Info
@@ -107,10 +107,12 @@ public class UseCase08View extends VerticalLayout {
         planSelect.setRequired(true);
 
         Span planDescription = new Span();
-        planDescription.bindText(planSignal.map(plan -> switch (plan) {
-        case STARTER -> "Perfect for small teams - $29/month";
-        case PROFESSIONAL -> "For growing businesses - $99/month";
-        case ENTERPRISE -> "Custom solutions - Contact sales";
+        planDescription.bindText(planSignal.map(plan -> {
+            return switch (plan) {
+            case STARTER -> "Perfect for small teams - $29/month";
+            case PROFESSIONAL -> "For growing businesses - $99/month";
+            case ENTERPRISE -> "Custom solutions - Contact sales";
+            };
         }));
 
         step3Layout.add(planSelect, planDescription);
@@ -134,26 +136,32 @@ public class UseCase08View extends VerticalLayout {
                 currentStepSignal.map(step -> step == Step.REVIEW));
 
         Signal<Boolean> step1ValidSignal = Signal.computed(() -> {
-            boolean firstNameValid = firstNameSignal
+            Boolean firstNameValid = firstNameSignal
                     .map(isValid(firstNameField)).get();
-            boolean lastNameValid = lastNameSignal.map(isValid(lastNameField))
+            Boolean lastNameValid = lastNameSignal.map(isValid(lastNameField))
                     .get();
-            boolean emailValid = emailSignal.map(isValid(emailField)).get();
-            return firstNameValid && lastNameValid && emailValid;
+            Boolean emailValid = emailSignal.map(isValid(emailField)).get();
+            return firstNameValid
+                    && lastNameValid
+                    && emailValid;
         });
 
         Signal<Boolean> step2ValidSignal = Signal.computed(() -> {
-            boolean companyNameValid = companyNameSignal
+            Boolean companyNameValid = companyNameSignal
                     .map(isValid(companyNameField)).get();
-            boolean companySizeValid = companySizeSignal
+            Boolean companySizeValid = companySizeSignal
                     .map(isValid(companySizeSelect)).get();
-            boolean industryValid = industrySignal.map(isValid(industrySelect))
+            Boolean industryValid = industrySignal.map(isValid(industrySelect))
                     .get();
-            return companyNameValid && companySizeValid && industryValid;
+            return companyNameValid
+                    && companySizeValid
+                    && industryValid;
         });
 
-        Signal<Boolean> step3ValidSignal = Signal
-                .computed(() -> planSignal.map(isValid(planSelect)).get());
+        Signal<Boolean> step3ValidSignal = Signal.computed(() -> {
+            Boolean valid = planSignal.map(isValid(planSelect)).get();
+            return valid;
+        });
 
         // Navigation buttons
         HorizontalLayout navigationLayout = new HorizontalLayout();
@@ -164,6 +172,7 @@ public class UseCase08View extends VerticalLayout {
             case COMPANY_INFO -> currentStepSignal.set(Step.PERSONAL_INFO);
             case PLAN_SELECTION -> currentStepSignal.set(Step.COMPANY_INFO);
             case REVIEW -> currentStepSignal.set(Step.PLAN_SELECTION);
+            default -> { }
             }
         });
         previousButton.bindVisible(
@@ -175,6 +184,7 @@ public class UseCase08View extends VerticalLayout {
             case PERSONAL_INFO -> currentStepSignal.set(Step.COMPANY_INFO);
             case COMPANY_INFO -> currentStepSignal.set(Step.PLAN_SELECTION);
             case PLAN_SELECTION -> currentStepSignal.set(Step.REVIEW);
+            default -> { }
             }
         });
         nextButton.bindVisible(
