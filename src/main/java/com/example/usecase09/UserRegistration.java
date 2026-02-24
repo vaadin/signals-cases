@@ -1,22 +1,19 @@
 package com.example.usecase09;
 
-import org.jspecify.annotations.Nullable;
-
 public class UserRegistration {
 
-    private @Nullable String username;
-    private @Nullable String email;
-    private @Nullable String password;
-    private @Nullable String confirmPassword;
-    private @Nullable AccountType accountType;
-    private @Nullable Integer age;
+    private String username = "";
+    private String email = "";
+    private String password = "";
+    private String confirmPassword = "";
+    private AccountType accountType = AccountType.PERSONAL;
+    private int age;
 
     public UserRegistration() {
     }
 
-    public UserRegistration(@Nullable String username, @Nullable String email,
-            @Nullable String password, @Nullable String confirmPassword,
-            @Nullable AccountType accountType, @Nullable Integer age) {
+    public UserRegistration(String username, String email, String password,
+            String confirmPassword, AccountType accountType, int age) {
         this.username = username;
         this.email = email;
         this.password = password;
@@ -25,51 +22,51 @@ public class UserRegistration {
         this.age = age;
     }
 
-    public @Nullable String getUsername() {
+    public String getUsername() {
         return username;
     }
 
-    public @Nullable String getEmail() {
+    public String getEmail() {
         return email;
     }
 
-    public @Nullable String getPassword() {
+    public String getPassword() {
         return password;
     }
 
-    public @Nullable String getConfirmPassword() {
+    public String getConfirmPassword() {
         return confirmPassword;
     }
 
-    public @Nullable AccountType getAccountType() {
+    public AccountType getAccountType() {
         return accountType;
     }
 
-    public @Nullable Integer getAge() {
+    public int getAge() {
         return age;
     }
 
-    public void setUsername(@Nullable String username) {
+    public void setUsername(String username) {
         this.username = username;
     }
 
-    public void setEmail(@Nullable String email) {
+    public void setEmail(String email) {
         this.email = email;
     }
 
-    public void setPassword(@Nullable String password) {
+    public void setPassword(String password) {
         this.password = password;
     }
 
-    public void setConfirmPassword(@Nullable String confirmPassword) {
+    public void setConfirmPassword(String confirmPassword) {
         this.confirmPassword = confirmPassword;
     }
 
-    public void setAccountType(@Nullable AccountType accountType) {
+    public void setAccountType(AccountType accountType) {
         this.accountType = accountType;
     }
 
-    public void setAge(@Nullable Integer age) {
+    public void setAge(int age) {
         this.age = age;
     }
 }
