@@ -68,8 +68,8 @@ public class UseCase03View extends VerticalLayout {
     private final ValueSignal<Integer> selectedShapeSignal = new ValueSignal<>(
             0);
 
-    private Element rectElement;
-    private Element starElement;
+    private Element rectElement = new Element("rect");
+    private Element starElement = new Element("polygon");
 
     public UseCase03View() {
         setSpacing(true);

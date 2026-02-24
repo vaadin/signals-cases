@@ -90,7 +90,8 @@ public class InvoiceService {
                                 new BigDecimal("100.75"),
                                 new BigDecimal("100.75"))),
                 "OVERDUE - Payment was due 2025-01-31");
-        default -> null;
+        default -> throw new IllegalArgumentException(
+                "Unknown invoice ID: " + invoiceId);
         };
     }
 

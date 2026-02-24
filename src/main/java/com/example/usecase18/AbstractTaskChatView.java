@@ -9,6 +9,8 @@ import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
 import com.example.views.MainLayout;
 
+import org.jspecify.annotations.Nullable;
+
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -45,7 +47,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
     protected final UserSessionRegistry userSessionRegistry;
 
     // Session ID for display name lookup
-    private String sessionId;
+    private @Nullable String sessionId;
 
     // Computed signals for statistics
     private Signal<Integer> totalTasksSignal;
@@ -56,8 +58,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
     protected final TaskLLMService taskLLMService;
 
     // UI Components
-    private MessageList messageList;
-    private MessageInput messageInput;
+    private MessageList messageList = new MessageList();
+    private MessageInput messageInput = new MessageInput();
 
     // Signals for UI state
     private final ValueSignal<Boolean> messageInputEnabledSignal = new ValueSignal<>(
@@ -113,6 +115,9 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         }
 
         String username = userInfo.getUsername();
+        if (username == null) {
+            return "Anonymous";
+        }
         if (sessionId == null) {
             return username;
         }

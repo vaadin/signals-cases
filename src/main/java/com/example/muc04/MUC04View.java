@@ -8,6 +8,8 @@ import com.example.signals.UserSessionRegistry;
 import com.example.views.ActiveUsersDisplay;
 import com.example.views.MainLayout;
 
+import org.jspecify.annotations.Nullable;
+
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
@@ -44,7 +46,7 @@ public class MUC04View extends VerticalLayout {
     private final String currentUser;
     private final MUC04Signals muc04Signals;
     private final UserSessionRegistry userSessionRegistry;
-    private String sessionId;
+    private @Nullable String sessionId;
     private final java.util.IdentityHashMap<com.vaadin.flow.signals.shared.SharedValueSignal<MUC04Signals.FieldLock>, String> lockKeyMap = new java.util.IdentityHashMap<>();
 
     public MUC04View(CurrentUserSignal currentUserSignal,
@@ -56,7 +58,8 @@ public class MUC04View extends VerticalLayout {
             throw new IllegalStateException(
                     "User must be authenticated to access this view");
         }
-        this.currentUser = userInfo.getUsername();
+        this.currentUser = java.util.Objects.requireNonNull(
+                userInfo.getUsername());
         this.muc04Signals = muc04Signals;
         this.userSessionRegistry = userSessionRegistry;
 

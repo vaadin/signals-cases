@@ -5,6 +5,8 @@ import jakarta.annotation.security.PermitAll;
 import java.util.Locale;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import com.example.preferences.UserPreferences;
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
@@ -44,8 +46,8 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
     private final CurrentUserSignal currentUserSignal;
     private final UserSessionRegistry userSessionRegistry;
     private final UserPreferences userPreferences;
-    private String currentUser;
-    private String sessionId;
+    private @Nullable String currentUser;
+    private @Nullable String sessionId;
     private TextField nicknameField;
     private Anchor sourceCodeLink;
 
@@ -159,7 +161,9 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         Avatar userAvatar = new Avatar();
         userAvatar.getElement().bindProperty("name", currentUserSignal
                 .getUserSignal()
-                .map(user -> user.isAuthenticated() ? user.getUsername() : ""),
+                .map(user -> user.isAuthenticated()
+                        && user.getUsername() != null ? user.getUsername()
+                                : ""),
                 null);
         userAvatar.getElement().bindProperty("img",
                 currentUserSignal.getUserSignal()
@@ -171,13 +175,16 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
                 .map(user -> user.isAuthenticated()));
 
         Span userName = new Span(currentUserSignal.getUserSignal()
-                .map(user -> user.isAuthenticated() ? user.getUsername() : ""));
+                .map(user -> user.isAuthenticated()
+                        && user.getUsername() != null ? user.getUsername()
+                                : ""));
         userName.getStyle().set("color", "var(--lumo-secondary-text-color)")
                 .set("font-size", "var(--lumo-font-size-s)");
 
         userDisplay.add(userAvatar, userName);
 
         // Logout button
+        @SuppressWarnings("NullAway")
         Button logoutButton = new Button("Logout", event -> {
             SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
             logoutHandler.logout(
@@ -330,7 +337,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
      * Get the profile picture path for a username. Images are stored in
      * src/main/resources/META-INF/resources/profile-pictures/
      */
-    public static String getProfilePicturePath(String username) {
+    public static String getProfilePicturePath(@Nullable String username) {
         if (username == null) {
             return "";
         }

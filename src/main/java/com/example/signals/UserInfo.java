@@ -1,15 +1,18 @@
 package com.example.signals;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Information about an active user session.
  */
-public record UserInfo(String username, String sessionId, String currentView,
-        String nickname, long sessionStartTime, boolean isTabActive,
+public record UserInfo(String username, String sessionId,
+        @Nullable String currentView, @Nullable String nickname,
+        long sessionStartTime, boolean isTabActive,
         long lastInteractionTime) {
 
     // Constructor with current view and nickname (legacy compatibility)
-    public UserInfo(String username, String sessionId, String currentView,
-            String nickname) {
+    public UserInfo(String username, String sessionId,
+            @Nullable String currentView, @Nullable String nickname) {
         this(username, sessionId, currentView, nickname,
                 System.currentTimeMillis(), true, System.currentTimeMillis());
     }
@@ -26,13 +29,13 @@ public record UserInfo(String username, String sessionId, String currentView,
     }
 
     // Helper to create updated instance with new view
-    public UserInfo withCurrentView(String newView) {
+    public UserInfo withCurrentView(@Nullable String newView) {
         return new UserInfo(username, sessionId, newView, nickname,
                 sessionStartTime, isTabActive, lastInteractionTime);
     }
 
     // Helper to create updated instance with new nickname
-    public UserInfo withNickname(String newNickname) {
+    public UserInfo withNickname(@Nullable String newNickname) {
         return new UserInfo(username, sessionId, currentView, newNickname,
                 sessionStartTime, isTabActive, lastInteractionTime);
     }

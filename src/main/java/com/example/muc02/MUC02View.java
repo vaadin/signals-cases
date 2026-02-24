@@ -8,6 +8,8 @@ import com.example.signals.UserSessionRegistry;
 import com.example.views.ActiveUsersDisplay;
 import com.example.views.MainLayout;
 
+import org.jspecify.annotations.Nullable;
+
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.html.Div;
@@ -41,10 +43,10 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
 public class MUC02View extends VerticalLayout {
 
     private final String currentUser;
-    private SharedValueSignal<MUC02Signals.CursorPosition> myCursorSignal;
+    private @Nullable SharedValueSignal<MUC02Signals.CursorPosition> myCursorSignal;
     private final MUC02Signals muc02Signals;
     private final UserSessionRegistry userSessionRegistry;
-    private String sessionId;
+    private @Nullable String sessionId;
     private final java.util.IdentityHashMap<SharedValueSignal<MUC02Signals.CursorPosition>, String> cursorKeyMap = new java.util.IdentityHashMap<>();
 
     public MUC02View(CurrentUserSignal currentUserSignal,
@@ -56,7 +58,8 @@ public class MUC02View extends VerticalLayout {
             throw new IllegalStateException(
                     "User must be authenticated to access this view");
         }
-        this.currentUser = userInfo.getUsername();
+        this.currentUser = java.util.Objects.requireNonNull(
+                userInfo.getUsername());
         this.muc02Signals = muc02Signals;
         this.userSessionRegistry = userSessionRegistry;
 
@@ -147,7 +150,9 @@ public class MUC02View extends VerticalLayout {
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
-        muc02Signals.unregisterCursor(currentUser, sessionId);
+        if (sessionId != null) {
+            muc02Signals.unregisterCursor(currentUser, sessionId);
+        }
     }
 
     private void renderAllCursors(Div container) {

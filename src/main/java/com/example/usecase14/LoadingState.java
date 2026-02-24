@@ -1,12 +1,14 @@
 package com.example.usecase14;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Represents the state of an async operation
  */
 public class LoadingState<T> {
     private State state;
-    private T data;
-    private String error;
+    private @Nullable T data;
+    private @Nullable String error;
 
     public enum State {
         IDLE, LOADING, SUCCESS, ERROR
@@ -20,7 +22,7 @@ public class LoadingState<T> {
     }
 
     // Constructor for internal use
-    private LoadingState(State state, T data, String error) {
+    private LoadingState(State state, @Nullable T data, @Nullable String error) {
         this.state = state;
         this.data = data;
         this.error = error;
@@ -30,11 +32,11 @@ public class LoadingState<T> {
         this.state = state;
     }
 
-    public void setData(T data) {
+    public void setData(@Nullable T data) {
         this.data = data;
     }
 
-    public void setError(String error) {
+    public void setError(@Nullable String error) {
         this.error = error;
     }
 
@@ -74,11 +76,11 @@ public class LoadingState<T> {
         return state == State.ERROR;
     }
 
-    public T getData() {
+    public @Nullable T getData() {
         return data;
     }
 
-    public String getError() {
+    public @Nullable String getError() {
         return error;
     }
 }
