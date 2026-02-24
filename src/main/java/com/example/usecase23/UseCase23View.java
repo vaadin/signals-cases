@@ -70,7 +70,7 @@ public class UseCase23View extends Main {
     private final ListSignal<ServiceHealth> serviceHealthSignal = new ListSignal<>();
     private final ListSignal<Number> responseSignal = new ListSignal<>();
 
-    private String taskId;
+    private @Nullable String taskId;
 
     public UseCase23View(SchedulerService schedulerService) {
         addClassName("dashboard-view");

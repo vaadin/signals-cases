@@ -340,8 +340,12 @@ public class UseCase07View extends VerticalLayout {
     }
 
     private void updateInvoiceListSignalItem(Invoice invoice) {
+        String invoiceId = invoice.getId();
+        if (invoiceId == null) {
+            return;
+        }
         invoiceListSignal.peek().stream()
-                .filter(signal -> signal.peek().getId().equals(invoice.getId()))
+                .filter(signal -> invoiceId.equals(signal.peek().getId()))
                 .findFirst().ifPresent(signal -> {
                     signal.modify(inv -> {
                         inv.setCustomerName(invoice.getCustomerName());
@@ -378,11 +382,15 @@ public class UseCase07View extends VerticalLayout {
     }
 
     private void removeLineItem(InvoiceDetails value, LineItem lineItem) {
-        invoiceService.removeLineItem(value.getInvoice().getId(), lineItem);
+        Invoice invoice = value.getInvoice();
+        String invoiceId = invoice != null ? invoice.getId() : null;
+        if (invoiceId == null) {
+            return;
+        }
+        invoiceService.removeLineItem(invoiceId, lineItem);
         lineItemsSignal.peek().stream().filter(v -> v.peek().equals(lineItem))
                 .findFirst().ifPresent(lineItemsSignal::remove);
         // need to also update the invoice total in the invoice list
-        updateInvoiceListSignalItem(
-                invoiceService.fetchInvoice(value.getInvoice().getId()));
+        updateInvoiceListSignalItem(invoiceService.fetchInvoice(invoiceId));
     }
 }
