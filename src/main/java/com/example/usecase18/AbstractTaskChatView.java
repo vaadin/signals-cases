@@ -115,9 +115,6 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         }
 
         String username = userInfo.getUsername();
-        if (username == null) {
-            return "Anonymous";
-        }
         if (sessionId == null) {
             return username;
         }

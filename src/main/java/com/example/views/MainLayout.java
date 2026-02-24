@@ -161,9 +161,8 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         Avatar userAvatar = new Avatar();
         userAvatar.getElement().bindProperty("name", currentUserSignal
                 .getUserSignal()
-                .map(user -> user.isAuthenticated()
-                        && user.getUsername() != null ? user.getUsername()
-                                : ""),
+                .map(user -> user.isAuthenticated() ? user.getUsername()
+                        : ""),
                 null);
         userAvatar.getElement().bindProperty("img",
                 currentUserSignal.getUserSignal()
@@ -175,9 +174,8 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
                 .map(user -> user.isAuthenticated()));
 
         Span userName = new Span(currentUserSignal.getUserSignal()
-                .map(user -> user.isAuthenticated()
-                        && user.getUsername() != null ? user.getUsername()
-                                : ""));
+                .map(user -> user.isAuthenticated() ? user.getUsername()
+                        : ""));
         userName.getStyle().set("color", "var(--lumo-secondary-text-color)")
                 .set("font-size", "var(--lumo-font-size-s)");
 

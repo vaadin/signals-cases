@@ -58,8 +58,7 @@ public class MUC04View extends VerticalLayout {
             throw new IllegalStateException(
                     "User must be authenticated to access this view");
         }
-        this.currentUser = java.util.Objects.requireNonNull(
-                userInfo.getUsername());
+        this.currentUser = userInfo.getUsername();
         this.muc04Signals = muc04Signals;
         this.userSessionRegistry = userSessionRegistry;
 
