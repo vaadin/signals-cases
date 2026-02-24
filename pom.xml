@@ -8,11 +8,9 @@
     <packaging>jar</packaging>
     
     <properties>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <vaadin.version>25.1-SNAPSHOT</vaadin.version>
         <spotless.plugin.version>3.1.0</spotless.plugin.version>
-        <error-prone.version>2.47.0</error-prone.version>
-        <nullaway.version>0.13.1</nullaway.version>
         <jspecify.version>1.0.0</jspecify.version>
     </properties>
     
@@ -82,27 +80,20 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <showWarnings>true</showWarnings>
-                    <compilerArgs>
-                        <arg>-XDcompilePolicy=simple</arg>
-                        <arg>--should-stop=ifError=FLOW</arg>
-                        <arg>-XDaddTypeAnnotationsToSymbol=true</arg>
-                        <arg>-Xplugin:ErrorProne -XepDisableAllChecks -Xep:NullAway:ERROR -XepOpt:NullAway:JSpecifyMode=true -XepOpt:NullAway:AnnotatedPackages=com.example</arg>
-                    </compilerArgs>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>com.google.errorprone</groupId>
-                            <artifactId>error_prone_core</artifactId>
-                            <version>${error-prone.version}</version>
-                        </path>
-                        <path>
-                            <groupId>com.uber.nullaway</groupId>
-                            <artifactId>nullaway</artifactId>
-                            <version>${nullaway.version}</version>
-                        </path>
-                    </annotationProcessorPaths>
-                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>am.ik.maven</groupId>
+                <artifactId>nullability-maven-plugin</artifactId>
+                <version>0.3.0</version>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>configure</goal>
+                            <goal>generate-package-info</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
