@@ -26,7 +26,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.impl.UsageTracker;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
@@ -244,16 +243,18 @@ public class UseCase16View extends VerticalLayout
     }
 
     private void setupSignalSubscriptions() {
-        // When signals change, update URL (except during initialization)
         Signal.effect(this, () -> {
-            // Access signals to track them
-            searchQuerySignal.get();
-            categorySignal.get();
+            String query = searchQuerySignal.get();
+            String category = categorySignal.get();
 
             if (!isInitializing) {
-                updateUrl();
+                updateUrl(query, category);
             }
-            updateFilteredResults();
+
+            filteredArticlesSignal.clear();
+            ALL_ARTICLES.stream()
+                    .filter(article -> article.matches(query, category))
+                    .forEach(filteredArticlesSignal::insertLast);
         });
     }
 
@@ -283,16 +284,9 @@ public class UseCase16View extends VerticalLayout
         }
 
         isInitializing = false;
-
-        // Initial filter
-        updateFilteredResults();
     }
 
-    private void updateUrl() {
-        String query = searchQuerySignal.get();
-        String category = categorySignal.get();
-
-        // Build query parameters
+    private void updateUrl(String query, String category) {
         StringBuilder urlParams = new StringBuilder();
         if (!query.isEmpty()) {
             urlParams.append("q=").append(query);
@@ -307,18 +301,6 @@ public class UseCase16View extends VerticalLayout
         String url = "use-case-16"
                 + (!urlParams.isEmpty() ? "?" + urlParams : "");
         UI.getCurrent().getPage().getHistory().replaceState(null, url);
-    }
-
-    private void updateFilteredResults() {
-        String query = UsageTracker.isActive() ? searchQuerySignal.get()
-                : searchQuerySignal.peek();
-        String category = UsageTracker.isActive() ? categorySignal.get()
-                : categorySignal.peek();
-
-        filteredArticlesSignal.clear();
-        ALL_ARTICLES.stream()
-                .filter(article -> article.matches(query, category))
-                .forEach(filteredArticlesSignal::insertLast);
     }
 
     private String getBaseUrl() {
