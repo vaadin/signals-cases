@@ -65,6 +65,7 @@ public class AnalyticsService {
                 0, 0.0, 0);
 
         public AnalyticsReport() {
+            this.period = "";
         }
 
         public AnalyticsReport(String period, int totalRevenue, int totalOrders,

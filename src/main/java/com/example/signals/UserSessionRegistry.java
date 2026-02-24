@@ -1,5 +1,6 @@
 package com.example.signals;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import com.vaadin.flow.signals.Signal;
@@ -46,7 +47,7 @@ public class UserSessionRegistry {
                             (a, b) -> a + 1);
 
                     String displayName;
-                    if (sessionCounts.get(username) > 1) {
+                    if (sessionCounts.getOrDefault(username, 0) > 1) {
                         displayName = username + " #" + sessionNum;
                     } else {
                         displayName = username;
@@ -83,7 +84,7 @@ public class UserSessionRegistry {
      * Register a user as active with a specific session ID and initial route.
      */
     public void registerUser(String username, String sessionId,
-            String initialRoute) {
+            @Nullable String initialRoute) {
         if (username == null || sessionId == null) {
             throw new IllegalArgumentException(
                     "Username and sessionId cannot be null");
@@ -158,7 +159,7 @@ public class UserSessionRegistry {
      * Set a custom nickname for a user session.
      */
     public void setNickname(String username, String sessionId,
-            String nickname) {
+            @Nullable String nickname) {
         String compositeKey = username + ":" + sessionId;
         String trimmedNickname = (nickname == null || nickname.trim().isEmpty())
                 ? null
@@ -176,7 +177,7 @@ public class UserSessionRegistry {
     /**
      * Get the nickname for a user session, or null if not set.
      */
-    public String getNickname(String username, String sessionId) {
+    public @Nullable String getNickname(String username, String sessionId) {
         String compositeKey = username + ":" + sessionId;
         return activeUsersSignal.peek().stream()
                 .filter(userSignal -> compositeKey

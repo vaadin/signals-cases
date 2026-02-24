@@ -10,6 +10,8 @@ import com.example.signals.UserSessionRegistry;
 import com.example.views.ActiveUsersDisplay;
 import com.example.views.MainLayout;
 
+import org.jspecify.annotations.Nullable;
+
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.button.Button;
@@ -45,7 +47,7 @@ public class MUC03View extends VerticalLayout {
     private final MUC03Signals muc03Signals;
     private final UserSessionRegistry userSessionRegistry;
     private final Random random = new Random();
-    private String sessionId;
+    private @Nullable String sessionId;
     private final java.util.IdentityHashMap<com.vaadin.flow.signals.shared.SharedValueSignal<Integer>, String> scoreKeyMap = new java.util.IdentityHashMap<>();
 
     public MUC03View(CurrentUserSignal currentUserSignal,
@@ -177,6 +179,9 @@ public class MUC03View extends VerticalLayout {
     }
 
     private void handleButtonClick() {
+        if (sessionId == null) {
+            return;
+        }
         // Atomic operation: Only first click counts (handled by
         // CollaborativeSignals)
         boolean moreClicksRemain = muc03Signals.awardPoint(currentUser,
@@ -217,7 +222,9 @@ public class MUC03View extends VerticalLayout {
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
-        muc03Signals.unregisterScore(currentUser, sessionId);
+        if (sessionId != null) {
+            muc03Signals.unregisterScore(currentUser, sessionId);
+        }
     }
 
     private HorizontalLayout createLeaderboardItem(

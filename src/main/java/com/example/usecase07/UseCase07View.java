@@ -241,16 +241,20 @@ public class UseCase07View extends VerticalLayout {
                 lineItemsSignal.peek().stream().filter(
                         signal -> signal.peek().getId() == lineItem.getId())
                         .findFirst().ifPresent(signal -> {
-                            signal.modify(target -> {
-                                LineItem source = details
-                                        .getLineItemById(lineItem.getId());
-                                target.setDescription(source.getDescription());
-                                target.setQuantity(source.getQuantity());
-                                target.setUnitPrice(source.getUnitPrice());
-                                target.setTotal(source.getTotal());
-                            });
-                            // keep editor open after update
-                            lineItemsGrid.getEditor().editItem(signal.peek());
+                            LineItem source = details
+                                    .getLineItemById(lineItem.getId());
+                            if (source != null) {
+                                signal.modify(target -> {
+                                    target.setDescription(
+                                            source.getDescription());
+                                    target.setQuantity(source.getQuantity());
+                                    target.setUnitPrice(source.getUnitPrice());
+                                    target.setTotal(source.getTotal());
+                                });
+                                // keep editor open after update
+                                lineItemsGrid.getEditor()
+                                        .editItem(signal.peek());
+                            }
                         });
             } else if (status.hasErrors()) {
                 Notification.show("Line item has validation errors.");

@@ -2,12 +2,14 @@ package com.example.usecase07;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 public class InvoiceDetails {
-    private Invoice invoice;
-    private String customerEmail;
-    private String customerAddress;
-    private List<LineItem> lineItems;
-    private String paymentStatus;
+    private Invoice invoice = new Invoice();
+    private String customerEmail = "";
+    private String customerAddress = "";
+    private List<LineItem> lineItems = List.of();
+    private String paymentStatus = "";
 
     public InvoiceDetails() {
     }
@@ -62,7 +64,7 @@ public class InvoiceDetails {
         this.paymentStatus = paymentStatus;
     }
 
-    public LineItem getLineItemById(int id) {
+    public @Nullable LineItem getLineItemById(int id) {
         return lineItems.stream().filter(li -> li.getId() == id).findFirst()
                 .orElse(null);
     }

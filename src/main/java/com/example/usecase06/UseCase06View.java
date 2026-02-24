@@ -8,6 +8,8 @@ import java.util.List;
 
 import com.example.views.MainLayout;
 
+import org.jspecify.annotations.Nullable;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
@@ -294,7 +296,7 @@ public class UseCase06View extends VerticalLayout {
                                 .insertLast(new CartItem(product, 1)));
     }
 
-    private DiscountCode validateDiscountCode(String code) {
+    private @Nullable DiscountCode validateDiscountCode(String code) {
         // Stub implementation
         return switch (code.toUpperCase()) {
         case "SAVE10" -> new DiscountCode("SAVE10", new BigDecimal("10"));

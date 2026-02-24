@@ -31,7 +31,7 @@ public class CurrentUserSignal {
         }
 
         public static UserInfo anonymous() {
-            return new UserInfo(null, Set.of(), false);
+            return new UserInfo("", Set.of(), false);
         }
 
         public static UserInfo authenticated(String username,

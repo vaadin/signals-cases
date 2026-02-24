@@ -49,8 +49,8 @@ public class UseCase08View extends VerticalLayout {
         var lastNameSignal = new ValueSignal<>("");
         var emailSignal = new ValueSignal<>("");
         var companyNameSignal = new ValueSignal<>("");
-        var companySizeSignal = new ValueSignal<>((String) null);
-        var industrySignal = new ValueSignal<>((String) null);
+        var companySizeSignal = new ValueSignal<>("");
+        var industrySignal = new ValueSignal<>("");
         var planSignal = new ValueSignal<>(Plan.STARTER);
 
         // Step 1: Personal Info

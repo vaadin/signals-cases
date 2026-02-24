@@ -2,18 +2,18 @@ package com.example.usecase09;
 
 public class UserRegistration {
 
-    private String username;
-    private String email;
-    private String password;
-    private String confirmPassword;
-    private AccountType accountType;
-    private Integer age;
+    private String username = "";
+    private String email = "";
+    private String password = "";
+    private String confirmPassword = "";
+    private AccountType accountType = AccountType.PERSONAL;
+    private int age;
 
     public UserRegistration() {
     }
 
     public UserRegistration(String username, String email, String password,
-            String confirmPassword, AccountType accountType, Integer age) {
+            String confirmPassword, AccountType accountType, int age) {
         this.username = username;
         this.email = email;
         this.password = password;
@@ -42,7 +42,7 @@ public class UserRegistration {
         return accountType;
     }
 
-    public Integer getAge() {
+    public int getAge() {
         return age;
     }
 
@@ -66,7 +66,7 @@ public class UserRegistration {
         this.accountType = accountType;
     }
 
-    public void setAge(Integer age) {
+    public void setAge(int age) {
         this.age = age;
     }
 }

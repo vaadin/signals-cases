@@ -5,11 +5,11 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 public class Invoice {
-    private String id;
-    private String customerName;
-    private LocalDate dueDate;
-    private BigDecimal total;
-    private String status;
+    private String id = "";
+    private String customerName = "";
+    private LocalDate dueDate = LocalDate.now();
+    private BigDecimal total = BigDecimal.ZERO;
+    private String status = "";
 
     public Invoice() {
     }

@@ -5,10 +5,10 @@ import java.util.Objects;
 
 public class LineItem {
     private int id;
-    private String description;
+    private String description = "";
     private int quantity;
-    private BigDecimal unitPrice;
-    private BigDecimal total;
+    private BigDecimal unitPrice = BigDecimal.ZERO;
+    private BigDecimal total = BigDecimal.ZERO;
 
     public LineItem() {
     }

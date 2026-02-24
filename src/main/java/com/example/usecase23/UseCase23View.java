@@ -45,6 +45,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility.FontSize;
 import com.vaadin.flow.theme.lumo.LumoUtility.FontWeight;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
+import org.jspecify.annotations.Nullable;
 
 @PageTitle("Use Case 23: Real-time Dashboard")
 @Route(value = "use-case-23", layout = MainLayout.class)
@@ -69,7 +70,7 @@ public class UseCase23View extends Main {
     private final ListSignal<ServiceHealth> serviceHealthSignal = new ListSignal<>();
     private final ListSignal<Number> responseSignal = new ListSignal<>();
 
-    private String taskId;
+    private @Nullable String taskId;
 
     public UseCase23View(SchedulerService schedulerService) {
         addClassName("dashboard-view");
