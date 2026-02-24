@@ -410,15 +410,13 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
                         item.setUserColorIndex(0);
                         String displayName = getCurrentDisplayName();
                         String username = userInfo.getUsername();
-                        if (displayName != null
-                                && !displayName.isBlank()) {
+                        if (displayName != null && !displayName.isBlank()) {
                             item.setUserName(displayName);
                         }
                         if (username != null && !username.isBlank()) {
                             String userImage = MainLayout
                                     .getProfilePicturePath(username);
-                            if (userImage != null
-                                    && !userImage.isBlank()) {
+                            if (userImage != null && !userImage.isBlank()) {
                                 item.setUserImage(userImage);
                             }
                         }

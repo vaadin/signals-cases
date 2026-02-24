@@ -1,7 +1,15 @@
 package com.example.usecase23;
 
+import jakarta.annotation.security.PermitAll;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+
 import com.example.usecase23.ServiceHealth.Status;
 import com.example.views.MainLayout;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.board.Board;
@@ -37,11 +45,6 @@ import com.vaadin.flow.theme.lumo.LumoUtility.FontSize;
 import com.vaadin.flow.theme.lumo.LumoUtility.FontWeight;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
-import jakarta.annotation.security.PermitAll;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 @PageTitle("Use Case 23: Real-time Dashboard")
 @Route(value = "use-case-23", layout = MainLayout.class)
@@ -54,7 +57,8 @@ public class UseCase23View extends Main {
     // state
     private final ValueSignal<Number> currentUsersSignal = new ValueSignal<>(0);
     private final ValueSignal<Number> viewEventsSignal = new ValueSignal<>(0);
-    private final ValueSignal<Number> conversionRateSignal = new ValueSignal<>(0);
+    private final ValueSignal<Number> conversionRateSignal = new ValueSignal<>(
+            0);
     private final ValueSignal<Number> customMetricSignal = new ValueSignal<>(0);
 
     private final ListSignal<String> timelineCategoriesSignal = new ListSignal<>();
@@ -88,7 +92,8 @@ public class UseCase23View extends Main {
         addAttachListener(event -> {
             UI ui = event.getUI();
             taskId = "dashboard-" + ui.getUIId();
-            schedulerService.scheduleDashboardDataUpdate(taskId, ui, this::onDataUpdate, 0, 2, TimeUnit.SECONDS);
+            schedulerService.scheduleDashboardDataUpdate(taskId, ui,
+                    this::onDataUpdate, 0, 2, TimeUnit.SECONDS);
         });
 
         addDetachListener(event -> {
@@ -133,9 +138,8 @@ public class UseCase23View extends Main {
         bindData(chart, newYorkSeries, newYorkTimelineSignal);
         bindData(chart, tokyoSeries, tokyoTimelineSignal);
 
-        Signal.effect(chart,
-                () -> xAxis.setCategories(timelineCategoriesSignal.get()
-                        .stream().map(Signal::get).toArray(String[]::new)));
+        Signal.effect(chart, () -> xAxis.setCategories(timelineCategoriesSignal
+                .get().stream().map(Signal::get).toArray(String[]::new)));
 
         conf.addSeries(berlinSeries);
         conf.addSeries(londonSeries);
@@ -180,7 +184,8 @@ public class UseCase23View extends Main {
 
         grid.addColumn(new ComponentRenderer<>(signal -> {
             Span status = new Span();
-            Signal<String> statusText = Signal.computed(() -> getStatusDisplayName(signal.get()));
+            Signal<String> statusText = Signal
+                    .computed(() -> getStatusDisplayName(signal.get()));
             status.getElement().bindAttribute("aria-label",
                     () -> "Status: " + statusText.get());
             status.getElement().bindAttribute("title",
@@ -193,15 +198,14 @@ public class UseCase23View extends Main {
                     () -> signal.get().getStatus() == Status.FAILING);
             return status;
         })).setHeader("").setFlexGrow(0).setAutoWidth(true);
-        grid.addColumn(signal -> signal.get().getCity())
-                .setHeader("City")
+        grid.addColumn(signal -> signal.get().getCity()).setHeader("City")
                 .setFlexGrow(1);
-        grid.addColumn(new ComponentRenderer<>(signal ->
-                        new Span(() -> String.valueOf(signal.get().getInput()))))
+        grid.addColumn(new ComponentRenderer<>(signal -> new Span(
+                () -> String.valueOf(signal.get().getInput()))))
                 .setHeader("Input").setAutoWidth(true)
                 .setTextAlign(ColumnTextAlign.END);
-        grid.addColumn(new ComponentRenderer<>(signal ->
-                        new Span(() -> String.valueOf(signal.get().getOutput()))))
+        grid.addColumn(new ComponentRenderer<>(signal -> new Span(
+                () -> String.valueOf(signal.get().getOutput()))))
                 .setHeader("Output").setAutoWidth(true)
                 .setTextAlign(ColumnTextAlign.END);
 
@@ -213,9 +217,11 @@ public class UseCase23View extends Main {
             // TODO not this, update each signal individually
         });
 
-        // Initialize with empty service health entries (will be populated by scheduler)
+        // Initialize with empty service health entries (will be populated by
+        // scheduler)
         List.of("Münster", "Cluj-Napoca", "Ciudad Victoria").forEach(city -> {
-            serviceHealthSignal.insertLast(new ServiceHealth(Status.OK, city, 0, 0));
+            serviceHealthSignal
+                    .insertLast(new ServiceHealth(Status.OK, city, 0, 0));
         });
 
         return serviceHealth;
@@ -296,8 +302,8 @@ public class UseCase23View extends Main {
     }
 
     /**
-     * Callback invoked by the scheduler service with new dashboard data.
-     * This method only updates signals - no UI access or chart drawing.
+     * Callback invoked by the scheduler service with new dashboard data. This
+     * method only updates signals - no UI access or chart drawing.
      */
     private void onDataUpdate(DashboardData data) {
         // Update highlight card signals
@@ -320,7 +326,8 @@ public class UseCase23View extends Main {
         londonTimelineSignal.insertLast(timeline.londonValue());
 
         if (newYorkTimelineSignal.get().size() >= TIMELINE_POINTS) {
-            newYorkTimelineSignal.remove(newYorkTimelineSignal.get().getFirst());
+            newYorkTimelineSignal
+                    .remove(newYorkTimelineSignal.get().getFirst());
         }
         newYorkTimelineSignal.insertLast(timeline.newYorkValue());
 
@@ -330,13 +337,15 @@ public class UseCase23View extends Main {
         tokyoTimelineSignal.insertLast(timeline.tokyoValue());
 
         if (timelineCategoriesSignal.get().size() >= TIMELINE_POINTS) {
-            timelineCategoriesSignal.remove(timelineCategoriesSignal.get().getFirst());
+            timelineCategoriesSignal
+                    .remove(timelineCategoriesSignal.get().getFirst());
         }
         timelineCategoriesSignal.insertLast(timeline.timestamp());
 
         // Update response times
         List<Double> responseTimes = data.responseTimes();
-        for (int i = 0; i < responseSignal.get().size() && i < responseTimes.size(); i++) {
+        for (int i = 0; i < responseSignal.get().size()
+                && i < responseTimes.size(); i++) {
             responseSignal.get().get(i).set(responseTimes.get(i));
         }
 
@@ -345,7 +354,8 @@ public class UseCase23View extends Main {
         data.serviceHealthList().forEach(
                 newHealth -> healthValues.forEach(currentHealthSignal -> {
                     var currentHealth = currentHealthSignal.get();
-                    if (Objects.equals(currentHealth.getCity(), newHealth.getCity())) {
+                    if (Objects.equals(currentHealth.getCity(),
+                            newHealth.getCity())) {
                         currentHealthSignal.set(newHealth);
                     }
                 }));
@@ -364,15 +374,15 @@ public class UseCase23View extends Main {
     }
 
     private static final class HighlightCard extends VerticalLayout {
-        record Change(double previous, double current) {}
+        record Change(double previous, double current) {
+        }
 
         private HighlightCard(String title, ValueSignal<Number> signal,
                 Function<Number, String> format) {
 
             // previous-current value holder
-            ValueSignal<Change> changeSignal = new ValueSignal<>(
-                new Change(signal.peek().doubleValue(), signal.peek().doubleValue())
-            );
+            ValueSignal<Change> changeSignal = new ValueSignal<>(new Change(
+                    signal.peek().doubleValue(), signal.peek().doubleValue()));
 
             // update previous value when the main signal changes
             Signal.effect(this, () -> {
@@ -382,14 +392,15 @@ public class UseCase23View extends Main {
             });
 
             // Computed signal for percentage change
-            Signal<Double> percentageSignal = changeSignal.map(change ->
-                calculatePercentageChange(change.current(), change.previous())
-            );
+            Signal<Double> percentageSignal = changeSignal
+                    .map(change -> calculatePercentageChange(change.current(),
+                            change.previous()));
 
             // Computed signals using method references
             Signal<String> prefixSignal = percentageSignal.map(this::getPrefix);
             Signal<VaadinIcon> iconSignal = percentageSignal.map(this::getIcon);
-            Signal<Boolean> successSignal = percentageSignal.map(percentage -> percentage > 0);
+            Signal<Boolean> successSignal = percentageSignal
+                    .map(percentage -> percentage > 0);
 
             H2 h2 = new H2(title);
             h2.addClassNames(FontWeight.NORMAL, Margin.NONE,
@@ -400,9 +411,8 @@ public class UseCase23View extends Main {
             valueSpan.bindText(signal.map(format::apply));
 
             Span percentageSpan = new Span();
-            percentageSpan.bindText(prefixSignal.map(prefix ->
-                prefix + percentageSignal.get()
-            ));
+            percentageSpan.bindText(prefixSignal
+                    .map(prefix -> prefix + percentageSignal.get()));
 
             Icon icon = new Icon(iconSignal);
             icon.setSize("10px");
@@ -412,7 +422,8 @@ public class UseCase23View extends Main {
             badge.add(icon, percentageSpan);
             badge.getElement().getThemeList().add("badge");
             badge.getElement().getThemeList().bind("success", successSignal);
-            badge.getElement().getThemeList().bind("error", Signal.not(successSignal));
+            badge.getElement().getThemeList().bind("error",
+                    Signal.not(successSignal));
 
             add(h2, valueSpan, badge);
             getStyle().setGap("5px");
@@ -432,11 +443,13 @@ public class UseCase23View extends Main {
             return percentage < 0 ? VaadinIcon.ARROW_DOWN : VaadinIcon.ARROW_UP;
         }
 
-        private double calculatePercentageChange(double current, double previous) {
+        private double calculatePercentageChange(double current,
+                double previous) {
             if (previous == 0.0) {
                 return 0.0;
             }
-            double percent = ((current - previous) / Math.abs(previous)) * 100.0;
+            double percent = ((current - previous) / Math.abs(previous))
+                    * 100.0;
             return Math.round(percent * 10.0) / 10.0;
         }
     }

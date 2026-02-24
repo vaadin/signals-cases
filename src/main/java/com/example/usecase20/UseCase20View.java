@@ -51,8 +51,7 @@ public class UseCase20View extends VerticalLayout {
 
         // Local signal mirroring the session-scoped preference for binding
         // convenience
-        ValueSignal<String> colorSignal = preferences
-                .backgroundColorSignal();
+        ValueSignal<String> colorSignal = preferences.backgroundColorSignal();
 
         // Color selection control
         RadioButtonGroup<String> colorPicker = new RadioButtonGroup<>(

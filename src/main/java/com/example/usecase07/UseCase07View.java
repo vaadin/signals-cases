@@ -92,8 +92,8 @@ public class UseCase07View extends VerticalLayout {
             var invoices = invoiceListSignal.get().stream()
                     .map(ValueSignal::peek).toList();
             invoiceGrid.setItems(invoices);
-            invoiceListSignal.get().forEach(signal ->
-                    Signal.effect(invoiceGrid, () -> {
+            invoiceListSignal.get()
+                    .forEach(signal -> Signal.effect(invoiceGrid, () -> {
                         invoiceGrid.getDataProvider().refreshItem(signal.get());
                     }));
         });
@@ -187,10 +187,11 @@ public class UseCase07View extends VerticalLayout {
                     .map(ValueSignal::peek).toList();
             lineItemsGrid.setItems(lineItems);
             updateFooterTotal(lineItemsGrid);
-            lineItemsSignal.get().forEach(signal ->
-                    Signal.effect(lineItemsGrid, () -> {
+            lineItemsSignal.get()
+                    .forEach(signal -> Signal.effect(lineItemsGrid, () -> {
                         // refresh the item in the grid
-                        lineItemsGrid.getDataProvider().refreshItem(signal.get());
+                        lineItemsGrid.getDataProvider()
+                                .refreshItem(signal.get());
                         // update footer total
                         updateFooterTotal(lineItemsGrid);
                     }));

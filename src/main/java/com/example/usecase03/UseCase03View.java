@@ -546,9 +546,8 @@ public class UseCase03View extends VerticalLayout {
 
     private void bindSliderToInteger(Slider slider,
             ValueSignal<Integer> integerSignal) {
-        slider.bindValue(integerSignal.map(Integer::doubleValue),
-                integerSignal.updater(
-                        (current, doubleValue) -> doubleValue.intValue()));
+        slider.bindValue(integerSignal.map(Integer::doubleValue), integerSignal
+                .updater((current, doubleValue) -> doubleValue.intValue()));
     }
 
 }
