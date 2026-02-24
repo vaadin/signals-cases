@@ -91,9 +91,9 @@ public class UserSessionRegistry {
 
         // Check using composite key
         String compositeKey = username + ":" + sessionId;
-        boolean exists = activeUsersSignal.get().stream()
+        boolean exists = activeUsersSignal.peek().stream()
                 .anyMatch(userSignal -> compositeKey
-                        .equals(userSignal.get().getCompositeKey()));
+                        .equals(userSignal.peek().getCompositeKey()));
 
         if (!exists) {
             activeUsersSignal.insertLast(
@@ -114,9 +114,9 @@ public class UserSessionRegistry {
         }
 
         String compositeKey = username + ":" + sessionId;
-        activeUsersSignal.get().stream()
+        activeUsersSignal.peek().stream()
                 .filter(userSignal -> compositeKey
-                        .equals(userSignal.get().getCompositeKey()))
+                        .equals(userSignal.peek().getCompositeKey()))
                 .findFirst().ifPresent(activeUsersSignal::remove);
     }
 
@@ -124,7 +124,7 @@ public class UserSessionRegistry {
      * Get count of active users.
      */
     public int getActiveUserCount() {
-        return activeUsersSignal.get().size();
+        return activeUsersSignal.peek().size();
     }
 
     /**
@@ -135,8 +135,8 @@ public class UserSessionRegistry {
             throw new IllegalArgumentException("Username cannot be null");
         }
 
-        return activeUsersSignal.get().stream().anyMatch(
-                userSignal -> username.equals(userSignal.get().username()));
+        return activeUsersSignal.peek().stream().anyMatch(
+                userSignal -> username.equals(userSignal.peek().username()));
     }
 
     /**
@@ -149,9 +149,9 @@ public class UserSessionRegistry {
         }
 
         String compositeKey = username + ":" + sessionId;
-        return activeUsersSignal.get().stream()
+        return activeUsersSignal.peek().stream()
                 .anyMatch(userSignal -> compositeKey
-                        .equals(userSignal.get().getCompositeKey()));
+                        .equals(userSignal.peek().getCompositeKey()));
     }
 
     /**
@@ -164,11 +164,11 @@ public class UserSessionRegistry {
                 ? null
                 : nickname.trim();
 
-        activeUsersSignal.get().stream()
+        activeUsersSignal.peek().stream()
                 .filter(userSignal -> compositeKey
-                        .equals(userSignal.get().getCompositeKey()))
+                        .equals(userSignal.peek().getCompositeKey()))
                 .findFirst().ifPresent(userSignal -> {
-                    UserInfo oldInfo = userSignal.get();
+                    UserInfo oldInfo = userSignal.peek();
                     userSignal.set(oldInfo.withNickname(trimmedNickname));
                 });
     }
@@ -178,10 +178,10 @@ public class UserSessionRegistry {
      */
     public String getNickname(String username, String sessionId) {
         String compositeKey = username + ":" + sessionId;
-        return activeUsersSignal.get().stream()
+        return activeUsersSignal.peek().stream()
                 .filter(userSignal -> compositeKey
-                        .equals(userSignal.get().getCompositeKey()))
-                .findFirst().map(userSignal -> userSignal.get().nickname())
+                        .equals(userSignal.peek().getCompositeKey()))
+                .findFirst().map(userSignal -> userSignal.peek().nickname())
                 .orElse(null);
     }
 
@@ -193,11 +193,11 @@ public class UserSessionRegistry {
         String compositeKey = username + ":" + sessionId;
 
         // Find the user and update their view
-        activeUsersSignal.get().stream()
+        activeUsersSignal.peek().stream()
                 .filter(userSignal -> compositeKey
-                        .equals(userSignal.get().getCompositeKey()))
+                        .equals(userSignal.peek().getCompositeKey()))
                 .findFirst().ifPresent(userSignal -> {
-                    UserInfo oldInfo = userSignal.get();
+                    UserInfo oldInfo = userSignal.peek();
                     userSignal.set(oldInfo.withCurrentView(viewRoute));
                 });
     }
@@ -236,11 +236,11 @@ public class UserSessionRegistry {
             boolean isActive) {
         String compositeKey = username + ":" + sessionId;
 
-        activeUsersSignal.get().stream()
+        activeUsersSignal.peek().stream()
                 .filter(userSignal -> compositeKey
-                        .equals(userSignal.get().getCompositeKey()))
+                        .equals(userSignal.peek().getCompositeKey()))
                 .findFirst().ifPresent(userSignal -> {
-                    UserInfo oldInfo = userSignal.get();
+                    UserInfo oldInfo = userSignal.peek();
                     userSignal.set(oldInfo.withTabActive(isActive));
                 });
     }
@@ -256,11 +256,11 @@ public class UserSessionRegistry {
     public void updateLastInteraction(String username, String sessionId) {
         String compositeKey = username + ":" + sessionId;
 
-        activeUsersSignal.get().stream()
+        activeUsersSignal.peek().stream()
                 .filter(userSignal -> compositeKey
-                        .equals(userSignal.get().getCompositeKey()))
+                        .equals(userSignal.peek().getCompositeKey()))
                 .findFirst().ifPresent(userSignal -> {
-                    UserInfo oldInfo = userSignal.get();
+                    UserInfo oldInfo = userSignal.peek();
                     userSignal.set(oldInfo.withLastInteractionTime(
                             System.currentTimeMillis()));
                 });

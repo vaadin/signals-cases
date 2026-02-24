@@ -241,10 +241,16 @@ public class UseCase07View extends VerticalLayout {
                 lineItemsSignal.peek().stream().filter(
                         signal -> signal.peek().getId() == lineItem.getId())
                         .findFirst().ifPresent(signal -> {
-                            signal.set(
-                                    details.getLineItemById(lineItem.getId()));
+                            signal.modify(target -> {
+                                LineItem source = details
+                                        .getLineItemById(lineItem.getId());
+                                target.setDescription(source.getDescription());
+                                target.setQuantity(source.getQuantity());
+                                target.setUnitPrice(source.getUnitPrice());
+                                target.setTotal(source.getTotal());
+                            });
                             // keep editor open after update
-                            lineItemsGrid.getEditor().editItem(signal.get());
+                            lineItemsGrid.getEditor().editItem(signal.peek());
                         });
             } else if (status.hasErrors()) {
                 Notification.show("Line item has validation errors.");
@@ -303,7 +309,12 @@ public class UseCase07View extends VerticalLayout {
         invoiceListSignal.peek().stream()
                 .filter(signal -> signal.peek().getId().equals(invoice.getId()))
                 .findFirst().ifPresent(signal -> {
-                    signal.set(invoice);
+                    signal.modify(inv -> {
+                        inv.setCustomerName(invoice.getCustomerName());
+                        inv.setDueDate(invoice.getDueDate());
+                        inv.setTotal(invoice.getTotal());
+                        inv.setStatus(invoice.getStatus());
+                    });
                 });
     }
 
@@ -329,7 +340,7 @@ public class UseCase07View extends VerticalLayout {
 
     private void removeLineItem(InvoiceDetails value, LineItem lineItem) {
         invoiceService.removeLineItem(value.getInvoice().getId(), lineItem);
-        lineItemsSignal.get().stream().filter(v -> v.peek().equals(lineItem))
+        lineItemsSignal.peek().stream().filter(v -> v.peek().equals(lineItem))
                 .findFirst().ifPresent(lineItemsSignal::remove);
         // need to also update the invoice total in the invoice list
         updateInvoiceListSignalItem(

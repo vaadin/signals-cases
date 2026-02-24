@@ -119,8 +119,8 @@ public class UseCase19View extends VerticalLayout {
      * Load all items in parallel
      */
     private void loadAllItems() {
-        itemsSignal.get().forEach(itemSignal -> {
-            DataItem item = itemSignal.get();
+        itemsSignal.peek().forEach(itemSignal -> {
+            DataItem item = itemSignal.peek();
             // Update to LOADING state
             itemSignal.set(new DataItem(item.id(), item.name(),
                     LoadingState.State.LOADING, null, null,
@@ -128,7 +128,7 @@ public class UseCase19View extends VerticalLayout {
 
             // Launch async operation (truly parallel via Spring @Async)
             dataLoadingService.loadDataAsync(item.id(), item.simulatedDelayMs(),
-                    simulateErrorsSignal.get()).thenAccept(data -> {
+                    simulateErrorsSignal.peek()).thenAccept(data -> {
                         // Update to SUCCESS state
                         // Signals are thread-safe - update directly from
                         // background thread
@@ -152,7 +152,7 @@ public class UseCase19View extends VerticalLayout {
      * Retry loading a single item
      */
     private void retryItem(ValueSignal<DataItem> itemSignal) {
-        DataItem item = itemSignal.get();
+        DataItem item = itemSignal.peek();
 
         // Update to LOADING state
         itemSignal.set(
@@ -161,7 +161,7 @@ public class UseCase19View extends VerticalLayout {
 
         // Launch async operation
         dataLoadingService.loadDataAsync(item.id(), item.simulatedDelayMs(),
-                simulateErrorsSignal.get()).thenAccept(data -> {
+                simulateErrorsSignal.peek()).thenAccept(data -> {
                     // Update to SUCCESS state
                     itemSignal.set(new DataItem(item.id(), item.name(),
                             LoadingState.State.SUCCESS, data, null,

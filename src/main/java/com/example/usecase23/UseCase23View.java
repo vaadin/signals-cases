@@ -198,7 +198,7 @@ public class UseCase23View extends Main {
                     () -> signal.get().getStatus() == Status.FAILING);
             return status;
         })).setHeader("").setFlexGrow(0).setAutoWidth(true);
-        grid.addColumn(signal -> signal.get().getCity()).setHeader("City")
+        grid.addColumn(signal -> signal.peek().getCity()).setHeader("City")
                 .setFlexGrow(1);
         grid.addColumn(new ComponentRenderer<>(signal -> new Span(
                 () -> String.valueOf(signal.get().getInput()))))
@@ -315,45 +315,45 @@ public class UseCase23View extends Main {
         // Update timeline signals
         DashboardData.TimelineData timeline = data.timelineData();
 
-        if (berlinTimelineSignal.get().size() >= TIMELINE_POINTS) {
-            berlinTimelineSignal.remove(berlinTimelineSignal.get().getFirst());
+        if (berlinTimelineSignal.peek().size() >= TIMELINE_POINTS) {
+            berlinTimelineSignal.remove(berlinTimelineSignal.peek().getFirst());
         }
         berlinTimelineSignal.insertLast(timeline.berlinValue());
 
-        if (londonTimelineSignal.get().size() >= TIMELINE_POINTS) {
-            londonTimelineSignal.remove(londonTimelineSignal.get().getFirst());
+        if (londonTimelineSignal.peek().size() >= TIMELINE_POINTS) {
+            londonTimelineSignal.remove(londonTimelineSignal.peek().getFirst());
         }
         londonTimelineSignal.insertLast(timeline.londonValue());
 
-        if (newYorkTimelineSignal.get().size() >= TIMELINE_POINTS) {
+        if (newYorkTimelineSignal.peek().size() >= TIMELINE_POINTS) {
             newYorkTimelineSignal
-                    .remove(newYorkTimelineSignal.get().getFirst());
+                    .remove(newYorkTimelineSignal.peek().getFirst());
         }
         newYorkTimelineSignal.insertLast(timeline.newYorkValue());
 
-        if (tokyoTimelineSignal.get().size() >= TIMELINE_POINTS) {
-            tokyoTimelineSignal.remove(tokyoTimelineSignal.get().getFirst());
+        if (tokyoTimelineSignal.peek().size() >= TIMELINE_POINTS) {
+            tokyoTimelineSignal.remove(tokyoTimelineSignal.peek().getFirst());
         }
         tokyoTimelineSignal.insertLast(timeline.tokyoValue());
 
-        if (timelineCategoriesSignal.get().size() >= TIMELINE_POINTS) {
+        if (timelineCategoriesSignal.peek().size() >= TIMELINE_POINTS) {
             timelineCategoriesSignal
-                    .remove(timelineCategoriesSignal.get().getFirst());
+                    .remove(timelineCategoriesSignal.peek().getFirst());
         }
         timelineCategoriesSignal.insertLast(timeline.timestamp());
 
         // Update response times
         List<Double> responseTimes = data.responseTimes();
-        for (int i = 0; i < responseSignal.get().size()
+        for (int i = 0; i < responseSignal.peek().size()
                 && i < responseTimes.size(); i++) {
-            responseSignal.get().get(i).set(responseTimes.get(i));
+            responseSignal.peek().get(i).set(responseTimes.get(i));
         }
 
         // Update service health
-        var healthValues = serviceHealthSignal.get();
+        var healthValues = serviceHealthSignal.peek();
         data.serviceHealthList().forEach(
                 newHealth -> healthValues.forEach(currentHealthSignal -> {
-                    var currentHealth = currentHealthSignal.get();
+                    var currentHealth = currentHealthSignal.peek();
                     if (Objects.equals(currentHealth.getCity(),
                             newHealth.getCity())) {
                         currentHealthSignal.set(newHealth);

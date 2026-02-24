@@ -159,7 +159,7 @@ public class UseCase08View extends VerticalLayout {
         HorizontalLayout navigationLayout = new HorizontalLayout();
 
         Button previousButton = new Button("Previous", e -> {
-            Step current = currentStepSignal.get();
+            Step current = currentStepSignal.peek();
             switch (current) {
             case COMPANY_INFO -> currentStepSignal.set(Step.PERSONAL_INFO);
             case PLAN_SELECTION -> currentStepSignal.set(Step.COMPANY_INFO);
@@ -170,7 +170,7 @@ public class UseCase08View extends VerticalLayout {
                 currentStepSignal.map(step -> step != Step.PERSONAL_INFO));
 
         Button nextButton = new Button("Next", e -> {
-            Step current = currentStepSignal.get();
+            Step current = currentStepSignal.peek();
             switch (current) {
             case PERSONAL_INFO -> currentStepSignal.set(Step.COMPANY_INFO);
             case COMPANY_INFO -> currentStepSignal.set(Step.PLAN_SELECTION);
