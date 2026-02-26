@@ -127,19 +127,20 @@ public class UseCase09View extends VerticalLayout {
                         "Please fix validation errors before submitting.");
             }
         });
-        submitButton.bindEnabled(
-                binder.getValidationStatus().map(BinderValidationStatus::isOk));
+        submitButton.bindEnabled(binder.validationStatusSignal()
+                .map(BinderValidationStatus::isOk));
 
         // Form status
         Div statusDiv = new Div();
         Span statusLabel = new Span();
-        statusLabel.bindText(binder.getValidationStatus()
+        statusLabel.bindText(binder.validationStatusSignal()
                 .map(status -> status.isOk() ? "Form is valid - Ready to submit"
                         : "Please complete all required fields correctly"));
-        statusLabel.getStyle().bind("color", binder.getValidationStatus()
+        statusLabel.getStyle().bind("color", binder.validationStatusSignal()
                 .map(status -> status.isOk() ? "green" : "orange"));
-        statusLabel.getStyle().bind("font-weight", binder.getValidationStatus()
-                .map(status -> status.isOk() ? "bold" : "normal"));
+        statusLabel.getStyle().bind("font-weight",
+                binder.validationStatusSignal()
+                        .map(status -> status.isOk() ? "bold" : "normal"));
         statusDiv.add(statusLabel);
 
         add(title, description, usernameField, emailField, passwordField,
