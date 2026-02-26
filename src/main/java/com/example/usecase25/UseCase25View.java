@@ -2,15 +2,12 @@ package com.example.usecase25;
 
 import jakarta.annotation.security.PermitAll;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import com.example.usecase23.SchedulerService;
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Main;
@@ -21,6 +18,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 import org.jspecify.annotations.Nullable;
@@ -31,18 +29,7 @@ import org.jspecify.annotations.Nullable;
 @PermitAll
 public class UseCase25View extends Main {
 
-    private static final List<StockQuote> INITIAL_STOCKS = List.of(
-            new StockQuote("AAPL", "Apple Inc.", 189.84, 0, 0),
-            new StockQuote("GOOGL", "Alphabet Inc.", 141.80, 0, 0),
-            new StockQuote("MSFT", "Microsoft Corp.", 378.91, 0, 0),
-            new StockQuote("AMZN", "Amazon.com Inc.", 178.25, 0, 0),
-            new StockQuote("TSLA", "Tesla Inc.", 248.42, 0, 0),
-            new StockQuote("NVDA", "NVIDIA Corp.", 495.22, 0, 0),
-            new StockQuote("META", "Meta Platforms", 390.42, 0, 0),
-            new StockQuote("NFLX", "Netflix Inc.", 476.58, 0, 0));
-
-    private final List<ValueSignal<StockQuote>> stockSignals = new ArrayList<>();
-    private final Random random = new Random();
+    private final ListSignal<StockQuote> stockSignals = new ListSignal<>();
     private @Nullable String taskId;
 
     public UseCase25View(SchedulerService schedulerService) {
@@ -63,19 +50,18 @@ public class UseCase25View extends Main {
         stockList.getStyle().set("display", "flex")
                 .set("flex-direction", "column");
 
-        for (StockQuote initial : INITIAL_STOCKS) {
-            var stockSignal = new ValueSignal<>(initial);
-            stockSignals.add(stockSignal);
+        for (StockQuote initial : StockPriceSimulator.INITIAL_STOCKS) {
+            var stockSignal = stockSignals.insertLast(initial);
             stockList.add(createStockRow(stockSignal));
         }
 
         add(title, description, header, stockList);
 
         addAttachListener(event -> {
-            UI ui = event.getUI();
-            taskId = "stock-ticker-" + ui.getUIId();
-            schedulerService.scheduleTask(taskId, ui,
-                    this::updatePrices, 1500, 1500, TimeUnit.MILLISECONDS);
+            taskId = "stock-ticker-" + event.getUI().getUIId();
+            schedulerService.scheduleTask(taskId,
+                    () -> StockPriceSimulator.updatePrices(stockSignals),
+                    1500, 1500, TimeUnit.MILLISECONDS);
         });
 
         addDetachListener(event -> {
@@ -178,32 +164,5 @@ public class UseCase25View extends Main {
 
         row.add(symbol, name, price, change, pctChange);
         return row;
-    }
-
-    /**
-     * Scheduled callback — only updates signal data, no UI calls.
-     */
-    private void updatePrices() {
-        int stocksToUpdate = 2 + random.nextInt(4); // 2–5 stocks per tick
-        for (int i = 0; i < stocksToUpdate; i++) {
-            int index = random.nextInt(stockSignals.size());
-            ValueSignal<StockQuote> stockSignal = stockSignals.get(index);
-
-            StockQuote current = stockSignal.peek();
-            double oldPrice = current.price();
-
-            // Random price change: -2% to +2%
-            double changePct = (random.nextDouble() - 0.5) * 4.0;
-            double priceChange = oldPrice * changePct / 100.0;
-            double newPrice = Math.max(1.0, oldPrice + priceChange);
-
-            double totalChange = newPrice
-                    - INITIAL_STOCKS.get(index).price();
-            double totalChangePct = (totalChange
-                    / INITIAL_STOCKS.get(index).price()) * 100.0;
-
-            stockSignal.set(new StockQuote(current.symbol(), current.name(),
-                    newPrice, totalChange, totalChangePct));
-        }
     }
 }

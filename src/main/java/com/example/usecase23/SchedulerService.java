@@ -135,6 +135,31 @@ public class SchedulerService {
     }
 
     /**
+     * Schedules a generic task to run periodically.
+     *
+     * @param taskId
+     *            Unique identifier for this task
+     * @param callback
+     *            The callback to run
+     * @param initialDelay
+     *            Initial delay before first execution
+     * @param period
+     *            Period between executions
+     * @param unit
+     *            Time unit for delays and period
+     */
+    public void scheduleTask(String taskId, Runnable callback,
+            long initialDelay, long period, TimeUnit unit) {
+
+        cancelTask(taskId);
+
+        ScheduledFuture<?> future = scheduler.scheduleAtFixedRate(
+                callback::run, initialDelay, period, unit);
+
+        tasks.put(taskId, future);
+    }
+
+    /**
      * Cancels a scheduled task.
      *
      * @param taskId
