@@ -107,6 +107,34 @@ public class SchedulerService {
     }
 
     /**
+     * Schedules a generic task to run periodically, executing the callback
+     * within UI.access for thread-safe updates.
+     *
+     * @param taskId
+     *            Unique identifier for this task
+     * @param ui
+     *            The UI instance to use for thread-safe access
+     * @param callback
+     *            The callback to run (called within UI.access)
+     * @param initialDelay
+     *            Initial delay before first execution
+     * @param period
+     *            Period between executions
+     * @param unit
+     *            Time unit for delays and period
+     */
+    public void scheduleTask(String taskId, UI ui, Runnable callback,
+            long initialDelay, long period, TimeUnit unit) {
+
+        cancelTask(taskId);
+
+        ScheduledFuture<?> future = scheduler.scheduleAtFixedRate(
+                () -> ui.access(callback::run), initialDelay, period, unit);
+
+        tasks.put(taskId, future);
+    }
+
+    /**
      * Cancels a scheduled task.
      *
      * @param taskId
