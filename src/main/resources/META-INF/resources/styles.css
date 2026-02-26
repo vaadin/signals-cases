@@ -1,1 +1,18 @@
 /* Add your styles here */
+
+.price-up {
+    color: var(--lumo-success-color);
+    animation: flash-green 0.6s ease-out;
+}
+.price-down {
+    color: var(--lumo-error-color);
+    animation: flash-red 0.6s ease-out;
+}
+@keyframes flash-green {
+    0% { background-color: rgba(76, 175, 80, 0.3); }
+    100% { background-color: transparent; }
+}
+@keyframes flash-red {
+    0% { background-color: rgba(244, 67, 54, 0.3); }
+    100% { background-color: transparent; }
+}
