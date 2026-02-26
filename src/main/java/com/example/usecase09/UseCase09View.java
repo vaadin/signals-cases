@@ -93,9 +93,9 @@ public class UseCase09View extends VerticalLayout {
                 .withValidator(value -> value != null && value.length() >= 8,
                         "Password must be at least 8 characters")
                 .bind("password");
-        // cross-field validation using Binder.Binding.value()
+        // cross-field validation using Binder.Binding.valueSignal()
         binder.forField(confirmPasswordField).withValidator(
-                value -> value != null && value.equals(pwBinding.value()),
+                value -> value != null && value.equals(pwBinding.valueSignal().get()),
                 "Passwords do not match").bind("confirmPassword");
 
         binder.forField(accountTypeSelect).bind("accountType");
@@ -128,17 +128,17 @@ public class UseCase09View extends VerticalLayout {
             }
         });
         submitButton.bindEnabled(
-                binder.getValidationStatus().map(BinderValidationStatus::isOk));
+                binder..map(BinderValidationStatus::isOk));
 
         // Form status
         Div statusDiv = new Div();
         Span statusLabel = new Span();
-        statusLabel.bindText(binder.getValidationStatus()
+        statusLabel.bindText(binder.validationStatusSignal()
                 .map(status -> status.isOk() ? "Form is valid - Ready to submit"
                         : "Please complete all required fields correctly"));
-        statusLabel.getStyle().bind("color", binder.getValidationStatus()
+        statusLabel.getStyle().bind("color", binder.validationStatusSignal()
                 .map(status -> status.isOk() ? "green" : "orange"));
-        statusLabel.getStyle().bind("font-weight", binder.getValidationStatus()
+        statusLabel.getStyle().bind("font-weight", binder.validationStatusSignal()
                 .map(status -> status.isOk() ? "bold" : "normal"));
         statusDiv.add(statusLabel);
 
