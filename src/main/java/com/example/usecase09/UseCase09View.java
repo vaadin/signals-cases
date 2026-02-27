@@ -88,14 +88,15 @@ public class UseCase09View extends VerticalLayout {
                         "Please enter a valid email address")
                 .bind("email");
 
-        Binder.Binding<UserRegistration, String> pwBinding = binder
+        Binder.Binding<UserRegistration, String> passwordBinding = binder
                 .forField(passwordField)
                 .withValidator(value -> value != null && value.length() >= 8,
                         "Password must be at least 8 characters")
                 .bind("password");
-        // cross-field validation using Binder.Binding.value()
+        // cross-field validation using field Binding.valueSignal()
         binder.forField(confirmPasswordField).withValidator(
-                value -> value != null && value.equals(pwBinding.value()),
+                value -> value != null
+                        && value.equals(passwordBinding.valueSignal().get()),
                 "Passwords do not match").bind("confirmPassword");
 
         binder.forField(accountTypeSelect).bind("accountType");
@@ -127,19 +128,20 @@ public class UseCase09View extends VerticalLayout {
                         "Please fix validation errors before submitting.");
             }
         });
-        submitButton.bindEnabled(
-                binder.getValidationStatus().map(BinderValidationStatus::isOk));
+        submitButton.bindEnabled(binder.validationStatusSignal()
+                .map(BinderValidationStatus::isOk));
 
         // Form status
         Div statusDiv = new Div();
         Span statusLabel = new Span();
-        statusLabel.bindText(binder.getValidationStatus()
+        statusLabel.bindText(binder.validationStatusSignal()
                 .map(status -> status.isOk() ? "Form is valid - Ready to submit"
                         : "Please complete all required fields correctly"));
-        statusLabel.getStyle().bind("color", binder.getValidationStatus()
+        statusLabel.getStyle().bind("color", binder.validationStatusSignal()
                 .map(status -> status.isOk() ? "green" : "orange"));
-        statusLabel.getStyle().bind("font-weight", binder.getValidationStatus()
-                .map(status -> status.isOk() ? "bold" : "normal"));
+        statusLabel.getStyle().bind("font-weight",
+                binder.validationStatusSignal()
+                        .map(status -> status.isOk() ? "bold" : "normal"));
         statusDiv.add(statusLabel);
 
         add(title, description, usernameField, emailField, passwordField,

@@ -83,7 +83,8 @@ public class UseCase01View extends VerticalLayout {
         confirmField.bindValue(confirmPasswordSignal,
                 confirmPasswordSignal::set);
         confirmField.setErrorMessage("Passwords do not match");
-        confirmField.bindInvalid(isConfirmValidSignal.map(valid -> !valid));
+        Signal.effect(confirmField,
+                () -> confirmField.setInvalid(!isConfirmValidSignal.get()));
 
         // Submit button with multiple signal bindings
         Button submitButton = new Button();
