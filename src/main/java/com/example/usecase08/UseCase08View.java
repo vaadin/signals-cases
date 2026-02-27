@@ -13,16 +13,18 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.BinderValidationStatus;
+import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.function.SignalMapper;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-08", layout = MainLayout.class)
@@ -38,79 +40,103 @@ public class UseCase08View extends VerticalLayout {
         H2 title = new H2("Use Case 8: Multi-Step Wizard with Validation");
 
         Paragraph description = new Paragraph(
-                "This use case demonstrates a multi-step wizard form with progressive validation. "
+                "This use case demonstrates a multi-step wizard form using Binder for each step's validation. "
                         + "Complete each step to unlock the next one. "
-                        + "Each step has its own validation rules, and the Next button is enabled only when the current step is valid. "
+                        + "Each step has its own Binder with validation rules, and the Next button is enabled "
+                        + "only when the current step's Binder validation passes. "
                         + "Review your information in the final step before submitting.");
 
-        // Create signals for current step and form data
-        var currentStepSignal = new ValueSignal<>(Step.PERSONAL_INFO);
-        var firstNameSignal = new ValueSignal<>("");
-        var lastNameSignal = new ValueSignal<>("");
-        var emailSignal = new ValueSignal<>("");
-        var companyNameSignal = new ValueSignal<>("");
-        var companySizeSignal = new ValueSignal<>("");
-        var industrySignal = new ValueSignal<>("");
-        var planSignal = new ValueSignal<>(Plan.STARTER);
+        // Create shared form data bean
+        FormData formData = new FormData();
 
-        // Step 1: Personal Info
+        // Create signal for current step
+        var currentStepSignal = new ValueSignal<>(Step.PERSONAL_INFO);
+
+        // Step 1: Personal Info with Binder
         VerticalLayout step1Layout = new VerticalLayout();
         step1Layout.add(new H3("Step 1: Personal Information"));
 
+        Binder<FormData> step1Binder = new Binder<>(FormData.class);
+
         TextField firstNameField = new TextField("First Name");
-        firstNameField.bindValue(firstNameSignal, firstNameSignal::set);
-        firstNameField.setRequired(true);
-        firstNameField.setMinLength(2);
+        step1Binder.forField(firstNameField)
+                .withValidator(value -> value != null && value.length() >= 2,
+                        "First name must be at least 2 characters")
+                .bind(FormData::getFirstName, FormData::setFirstName);
 
         TextField lastNameField = new TextField("Last Name");
-        lastNameField.bindValue(lastNameSignal, lastNameSignal::set);
-        lastNameField.setRequired(true);
-        lastNameField.setMinLength(2);
+        step1Binder.forField(lastNameField)
+                .withValidator(value -> value != null && value.length() >= 2,
+                        "Last name must be at least 2 characters")
+                .bind(FormData::getLastName, FormData::setLastName);
 
         EmailField emailField = new EmailField("Email");
-        emailField.bindValue(emailSignal, emailSignal::set);
-        emailField.setRequired(true);
+        step1Binder.forField(emailField)
+                .withValidator(new EmailValidator("Please enter a valid email"))
+                .bind(FormData::getEmail, FormData::setEmail);
+
+        step1Binder.setBean(formData);
 
         step1Layout.add(firstNameField, lastNameField, emailField);
         step1Layout.bindVisible(
                 currentStepSignal.map(step -> step == Step.PERSONAL_INFO));
 
-        // Step 2: Company Info
+        // Step 2: Company Info with Binder
         VerticalLayout step2Layout = new VerticalLayout();
         step2Layout.add(new H3("Step 2: Company Information"));
 
+        Binder<FormData> step2Binder = new Binder<>(FormData.class);
+
         TextField companyNameField = new TextField("Company Name");
-        companyNameField.bindValue(companyNameSignal, companyNameSignal::set);
-        companyNameField.setRequired(true);
+        step2Binder.forField(companyNameField)
+                .withValidator(value -> value != null && !value.trim().isEmpty(),
+                        "Company name is required")
+                .bind(FormData::getCompanyName, FormData::setCompanyName);
 
         ComboBox<String> companySizeSelect = new ComboBox<>("Company Size",
                 List.of("1-10", "11-50", "51-200", "201-1000", "1000+"));
-        companySizeSelect.bindValue(companySizeSignal, companySizeSignal::set);
-        companySizeSelect.setRequired(true);
+        step2Binder.forField(companySizeSelect)
+                .withValidator(value -> value != null && !value.isEmpty(),
+                        "Please select a company size")
+                .bind(FormData::getCompanySize, FormData::setCompanySize);
 
         ComboBox<String> industrySelect = new ComboBox<>("Industry",
                 List.of("Technology", "Healthcare", "Finance", "Retail",
                         "Manufacturing", "Other"));
-        industrySelect.bindValue(industrySignal, industrySignal::set);
-        industrySelect.setRequired(true);
+        step2Binder.forField(industrySelect)
+                .withValidator(value -> value != null && !value.isEmpty(),
+                        "Please select an industry")
+                .bind(FormData::getIndustry, FormData::setIndustry);
+
+        step2Binder.setBean(formData);
 
         step2Layout.add(companyNameField, companySizeSelect, industrySelect);
         step2Layout.bindVisible(
                 currentStepSignal.map(step -> step == Step.COMPANY_INFO));
 
-        // Step 3: Plan Selection
+        // Step 3: Plan Selection with Binder
         VerticalLayout step3Layout = new VerticalLayout();
         step3Layout.add(new H3("Step 3: Select Your Plan"));
 
+        Binder<FormData> step3Binder = new Binder<>(FormData.class);
+
         ComboBox<Plan> planSelect = new ComboBox<>("Plan", Plan.values());
-        planSelect.bindValue(planSignal, planSignal::set);
-        planSelect.setRequired(true);
+        step3Binder.forField(planSelect)
+                .withValidator(value -> value != null, "Please select a plan")
+                .bind(FormData::getPlan, FormData::setPlan);
+
+        step3Binder.setBean(formData);
 
         Span planDescription = new Span();
-        planDescription.bindText(planSignal.map(plan -> switch (plan) {
-        case STARTER -> "Perfect for small teams - $29/month";
-        case PROFESSIONAL -> "For growing businesses - $99/month";
-        case ENTERPRISE -> "Custom solutions - Contact sales";
+        Signal<Plan> planSignal = step3Binder.validationStatusSignal()
+                .map(status -> formData.getPlan());
+        planDescription.bindText(planSignal.map(plan -> {
+            if (plan == null) return "Select a plan to see details";
+            return switch (plan) {
+                case STARTER -> "Perfect for small teams - $29/month";
+                case PROFESSIONAL -> "For growing businesses - $99/month";
+                case ENTERPRISE -> "Custom solutions - Contact sales";
+            };
         }));
 
         step3Layout.add(planSelect, planDescription);
@@ -122,38 +148,31 @@ public class UseCase08View extends VerticalLayout {
         step4Layout.add(new H3("Step 4: Review Your Information"));
 
         Div reviewDiv = new Div();
-        reviewDiv.bindText(Signal.computed(() -> "Name: "
-                + firstNameSignal.get() + " " + lastNameSignal.get() + "\n"
-                + "Email: " + emailSignal.get() + "\n" + "Company: "
-                + companyNameSignal.get() + "\n" + "Size: "
-                + companySizeSignal.get() + "\n" + "Industry: "
-                + industrySignal.get() + "\n" + "Plan: " + planSignal.get()));
+        reviewDiv.getStyle().set("white-space", "pre-line");
+        // Update review when entering this step
+        Signal.effect(reviewDiv, () -> {
+            if (currentStepSignal.get() == Step.REVIEW) {
+                String reviewText = "Name: " + formData.getFirstName() + " " + formData.getLastName() + "\n"
+                        + "Email: " + formData.getEmail() + "\n"
+                        + "Company: " + formData.getCompanyName() + "\n"
+                        + "Size: " + formData.getCompanySize() + "\n"
+                        + "Industry: " + formData.getIndustry() + "\n"
+                        + "Plan: " + formData.getPlan();
+                reviewDiv.setText(reviewText);
+            }
+        });
 
         step4Layout.add(reviewDiv);
         step4Layout.bindVisible(
                 currentStepSignal.map(step -> step == Step.REVIEW));
 
-        Signal<Boolean> step1ValidSignal = Signal.computed(() -> {
-            boolean firstNameValid = firstNameSignal
-                    .map(isValid(firstNameField)).get();
-            boolean lastNameValid = lastNameSignal.map(isValid(lastNameField))
-                    .get();
-            boolean emailValid = emailSignal.map(isValid(emailField)).get();
-            return firstNameValid && lastNameValid && emailValid;
-        });
-
-        Signal<Boolean> step2ValidSignal = Signal.computed(() -> {
-            boolean companyNameValid = companyNameSignal
-                    .map(isValid(companyNameField)).get();
-            boolean companySizeValid = companySizeSignal
-                    .map(isValid(companySizeSelect)).get();
-            boolean industryValid = industrySignal.map(isValid(industrySelect))
-                    .get();
-            return companyNameValid && companySizeValid && industryValid;
-        });
-
-        Signal<Boolean> step3ValidSignal = Signal
-                .computed(() -> planSignal.map(isValid(planSelect)).get());
+        // Validation signals using Binder's validationStatusSignal
+        Signal<Boolean> step1ValidSignal = step1Binder.validationStatusSignal()
+                .map(BinderValidationStatus::isOk);
+        Signal<Boolean> step2ValidSignal = step2Binder.validationStatusSignal()
+                .map(BinderValidationStatus::isOk);
+        Signal<Boolean> step3ValidSignal = step3Binder.validationStatusSignal()
+                .map(BinderValidationStatus::isOk);
 
         // Navigation buttons
         HorizontalLayout navigationLayout = new HorizontalLayout();
@@ -161,9 +180,10 @@ public class UseCase08View extends VerticalLayout {
         Button previousButton = new Button("Previous", e -> {
             Step current = currentStepSignal.peek();
             switch (current) {
-            case COMPANY_INFO -> currentStepSignal.set(Step.PERSONAL_INFO);
-            case PLAN_SELECTION -> currentStepSignal.set(Step.COMPANY_INFO);
-            case REVIEW -> currentStepSignal.set(Step.PLAN_SELECTION);
+                case COMPANY_INFO -> currentStepSignal.set(Step.PERSONAL_INFO);
+                case PLAN_SELECTION -> currentStepSignal.set(Step.COMPANY_INFO);
+                case REVIEW -> currentStepSignal.set(Step.PLAN_SELECTION);
+                default -> {}
             }
         });
         previousButton.bindVisible(
@@ -172,9 +192,10 @@ public class UseCase08View extends VerticalLayout {
         Button nextButton = new Button("Next", e -> {
             Step current = currentStepSignal.peek();
             switch (current) {
-            case PERSONAL_INFO -> currentStepSignal.set(Step.COMPANY_INFO);
-            case COMPANY_INFO -> currentStepSignal.set(Step.PLAN_SELECTION);
-            case PLAN_SELECTION -> currentStepSignal.set(Step.REVIEW);
+                case PERSONAL_INFO -> currentStepSignal.set(Step.COMPANY_INFO);
+                case COMPANY_INFO -> currentStepSignal.set(Step.PLAN_SELECTION);
+                case PLAN_SELECTION -> currentStepSignal.set(Step.REVIEW);
+                default -> {}
             }
         });
         nextButton.bindVisible(
@@ -182,17 +203,19 @@ public class UseCase08View extends VerticalLayout {
         nextButton.bindEnabled(Signal.computed(() -> {
             Step current = currentStepSignal.get();
             return switch (current) {
-            case PERSONAL_INFO -> step1ValidSignal.get();
-            case COMPANY_INFO -> step2ValidSignal.get();
-            case PLAN_SELECTION -> step3ValidSignal.get();
-            case REVIEW -> false;
+                case PERSONAL_INFO -> step1ValidSignal.get();
+                case COMPANY_INFO -> step2ValidSignal.get();
+                case PLAN_SELECTION -> step3ValidSignal.get();
+                case REVIEW -> false;
             };
         }));
 
         Button submitButton = new Button("Submit", e -> {
             // Handle form submission
-            System.out.println("Form submitted!");
+            Notification.show("Form submitted successfully for " +
+                    formData.getFirstName() + " " + formData.getLastName() + "!");
         });
+        submitButton.addThemeName("primary");
         submitButton.bindVisible(
                 currentStepSignal.map(step -> step == Step.REVIEW));
 
@@ -202,10 +225,10 @@ public class UseCase08View extends VerticalLayout {
         Span progressIndicator = new Span();
         progressIndicator.bindText(currentStepSignal.map(step -> {
             int stepNumber = switch (step) {
-            case PERSONAL_INFO -> 1;
-            case COMPANY_INFO -> 2;
-            case PLAN_SELECTION -> 3;
-            case REVIEW -> 4;
+                case PERSONAL_INFO -> 1;
+                case COMPANY_INFO -> 2;
+                case PLAN_SELECTION -> 3;
+                case REVIEW -> 4;
             };
             return "Step " + stepNumber + " of 4";
         }));
@@ -213,12 +236,5 @@ public class UseCase08View extends VerticalLayout {
 
         add(title, description, progressIndicator, step1Layout, step2Layout,
                 step3Layout, step4Layout, navigationLayout);
-    }
-
-    private <T> SignalMapper<T, Boolean> isValid(HasValidator<T> field) {
-        return value -> {
-            var validator = field.getDefaultValidator();
-            return !validator.apply(value, null).isError();
-        };
     }
 }

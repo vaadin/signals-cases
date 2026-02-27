@@ -15,6 +15,9 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.BinderValidationStatus;
+import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -27,6 +30,39 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PermitAll
 public class UseCase01View extends VerticalLayout {
 
+    /**
+     * Simple data class for form binding
+     */
+    public static class AccountData {
+        private String email = "";
+        private String password = "";
+        private String confirmPassword = "";
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        public String getConfirmPassword() {
+            return confirmPassword;
+        }
+
+        public void setConfirmPassword(String confirmPassword) {
+            this.confirmPassword = confirmPassword;
+        }
+    }
+
     public UseCase01View() {
         setSpacing(true);
         setPadding(true);
@@ -34,100 +70,92 @@ public class UseCase01View extends VerticalLayout {
         H2 title = new H2("Use Case 1: Dynamic Button State");
 
         Paragraph description = new Paragraph(
-                "This use case demonstrates reactive form validation with dynamic button states. "
-                        + "The submit button is enabled only when all fields are valid: email contains '@', "
-                        + "password is at least 8 characters, and passwords match. "
-                        + "The button also reactively changes text during form submission.");
+                "This use case demonstrates Binder integration with signal-based dynamic button states. "
+                        + "The form uses Vaadin Binder for proper field binding and validation. "
+                        + "The submit button is enabled only when Binder validation passes. "
+                        + "The button text reactively changes during form submission using signals.");
 
-        // Field signals
-        ValueSignal<String> emailSignal = new ValueSignal<>("");
-        ValueSignal<String> passwordSignal = new ValueSignal<>("");
-        ValueSignal<String> confirmPasswordSignal = new ValueSignal<>("");
+        // Create binder and bean
+        Binder<AccountData> binder = new Binder<>(AccountData.class);
+        AccountData data = new AccountData();
+
+        // Signal for submission state (drives button text and theme)
         ValueSignal<SubmissionState> submissionStateSignal = new ValueSignal<>(
                 SubmissionState.IDLE);
-
-        // Individual field validity signals
-        Signal<Boolean> isPasswordValidSignal = Signal.computed(() -> {
-            String password = passwordSignal.get();
-            return password.isEmpty() || password.length() >= 8;
-        });
-
-        Signal<Boolean> isConfirmValidSignal = Signal.computed(() -> {
-            String password = passwordSignal.get();
-            String confirm = confirmPasswordSignal.get();
-            return confirm.isEmpty() || password.equals(confirm);
-        });
-
-        // Computed validity signal
-        Signal<Boolean> isValidSignal = Signal.computed(() -> {
-            String email = emailSignal.get();
-            String password = passwordSignal.get();
-            String confirm = confirmPasswordSignal.get();
-
-            return email.contains("@") && password.length() >= 8
-                    && password.equals(confirm);
-        });
 
         // Form fields
         EmailField emailField = new EmailField("Email");
         emailField.setHelperText("Valid email address required");
-        emailField.bindValue(emailSignal, emailSignal::set);
 
         PasswordField passwordField = new PasswordField("Password");
         passwordField.setHelperText("Minimum 8 characters required");
-        passwordField.bindValue(passwordSignal, passwordSignal::set);
-        passwordField.setMinLength(8);
 
         PasswordField confirmField = new PasswordField("Confirm Password");
         confirmField.setHelperText("Must match password");
-        confirmField.bindValue(confirmPasswordSignal,
-                confirmPasswordSignal::set);
-        confirmField.setErrorMessage("Passwords do not match");
-        Signal.effect(confirmField,
-                () -> confirmField.setInvalid(!isConfirmValidSignal.get()));
 
-        // Submit button with multiple signal bindings
+        // Binder field bindings with validators
+        binder.forField(emailField)
+                .withValidator(new EmailValidator("Please enter a valid email address"))
+                .bind(AccountData::getEmail, AccountData::setEmail);
+
+        binder.forField(passwordField)
+                .withValidator(value -> value != null && value.length() >= 8,
+                        "Password must be at least 8 characters")
+                .bind(AccountData::getPassword, AccountData::setPassword);
+
+        // Cross-field validation for password confirmation
+        binder.forField(confirmField)
+                .withValidator(value -> value != null
+                        && value.equals(passwordField.getValue()),
+                        "Passwords do not match")
+                .bind(AccountData::getConfirmPassword, AccountData::setConfirmPassword);
+
+        binder.setBean(data);
+
+        // Submit button with signal-based text and theme
         Button submitButton = new Button();
 
-        // Bind enabled state: enabled when valid AND not submitting
-        submitButton.bindEnabled(Signal
-                .computed(() -> isValidSignal.get() && (submissionStateSignal
-                        .get() != SubmissionState.SUBMITTING)));
+        // Bind enabled state using Binder's validationStatusSignal combined with submission state
+        Signal<Boolean> isFormValidSignal = binder.validationStatusSignal()
+                .map(BinderValidationStatus::isOk);
+        submitButton.bindEnabled(Signal.computed(() ->
+                isFormValidSignal.get() &&
+                submissionStateSignal.get() != SubmissionState.SUBMITTING));
 
         // Bind button text based on submission state
-        submitButton
-                .bindText(submissionStateSignal.map(state -> switch (state) {
-                case IDLE -> "Create Account";
-                case SUBMITTING -> "Creating...";
-                case SUCCESS -> "Success!";
-                case ERROR -> "Retry";
-                }));
+        submitButton.bindText(submissionStateSignal.map(state -> switch (state) {
+            case IDLE -> "Create Account";
+            case SUBMITTING -> "Creating...";
+            case SUCCESS -> "Success!";
+            case ERROR -> "Retry";
+        }));
 
         // Bind theme variant
         submitButton.bindThemeVariant(ButtonVariant.LUMO_SUCCESS,
                 submissionStateSignal.map(SubmissionState.SUCCESS::equals));
         submitButton.bindThemeVariant(ButtonVariant.LUMO_PRIMARY,
-                submissionStateSignal
-                        .map(state -> state != SubmissionState.SUCCESS));
+                submissionStateSignal.map(state -> state != SubmissionState.SUCCESS));
 
         submitButton.addClickListener(e -> {
+            if (!binder.isValid()) {
+                return;
+            }
+
             submissionStateSignal.set(SubmissionState.SUBMITTING);
+
             // Simulate async submission
             CompletableFuture.runAsync(() -> {
                 try {
                     Thread.sleep(2000);
                     submissionStateSignal.set(SubmissionState.SUCCESS);
 
-                    // Reset form fields
-                    emailSignal.set("");
-                    passwordSignal.set("");
-                    confirmPasswordSignal.set("");
+                    // Reset form using Binder
+                    binder.setBean(new AccountData());
 
                     // Reset submission state back to IDLE
                     submissionStateSignal.set(SubmissionState.IDLE);
 
-                    // Show success notification (imperative UI - needs
-                    // ui.access)
+                    // Show success notification (imperative UI - needs ui.access)
                     getUI().ifPresent(ui -> ui.access(() -> {
                         Notification notification = Notification
                                 .show("Account created successfully!");
