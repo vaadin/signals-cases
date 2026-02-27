@@ -60,20 +60,6 @@ public class MissingAPI {
     }
 
     /**
-     * Binds the browser document title to a Signal. The UI is used to get the
-     * page and execute JavaScript to update document.title.
-     */
-    public static void bindBrowserTitle(com.vaadin.flow.component.UI ui,
-            Signal<String> signal) {
-        Signal.effect(ui, () -> {
-            String title = signal.get();
-            if (title != null) {
-                ui.getPage().setTitle(title);
-            }
-        });
-    }
-
-    /**
      * Synchronizes the selected index between a Tabs component and a writable
      * signal.
      * <p>
