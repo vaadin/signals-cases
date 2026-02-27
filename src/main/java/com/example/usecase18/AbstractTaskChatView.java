@@ -3,7 +3,6 @@ package com.example.usecase18;
 import java.time.Instant;
 import java.time.LocalDate;
 
-import com.example.MissingAPI;
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
@@ -321,7 +320,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
 
         // Bind directly to ListSignal - it will register dependencies on all
         // individual ValueSignals
-        MissingAPI.bindItems(grid, tasksSignal);
+        grid.bindItems(tasksSignal);
 
         gridContainer.add(grid);
         gridContainer.setFlexGrow(1, grid);

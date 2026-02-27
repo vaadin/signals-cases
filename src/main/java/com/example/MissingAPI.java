@@ -18,50 +18,6 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
 public class MissingAPI {
 
     /**
-     * Binds a Grid's items to a Signal containing a List.
-     */
-    public static <T> void bindItems(Grid<T> grid, Signal<List<T>> signal) {
-        Signal.effect(grid, () -> {
-            List<T> items = signal.get();
-            if (items != null) {
-                grid.setItems(items);
-            } else {
-                grid.setItems(List.of());
-            }
-        });
-    }
-
-    /**
-     * Binds a Grid's items to a SharedListSignal. Registers dependencies on all
-     * individual ValueSignals within the ListSignal by reading each one, so the
-     * Grid updates when any item changes.
-     */
-    public static <T> void bindItems(Grid<T> grid,
-            SharedListSignal<T> listSignal) {
-        Signal.effect(grid, () -> {
-            List<SharedValueSignal<T>> signals = listSignal.get();
-            // Read each individual signal to register dependency
-            List<T> items = signals.stream().map(SharedValueSignal::get)
-                    .toList();
-            grid.setItems(items);
-        });
-    }
-
-    /**
-     * Binds a Grid's items to a local ListSignal. Registers dependencies on all
-     * individual ValueSignals within the ListSignal by reading each one, so the
-     * Grid updates when any item changes.
-     */
-    public static <T> void bindItems(Grid<T> grid, ListSignal<T> listSignal) {
-        Signal.effect(grid, () -> {
-            List<ValueSignal<T>> signals = listSignal.get();
-            // Read each individual signal to register dependency
-            List<T> items = signals.stream().map(ValueSignal::get).toList();
-            grid.setItems(items);
-        });
-    }
-
-    /**
      * Binds a VirtualList's items to a Signal containing a List.
      */
     public static <T> void bindItems(VirtualList<T> virtualList,
@@ -104,22 +60,6 @@ public class MissingAPI {
             // Read each individual signal to register dependency
             List<T> items = signals.stream().map(ValueSignal::get).toList();
             virtualList.setItems(items);
-        });
-    }
-
-    /**
-     * Binds a ComboBox's items to a Signal containing a List.
-     */
-    public static <T> void bindItems(
-            com.vaadin.flow.component.combobox.ComboBox<T> comboBox,
-            Signal<List<T>> signal) {
-        Signal.effect(comboBox, () -> {
-            List<T> items = signal.get();
-            if (items != null) {
-                comboBox.setItems(items);
-            } else {
-                comboBox.setItems(List.of());
-            }
         });
     }
 
