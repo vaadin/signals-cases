@@ -34,4 +34,39 @@ class UseCase21ViewTest extends SpringBrowserlessTest {
         // Submit and Cancel buttons (text from i18n signals)
         assertEquals(2, $view(Button.class).all().size());
     }
+
+    @Test
+    void buttonTextsAreEnglishTranslations() {
+        navigate(UseCase21View.class);
+        runPendingSignalsTasks();
+
+        assertTrue($view(Button.class).all().stream()
+                .anyMatch(b -> "Submit".equals(b.getText())));
+        assertTrue($view(Button.class).all().stream()
+                .anyMatch(b -> "Cancel".equals(b.getText())));
+    }
+
+    @Test
+    void formFieldLabelsAreEnglishTranslations() {
+        navigate(UseCase21View.class);
+        runPendingSignalsTasks();
+
+        TextField nameField = $view(TextField.class).single();
+        assertEquals("Name", nameField.getLabel());
+
+        EmailField emailField = $view(EmailField.class).single();
+        assertEquals("Email", emailField.getLabel());
+    }
+
+    @Test
+    void formFieldPlaceholdersAreEnglishTranslations() {
+        navigate(UseCase21View.class);
+        runPendingSignalsTasks();
+
+        TextField nameField = $view(TextField.class).single();
+        assertEquals("Enter your name", nameField.getPlaceholder());
+
+        EmailField emailField = $view(EmailField.class).single();
+        assertEquals("Enter your email address", emailField.getPlaceholder());
+    }
 }
