@@ -1,12 +1,10 @@
 package com.example;
 
-import java.util.List;
-
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
+import java.util.List;
 
 /**
  * Temporary helper class providing static methods for Signal-based component
@@ -26,37 +24,6 @@ public class MissingAPI {
             } else {
                 virtualList.setItems(List.of());
             }
-        });
-    }
-
-    /**
-     * Binds a VirtualList's items to a SharedListSignal. Registers dependencies
-     * on all individual ValueSignals within the ListSignal by reading each one,
-     * so the VirtualList updates when any item changes.
-     */
-    public static <T> void bindItems(VirtualList<T> virtualList,
-            SharedListSignal<T> listSignal) {
-        Signal.effect(virtualList, () -> {
-            List<SharedValueSignal<T>> signals = listSignal.get();
-            // Read each individual signal to register dependency
-            List<T> items = signals.stream().map(SharedValueSignal::get)
-                    .toList();
-            virtualList.setItems(items);
-        });
-    }
-
-    /**
-     * Binds a VirtualList's items to a local ListSignal. Registers dependencies
-     * on all individual ValueSignals within the ListSignal by reading each one,
-     * so the VirtualList updates when any item changes.
-     */
-    public static <T> void bindItems(VirtualList<T> virtualList,
-            ListSignal<T> listSignal) {
-        Signal.effect(virtualList, () -> {
-            List<ValueSignal<T>> signals = listSignal.get();
-            // Read each individual signal to register dependency
-            List<T> items = signals.stream().map(ValueSignal::get).toList();
-            virtualList.setItems(items);
         });
     }
 
