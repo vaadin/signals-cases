@@ -62,4 +62,21 @@ class UseCase07ViewTest extends SpringBrowserlessTest {
         Grid<Invoice> grid = $view(Grid.class).atIndex(1);
         assertEquals(5, test(grid).size());
     }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void selectingInvoiceShowsDetailPanel() {
+        navigate(UseCase07View.class);
+        runPendingSignalsTasks();
+
+        // Select first invoice in grid
+        Grid<Invoice> grid = $view(Grid.class).atIndex(1);
+        Invoice firstInvoice = test(grid).getRow(0);
+        grid.asSingleSelect().setValue(firstInvoice);
+        runPendingSignalsTasks();
+
+        // Detail panel should become visible — "Add Line Item" button appears
+        assertTrue($view(Button.class).all().stream()
+                .anyMatch(b -> "Add Line Item".equals(b.getText())));
+    }
 }
