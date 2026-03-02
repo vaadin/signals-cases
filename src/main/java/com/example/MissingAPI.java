@@ -6,10 +6,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.flow.signals.shared.SharedListSignal;
-import com.vaadin.flow.signals.shared.SharedValueSignal;
 
 /**
  * Temporary helper class providing static methods for Signal-based component

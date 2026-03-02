@@ -88,14 +88,15 @@ public class UseCase09View extends VerticalLayout {
                         "Please enter a valid email address")
                 .bind("email");
 
-        binder.forField(passwordField)
+        Binder.Binding<UserRegistration, String> passwordBinding = binder
+                .forField(passwordField)
                 .withValidator(value -> value != null && value.length() >= 8,
                         "Password must be at least 8 characters")
                 .bind("password");
-        // cross-field validation using field getValue()
+        // cross-field validation using field Binding.valueSignal()
         binder.forField(confirmPasswordField).withValidator(
                 value -> value != null
-                        && value.equals(passwordField.getValue()),
+                        && value.equals(passwordBinding.valueSignal().get()),
                 "Passwords do not match").bind("confirmPassword");
 
         binder.forField(accountTypeSelect).bind("accountType");
