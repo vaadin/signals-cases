@@ -6,10 +6,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.flow.signals.shared.SharedListSignal;
-import com.vaadin.flow.signals.shared.SharedValueSignal;
 
 /**
  * Temporary helper class providing static methods for Signal-based component
@@ -32,36 +29,6 @@ public class MissingAPI {
     }
 
     /**
-     * Binds a Grid's items to a SharedListSignal. Registers dependencies on all
-     * individual ValueSignals within the ListSignal by reading each one, so the
-     * Grid updates when any item changes.
-     */
-    public static <T> void bindItems(Grid<T> grid,
-            SharedListSignal<T> listSignal) {
-        Signal.effect(grid, () -> {
-            List<SharedValueSignal<T>> signals = listSignal.get();
-            // Read each individual signal to register dependency
-            List<T> items = signals.stream().map(SharedValueSignal::get)
-                    .toList();
-            grid.setItems(items);
-        });
-    }
-
-    /**
-     * Binds a Grid's items to a local ListSignal. Registers dependencies on all
-     * individual ValueSignals within the ListSignal by reading each one, so the
-     * Grid updates when any item changes.
-     */
-    public static <T> void bindItems(Grid<T> grid, ListSignal<T> listSignal) {
-        Signal.effect(grid, () -> {
-            List<ValueSignal<T>> signals = listSignal.get();
-            // Read each individual signal to register dependency
-            List<T> items = signals.stream().map(ValueSignal::get).toList();
-            grid.setItems(items);
-        });
-    }
-
-    /**
      * Binds a VirtualList's items to a Signal containing a List.
      */
     public static <T> void bindItems(VirtualList<T> virtualList,
@@ -77,37 +44,6 @@ public class MissingAPI {
     }
 
     /**
-     * Binds a VirtualList's items to a SharedListSignal. Registers dependencies
-     * on all individual ValueSignals within the ListSignal by reading each one,
-     * so the VirtualList updates when any item changes.
-     */
-    public static <T> void bindItems(VirtualList<T> virtualList,
-            SharedListSignal<T> listSignal) {
-        Signal.effect(virtualList, () -> {
-            List<SharedValueSignal<T>> signals = listSignal.get();
-            // Read each individual signal to register dependency
-            List<T> items = signals.stream().map(SharedValueSignal::get)
-                    .toList();
-            virtualList.setItems(items);
-        });
-    }
-
-    /**
-     * Binds a VirtualList's items to a local ListSignal. Registers dependencies
-     * on all individual ValueSignals within the ListSignal by reading each one,
-     * so the VirtualList updates when any item changes.
-     */
-    public static <T> void bindItems(VirtualList<T> virtualList,
-            ListSignal<T> listSignal) {
-        Signal.effect(virtualList, () -> {
-            List<ValueSignal<T>> signals = listSignal.get();
-            // Read each individual signal to register dependency
-            List<T> items = signals.stream().map(ValueSignal::get).toList();
-            virtualList.setItems(items);
-        });
-    }
-
-    /**
      * Binds a ComboBox's items to a Signal containing a List.
      */
     public static <T> void bindItems(
@@ -119,20 +55,6 @@ public class MissingAPI {
                 comboBox.setItems(items);
             } else {
                 comboBox.setItems(List.of());
-            }
-        });
-    }
-
-    /**
-     * Binds the browser document title to a Signal. The UI is used to get the
-     * page and execute JavaScript to update document.title.
-     */
-    public static void bindBrowserTitle(com.vaadin.flow.component.UI ui,
-            Signal<String> signal) {
-        Signal.effect(ui, () -> {
-            String title = signal.get();
-            if (title != null) {
-                ui.getPage().setTitle(title);
             }
         });
     }

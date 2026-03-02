@@ -88,15 +88,7 @@ public class UseCase07View extends VerticalLayout {
         invoiceGrid = new Grid<>(Invoice.class);
         invoiceGrid.setColumns("id", "customerName", "dueDate", "total",
                 "status");
-        Signal.effect(invoiceGrid, () -> {
-            var invoices = invoiceListSignal.get().stream()
-                    .map(ValueSignal::peek).toList();
-            invoiceGrid.setItems(invoices);
-            invoiceListSignal.get()
-                    .forEach(signal -> Signal.effect(invoiceGrid, () -> {
-                        invoiceGrid.getDataProvider().refreshItem(signal.get());
-                    }));
-        });
+        invoiceGrid.bindItems(invoiceListSignal);
         invoiceGrid.asSingleSelect().addValueChangeListener(e -> {
             Invoice selected = e.getValue();
             selectedInvoiceSignal
@@ -182,16 +174,12 @@ public class UseCase07View extends VerticalLayout {
             return button;
         });
 
+        lineItemsGrid.bindItems(lineItemsSignal);
         Signal.effect(lineItemsGrid, () -> {
-            var lineItems = lineItemsSignal.get().stream()
-                    .map(ValueSignal::peek).toList();
-            lineItemsGrid.setItems(lineItems);
             updateFooterTotal(lineItemsGrid);
             lineItemsSignal.get()
                     .forEach(signal -> Signal.effect(lineItemsGrid, () -> {
-                        // refresh the item in the grid
-                        lineItemsGrid.getDataProvider()
-                                .refreshItem(signal.get());
+                        signal.get(); // trigger
                         // update footer total
                         updateFooterTotal(lineItemsGrid);
                     }));
