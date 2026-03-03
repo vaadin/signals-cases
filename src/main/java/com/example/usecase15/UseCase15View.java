@@ -4,6 +4,10 @@ import jakarta.annotation.security.PermitAll;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -32,12 +36,13 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * Use Case 15: Debounced Search
  *
  * Demonstrates search-as-you-type with debouncing: - TextField with immediate
- * updates to signal - Debounced signal (300ms delay) - Search only fires after
- * user stops typing - Cancel in-flight requests on new input - Loading
- * indicator during search - Highlight matching text in results
+ * updates to instant signal - Manually debounced signal (1000ms delay) - Search
+ * only fires after user stops typing - Cancel in-flight requests on new input -
+ * Loading indicator during search - Highlight matching text in results
  *
- * Key Patterns: - Debouncing for performance - Async search with cancellation -
- * Loading states for search - Real-time search results
+ * Key Patterns: - Manual debouncing with ScheduledExecutorService - Async
+ * search with cancellation - Loading states for search - Real-time search
+ * results - Keystroke vs search count comparison
  */
 @Route(value = "use-case-15", layout = MainLayout.class)
 @PageTitle("Use Case 15: Debounced Search")
@@ -72,12 +77,21 @@ public class UseCase15View extends VerticalLayout {
             new Product("14", "Webcam HD", "Electronics", 79.99),
             new Product("15", "Bookshelf", "Furniture", 129.99));
 
+    private static final long DEBOUNCE_DELAY_MS = 1000;
+
+    private final ValueSignal<String> instantQuerySignal = new ValueSignal<>(
+            "");
     private final ValueSignal<String> searchQuerySignal = new ValueSignal<>("");
     private final ValueSignal<Boolean> isSearchingSignal = new ValueSignal<>(
             false);
     private final ListSignal<Product> searchResultsSignal = new ListSignal<>();
     private final ValueSignal<Integer> searchCountSignal = new ValueSignal<>(0);
+    private final ValueSignal<Integer> keystrokeCountSignal = new ValueSignal<>(
+            0);
 
+    private final ScheduledExecutorService debounceExecutor = Executors
+            .newSingleThreadScheduledExecutor();
+    private final AtomicReference<ScheduledFuture<?>> pendingDebounce = new AtomicReference<>();
     private final AtomicReference<CompletableFuture<Void>> currentSearch = new AtomicReference<>();
 
     public UseCase15View() {
@@ -88,22 +102,23 @@ public class UseCase15View extends VerticalLayout {
 
         Paragraph description = new Paragraph(
                 "This use case demonstrates search-as-you-type with debouncing. "
-                        + "As you type in the search field, the actual search is delayed by 300ms. "
+                        + "As you type, the 'Instant value' updates on every keystroke, but the actual search is delayed by 1000ms. "
                         + "This prevents excessive server calls while typing and only searches after you pause. "
-                        + "The search counter shows how many searches were actually performed.");
+                        + "Compare the keystroke count vs search count to see debounce efficiency.");
 
-        // Search field
+        // Search field — EAGER mode sends every keystroke
         TextField searchField = new TextField("Search Products");
         searchField.setPlaceholder("Type to search...");
         searchField.setWidth("400px");
         searchField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
         searchField.setClearButtonVisible(true);
-        searchField.setValueChangeMode(ValueChangeMode.LAZY);
-        searchField.setValueChangeTimeout(300);
+        searchField.setValueChangeMode(ValueChangeMode.EAGER);
 
-        searchField.bindValue(searchQuerySignal, searchQuerySignal::set);
-        searchField.addValueChangeListener(e -> {
-            performSearch(searchQuerySignal.get());
+        searchField.bindValue(instantQuerySignal, value -> {
+            instantQuerySignal.set(value);
+            keystrokeCountSignal
+                    .set(keystrokeCountSignal.peek() + 1);
+            scheduleDebouncedSearch(value);
         });
 
         // Search stats
@@ -111,20 +126,20 @@ public class UseCase15View extends VerticalLayout {
         statsBox.getStyle().set("background-color", "#f5f5f5")
                 .set("padding", "1em").set("border-radius", "4px")
                 .set("margin", "1em 0").set("display", "flex").set("gap", "2em")
-                .set("align-items", "center");
+                .set("flex-wrap", "wrap").set("align-items", "center");
 
         Div instantQueryDiv = new Div();
         Span instantLabel = new Span("Instant value: ");
         instantLabel.getStyle().set("color",
                 "var(--lumo-secondary-text-color)");
-        Span instantValue = new Span(searchQuerySignal
+        Span instantValue = new Span(instantQuerySignal
                 .map(q -> q.isEmpty() ? "(empty)" : "\"" + q + "\""));
         instantValue.getStyle().set("font-family", "monospace")
                 .set("font-weight", "bold");
         instantQueryDiv.add(instantLabel, instantValue);
 
         Div debouncedQueryDiv = new Div();
-        Span debouncedLabel = new Span("Debounced value (300ms): ");
+        Span debouncedLabel = new Span("Debounced value (1000ms): ");
         debouncedLabel.getStyle().set("color",
                 "var(--lumo-secondary-text-color)");
         Span debouncedValue = new Span(searchQuerySignal
@@ -134,6 +149,15 @@ public class UseCase15View extends VerticalLayout {
                 .set("color", "var(--lumo-primary-color)");
         debouncedQueryDiv.add(debouncedLabel, debouncedValue);
 
+        Div keystrokeCountDiv = new Div();
+        Span keystrokeLabel = new Span("Keystrokes: ");
+        keystrokeLabel.getStyle().set("color",
+                "var(--lumo-secondary-text-color)");
+        Span keystrokeValue = new Span(
+                keystrokeCountSignal.map(String::valueOf));
+        keystrokeValue.getStyle().set("font-weight", "bold");
+        keystrokeCountDiv.add(keystrokeLabel, keystrokeValue);
+
         Div searchCountDiv = new Div();
         Span countLabel = new Span("Searches performed: ");
         countLabel.getStyle().set("color", "var(--lumo-secondary-text-color)");
@@ -142,7 +166,8 @@ public class UseCase15View extends VerticalLayout {
                 "var(--lumo-success-color)");
         searchCountDiv.add(countLabel, countValue);
 
-        statsBox.add(instantQueryDiv, debouncedQueryDiv, searchCountDiv);
+        statsBox.add(instantQueryDiv, debouncedQueryDiv, keystrokeCountDiv,
+                searchCountDiv);
 
         // Search status
         Div statusBox = new Div();
@@ -186,11 +211,10 @@ public class UseCase15View extends VerticalLayout {
                 .set("padding", "1em").set("border-radius", "4px")
                 .set("margin-top", "1em").set("font-style", "italic");
         infoBox.add(new Paragraph(
-                "💡 Debouncing is critical for performance in production applications. "
+                "Debouncing is critical for performance in production applications. "
                         + "Without debouncing, typing 'laptop' would trigger 6 searches (one per character). "
-                        + "With debouncing, it triggers just 1 search after you stop typing. "
-                        + "The pattern also demonstrates cancelling in-flight requests when a new search starts. "
-                        + "Watch the 'Searches performed' counter to see the debouncing in action."));
+                        + "With 1000ms debouncing, it triggers just 1 search after you stop typing. "
+                        + "Compare the Keystrokes and Searches performed counters to see the savings."));
 
         // Add CSS for spinner animation
         getElement().executeJs("const style = document.createElement('style');"
@@ -209,11 +233,32 @@ public class UseCase15View extends VerticalLayout {
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
+        // Cancel pending debounce
+        ScheduledFuture<?> pending = pendingDebounce.get();
+        if (pending != null) {
+            pending.cancel(false);
+        }
+        debounceExecutor.shutdownNow();
         // Cancel any in-flight search
         CompletableFuture<Void> search = currentSearch.get();
         if (search != null) {
             search.cancel(true);
         }
+    }
+
+    private void scheduleDebouncedSearch(String query) {
+        // Cancel any pending debounce timer
+        ScheduledFuture<?> pending = pendingDebounce.get();
+        if (pending != null) {
+            pending.cancel(false);
+        }
+
+        // Schedule a new debounced search
+        ScheduledFuture<?> future = debounceExecutor.schedule(() -> {
+            searchQuerySignal.set(query);
+            performSearch(query);
+        }, DEBOUNCE_DELAY_MS, TimeUnit.MILLISECONDS);
+        pendingDebounce.set(future);
     }
 
     private void performSearch(String query) {
