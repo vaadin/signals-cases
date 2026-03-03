@@ -4,6 +4,8 @@ import jakarta.annotation.security.PermitAll;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -128,7 +130,7 @@ public class UseCase08View extends VerticalLayout {
         step3Binder.setBean(formData);
 
         Span planDescription = new Span();
-        Signal<Plan> planSignal = step3Binder.validationStatusSignal()
+        Signal<@Nullable Plan> planSignal = step3Binder.validationStatusSignal()
                 .map(status -> formData.getPlan());
         planDescription.bindText(planSignal.map(plan -> {
             if (plan == null) return "Select a plan to see details";
