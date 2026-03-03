@@ -98,7 +98,7 @@ public class UseCase01View extends VerticalLayout {
                 .withValidator(new EmailValidator("Please enter a valid email address"))
                 .bind(AccountData::getEmail, AccountData::setEmail);
 
-        binder.forField(passwordField)
+        var passwordBinding = binder.forField(passwordField)
                 .withValidator(value -> value != null && value.length() >= 8,
                         "Password must be at least 8 characters")
                 .bind(AccountData::getPassword, AccountData::setPassword);
@@ -106,7 +106,7 @@ public class UseCase01View extends VerticalLayout {
         // Cross-field validation for password confirmation
         binder.forField(confirmField)
                 .withValidator(value -> value != null
-                        && value.equals(passwordField.getValue()),
+                        && value.equals(passwordBinding.valueSignal().get()),
                         "Passwords do not match")
                 .bind(AccountData::getConfirmPassword, AccountData::setConfirmPassword);
 
