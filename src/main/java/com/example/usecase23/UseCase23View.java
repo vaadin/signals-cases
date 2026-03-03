@@ -192,16 +192,13 @@ public class UseCase23View extends Main {
                     () -> "Status: " + statusText.get());
             status.getElement().bindAttribute("title",
                     () -> "Status: " + statusText.get());
+            status.getElement().getThemeList().addAll(List.of("badge", "primary"));
             status.getElement().getThemeList().bind(() -> {
-                List<String> themes = new ArrayList<>(3);
-                themes.add("badge");
-                themes.add("primary");
-                if (signal.get().getStatus() == Status.EXCELLENT) {
-                    themes.add("success");
-                } else if (signal.get().getStatus() == Status.FAILING) {
-                    themes.add("error");
-                }
-                return themes;
+                return switch (signal.get().getStatus()) {
+                    case EXCELLENT -> List.of("success");
+                    case FAILING -> List.of("error");
+                    default -> List.of();
+                };
             });
             return status;
         })).setHeader("").setFlexGrow(0).setAutoWidth(true);
