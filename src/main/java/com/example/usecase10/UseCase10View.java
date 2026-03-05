@@ -122,8 +122,9 @@ public class UseCase10View extends VerticalLayout {
                 .whenComplete((TransferContext ctx, Boolean success) -> {
                     if (!success) {
                         String reason = ctx.exception() != null
-                                ? ctx.exception().getMessage()
-                                : "Unknown error";
+                                && ctx.exception().getMessage() != null
+                                        ? ctx.exception().getMessage()
+                                        : "Unknown error";
                         uploadStateSignal.set(
                                 new UploadState.Failed(ctx.fileName(), reason));
                     }
