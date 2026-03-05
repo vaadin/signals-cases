@@ -42,8 +42,10 @@ public sealed interface UploadState {
             return bytes + " B";
         }
         if (bytes < 1024 * 1024) {
-            return String.format("%.1f KB", bytes / 1024.0);
+            return String.format(java.util.Locale.US, "%.1f KB",
+                    bytes / 1024.0);
         }
-        return String.format("%.1f MB", bytes / (1024.0 * 1024));
+        return String.format(java.util.Locale.US, "%.1f MB",
+                bytes / (1024.0 * 1024));
     }
 }
