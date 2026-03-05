@@ -12,7 +12,7 @@ public class FormData {
     private String companyName = "";
     private String companySize = "";
     private String industry = "";
-    private @Nullable Plan plan;
+    private @Nullable Plan plan = Plan.STARTER;
 
     public FormData() {
     }
