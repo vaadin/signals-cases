@@ -29,7 +29,7 @@ import org.jspecify.annotations.Nullable;
 @PermitAll
 public class UseCase25View extends Main {
 
-    private final ListSignal<StockQuote> stockSignals = new ListSignal<>();
+    final ListSignal<StockQuote> stockSignals = new ListSignal<>();
     private @Nullable String taskId;
 
     public UseCase25View(SchedulerService schedulerService) {
