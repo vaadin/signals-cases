@@ -4,7 +4,6 @@ import jakarta.annotation.security.PermitAll;
 
 import java.util.List;
 
-import org.jspecify.annotations.Nullable;
 
 import com.example.views.MainLayout;
 
@@ -130,15 +129,12 @@ public class UseCase08View extends VerticalLayout {
         step3Binder.setBean(formData);
 
         Span planDescription = new Span();
-        Signal<@Nullable Plan> planSignal = step3Binder.validationStatusSignal()
+        Signal<Plan> planSignal = step3Binder.validationStatusSignal()
                 .map(status -> formData.getPlan());
-        planDescription.bindText(planSignal.map(plan -> {
-            if (plan == null) return "Select a plan to see details";
-            return switch (plan) {
-                case STARTER -> "Perfect for small teams - $29/month";
-                case PROFESSIONAL -> "For growing businesses - $99/month";
-                case ENTERPRISE -> "Custom solutions - Contact sales";
-            };
+        planDescription.bindText(planSignal.map(plan -> switch (plan) {
+            case STARTER -> "Perfect for small teams - $29/month";
+            case PROFESSIONAL -> "For growing businesses - $99/month";
+            case ENTERPRISE -> "Custom solutions - Contact sales";
         }));
 
         step3Layout.add(planSelect, planDescription);

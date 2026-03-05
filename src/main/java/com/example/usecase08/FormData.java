@@ -1,7 +1,5 @@
 package com.example.usecase08;
 
-import org.jspecify.annotations.Nullable;
-
 /**
  * Mutable data class for wizard form binding with Binder.
  */
@@ -12,7 +10,7 @@ public class FormData {
     private String companyName = "";
     private String companySize = "";
     private String industry = "";
-    private @Nullable Plan plan = Plan.STARTER;
+    private Plan plan = Plan.STARTER;
 
     public FormData() {
     }
@@ -65,11 +63,11 @@ public class FormData {
         this.industry = industry;
     }
 
-    public @Nullable Plan getPlan() {
+    public Plan getPlan() {
         return plan;
     }
 
-    public void setPlan(@Nullable Plan plan) {
+    public void setPlan(Plan plan) {
         this.plan = plan;
     }
 }
