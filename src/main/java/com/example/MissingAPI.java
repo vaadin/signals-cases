@@ -1,32 +1,16 @@
 package com.example;
 
-import java.util.List;
-
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
+import java.util.List;
 
 /**
  * Temporary helper class providing static methods for Signal-based component
  * bindings until the official API is implemented in Vaadin.
  */
 public class MissingAPI {
-
-    /**
-     * Binds a Grid's items to a Signal containing a List.
-     */
-    public static <T> void bindItems(Grid<T> grid, Signal<List<T>> signal) {
-        Signal.effect(grid, () -> {
-            List<T> items = signal.get();
-            if (items != null) {
-                grid.setItems(items);
-            } else {
-                grid.setItems(List.of());
-            }
-        });
-    }
 
     /**
      * Binds a VirtualList's items to a Signal containing a List.
@@ -44,17 +28,15 @@ public class MissingAPI {
     }
 
     /**
-     * Binds a ComboBox's items to a Signal containing a List.
+     * Binds the browser document title to a Signal. The UI is used to get the
+     * page and execute JavaScript to update document.title.
      */
-    public static <T> void bindItems(
-            com.vaadin.flow.component.combobox.ComboBox<T> comboBox,
-            Signal<List<T>> signal) {
-        Signal.effect(comboBox, () -> {
-            List<T> items = signal.get();
-            if (items != null) {
-                comboBox.setItems(items);
-            } else {
-                comboBox.setItems(List.of());
+    public static void bindBrowserTitle(com.vaadin.flow.component.UI ui,
+            Signal<String> signal) {
+        Signal.effect(ui, () -> {
+            String title = signal.get();
+            if (title != null) {
+                ui.getPage().setTitle(title);
             }
         });
     }

@@ -4,7 +4,6 @@ import jakarta.annotation.security.PermitAll;
 
 import java.util.List;
 
-import com.example.MissingAPI;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -46,8 +45,8 @@ public class UseCase04View extends VerticalLayout {
         // Load all products
         List<Product> allProducts = loadProducts();
 
-        // Computed signal for filtered products
-        Signal<List<Product>> filteredProductsSignal = Signal.computed(() -> {
+        // Computed signal for filtered products - returns a list of signals
+        Signal<List<ValueSignal<Product>>> filteredProductsSignal = Signal.computed(() -> {
             String category = categoryFilterSignal.get();
             String searchTerm = searchTermSignal.get().toLowerCase();
             boolean inStockOnly = inStockOnlySignal.get();
@@ -58,7 +57,9 @@ public class UseCase04View extends VerticalLayout {
                     .filter(p -> searchTerm.isEmpty()
                             || p.name().toLowerCase().contains(searchTerm)
                             || p.id().toLowerCase().contains(searchTerm))
-                    .filter(p -> !inStockOnly || p.stock() > 0).toList();
+                    .filter(p -> !inStockOnly || p.stock() > 0)
+                    .map(ValueSignal::new)
+                    .toList();
         });
 
         // Filter UI components
@@ -77,7 +78,7 @@ public class UseCase04View extends VerticalLayout {
         // Data grid
         Grid<Product> grid = new Grid<>(Product.class);
         grid.setColumns("id", "name", "category", "price", "stock");
-        MissingAPI.bindItems(grid, filteredProductsSignal);
+        grid.bindItems(filteredProductsSignal);
 
         add(title, description, categoryFilter, searchField, inStockCheckbox,
                 grid);

@@ -5,7 +5,6 @@ import jakarta.annotation.security.PermitAll;
 import java.util.List;
 import java.util.Map;
 
-import com.example.MissingAPI;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -48,10 +47,11 @@ public class UseCase05View extends VerticalLayout {
         // State selector - computed items based on country
         ComboBox<String> stateSelect = new ComboBox<>("State/Province");
         stateSelect.setItems(List.of()); // Initialize with empty items
-        MissingAPI.bindItems(stateSelect, countrySignal.map(country -> {
-            stateSignal.set(""); // Reset state when country changes
-            return country != null && !country.isEmpty() ? loadStates(country)
-                    : List.of();
+        stateSelect.bindItems(countrySignal.map(country -> {
+            stateSignal.set(""); // Reset state when the country changes
+            List<String> states = country != null && !country.isEmpty()
+                    ? loadStates(country) : List.of();
+            return states.stream().map(ValueSignal::new).toList();
         }));
         stateSelect.bindValue(stateSignal, stateSignal::set);
         stateSelect.bindEnabled(countrySignal
@@ -60,11 +60,11 @@ public class UseCase05View extends VerticalLayout {
         // City selector - computed items based on state
         ComboBox<String> citySelect = new ComboBox<>("City");
         citySelect.setItems(List.of()); // Initialize with empty items
-        MissingAPI.bindItems(citySelect, stateSignal.map(state -> {
+        citySelect.bindItems(stateSignal.map(state -> {
             citySignal.set(""); // Reset city when state changes
-            return state != null && !state.isEmpty()
-                    ? loadCities(countrySignal.get(), state)
-                    : List.of();
+            List<String> cities = state != null && !state.isEmpty()
+                    ? loadCities(countrySignal.get(), state) : List.of();
+            return cities.stream().map(ValueSignal::new).toList();
         }));
         citySelect.bindValue(citySignal, citySignal::set);
         citySelect.bindEnabled(
