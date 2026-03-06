@@ -127,7 +127,8 @@ public class UseCase25View extends Main {
         // Price
         Span price = new Span();
         price.bindText(stockSignal
-                .map(q -> String.format("$%.2f", q.price())));
+                .map(q -> String.format(java.util.Locale.US, "$%.2f",
+                        q.price())));
         price.getStyle().set("text-align", "right")
                 .set("font-family", "monospace")
                 .set("font-weight", "600")
@@ -138,7 +139,8 @@ public class UseCase25View extends Main {
         Span change = new Span();
         change.bindText(stockSignal.map(q -> {
             String prefix = q.change() >= 0 ? "+" : "";
-            return prefix + String.format("%.2f", q.change());
+            return prefix + String.format(java.util.Locale.US, "%.2f",
+                    q.change());
         }));
         change.getStyle().set("text-align", "right")
                 .set("font-family", "monospace");
@@ -147,7 +149,8 @@ public class UseCase25View extends Main {
         Span pctChange = new Span();
         pctChange.bindText(stockSignal.map(q -> {
             String prefix = q.changePercent() >= 0 ? "+" : "";
-            return prefix + String.format("%.2f%%", q.changePercent());
+            return prefix + String.format(java.util.Locale.US, "%.2f%%",
+                    q.changePercent());
         }));
         pctChange.getStyle().set("text-align", "right")
                 .set("font-family", "monospace");
