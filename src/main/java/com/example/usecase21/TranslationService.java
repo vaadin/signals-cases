@@ -4,12 +4,8 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.springframework.stereotype.Service;
-import org.springframework.web.context.annotation.SessionScope;
-
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
  * Session-scoped service that bridges ResourceBundle and Signals for reactive
@@ -19,8 +15,6 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * changes. ResourceBundle.getBundle() has built-in caching so repeated calls
  * are efficient.
  */
-@Service
-@SessionScope
 public class TranslationService {
 
     private static final String BUNDLE_NAME = "i18n.messages";
@@ -34,7 +28,7 @@ public class TranslationService {
      * @return a Signal containing the translated string, or "!key!" if not
      *         found
      */
-    public Signal<String> t(String key) {
+    public static Signal<String> translate(String key) {
         return Signal.computed(() -> {
             Locale locale = UI.getCurrent().localeSignal().get();
             try {
@@ -48,12 +42,5 @@ public class TranslationService {
             }
             return "!" + key + "!";
         });
-    }
-
-    /**
-     * Returns the current locale signal for direct access.
-     */
-    public ValueSignal<Locale> getLocaleSignal() {
-        return UI.getCurrent().localeSignal();
     }
 }
