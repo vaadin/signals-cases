@@ -21,9 +21,10 @@ public class SecurityConfiguration {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http)
             throws Exception {
-        // Allow access to profile pictures without authentication
+        // Allow access to profile pictures and actuator endpoints without authentication
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/profile-pictures/**").permitAll());
+                .requestMatchers("/profile-pictures/**").permitAll()
+                .requestMatchers("/actuator/**").permitAll());
 
         // Configure Vaadin's security using VaadinSecurityConfigurer
         http.with(VaadinSecurityConfigurer.vaadin(), configurer -> {
