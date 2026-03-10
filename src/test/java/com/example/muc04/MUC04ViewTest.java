@@ -114,7 +114,7 @@ class MUC04ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // The shared signal should reflect the value (visible to all users)
-        assertEquals("Acme Corp", muc04Signals.getCompanyNameSignal().get());
+        assertEquals("Acme Corp", muc04Signals.getCompanyNameSignal().peek());
     }
 
     @Test
