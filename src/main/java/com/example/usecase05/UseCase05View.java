@@ -39,8 +39,8 @@ public class UseCase05View extends VerticalLayout {
         // Create signals for selections - use first country as default
         List<String> countries = loadCountries();
         ValueSignal<String> countrySignal = new ValueSignal<>(countries.get(0));
-        ValueSignal<@Nullable String> stateSignal = new ValueSignal<>(null);
-        ValueSignal<@Nullable String> citySignal = new ValueSignal<>(null);
+        ValueSignal<@Nullable String> stateSignal = new ValueSignal<@Nullable String>(null);
+        ValueSignal<@Nullable String> citySignal = new ValueSignal<@Nullable String>(null);
 
         var states = countrySignal.map(country -> loadStates(country));
         var cities = stateSignal.map(state -> loadCities(countrySignal.get(), state));
@@ -69,7 +69,7 @@ public class UseCase05View extends VerticalLayout {
         return List.of("United States", "Canada", "United Kingdom", "Germany");
     }
 
-    private List<String> loadStates(String country) {
+    private List<String> loadStates(@Nullable String country) {
         if (country == null) {
             return List.of();
         }
@@ -84,7 +84,7 @@ public class UseCase05View extends VerticalLayout {
         return statesByCountry.getOrDefault(country, List.of());
     }
 
-    private List<String> loadCities(String country, String state) {
+    private List<String> loadCities(@Nullable String country, @Nullable String state) {
         if (country == null || state == null) {
             return List.of();
         }
