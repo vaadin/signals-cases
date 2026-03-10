@@ -161,14 +161,14 @@ public class MUC06View extends VerticalLayout {
     private HorizontalLayout createTaskRow(
             SharedValueSignal<MUC06Signals.Task> taskSignal,
             SharedListSignal<MUC06Signals.Task> tasksSignal) {
-        MUC06Signals.Task task = taskSignal.get();
+        MUC06Signals.Task task = taskSignal.peek();
 
         // Checkbox for completed status
         Checkbox checkbox = new Checkbox();
         checkbox.setValue(task.completed());
         checkbox.setAriaLabel("Task completed");
         checkbox.addValueChangeListener(e -> {
-            MUC06Signals.Task current = taskSignal.get();
+            MUC06Signals.Task current = taskSignal.peek();
             taskSignal.set(new MUC06Signals.Task(current.id(), current.title(),
                     e.getValue(), current.dueDate()));
         });
@@ -179,7 +179,7 @@ public class MUC06View extends VerticalLayout {
         titleField.setPlaceholder("Task title...");
         titleField.setWidth("400px");
         titleField.addValueChangeListener(e -> {
-            MUC06Signals.Task current = taskSignal.get();
+            MUC06Signals.Task current = taskSignal.peek();
             taskSignal.set(new MUC06Signals.Task(current.id(), e.getValue(),
                     current.completed(), current.dueDate()));
         });
@@ -197,7 +197,7 @@ public class MUC06View extends VerticalLayout {
         datePicker.setPlaceholder("Due date");
         datePicker.setWidth("180px");
         datePicker.addValueChangeListener(e -> {
-            MUC06Signals.Task current = taskSignal.get();
+            MUC06Signals.Task current = taskSignal.peek();
             taskSignal.set(new MUC06Signals.Task(current.id(), current.title(),
                     current.completed(), e.getValue()));
         });

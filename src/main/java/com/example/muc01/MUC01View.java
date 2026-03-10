@@ -184,13 +184,13 @@ public class MUC01View extends VerticalLayout {
             return currentUser;
         }
 
-        var users = userSessionRegistry.getActiveUsersSignal().get();
-        var displayNames = userSessionRegistry.getDisplayNamesSignal().get();
+        var users = userSessionRegistry.getActiveUsersSignal().peek();
+        var displayNames = userSessionRegistry.getDisplayNamesSignal().peek();
 
         // Find matching session key for current user
         String sessionKey = currentUser + ":" + sessionId;
         for (int i = 0; i < users.size() && i < displayNames.size(); i++) {
-            if (sessionKey.equals(users.get(i).get().getCompositeKey())) {
+            if (sessionKey.equals(users.get(i).peek().getCompositeKey())) {
                 return displayNames.get(i);
             }
         }

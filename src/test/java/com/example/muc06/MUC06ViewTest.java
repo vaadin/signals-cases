@@ -108,7 +108,7 @@ class MUC06ViewTest extends SpringBrowserlessTest {
         var tasks = muc06Signals.getTasksSignal().peek();
         // Find an incomplete task and mark it complete
         for (var taskSignal : tasks) {
-            MUC06Signals.Task task = taskSignal.get();
+            MUC06Signals.Task task = taskSignal.peek();
             if (!task.completed()) {
                 taskSignal.set(new MUC06Signals.Task(task.id(), task.title(),
                         true, task.dueDate()));

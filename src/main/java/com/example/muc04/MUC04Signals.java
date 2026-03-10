@@ -46,10 +46,10 @@ public class MUC04Signals {
 
     public void unlockField(String fieldName, String username,
             String sessionId) {
-        SharedValueSignal<FieldLock> lockSignal = fieldLocksSignal.get()
+        SharedValueSignal<FieldLock> lockSignal = fieldLocksSignal.peek()
                 .get(fieldName);
         if (lockSignal != null) {
-            FieldLock lock = lockSignal.get();
+            FieldLock lock = lockSignal.peek();
             if (lock != null && username.equals(lock.username())
                     && sessionId.equals(lock.sessionId())) {
                 fieldLocksSignal.remove(fieldName);
@@ -59,12 +59,12 @@ public class MUC04Signals {
 
     public boolean isFieldLockedByOther(String fieldName, String username,
             String sessionId) {
-        SharedValueSignal<FieldLock> lockSignal = fieldLocksSignal.get()
+        SharedValueSignal<FieldLock> lockSignal = fieldLocksSignal.peek()
                 .get(fieldName);
         if (lockSignal == null) {
             return false;
         }
-        FieldLock lockOwner = lockSignal.get();
+        FieldLock lockOwner = lockSignal.peek();
         return lockOwner != null && !(username.equals(lockOwner.username())
                 && sessionId.equals(lockOwner.sessionId()));
     }
