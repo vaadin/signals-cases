@@ -1,11 +1,13 @@
 package com.example;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
@@ -87,5 +89,9 @@ public class MissingAPI {
         tabs.addSelectedChangeListener(event -> {
             numberSignal.set(event.getSource().getSelectedIndex());
         });
+    }
+
+    public static <T> Stream<T> getValues(ListSignal<T> signal) {
+        return signal.get().stream().map(Signal::get);
     }
 }
