@@ -5,6 +5,8 @@ import jakarta.annotation.security.PermitAll;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import com.example.MissingAPI;
 import com.example.views.MainLayout;
 
@@ -37,8 +39,11 @@ public class UseCase05View extends VerticalLayout {
         // Create signals for selections - use first country as default
         List<String> countries = loadCountries();
         ValueSignal<String> countrySignal = new ValueSignal<>(countries.get(0));
-        ValueSignal<String> stateSignal = new ValueSignal<>("");
-        ValueSignal<String> citySignal = new ValueSignal<>("");
+        ValueSignal<@Nullable String> stateSignal = new ValueSignal<>(null);
+        ValueSignal<@Nullable String> citySignal = new ValueSignal<>(null);
+
+        var states = countrySignal.map(country -> loadStates(country));
+        var cities = stateSignal.map(state -> loadCities(countrySignal.get(), state));
 
         // Country selector
         ComboBox<String> countrySelect = new ComboBox<>("Country");
@@ -47,28 +52,14 @@ public class UseCase05View extends VerticalLayout {
 
         // State selector - computed items based on country
         ComboBox<String> stateSelect = new ComboBox<>("State/Province");
-        stateSelect.setItems(List.of()); // Initialize with empty items
-        MissingAPI.bindItems(stateSelect, countrySignal.map(country -> {
-            stateSignal.set(""); // Reset state when country changes
-            return country != null && !country.isEmpty() ? loadStates(country)
-                    : List.of();
-        }));
+        MissingAPI.bindItems(stateSelect, states);
         stateSelect.bindValue(stateSignal, stateSignal::set);
-        stateSelect.bindEnabled(countrySignal
-                .map(country -> country != null && !country.isEmpty()));
 
         // City selector - computed items based on state
         ComboBox<String> citySelect = new ComboBox<>("City");
-        citySelect.setItems(List.of()); // Initialize with empty items
-        MissingAPI.bindItems(citySelect, stateSignal.map(state -> {
-            citySignal.set(""); // Reset city when state changes
-            return state != null && !state.isEmpty()
-                    ? loadCities(countrySignal.get(), state)
-                    : List.of();
-        }));
+        MissingAPI.bindItems(citySelect, cities);
         citySelect.bindValue(citySignal, citySignal::set);
-        citySelect.bindEnabled(
-                stateSignal.map(state -> state != null && !state.isEmpty()));
+        citySelect.bindEnabled(() -> !cities.get().isEmpty());
 
         add(title, description, countrySelect, stateSelect, citySelect);
     }
@@ -79,6 +70,10 @@ public class UseCase05View extends VerticalLayout {
     }
 
     private List<String> loadStates(String country) {
+        if (country == null) {
+            return List.of();
+        }
+
         // Stub implementation - returns mock data
         Map<String, List<String>> statesByCountry = Map.of("United States",
                 List.of("California", "Texas", "New York", "Florida"), "Canada",
@@ -90,6 +85,10 @@ public class UseCase05View extends VerticalLayout {
     }
 
     private List<String> loadCities(String country, String state) {
+        if (country == null || state == null) {
+            return List.of();
+        }
+
         // Stub implementation - returns mock data
         Map<String, Map<String, List<String>>> citiesByState = Map.of(
                 "United States",
