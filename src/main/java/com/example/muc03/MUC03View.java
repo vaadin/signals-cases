@@ -229,15 +229,15 @@ public class MUC03View extends VerticalLayout {
 
     private HorizontalLayout createLeaderboardItem(
             com.vaadin.flow.signals.shared.SharedValueSignal<Integer> scoreSignal) {
-        var users = userSessionRegistry.getActiveUsersSignal().get();
-        var displayNames = userSessionRegistry.getDisplayNamesSignal().get();
+        var users = userSessionRegistry.getActiveUsersSignal().peek();
+        var displayNames = userSessionRegistry.getDisplayNamesSignal().peek();
 
         String sessionKey = scoreKeyMap.getOrDefault(scoreSignal, "");
 
         // Build display name mapping
         java.util.Map<String, String> displayNameMap = new java.util.HashMap<>();
         for (int i = 0; i < users.size() && i < displayNames.size(); i++) {
-            String key = users.get(i).get().getCompositeKey();
+            String key = users.get(i).peek().getCompositeKey();
             displayNameMap.put(key, displayNames.get(i));
         }
 
