@@ -2,6 +2,8 @@ package com.example.usecase09;
 
 import jakarta.annotation.security.PermitAll;
 
+import java.util.Objects;
+
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -45,6 +47,7 @@ public class UseCase09View extends VerticalLayout {
 
         // Create binder
         Binder<UserRegistration> binder = new Binder<>(UserRegistration.class);
+        var okStatusSignal = binder.validationStatusSignal().map(BinderValidationStatus::isOk);
 
         // Create form fields
         TextField usernameField = new TextField("Username");
@@ -55,26 +58,6 @@ public class UseCase09View extends VerticalLayout {
         ComboBox<AccountType> accountTypeSelect = new ComboBox<>("Account Type",
                 AccountType.values());
         IntegerField ageField = new IntegerField("Age");
-
-        ValueSignal<AccountType> accountTypeSignal = new ValueSignal<>(
-                AccountType.PERSONAL);
-        ValueSignal<Integer> ageSignal = new ValueSignal<>(0);
-
-        accountTypeSelect.bindValue(accountTypeSignal, accountTypeSignal::set);
-        ageField.bindValue(ageSignal, ageSignal::set);
-
-        Signal<Boolean> ageValidSignal = Signal.computed(() -> {
-            Integer age = ageSignal.get();
-            AccountType accountType = accountTypeSignal.get();
-            if (age == null)
-                return false;
-            // Business accounts require age >= 18
-            if (accountType == AccountType.BUSINESS) {
-                return age >= 18;
-            }
-            // Personal accounts require age >= 13
-            return age >= 13;
-        });
 
         // binder bindings
         binder.forField(usernameField)
@@ -88,21 +71,21 @@ public class UseCase09View extends VerticalLayout {
                         "Please enter a valid email address")
                 .bind("email");
 
-        Binder.Binding<UserRegistration, String> passwordBinding = binder
+        var passwordSignal = binder
                 .forField(passwordField)
                 .withValidator(value -> value != null && value.length() >= 8,
                         "Password must be at least 8 characters")
-                .bind("password");
+                .bind("password").valueSignal();
         // cross-field validation using field Binding.valueSignal()
         binder.forField(confirmPasswordField).withValidator(
-                value -> value != null
-                        && value.equals(passwordBinding.valueSignal().get()),
+                value -> Objects.equals(value, passwordSignal.get()),
                 "Passwords do not match").bind("confirmPassword");
 
-        binder.forField(accountTypeSelect).bind("accountType");
-        // another cross-field validation, this one uses signals directly
+        var accountTypeSignal = binder.forField(accountTypeSelect).bind("accountType").valueSignal();
+
+        // another cross-field validation, this one uses a helper method
         binder.forField(ageField)
-                .withValidator(value -> ageValidSignal.get(), value -> {
+                .withValidator(age -> validateAge(age, accountTypeSignal.get()), value -> {
                     AccountType accountType = accountTypeSignal.get();
                     if (accountType == AccountType.BUSINESS) {
                         return "Business accounts require age 18 or older";
@@ -128,24 +111,29 @@ public class UseCase09View extends VerticalLayout {
                         "Please fix validation errors before submitting.");
             }
         });
-        submitButton.bindEnabled(binder.validationStatusSignal()
-                .map(BinderValidationStatus::isOk));
+        submitButton.bindEnabled(okStatusSignal);
 
         // Form status
         Div statusDiv = new Div();
-        Span statusLabel = new Span();
-        statusLabel.bindText(binder.validationStatusSignal()
-                .map(status -> status.isOk() ? "Form is valid - Ready to submit"
-                        : "Please complete all required fields correctly"));
-        statusLabel.getStyle().bind("color", binder.validationStatusSignal()
-                .map(status -> status.isOk() ? "green" : "orange"));
-        statusLabel.getStyle().bind("font-weight",
-                binder.validationStatusSignal()
-                        .map(status -> status.isOk() ? "bold" : "normal"));
+        Span statusLabel = new Span(() -> okStatusSignal.get() ? "Form is valid - Ready to submit"
+                : "Please complete all required fields correctly");
+        statusLabel.getStyle().bind("color", () -> okStatusSignal.get() ? "green" : "orange");
+        statusLabel.getStyle().bind("font-weight", () -> okStatusSignal.get() ? "bold" : "normal");
         statusDiv.add(statusLabel);
 
         add(title, description, usernameField, emailField, passwordField,
                 confirmPasswordField, accountTypeSelect, ageField, statusDiv,
                 submitButton);
+    }
+
+    private static boolean validateAge(Integer age, AccountType accountType) {
+        if (age == null)
+            return false;
+        // Business accounts require age >= 18
+        if (accountType == AccountType.BUSINESS) {
+            return age >= 18;
+        }
+        // Personal accounts require age >= 13
+        return age >= 13;
     }
 }
