@@ -57,25 +57,26 @@ public class UseCase24View extends VerticalLayout {
         seedNotifications(notificationsSignal);
 
         // Filter signals
-        var typeFilterSignal = new ValueSignal<String>("All");
-        var readFilterSignal = new ValueSignal<String>("All");
+        var typeFilterSignal = new ValueSignal<>("All");
+        var readFilterSignal = new ValueSignal<>("All");
 
         // Computed filtered signal
-        Signal<List<Notification>> filteredSignal = Signal.computed(() -> {
+        Signal<List<ValueSignal<Notification>>> filteredSignal = Signal.computed(() -> {
             String typeFilter = typeFilterSignal.get();
             String readFilter = readFilterSignal.get();
 
-            return notificationsSignal.get().stream().map(ValueSignal::get)
+            return notificationsSignal.get().stream()
                     .filter(n -> typeFilter.equals("All")
-                            || n.type().name().equals(typeFilter))
+                            || n.get().type().name().equals(typeFilter))
                     .filter(n -> {
                         if (readFilter.equals("Unread")) {
-                            return !n.read();
+                            return !n.get().read();
                         } else if (readFilter.equals("Read")) {
-                            return n.read();
+                            return n.get().read();
                         }
                         return true;
-                    }).sorted((a, b) -> b.timestamp().compareTo(a.timestamp()))
+                    }).sorted((a, b) ->
+                            b.get().timestamp().compareTo(a.get().timestamp()))
                     .toList();
         });
 
@@ -178,7 +179,7 @@ public class UseCase24View extends VerticalLayout {
                 notification -> createNotificationCard(notification,
                         notificationsSignal)));
 
-        MissingAPI.bindItems(virtualList, filteredSignal);
+        virtualList.bindItems(filteredSignal);
 
         // Empty state
         var emptyState = new Paragraph(

@@ -1,31 +1,14 @@
 package com.example;
 
 import com.vaadin.flow.component.tabs.Tabs;
-import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
-import java.util.List;
 
 /**
  * Temporary helper class providing static methods for Signal-based component
  * bindings until the official API is implemented in Vaadin.
  */
 public class MissingAPI {
-
-    /**
-     * Binds a VirtualList's items to a Signal containing a List.
-     */
-    public static <T> void bindItems(VirtualList<T> virtualList,
-            Signal<List<T>> signal) {
-        Signal.effect(virtualList, () -> {
-            List<T> items = signal.get();
-            if (items != null) {
-                virtualList.setItems(items);
-            } else {
-                virtualList.setItems(List.of());
-            }
-        });
-    }
 
     /**
      * Binds the browser document title to a Signal. The UI is used to get the
