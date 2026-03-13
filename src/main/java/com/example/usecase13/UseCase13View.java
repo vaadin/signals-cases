@@ -5,6 +5,8 @@ import jakarta.annotation.security.PermitAll;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserInfo;
 import com.example.signals.UserSessionRegistry;
@@ -220,7 +222,7 @@ public class UseCase13View extends VerticalLayout {
         viewRow.getStyle().set("gap", "0.5em");
 
         Span viewIcon = new Span("📍");
-        Signal<String> currentView = userSignal.map(UserInfo::currentView);
+        Signal<@Nullable String> currentView = userSignal.map(UserInfo::currentView);
         Span viewText = new Span(() -> "Viewing: "
                 + (currentView.get() != null ? formatViewName(currentView.get())
                         : "Unknown"));
