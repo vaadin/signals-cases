@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
@@ -32,5 +33,44 @@ class UseCase15ViewTest extends SpringBrowserlessTest {
                 .filter(f -> "Search Products".equals(f.getLabel()))
                 .findFirst().orElseThrow();
         assertEquals("Type to search...", searchField.getPlaceholder());
+    }
+
+    @Test
+    void instantQueryUpdatesOnTextInput() {
+        navigate(UseCase15View.class);
+        runPendingSignalsTasks();
+
+        // Type into the search field
+        TextField searchField = $view(TextField.class).all().stream()
+                .filter(f -> "Search Products".equals(f.getLabel()))
+                .findFirst().orElseThrow();
+        test(searchField).setValue("laptop");
+        runPendingSignalsTasks();
+
+        // The instant value Span should show the typed text
+        assertTrue($view(Span.class).all().stream()
+                .anyMatch(s -> s.getText() != null
+                        && s.getText().contains("\"laptop\"")));
+    }
+
+    @Test
+    void keystrokeCounterIncrements() {
+        navigate(UseCase15View.class);
+        runPendingSignalsTasks();
+
+        // Initially keystroke count should be 0
+        assertTrue($view(Span.class).all().stream()
+                .anyMatch(s -> "0".equals(s.getText())));
+
+        // Type a value
+        TextField searchField = $view(TextField.class).all().stream()
+                .filter(f -> "Search Products".equals(f.getLabel()))
+                .findFirst().orElseThrow();
+        test(searchField).setValue("a");
+        runPendingSignalsTasks();
+
+        // Keystroke count should now be 1
+        assertTrue($view(Span.class).all().stream()
+                .anyMatch(s -> "1".equals(s.getText())));
     }
 }

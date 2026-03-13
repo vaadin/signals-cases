@@ -2,6 +2,7 @@ package com.example.usecase23;
 
 import jakarta.annotation.security.PermitAll;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -191,12 +192,14 @@ public class UseCase23View extends Main {
                     () -> "Status: " + statusText.get());
             status.getElement().bindAttribute("title",
                     () -> "Status: " + statusText.get());
-            status.getElement().getThemeList().add("badge");
-            status.getElement().getThemeList().add("primary");
-            status.getElement().getThemeList().bind("success",
-                    () -> signal.get().getStatus() == Status.EXCELLENT);
-            status.getElement().getThemeList().bind("error",
-                    () -> signal.get().getStatus() == Status.FAILING);
+            status.getElement().getThemeList().addAll(List.of("badge", "primary"));
+            status.getElement().getThemeList().bind(() -> {
+                return switch (signal.get().getStatus()) {
+                    case EXCELLENT -> List.of("success");
+                    case FAILING -> List.of("error");
+                    default -> List.of();
+                };
+            });
             return status;
         })).setHeader("").setFlexGrow(0).setAutoWidth(true);
         grid.addColumn(signal -> signal.peek().getCity()).setHeader("City")
@@ -421,10 +424,8 @@ public class UseCase23View extends Main {
 
             Span badge = new Span();
             badge.add(icon, percentageSpan);
-            badge.getElement().getThemeList().add("badge");
-            badge.getElement().getThemeList().bind("success", successSignal);
-            badge.getElement().getThemeList().bind("error",
-                    Signal.not(successSignal));
+            badge.getElement().getThemeList().bind(() ->
+                    successSignal.get() ? List.of("badge","success") : List.of("badge", "error"));
 
             add(h2, valueSpan, badge);
             getStyle().setGap("5px");

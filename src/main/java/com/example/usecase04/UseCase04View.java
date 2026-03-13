@@ -9,6 +9,7 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -32,41 +33,46 @@ public class UseCase04View extends VerticalLayout {
         H2 title = new H2("Use Case 4: Filtered and Sorted Data Grid");
 
         Paragraph description = new Paragraph(
-                "This use case demonstrates a Grid with reactive client-side filtering and sorting. "
+                "This use case demonstrates a Grid with DataView-based filtering. "
                         + "Filter by category, search by name/ID, and toggle in-stock only. "
-                        + "All filters are applied reactively through computed signals. "
-                        + "The filtered list updates automatically as you change any filter.");
+                        + "Signals are used to bind filter controls, while DataView handles the actual filtering. "
+                        + "This shows proper integration of signals with Vaadin's DataView API.");
 
         // Create signals for filter inputs
         ValueSignal<String> categoryFilterSignal = new ValueSignal<>("All");
         ValueSignal<String> searchTermSignal = new ValueSignal<>("");
         ValueSignal<Boolean> inStockOnlySignal = new ValueSignal<>(false);
 
-        // Load all products
+        // Load all products and set up Grid with DataView
         List<Product> allProducts = loadProducts();
 
-        // Computed signal for filtered products - returns a list of signals
-        Signal<List<ValueSignal<Product>>> filteredProductsSignal = Signal.computed(() -> {
-            String category = categoryFilterSignal.get();
-            String searchTerm = searchTermSignal.get().toLowerCase();
-            boolean inStockOnly = inStockOnlySignal.get();
+        // Data grid with ListDataView for filtering
+        Grid<Product> grid = new Grid<>(Product.class);
+        grid.setColumns("id", "name", "category", "price", "stock");
 
-            return allProducts.stream()
-                    .filter(p -> category.equals("All")
-                            || p.category().equals(category))
-                    .filter(p -> searchTerm.isEmpty()
-                            || p.name().toLowerCase().contains(searchTerm)
-                            || p.id().toLowerCase().contains(searchTerm))
-                    .filter(p -> !inStockOnly || p.stock() > 0)
-                    .map(ValueSignal::new)
-                    .toList();
+        // Use setItems to get a GridListDataView for filtering
+        GridListDataView<Product> dataView = grid.setItems(allProducts);
+
+        // Set up filtering using DataView - filters are applied based on signal values
+        dataView.setFilter(product -> {
+            String category = categoryFilterSignal.peek();
+            String searchTerm = searchTermSignal.peek().toLowerCase();
+            boolean inStockOnly = inStockOnlySignal.peek();
+
+            boolean categoryMatch = category.equals("All")
+                    || product.category().equals(category);
+            boolean searchMatch = searchTerm.isEmpty()
+                    || product.name().toLowerCase().contains(searchTerm)
+                    || product.id().toLowerCase().contains(searchTerm);
+            boolean stockMatch = !inStockOnly || product.stock() > 0;
+
+            return categoryMatch && searchMatch && stockMatch;
         });
 
-        // Filter UI components
+        // Filter UI components with signal bindings
         ComboBox<String> categoryFilter = new ComboBox<>("Category", List.of(
                 "All", "Electronics", "Clothing", "Books", "Home & Garden"));
-        categoryFilter.bindValue(categoryFilterSignal,
-                categoryFilterSignal::set);
+        categoryFilter.bindValue(categoryFilterSignal, categoryFilterSignal::set);
 
         TextField searchField = new TextField("Search");
         searchField.setPlaceholder("Search by name or ID");
@@ -75,10 +81,15 @@ public class UseCase04View extends VerticalLayout {
         Checkbox inStockCheckbox = new Checkbox("Show in-stock items only");
         inStockCheckbox.bindValue(inStockOnlySignal, inStockOnlySignal::set);
 
-        // Data grid
-        Grid<Product> grid = new Grid<>(Product.class);
-        grid.setColumns("id", "name", "category", "price", "stock");
-        grid.bindItems(filteredProductsSignal);
+        // Use Signal.effect to refresh DataView when any filter signal changes
+        Signal.effect(grid, () -> {
+            // Read all signal values to register dependencies
+            categoryFilterSignal.get();
+            searchTermSignal.get();
+            inStockOnlySignal.get();
+            // Refresh the DataView to reapply filters
+            dataView.refreshAll();
+        });
 
         add(title, description, categoryFilter, searchField, inStockCheckbox,
                 grid);

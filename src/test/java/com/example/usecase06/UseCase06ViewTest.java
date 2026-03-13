@@ -133,4 +133,55 @@ class UseCase06ViewTest extends SpringBrowserlessTest {
                 .anyMatch(s -> s.getText() != null
                         && s.getText().startsWith("Discount:")));
     }
+
+    @Test
+    void addSameProductTwiceIncrementsQuantity() {
+        navigate(UseCase06View.class);
+        runPendingSignalsTasks();
+
+        // Add Laptop ($999.99) once
+        Button addLaptop = $view(Button.class).all().stream()
+                .filter(b -> "Add".equals(b.getText())).findFirst()
+                .orElseThrow();
+        test(addLaptop).click();
+        runPendingSignalsTasks();
+
+        Span subtotalLabel = $view(Span.class).all().stream()
+                .filter(s -> s.getText() != null
+                        && s.getText().startsWith("Subtotal:"))
+                .findFirst().orElseThrow();
+        assertEquals("Subtotal: $999.99", subtotalLabel.getText());
+
+        // Add same product again — qty incremented, subtotal doubled
+        test(addLaptop).click();
+        runPendingSignalsTasks();
+
+        assertEquals("Subtotal: $1999.98", subtotalLabel.getText());
+    }
+
+    @Test
+    void emptyCartResetsSubtotal() {
+        navigate(UseCase06View.class);
+        runPendingSignalsTasks();
+
+        // Add a product
+        Button addLaptop = $view(Button.class).all().stream()
+                .filter(b -> "Add".equals(b.getText())).findFirst()
+                .orElseThrow();
+        test(addLaptop).click();
+        runPendingSignalsTasks();
+
+        // Click "Empty cart"
+        Button emptyCartButton = $view(Button.class).all().stream()
+                .filter(b -> "Empty cart".equals(b.getText())).findFirst()
+                .orElseThrow();
+        test(emptyCartButton).click();
+        runPendingSignalsTasks();
+
+        Span subtotalLabel = $view(Span.class).all().stream()
+                .filter(s -> s.getText() != null
+                        && s.getText().startsWith("Subtotal:"))
+                .findFirst().orElseThrow();
+        assertEquals("Subtotal: $0.00", subtotalLabel.getText());
+    }
 }

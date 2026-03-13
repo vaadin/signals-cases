@@ -56,23 +56,23 @@ public class MUC03Signals {
     }
 
     public synchronized boolean awardPoint(String username, String sessionId) {
-        if (!buttonVisibleSignal.get() || clicksRemainingSignal.get() <= 0) {
+        if (!buttonVisibleSignal.peek() || clicksRemainingSignal.peek() <= 0) {
             return false; // Round already finished
         }
 
         // Award the point
         String sessionKey = username + ":" + sessionId;
-        SharedValueSignal<Integer> scoreSignal = leaderboardSignal.get()
+        SharedValueSignal<Integer> scoreSignal = leaderboardSignal.peek()
                 .get(sessionKey);
         if (scoreSignal != null) {
-            scoreSignal.set(scoreSignal.get() + 1);
+            scoreSignal.set(scoreSignal.peek() + 1);
         } else {
             // Initialize if not present
             leaderboardSignal.put(sessionKey, 1);
         }
 
         // Decrement clicks remaining
-        int remaining = clicksRemainingSignal.get() - 1;
+        int remaining = clicksRemainingSignal.peek() - 1;
         clicksRemainingSignal.set(remaining);
 
         // Hide button temporarily (will be repositioned by view)
@@ -86,7 +86,7 @@ public class MUC03Signals {
         buttonLeftSignal.set(left);
         buttonTopSignal.set(top);
         clicksRemainingSignal.set(5); // 5 clicks per round
-        roundNumberSignal.set(roundNumberSignal.get() + 1);
+        roundNumberSignal.set(roundNumberSignal.peek() + 1);
         buttonVisibleSignal.set(true);
     }
 

@@ -23,26 +23,24 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 
+import static com.example.usecase21.TranslationService.translate;
+
 @Route(value = "use-case-21", layout = MainLayout.class)
 @PageTitle("Use Case 21: Signals-Based i18n")
 @Menu(order = 21, title = "UC 21: Signals-Based i18n")
 @PermitAll
 public class UseCase21View extends VerticalLayout {
 
-    private final TranslationService t;
-
-    public UseCase21View(TranslationService translationService) {
+    public UseCase21View() {
         setSpacing(true);
         setPadding(true);
 
-        this.t = translationService;
-
         // Title and description
         H2 title = new H2();
-        title.bindText(t.t("uc21.title"));
+        title.bindText(translate("uc21.title"));
 
         Paragraph description = new Paragraph();
-        description.bindText(t.t("uc21.description"));
+        description.bindText(translate("uc21.description"));
 
         add(title, description);
 
@@ -63,10 +61,10 @@ public class UseCase21View extends VerticalLayout {
         Div card = createCard();
 
         H3 heading = new H3();
-        heading.bindText(t.t("uc21.welcome.heading"));
+        heading.bindText(translate("uc21.welcome.heading"));
 
         Paragraph text = new Paragraph();
-        text.bindText(t.t("uc21.welcome.text"));
+        text.bindText(translate("uc21.welcome.text"));
 
         card.add(heading, text);
         return card;
@@ -76,19 +74,19 @@ public class UseCase21View extends VerticalLayout {
         Div card = createCard();
 
         H3 heading = new H3();
-        heading.bindText(t.t("uc21.howItWorks.heading"));
+        heading.bindText(translate("uc21.howItWorks.heading"));
 
         Paragraph step1 = new Paragraph();
-        step1.bindText(t.t("uc21.howItWorks.step1"));
+        step1.bindText(translate("uc21.howItWorks.step1"));
 
         Paragraph step2 = new Paragraph();
-        step2.bindText(t.t("uc21.howItWorks.step2"));
+        step2.bindText(translate("uc21.howItWorks.step2"));
 
         Paragraph step3 = new Paragraph();
-        step3.bindText(t.t("uc21.howItWorks.step3"));
+        step3.bindText(translate("uc21.howItWorks.step3"));
 
         Paragraph step4 = new Paragraph();
-        step4.bindText(t.t("uc21.howItWorks.step4"));
+        step4.bindText(translate("uc21.howItWorks.step4"));
 
         card.add(heading, step1, step2, step3, step4);
         return card;
@@ -98,31 +96,31 @@ public class UseCase21View extends VerticalLayout {
         Div card = createCard();
 
         H3 heading = new H3();
-        heading.bindText(t.t("uc21.sampleForm.heading"));
+        heading.bindText(translate("uc21.sampleForm.heading"));
 
         // Name field
         TextField nameField = new TextField();
         nameField.setWidthFull();
         Signal.effect(nameField, () -> nameField
-                .setLabel(t.t("uc21.sampleForm.nameLabel").get()));
+                .setLabel(translate("uc21.sampleForm.nameLabel").get()));
         Signal.effect(nameField, () -> nameField
-                .setPlaceholder(t.t("uc21.sampleForm.namePlaceholder").get()));
+                .setPlaceholder(translate("uc21.sampleForm.namePlaceholder").get()));
 
         // Email field
         EmailField emailField = new EmailField();
         emailField.setWidthFull();
         Signal.effect(emailField, () -> emailField
-                .setLabel(t.t("uc21.sampleForm.emailLabel").get()));
+                .setLabel(translate("uc21.sampleForm.emailLabel").get()));
         Signal.effect(emailField, () -> emailField
-                .setPlaceholder(t.t("uc21.sampleForm.emailPlaceholder").get()));
+                .setPlaceholder(translate("uc21.sampleForm.emailPlaceholder").get()));
 
         // Buttons
         Button submitButton = new Button();
         submitButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        submitButton.bindText(t.t("uc21.sampleForm.submitButton"));
+        submitButton.bindText(translate("uc21.sampleForm.submitButton"));
 
         Button cancelButton = new Button();
-        cancelButton.bindText(t.t("uc21.sampleForm.cancelButton"));
+        cancelButton.bindText(translate("uc21.sampleForm.cancelButton"));
 
         HorizontalLayout buttonLayout = new HorizontalLayout(submitButton,
                 cancelButton);
@@ -142,7 +140,7 @@ public class UseCase21View extends VerticalLayout {
         Div card = createCard();
 
         H3 heading = new H3();
-        heading.bindText(t.t("uc21.status.heading"));
+        heading.bindText(translate("uc21.status.heading"));
 
         // Language display
         HorizontalLayout languageRow = new HorizontalLayout();
@@ -150,7 +148,7 @@ public class UseCase21View extends VerticalLayout {
         languageRow.setSpacing(true);
 
         Span languageLabel = new Span();
-        languageLabel.bindText(t.t("uc21.status.language").map(s -> s + ":"));
+        languageLabel.bindText(translate("uc21.status.language").map(s -> s + ":"));
         languageLabel.getStyle().set("font-weight", "bold");
 
         Span languageValue = new Span();
@@ -168,7 +166,7 @@ public class UseCase21View extends VerticalLayout {
         localeRow.setSpacing(true);
 
         Span localeLabel = new Span();
-        localeLabel.bindText(t.t("uc21.status.locale").map(s -> s + ":"));
+        localeLabel.bindText(translate("uc21.status.locale").map(s -> s + ":"));
         localeLabel.getStyle().set("font-weight", "bold");
 
         Span localeValue = new Span();

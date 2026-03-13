@@ -235,7 +235,7 @@ public class MUC04View extends VerticalLayout {
         String fieldName = lockKeyMap.getOrDefault(lockSignal, "");
         String fieldLabel = formatFieldName(fieldName);
 
-        MUC04Signals.FieldLock lock = lockSignal.get();
+        MUC04Signals.FieldLock lock = lockSignal.peek();
         boolean isCurrentSession = sessionId != null
                 && lock.username().equals(currentUser)
                 && lock.sessionId().equals(sessionId);
