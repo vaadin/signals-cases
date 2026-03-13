@@ -147,7 +147,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         localeSelector.addValueChangeListener(event -> {
             Locale selectedLocale = localeMap.get(event.getValue());
             if (selectedLocale != null) {
-                UI.getCurrent().localeSignal().set(selectedLocale);
+                UI.getCurrent().setLocale(selectedLocale);
             }
         });
 
