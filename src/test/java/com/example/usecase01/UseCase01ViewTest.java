@@ -31,6 +31,9 @@ class UseCase01ViewTest extends SpringBrowserlessTest {
     @Test
     void submitButtonDisabledWhenFormIsEmpty() {
         navigate(UseCase01View.class);
+        test($view(EmailField.class).single()).setValue("");
+        test($view(PasswordField.class).atIndex(1)).setValue("");
+        test($view(PasswordField.class).atIndex(2)).setValue("");
         runPendingSignalsTasks();
 
         Button submitButton = $view(Button.class).single();
