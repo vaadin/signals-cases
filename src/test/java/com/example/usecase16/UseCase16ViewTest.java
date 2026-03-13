@@ -4,11 +4,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 
+import com.vaadin.browserless.SpringBrowserlessTest;
+import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.browserless.SpringBrowserlessTest;
-import com.vaadin.browserless.ViewPackages;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,8 +31,8 @@ class UseCase16ViewTest extends SpringBrowserlessTest {
         navigate(UseCase16View.class);
         runPendingSignalsTasks();
 
-        assertTrue($view(H3.class).all().stream()
-                .anyMatch(h -> h.getText() != null
+        assertTrue(
+                $view(H3.class).all().stream().anyMatch(h -> h.getText() != null
                         && h.getText().contains("10 articles")));
     }
 
@@ -46,8 +46,8 @@ class UseCase16ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Multiple articles mention "signal" in title or content
-        assertTrue($view(H3.class).all().stream()
-                .anyMatch(h -> h.getText() != null
+        assertTrue(
+                $view(H3.class).all().stream().anyMatch(h -> h.getText() != null
                         && h.getText().contains("articles found")));
     }
 
@@ -62,8 +62,8 @@ class UseCase16ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // 4 Tutorial articles
-        assertTrue($view(H3.class).all().stream()
-                .anyMatch(h -> h.getText() != null
+        assertTrue(
+                $view(H3.class).all().stream().anyMatch(h -> h.getText() != null
                         && h.getText().contains("4 articles")));
     }
 
@@ -81,8 +81,8 @@ class UseCase16ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Articles matching "signal" in Tutorial category
-        assertTrue($view(H3.class).all().stream()
-                .anyMatch(h -> h.getText() != null
+        assertTrue(
+                $view(H3.class).all().stream().anyMatch(h -> h.getText() != null
                         && h.getText().contains("articles found")));
     }
 }

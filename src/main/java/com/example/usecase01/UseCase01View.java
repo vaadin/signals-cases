@@ -95,7 +95,8 @@ public class UseCase01View extends VerticalLayout {
 
         // Binder field bindings with validators
         binder.forField(emailField)
-                .withValidator(new EmailValidator("Please enter a valid email address"))
+                .withValidator(new EmailValidator(
+                        "Please enter a valid email address"))
                 .bind(AccountData::getEmail, AccountData::setEmail);
 
         var passwordBinding = binder.forField(passwordField)
@@ -104,37 +105,39 @@ public class UseCase01View extends VerticalLayout {
                 .bind(AccountData::getPassword, AccountData::setPassword);
 
         // Cross-field validation for password confirmation
-        binder.forField(confirmField)
-                .withValidator(value -> value != null
+        binder.forField(confirmField).withValidator(
+                value -> value != null
                         && value.equals(passwordBinding.valueSignal().get()),
-                        "Passwords do not match")
-                .bind(AccountData::getConfirmPassword, AccountData::setConfirmPassword);
+                "Passwords do not match").bind(AccountData::getConfirmPassword,
+                        AccountData::setConfirmPassword);
 
         binder.setBean(data);
 
         // Submit button with signal-based text and theme
         Button submitButton = new Button();
 
-        // Bind enabled state using Binder's validationStatusSignal combined with submission state
+        // Bind enabled state using Binder's validationStatusSignal combined
+        // with submission state
         Signal<Boolean> isFormValidSignal = binder.validationStatusSignal()
                 .map(BinderValidationStatus::isOk);
-        submitButton.bindEnabled(Signal.computed(() ->
-                isFormValidSignal.get() &&
-                submissionStateSignal.get() != SubmissionState.SUBMITTING));
+        submitButton.bindEnabled(Signal.computed(() -> isFormValidSignal.get()
+                && submissionStateSignal.get() != SubmissionState.SUBMITTING));
 
         // Bind button text based on submission state
-        submitButton.bindText(submissionStateSignal.map(state -> switch (state) {
-            case IDLE -> "Create Account";
-            case SUBMITTING -> "Creating...";
-            case SUCCESS -> "Success!";
-            case ERROR -> "Retry";
-        }));
+        submitButton
+                .bindText(submissionStateSignal.map(state -> switch (state) {
+                case IDLE -> "Create Account";
+                case SUBMITTING -> "Creating...";
+                case SUCCESS -> "Success!";
+                case ERROR -> "Retry";
+                }));
 
         // Bind theme variant
         submitButton.bindThemeVariant(ButtonVariant.LUMO_SUCCESS,
                 submissionStateSignal.map(SubmissionState.SUCCESS::equals));
         submitButton.bindThemeVariant(ButtonVariant.LUMO_PRIMARY,
-                submissionStateSignal.map(state -> state != SubmissionState.SUCCESS));
+                submissionStateSignal
+                        .map(state -> state != SubmissionState.SUCCESS));
 
         submitButton.addClickListener(e -> {
             if (!binder.isValid()) {
@@ -155,7 +158,8 @@ public class UseCase01View extends VerticalLayout {
                     // Reset submission state back to IDLE
                     submissionStateSignal.set(SubmissionState.IDLE);
 
-                    // Show success notification (imperative UI - needs ui.access)
+                    // Show success notification (imperative UI - needs
+                    // ui.access)
                     getUI().ifPresent(ui -> ui.access(() -> {
                         Notification notification = Notification
                                 .show("Account created successfully!");

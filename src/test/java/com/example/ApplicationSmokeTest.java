@@ -9,9 +9,9 @@ import org.springframework.security.test.context.support.WithMockUser;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
- * App-level smoke test that loads the full Spring context.
- * Catches wiring issues, circular dependencies, and missing config
- * that per-view tests (with isolated @ViewPackages contexts) would miss.
+ * App-level smoke test that loads the full Spring context. Catches wiring
+ * issues, circular dependencies, and missing config that per-view tests (with
+ * isolated @ViewPackages contexts) would miss.
  */
 @SpringBootTest
 @WithMockUser

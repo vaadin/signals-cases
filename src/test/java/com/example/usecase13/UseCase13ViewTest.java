@@ -1,16 +1,16 @@
 package com.example.usecase13;
 
+import com.example.signals.UserSessionRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 
-import com.example.signals.UserSessionRegistry;
-import com.vaadin.flow.component.card.Card;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.card.Card;
+import com.vaadin.flow.component.html.H3;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -30,8 +30,8 @@ class UseCase13ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // The counter box should show "Currently Online" text
-        assertTrue($view(H3.class).all().stream()
-                .anyMatch(h -> h.getText() != null
+        assertTrue(
+                $view(H3.class).all().stream().anyMatch(h -> h.getText() != null
                         && h.getText().contains("Currently Online")));
     }
 
@@ -66,7 +66,7 @@ class UseCase13ViewTest extends SpringBrowserlessTest {
         int expectedCount = initialCount + 2;
         // Counter should show the expected count
         assertTrue($view(H3.class).all().stream()
-                .anyMatch(h -> h.getText() != null
-                        && h.getText().contains(String.valueOf(expectedCount))));
+                .anyMatch(h -> h.getText() != null && h.getText()
+                        .contains(String.valueOf(expectedCount))));
     }
 }

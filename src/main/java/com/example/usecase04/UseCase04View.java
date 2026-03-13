@@ -53,7 +53,8 @@ public class UseCase04View extends VerticalLayout {
         // Use setItems to get a GridListDataView for filtering
         GridListDataView<Product> dataView = grid.setItems(allProducts);
 
-        // Set up filtering using DataView - filters are applied based on signal values
+        // Set up filtering using DataView - filters are applied based on signal
+        // values
         dataView.setFilter(product -> {
             String category = categoryFilterSignal.peek();
             String searchTerm = searchTermSignal.peek().toLowerCase();
@@ -72,7 +73,8 @@ public class UseCase04View extends VerticalLayout {
         // Filter UI components with signal bindings
         ComboBox<String> categoryFilter = new ComboBox<>("Category", List.of(
                 "All", "Electronics", "Clothing", "Books", "Home & Garden"));
-        categoryFilter.bindValue(categoryFilterSignal, categoryFilterSignal::set);
+        categoryFilter.bindValue(categoryFilterSignal,
+                categoryFilterSignal::set);
 
         TextField searchField = new TextField("Search");
         searchField.setPlaceholder("Search by name or ID");

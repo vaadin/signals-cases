@@ -240,8 +240,8 @@ public class UseCase13View extends VerticalLayout {
 
         Span viewIcon = new Span("📍");
         String currentView = userInfo.currentView();
-        Span viewText = new Span("Viewing: "
-                + (currentView != null ? formatViewName(currentView)
+        Span viewText = new Span(
+                "Viewing: " + (currentView != null ? formatViewName(currentView)
                         : "Unknown"));
         viewText.getStyle().set("font-size", "var(--lumo-font-size-s)");
 

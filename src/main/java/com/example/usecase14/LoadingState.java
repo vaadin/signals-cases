@@ -22,7 +22,8 @@ public class LoadingState<T> {
     }
 
     // Constructor for internal use
-    private LoadingState(State state, @Nullable T data, @Nullable String error) {
+    private LoadingState(State state, @Nullable T data,
+            @Nullable String error) {
         this.state = state;
         this.data = data;
         this.error = error;

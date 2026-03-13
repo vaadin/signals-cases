@@ -35,8 +35,7 @@ class StockPriceSimulator {
             double priceChange = oldPrice * changePct / 100.0;
             double newPrice = Math.max(1.0, oldPrice + priceChange);
 
-            double totalChange = newPrice
-                    - INITIAL_STOCKS.get(index).price();
+            double totalChange = newPrice - INITIAL_STOCKS.get(index).price();
             double totalChangePct = (totalChange
                     / INITIAL_STOCKS.get(index).price()) * 100.0;
 

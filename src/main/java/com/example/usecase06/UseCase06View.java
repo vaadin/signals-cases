@@ -7,7 +7,6 @@ import java.math.RoundingMode;
 import java.util.List;
 
 import com.example.views.MainLayout;
-
 import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.button.Button;
