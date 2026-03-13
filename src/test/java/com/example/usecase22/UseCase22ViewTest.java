@@ -4,12 +4,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 
+import com.vaadin.browserless.SpringBrowserlessTest;
+import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.browserless.SpringBrowserlessTest;
-import com.vaadin.browserless.ViewPackages;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -23,7 +23,8 @@ class UseCase22ViewTest extends SpringBrowserlessTest {
     void viewRendersWithPersonalAndAddressFields() {
         navigate(UseCase22View.class);
 
-        // Personal: First Name, Last Name, Email + Address: Street, City, ZIP, Country = 7
+        // Personal: First Name, Last Name, Email + Address: Street, City, ZIP,
+        // Country = 7
         assertTrue($view(TextField.class).all().size() >= 7);
         assertEquals(1, $view(IntegerField.class).all().size());
     }
@@ -55,8 +56,8 @@ class UseCase22ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         Span fullNameLabel = $view(Span.class).all().stream()
-                .filter(s -> s.getText().startsWith("Full name:"))
-                .findFirst().orElseThrow();
+                .filter(s -> s.getText().startsWith("Full name:")).findFirst()
+                .orElseThrow();
         assertEquals("Full name: Jane Doe", fullNameLabel.getText());
     }
 
@@ -71,8 +72,8 @@ class UseCase22ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         Span fullNameLabel = $view(Span.class).all().stream()
-                .filter(s -> s.getText().startsWith("Full name:"))
-                .findFirst().orElseThrow();
+                .filter(s -> s.getText().startsWith("Full name:")).findFirst()
+                .orElseThrow();
         assertEquals("Full name: John Smith", fullNameLabel.getText());
     }
 
@@ -87,8 +88,8 @@ class UseCase22ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         Span addressLabel = $view(Span.class).all().stream()
-                .filter(s -> s.getText().startsWith("Formatted:"))
-                .findFirst().orElseThrow();
+                .filter(s -> s.getText().startsWith("Formatted:")).findFirst()
+                .orElseThrow();
         assertTrue(addressLabel.getText().contains("Portland"));
     }
 
@@ -103,8 +104,8 @@ class UseCase22ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         Span addressLabel = $view(Span.class).all().stream()
-                .filter(s -> s.getText().startsWith("Formatted:"))
-                .findFirst().orElseThrow();
+                .filter(s -> s.getText().startsWith("Formatted:")).findFirst()
+                .orElseThrow();
         assertTrue(addressLabel.getText().contains("456 Oak Ave"));
     }
 

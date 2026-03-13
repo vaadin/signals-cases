@@ -4,12 +4,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 
+import com.vaadin.browserless.SpringBrowserlessTest;
+import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.browserless.SpringBrowserlessTest;
-import com.vaadin.browserless.ViewPackages;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -56,7 +56,8 @@ class UseCase19ViewTest extends SpringBrowserlessTest {
         test(loadButton).click();
         runPendingSignalsTasks();
 
-        // All 6 cards should transition to LOADING — ProgressBars become visible
+        // All 6 cards should transition to LOADING — ProgressBars become
+        // visible
         assertTrue($view(ProgressBar.class).all().stream()
                 .anyMatch(ProgressBar::isIndeterminate));
     }

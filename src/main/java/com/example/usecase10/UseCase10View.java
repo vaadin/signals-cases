@@ -31,9 +31,9 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * Demonstrates the fundamental pattern of wrapping existing event-based APIs
  * into reactive signals. Three different event sources are bridged:
  *
- * 1. Upload component listeners → ValueSignal&lt;UploadState&gt;
- * 2. Keyboard shortcuts → ValueSignal&lt;String&gt;
- * 3. Dark mode media query events → ValueSignal&lt;Boolean&gt;
+ * 1. Upload component listeners → ValueSignal&lt;UploadState&gt; 2. Keyboard
+ * shortcuts → ValueSignal&lt;String&gt; 3. Dark mode media query events →
+ * ValueSignal&lt;Boolean&gt;
  *
  * All three are then composed with Signal.computed() into a unified summary.
  *
@@ -107,18 +107,18 @@ public class UseCase10View extends VerticalLayout {
                 .whenStart((TransferContext ctx) -> uploadStateSignal
                         .set(new UploadState.InProgress(ctx.fileName(), 0,
                                 ctx.contentLength())))
-                .onProgress((TransferContext ctx, Long transferred,
-                        Long total) -> {
-                    uploadStateSignal
-                            .set(new UploadState.InProgress(ctx.fileName(),
-                                    transferred, total));
-                    try {
-                        // Slow down transfer so progress states are visible
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                })
+                .onProgress(
+                        (TransferContext ctx, Long transferred, Long total) -> {
+                            uploadStateSignal.set(new UploadState.InProgress(
+                                    ctx.fileName(), transferred, total));
+                            try {
+                                // Slow down transfer so progress states are
+                                // visible
+                                Thread.sleep(500);
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                            }
+                        })
                 .whenComplete((TransferContext ctx, Boolean success) -> {
                     if (!success) {
                         String reason = ctx.exception() != null
