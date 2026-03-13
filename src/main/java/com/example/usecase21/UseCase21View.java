@@ -103,16 +103,16 @@ public class UseCase21View extends VerticalLayout {
         nameField.setWidthFull();
         Signal.effect(nameField, () -> nameField
                 .setLabel(translate("uc21.sampleForm.nameLabel").get()));
-        Signal.effect(nameField, () -> nameField
-                .setPlaceholder(translate("uc21.sampleForm.namePlaceholder").get()));
+        Signal.effect(nameField, () -> nameField.setPlaceholder(
+                translate("uc21.sampleForm.namePlaceholder").get()));
 
         // Email field
         EmailField emailField = new EmailField();
         emailField.setWidthFull();
         Signal.effect(emailField, () -> emailField
                 .setLabel(translate("uc21.sampleForm.emailLabel").get()));
-        Signal.effect(emailField, () -> emailField
-                .setPlaceholder(translate("uc21.sampleForm.emailPlaceholder").get()));
+        Signal.effect(emailField, () -> emailField.setPlaceholder(
+                translate("uc21.sampleForm.emailPlaceholder").get()));
 
         // Buttons
         Button submitButton = new Button();
@@ -148,7 +148,8 @@ public class UseCase21View extends VerticalLayout {
         languageRow.setSpacing(true);
 
         Span languageLabel = new Span();
-        languageLabel.bindText(translate("uc21.status.language").map(s -> s + ":"));
+        languageLabel
+                .bindText(translate("uc21.status.language").map(s -> s + ":"));
         languageLabel.getStyle().set("font-weight", "bold");
 
         Span languageValue = new Span();

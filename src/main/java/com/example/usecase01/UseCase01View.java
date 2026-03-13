@@ -100,7 +100,8 @@ public class UseCase01View extends VerticalLayout {
 
         // Binder field bindings with validators
         binder.forField(emailField)
-                .withValidator(new EmailValidator("Please enter a valid email address"))
+                .withValidator(new EmailValidator(
+                        "Please enter a valid email address"))
                 .bind(AccountData::getEmail, AccountData::setEmail);
 
         var passwordBinding = binder.forField(passwordField)
@@ -109,11 +110,11 @@ public class UseCase01View extends VerticalLayout {
                 .bind(AccountData::getPassword, AccountData::setPassword);
 
         // Cross-field validation for password confirmation
-        binder.forField(confirmField)
-                .withValidator(value -> value != null
+        binder.forField(confirmField).withValidator(
+                value -> value != null
                         && value.equals(passwordBinding.valueSignal().get()),
-                        "Passwords do not match")
-                .bind(AccountData::getConfirmPassword, AccountData::setConfirmPassword);
+                "Passwords do not match").bind(AccountData::getConfirmPassword,
+                        AccountData::setConfirmPassword);
 
         binder.setBean(data);
 
@@ -126,12 +127,13 @@ public class UseCase01View extends VerticalLayout {
                 submissionStateSignal.get() != SubmissionState.SUBMITTING);
 
         // Bind button text based on submission state
-        submitButton.bindText(submissionStateSignal.map(state -> switch (state) {
-            case IDLE -> "Create Account";
-            case SUBMITTING -> "Creating...";
-            case SUCCESS -> "Success!";
-            case ERROR -> "Retry";
-        }));
+        submitButton
+                .bindText(submissionStateSignal.map(state -> switch (state) {
+                case IDLE -> "Create Account";
+                case SUBMITTING -> "Creating...";
+                case SUCCESS -> "Success!";
+                case ERROR -> "Retry";
+                }));
 
         // Bind theme variant
         submitButton.bindThemeVariant(ButtonVariant.LUMO_SUCCESS,

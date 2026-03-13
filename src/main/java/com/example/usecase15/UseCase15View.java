@@ -116,8 +116,7 @@ public class UseCase15View extends VerticalLayout {
 
         searchField.bindValue(instantQuerySignal, value -> {
             instantQuerySignal.set(value);
-            keystrokeCountSignal
-                    .set(keystrokeCountSignal.peek() + 1);
+            keystrokeCountSignal.set(keystrokeCountSignal.peek() + 1);
             scheduleDebouncedSearch(value);
         });
 

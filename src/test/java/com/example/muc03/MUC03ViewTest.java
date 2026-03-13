@@ -6,11 +6,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 
+import com.vaadin.browserless.SpringBrowserlessTest;
+import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.browserless.SpringBrowserlessTest;
-import com.vaadin.browserless.ViewPackages;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -81,12 +81,13 @@ class MUC03ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Clicks remaining should be 4
-        assertTrue($view(Div.class).all().stream().anyMatch(d -> d.getText() != null
-                && d.getText().contains("Targets remaining: 4")));
+        assertTrue($view(Div.class).all().stream()
+                .anyMatch(d -> d.getText() != null
+                        && d.getText().contains("Targets remaining: 4")));
 
         // User B's score should appear in leaderboard
-        assertTrue($view(Span.class).all().stream().anyMatch(s -> s.getText() != null
-                && s.getText().contains("1 points")));
+        assertTrue($view(Span.class).all().stream().anyMatch(
+                s -> s.getText() != null && s.getText().contains("1 points")));
     }
 
     @Test
@@ -108,8 +109,8 @@ class MUC03ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // No score spans should remain (leaderboard cleared)
-        assertTrue($view(Span.class).all().stream().noneMatch(s -> s.getText() != null
-                && s.getText().contains("points")));
+        assertTrue($view(Span.class).all().stream().noneMatch(
+                s -> s.getText() != null && s.getText().contains("points")));
     }
 
     @Test
@@ -123,15 +124,15 @@ class MUC03ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Target button should be visible — click it via the UI
-        Button targetButton = $view(Button.class).all().stream()
-                .filter(b -> b.getText() != null
-                        && b.getText().contains("CLICK ME!"))
+        Button targetButton = $view(Button.class).all().stream().filter(
+                b -> b.getText() != null && b.getText().contains("CLICK ME!"))
                 .findFirst().orElseThrow();
         test(targetButton).click();
         runPendingSignalsTasks();
 
         // After click, clicks remaining should be 4
-        assertTrue($view(Div.class).all().stream().anyMatch(d -> d.getText() != null
-                && d.getText().contains("Targets remaining: 4")));
+        assertTrue($view(Div.class).all().stream()
+                .anyMatch(d -> d.getText() != null
+                        && d.getText().contains("Targets remaining: 4")));
     }
 }
