@@ -91,7 +91,7 @@ public class UseCase15View extends VerticalLayout {
 
     private final ScheduledExecutorService debounceExecutor = Executors
             .newSingleThreadScheduledExecutor();
-    private volatile ScheduledFuture<?> pendingDebounce = null;
+    private volatile @Nullable ScheduledFuture<?> pendingDebounce = null;
 
     public UseCase15View() {
         setSpacing(true);
