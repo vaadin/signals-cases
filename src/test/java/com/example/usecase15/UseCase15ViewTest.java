@@ -4,10 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.TextField;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -30,8 +30,8 @@ class UseCase15ViewTest extends SpringBrowserlessTest {
         navigate(UseCase15View.class);
 
         TextField searchField = $view(TextField.class).all().stream()
-                .filter(f -> "Search Products".equals(f.getLabel()))
-                .findFirst().orElseThrow();
+                .filter(f -> "Search Products".equals(f.getLabel())).findFirst()
+                .orElseThrow();
         assertEquals("Type to search...", searchField.getPlaceholder());
     }
 
@@ -42,8 +42,8 @@ class UseCase15ViewTest extends SpringBrowserlessTest {
 
         // Type into the search field
         TextField searchField = $view(TextField.class).all().stream()
-                .filter(f -> "Search Products".equals(f.getLabel()))
-                .findFirst().orElseThrow();
+                .filter(f -> "Search Products".equals(f.getLabel())).findFirst()
+                .orElseThrow();
         test(searchField).setValue("laptop");
         runPendingSignalsTasks();
 
@@ -64,8 +64,8 @@ class UseCase15ViewTest extends SpringBrowserlessTest {
 
         // Type a value
         TextField searchField = $view(TextField.class).all().stream()
-                .filter(f -> "Search Products".equals(f.getLabel()))
-                .findFirst().orElseThrow();
+                .filter(f -> "Search Products".equals(f.getLabel())).findFirst()
+                .orElseThrow();
         test(searchField).setValue("a");
         runPendingSignalsTasks();
 

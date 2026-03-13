@@ -153,8 +153,8 @@ public class SchedulerService {
 
         cancelTask(taskId);
 
-        ScheduledFuture<?> future = scheduler.scheduleAtFixedRate(
-                callback::run, initialDelay, period, unit);
+        ScheduledFuture<?> future = scheduler.scheduleAtFixedRate(callback::run,
+                initialDelay, period, unit);
 
         tasks.put(taskId, future);
     }

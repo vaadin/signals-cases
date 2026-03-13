@@ -4,11 +4,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 
+import com.vaadin.browserless.SpringBrowserlessTest;
+import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.browserless.SpringBrowserlessTest;
-import com.vaadin.browserless.ViewPackages;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -27,7 +27,8 @@ class UseCase02ViewTest extends SpringBrowserlessTest {
         navigate(UseCase02View.class);
         runPendingSignalsTasks();
 
-        // Only needsVisa checkbox visible; visa type ComboBox is in hidden section
+        // Only needsVisa checkbox visible; visa type ComboBox is in hidden
+        // section
         assertEquals(1, $view(Checkbox.class).all().size());
         assertFalse($view(ComboBox.class).all().stream()
                 .anyMatch(c -> "Visa Type".equals(c.getLabel())));
@@ -90,9 +91,8 @@ class UseCase02ViewTest extends SpringBrowserlessTest {
         // Previous employer fields now visible
         assertTrue($view(TextField.class).all().stream()
                 .anyMatch(f -> "Previous Employer".equals(f.getLabel())));
-        assertTrue($view(TextField.class).all().stream()
-                .anyMatch(
-                        f -> "Previous Petition Number".equals(f.getLabel())));
+        assertTrue($view(TextField.class).all().stream().anyMatch(
+                f -> "Previous Petition Number".equals(f.getLabel())));
     }
 
     @SuppressWarnings("unchecked")
@@ -133,8 +133,8 @@ class UseCase02ViewTest extends SpringBrowserlessTest {
         test(visaTypeSelect).selectItem("O1");
         runPendingSignalsTasks();
 
-        assertTrue($view(TextField.class).all().stream().anyMatch(f -> "Field of Extraordinary Ability"
-                .equals(f.getLabel())));
+        assertTrue($view(TextField.class).all().stream().anyMatch(
+                f -> "Field of Extraordinary Ability".equals(f.getLabel())));
     }
 
     @Test
