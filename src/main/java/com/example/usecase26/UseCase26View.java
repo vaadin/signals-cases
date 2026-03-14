@@ -91,7 +91,7 @@ public class UseCase26View extends VerticalLayout {
         logPanel.add(new H3("Creation Log"));
         var logEntries = new Div();
         logEntries.bindChildren(creationLog,
-                entrySignal -> new Span(entrySignal.get()));
+                entrySignal -> new Div(new Span(entrySignal.get())));
         logPanel.add(logEntries);
 
         add(title, description, countrySelect, usWrapper, deWrapper, jpWrapper,
