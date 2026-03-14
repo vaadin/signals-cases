@@ -14,6 +14,7 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
@@ -86,16 +87,23 @@ public class UseCase26View extends VerticalLayout {
         // Creation log panel
         var logPanel = new Div();
         logPanel.getStyle().set("background-color", "#f5f5f5")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("margin-top", "1em");
+                .set("padding", "1em").set("border-radius", "4px");
         logPanel.add(new H3("Creation Log"));
         var logEntries = new Div();
         logEntries.bindChildren(creationLog,
                 entrySignal -> new Div(new Span(entrySignal.get())));
         logPanel.add(logEntries);
 
-        add(title, description, countrySelect, usWrapper, deWrapper, jpWrapper,
-                ukWrapper, logPanel);
+        // Main content: forms on the left, log on the right
+        var formsArea = new Div(countrySelect, usWrapper, deWrapper, jpWrapper,
+                ukWrapper);
+        formsArea.getStyle().set("flex", "1");
+
+        var contentLayout = new HorizontalLayout(formsArea, logPanel);
+        contentLayout.setWidthFull();
+        contentLayout.setAlignItems(HorizontalLayout.Alignment.START);
+
+        add(title, description, contentLayout);
     }
 
     private void populateUSForm(Div wrapper) {

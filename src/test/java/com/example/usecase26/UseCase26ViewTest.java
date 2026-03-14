@@ -162,4 +162,58 @@ class UseCase26ViewTest extends SpringBrowserlessTest {
                 .count();
         assertEquals(1, logEntries);
     }
+
+    @Test
+    void switchingBetweenNonJapanCountriesNeverDestroysJapan() {
+        navigate(UseCase26View.class);
+        runPendingSignalsTasks();
+
+        selectCountry("US");
+        selectCountry("GERMANY");
+        selectCountry("UK");
+        selectCountry("US");
+
+        // No destroy messages should appear at all
+        long destroyCount = $view(Span.class).all().stream().filter(
+                s -> s.getText() != null && s.getText().startsWith("Destroyed"))
+                .count();
+        assertEquals(0, destroyCount);
+    }
+
+    @Test
+    void japanDestroyOnlyOnSwitchAwayFromJapan() {
+        navigate(UseCase26View.class);
+        runPendingSignalsTasks();
+
+        selectCountry("JAPAN");
+        selectCountry("US");
+        selectCountry("GERMANY");
+        selectCountry("JAPAN");
+        selectCountry("UK");
+
+        // Japan created twice, destroyed twice
+        long jpCreated = $view(Span.class).all().stream()
+                .filter(s -> "Created Japan address form".equals(s.getText()))
+                .count();
+        assertEquals(2, jpCreated);
+
+        long jpDestroyed = $view(Span.class).all().stream()
+                .filter(s -> "Destroyed Japan address form".equals(s.getText()))
+                .count();
+        assertEquals(2, jpDestroyed);
+
+        // Create-once countries: each created exactly once, never destroyed
+        assertEquals(1,
+                $view(Span.class).all().stream().filter(
+                        s -> "Created US address form".equals(s.getText()))
+                        .count());
+        assertEquals(1,
+                $view(Span.class).all().stream().filter(
+                        s -> "Created Germany address form".equals(s.getText()))
+                        .count());
+        assertEquals(1,
+                $view(Span.class).all().stream().filter(
+                        s -> "Created UK address form".equals(s.getText()))
+                        .count());
+    }
 }

@@ -119,7 +119,8 @@ public class MissingAPI {
         container.bindVisible(visible).onChange(context -> {
             if (context.getNewValue()) {
                 populator.accept(container);
-            } else if (!context.isInitialRun()) {
+            } else if (!context.isInitialRun()
+                    && container.getElement().getChildCount() > 0) {
                 container.removeAll();
                 if (onDestroy != null) {
                     onDestroy.accept(container);
