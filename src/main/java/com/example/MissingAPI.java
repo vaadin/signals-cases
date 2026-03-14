@@ -2,9 +2,14 @@ package com.example;
 
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.virtuallist.VirtualList;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
@@ -76,6 +81,54 @@ public class MissingAPI {
      *            selected index of the Tabs and can also update it. Must not be
      *            {@code null}.
      */
+    /**
+     * Lazily populates a container the first time it becomes visible
+     * (create-once-keep pattern). The populator is called only once; on
+     * subsequent visibility changes the existing children are kept.
+     */
+    public static <C extends Component & HasComponents> void lazyPopulate(
+            C container, Signal<Boolean> visible,
+            SerializableConsumer<C> populator) {
+        container.bindVisible(visible).onChange(context -> {
+            if (context.getNewValue()
+                    && container.getElement().getChildCount() == 0) {
+                populator.accept(container);
+            }
+        });
+    }
+
+    /**
+     * Lazily populates a container each time it becomes visible and removes all
+     * children when it becomes invisible (create-and-destroy pattern).
+     */
+    public static <C extends Component & HasComponents> void lazyPopulateRecreating(
+            C container, Signal<Boolean> visible,
+            SerializableConsumer<C> populator) {
+        lazyPopulateRecreating(container, visible, populator, null);
+    }
+
+    /**
+     * Lazily populates a container each time it becomes visible and removes all
+     * children when it becomes invisible (create-and-destroy pattern). The
+     * optional {@code onDestroy} callback is invoked after {@code removeAll()}.
+     */
+    public static <C extends Component & HasComponents> void lazyPopulateRecreating(
+            C container, Signal<Boolean> visible,
+            SerializableConsumer<C> populator,
+            @Nullable SerializableConsumer<C> onDestroy) {
+        container.bindVisible(visible).onChange(context -> {
+            if (context.getNewValue()) {
+                populator.accept(container);
+            } else if (!context.isInitialRun()
+                    && container.getElement().getChildCount() > 0) {
+                container.removeAll();
+                if (onDestroy != null) {
+                    onDestroy.accept(container);
+                }
+            }
+        });
+    }
+
     public static void tabsSyncSelectedIndex(Tabs tabs,
             ValueSignal<Integer> numberSignal) {
         Signal.effect(tabs, () -> {
