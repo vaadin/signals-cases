@@ -1,11 +1,8 @@
 package com.example;
 
-import java.util.List;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.tabs.TabSheet;
-import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
@@ -15,20 +12,6 @@ import com.vaadin.flow.signals.local.ListSignal;
  * bindings until the official API is implemented in Vaadin.
  */
 public class MissingAPI {
-
-    /**
-     * Binds the browser document title to a Signal. The UI is used to get the
-     * page and execute JavaScript to update document.title.
-     */
-    public static void bindBrowserTitle(com.vaadin.flow.component.UI ui,
-            Signal<String> signal) {
-        Signal.effect(ui, () -> {
-            String title = signal.get();
-            if (title != null) {
-                ui.getPage().setTitle(title);
-            }
-        });
-    }
 
     /**
      * Synchronizes the selected index between a Tabs component and a writable
