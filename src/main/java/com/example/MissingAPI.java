@@ -2,6 +2,7 @@ package com.example;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
@@ -174,7 +175,7 @@ public class MissingAPI {
                 }
             });
             resizeObserver.observe(target);
-            target._resizeObserver = resizeObserver;
+            window[$1] = resizeObserver;
             const rect = target.getBoundingClientRect();
             const event = new CustomEvent('%s', {
                 detail: { width: Math.floor(rect.width), height: Math.floor(rect.height) }
@@ -183,10 +184,9 @@ public class MissingAPI {
             """.formatted(RESIZE_EVENT, RESIZE_EVENT);
 
     private static final String CLEANUP_RESIZE_OBSERVER_JS = """
-            const target = $0;
-            if (target && target._resizeObserver) {
-                target._resizeObserver.disconnect();
-                delete target._resizeObserver;
+            if (window[$0]) {
+                window[$0].disconnect();
+                delete window[$0];
             }
             """;
 
@@ -204,6 +204,8 @@ public class MissingAPI {
                 new ComponentSize(0, 0));
 
         component.addAttachListener(attachEvent -> {
+            String cleanupKey = UUID.randomUUID().toString();
+
             DomListenerRegistration reg = component.getElement()
                     .addEventListener(RESIZE_EVENT, event -> {
                         int width = (int) event.getEventData()
@@ -215,12 +217,13 @@ public class MissingAPI {
                     .addEventData("event.detail.height");
 
             component.getElement().executeJs(SETUP_RESIZE_OBSERVER_JS,
-                    component.getElement());
+                    component.getElement(), cleanupKey);
 
             component.addDetachListener(detachEvent -> {
+                detachEvent.unregisterListener();
                 reg.remove();
-                component.getElement().executeJs(
-                        CLEANUP_RESIZE_OBSERVER_JS, component.getElement());
+                detachEvent.getUI().getPage().executeJs(
+                        CLEANUP_RESIZE_OBSERVER_JS, cleanupKey);
             });
         });
 
