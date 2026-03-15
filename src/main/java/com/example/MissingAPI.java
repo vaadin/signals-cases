@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.virtuallist.VirtualList;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
-import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
  * Temporary helper class providing static methods for Signal-based component
@@ -78,8 +78,8 @@ public class MissingAPI {
      *            selected index of the Tabs and can also update it. Must not be
      *            {@code null}.
      */
-    public static void tabsSyncSelectedIndex(Tabs tabs,
-            ValueSignal<Integer> numberSignal) {
+    public static void tabsSyncSelectedIndex(TabSheet tabs,
+            Signal<Integer> numberSignal, SerializableConsumer<Integer> writeCallback) {
         Signal.effect(tabs, () -> {
             Integer index = numberSignal.get();
             if (index != null) {
@@ -87,7 +87,7 @@ public class MissingAPI {
             }
         });
         tabs.addSelectedChangeListener(event -> {
-            numberSignal.set(event.getSource().getSelectedIndex());
+            writeCallback.accept(event.getSource().getSelectedIndex());
         });
     }
 

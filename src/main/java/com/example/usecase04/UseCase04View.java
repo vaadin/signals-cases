@@ -53,26 +53,11 @@ public class UseCase04View extends VerticalLayout {
         // Use setItems to get a GridListDataView for filtering
         GridListDataView<Product> dataView = grid.setItems(allProducts);
 
-        // Set up filtering using DataView - filters are applied based on signal values
-        dataView.setFilter(product -> {
-            String category = categoryFilterSignal.peek();
-            String searchTerm = searchTermSignal.peek().toLowerCase();
-            boolean inStockOnly = inStockOnlySignal.peek();
-
-            boolean categoryMatch = category.equals("All")
-                    || product.category().equals(category);
-            boolean searchMatch = searchTerm.isEmpty()
-                    || product.name().toLowerCase().contains(searchTerm)
-                    || product.id().toLowerCase().contains(searchTerm);
-            boolean stockMatch = !inStockOnly || product.stock() > 0;
-
-            return categoryMatch && searchMatch && stockMatch;
-        });
-
         // Filter UI components with signal bindings
         ComboBox<String> categoryFilter = new ComboBox<>("Category", List.of(
                 "All", "Electronics", "Clothing", "Books", "Home & Garden"));
-        categoryFilter.bindValue(categoryFilterSignal, categoryFilterSignal::set);
+        categoryFilter.bindValue(categoryFilterSignal,
+                categoryFilterSignal::set);
 
         TextField searchField = new TextField("Search");
         searchField.setPlaceholder("Search by name or ID");
@@ -81,14 +66,23 @@ public class UseCase04View extends VerticalLayout {
         Checkbox inStockCheckbox = new Checkbox("Show in-stock items only");
         inStockCheckbox.bindValue(inStockOnlySignal, inStockOnlySignal::set);
 
-        // Use Signal.effect to refresh DataView when any filter signal changes
+        // Use Signal.effect to configure DataView when any filter signal changes
         Signal.effect(grid, () -> {
-            // Read all signal values to register dependencies
-            categoryFilterSignal.get();
-            searchTermSignal.get();
-            inStockOnlySignal.get();
-            // Refresh the DataView to reapply filters
-            dataView.refreshAll();
+            // Read values outside the filter callback to register dependencies
+            String category = categoryFilterSignal.get();
+            String searchTerm = searchTermSignal.get().toLowerCase();
+            boolean inStockOnly = inStockOnlySignal.get();
+
+            dataView.setFilter(product -> {
+                boolean categoryMatch = category.equals("All")
+                        || product.category().equals(category);
+                boolean searchMatch = searchTerm.isEmpty()
+                        || product.name().toLowerCase().contains(searchTerm)
+                        || product.id().toLowerCase().contains(searchTerm);
+                boolean stockMatch = !inStockOnly || product.stock() > 0;
+
+                return categoryMatch && searchMatch && stockMatch;
+            });
         });
 
         add(title, description, categoryFilter, searchField, inStockCheckbox,

@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.example.usecase23.SchedulerService;
 import com.example.views.MainLayout;
+import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -21,8 +22,6 @@ import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
-import org.jspecify.annotations.Nullable;
-
 @PageTitle("Use Case 25: Stock Ticker")
 @Route(value = "use-case-25", layout = MainLayout.class)
 @Menu(order = 25, title = "UC 25: Stock Ticker")
@@ -34,7 +33,8 @@ public class UseCase25View extends Main {
 
     public UseCase25View(SchedulerService schedulerService) {
         addClassName("stock-ticker-view");
-        getStyle().set("display", "block").set("padding", "var(--lumo-space-l)");
+        getStyle().set("display", "block").set("padding",
+                "var(--lumo-space-l)");
 
         var title = new H2("Use Case 25: Stock Ticker");
         var description = new Paragraph(
@@ -47,8 +47,8 @@ public class UseCase25View extends Main {
 
         // Stock rows container
         Div stockList = new Div();
-        stockList.getStyle().set("display", "flex")
-                .set("flex-direction", "column");
+        stockList.getStyle().set("display", "flex").set("flex-direction",
+                "column");
 
         for (StockQuote initial : StockPriceSimulator.INITIAL_STOCKS) {
             var stockSignal = stockSignals.insertLast(initial);
@@ -60,8 +60,8 @@ public class UseCase25View extends Main {
         addAttachListener(event -> {
             taskId = "stock-ticker-" + event.getUI().getUIId();
             schedulerService.scheduleTask(taskId,
-                    () -> StockPriceSimulator.updatePrices(stockSignals),
-                    1500, 1500, TimeUnit.MILLISECONDS);
+                    () -> StockPriceSimulator.updatePrices(stockSignals), 1500,
+                    1500, TimeUnit.MILLISECONDS);
         });
 
         addDetachListener(event -> {
@@ -74,8 +74,7 @@ public class UseCase25View extends Main {
     private Div createHeaderRow() {
         Div row = new Div();
         row.getStyle().set("display", "grid")
-                .set("grid-template-columns",
-                        "80px 1fr 120px 100px 100px")
+                .set("grid-template-columns", "80px 1fr 120px 100px 100px")
                 .set("gap", "var(--lumo-space-s)")
                 .set("padding", "var(--lumo-space-s) var(--lumo-space-m)")
                 .set("border-bottom", "2px solid var(--lumo-contrast-20pct)")
@@ -104,19 +103,17 @@ public class UseCase25View extends Main {
     private Div createStockRow(ValueSignal<StockQuote> stockSignal) {
         Div row = new Div();
         row.getStyle().set("display", "grid")
-                .set("grid-template-columns",
-                        "80px 1fr 120px 100px 100px")
+                .set("grid-template-columns", "80px 1fr 120px 100px 100px")
                 .set("gap", "var(--lumo-space-s)")
                 .set("padding", "var(--lumo-space-s) var(--lumo-space-m)")
                 .set("align-items", "center")
-                .set("border-bottom",
-                        "1px solid var(--lumo-contrast-10pct)");
+                .set("border-bottom", "1px solid var(--lumo-contrast-10pct)");
 
         // Symbol
         Span symbol = new Span();
         symbol.bindText(stockSignal.map(StockQuote::symbol));
-        symbol.getStyle().set("font-weight", "bold")
-                .set("font-family", "monospace");
+        symbol.getStyle().set("font-weight", "bold").set("font-family",
+                "monospace");
 
         // Company name
         Span name = new Span();
@@ -126,24 +123,21 @@ public class UseCase25View extends Main {
 
         // Price
         Span price = new Span();
-        price.bindText(stockSignal
-                .map(q -> String.format(java.util.Locale.US, "$%.2f",
-                        q.price())));
+        price.bindText(stockSignal.map(
+                q -> String.format(java.util.Locale.US, "$%.2f", q.price())));
         price.getStyle().set("text-align", "right")
-                .set("font-family", "monospace")
-                .set("font-weight", "600")
-                .set("border-radius", "4px")
-                .set("padding", "2px 6px");
+                .set("font-family", "monospace").set("font-weight", "600")
+                .set("border-radius", "4px").set("padding", "2px 6px");
 
         // Change
         Span change = new Span();
         change.bindText(stockSignal.map(q -> {
             String prefix = q.change() >= 0 ? "+" : "";
-            return prefix + String.format(java.util.Locale.US, "%.2f",
-                    q.change());
+            return prefix
+                    + String.format(java.util.Locale.US, "%.2f", q.change());
         }));
-        change.getStyle().set("text-align", "right")
-                .set("font-family", "monospace");
+        change.getStyle().set("text-align", "right").set("font-family",
+                "monospace");
 
         // % Change
         Span pctChange = new Span();
@@ -152,8 +146,8 @@ public class UseCase25View extends Main {
             return prefix + String.format(java.util.Locale.US, "%.2f%%",
                     q.changePercent());
         }));
-        pctChange.getStyle().set("text-align", "right")
-                .set("font-family", "monospace");
+        pctChange.getStyle().set("text-align", "right").set("font-family",
+                "monospace");
 
         // React to price changes with flash effect
         List<Element> flashTargets = List.of(price.getElement(),

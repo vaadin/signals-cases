@@ -4,15 +4,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.progressbar.ProgressBar;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -25,8 +23,8 @@ class UseCase14ViewTest extends SpringBrowserlessTest {
     void viewRendersWithLoadButton() {
         navigate(UseCase14View.class);
 
-        assertTrue($view(Button.class).all().stream()
-                .anyMatch(b -> "Generate Analytics Report".equals(b.getText())));
+        assertTrue($view(Button.class).all().stream().anyMatch(
+                b -> "Generate Analytics Report".equals(b.getText())));
     }
 
     @Test

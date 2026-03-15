@@ -6,10 +6,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.textfield.TextField;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -44,9 +44,8 @@ class MUC04ViewTest extends SpringBrowserlessTest {
         navigate(MUC04View.class);
         runPendingSignalsTasks();
 
-        $view(TextField.class).all()
-                .forEach(f -> assertTrue(f.isEnabled(),
-                        "Field '" + f.getLabel() + "' should be enabled"));
+        $view(TextField.class).all().forEach(f -> assertTrue(f.isEnabled(),
+                "Field '" + f.getLabel() + "' should be enabled"));
     }
 
     @Test
@@ -80,8 +79,8 @@ class MUC04ViewTest extends SpringBrowserlessTest {
         // Helper text should indicate who is editing
         TextField addressField = getFieldByLabel("Address");
         assertTrue(
-                addressField.getHelperText() != null && addressField
-                        .getHelperText().contains("otherUser"),
+                addressField.getHelperText() != null
+                        && addressField.getHelperText().contains("otherUser"),
                 "Helper text should show the locking user's name");
     }
 
