@@ -18,6 +18,18 @@ public class MissingAPI {
 
     /**
      * Binds a Grid's items to a Signal containing a List.
+     * <p>
+     * Creates a reactive effect that updates the grid's items whenever the
+     * signal value changes. If the signal value is {@code null}, the grid is
+     * cleared.
+     *
+     * @param <T>
+     *            the type of items in the grid
+     * @param grid
+     *            the grid to bind. Must not be {@code null}.
+     * @param signal
+     *            a signal containing the list of items. Must not be
+     *            {@code null}.
      */
     public static <T> void bindItems(Grid<T> grid, Signal<List<T>> signal) {
         Signal.effect(grid, () -> {
@@ -32,6 +44,18 @@ public class MissingAPI {
 
     /**
      * Binds a VirtualList's items to a Signal containing a List.
+     * <p>
+     * Creates a reactive effect that updates the virtual list's items whenever
+     * the signal value changes. If the signal value is {@code null}, the list
+     * is cleared.
+     *
+     * @param <T>
+     *            the type of items in the virtual list
+     * @param virtualList
+     *            the virtual list to bind. Must not be {@code null}.
+     * @param signal
+     *            a signal containing the list of items. Must not be
+     *            {@code null}.
      */
     public static <T> void bindItems(VirtualList<T> virtualList,
             Signal<List<T>> signal) {
@@ -47,6 +71,18 @@ public class MissingAPI {
 
     /**
      * Binds a ComboBox's items to a Signal containing a List.
+     * <p>
+     * Creates a reactive effect that updates the combo box's items whenever
+     * the signal value changes. If the signal value is {@code null}, the combo
+     * box is cleared.
+     *
+     * @param <T>
+     *            the type of items in the combo box
+     * @param comboBox
+     *            the combo box to bind. Must not be {@code null}.
+     * @param signal
+     *            a signal containing the list of items. Must not be
+     *            {@code null}.
      */
     public static <T> void bindItems(
             com.vaadin.flow.component.combobox.ComboBox<T> comboBox,
@@ -77,6 +113,10 @@ public class MissingAPI {
      *            A writable integer signal that will receive the current
      *            selected index of the Tabs and can also update it. Must not be
      *            {@code null}.
+     * @param writeCallback
+     *            A callback invoked to write the new selected index back to the
+     *            signal when the user changes the tab in the UI. Must not be
+     *            {@code null}.
      */
     public static void tabsSyncSelectedIndex(TabSheet tabs,
             Signal<Integer> numberSignal, SerializableConsumer<Integer> writeCallback) {
@@ -91,6 +131,19 @@ public class MissingAPI {
         });
     }
 
+    /**
+     * Extracts the current values from a {@link ListSignal} as a stream.
+     * <p>
+     * Each entry in the list signal is itself a signal; this method unwraps
+     * them by calling {@link Signal#get()} on each entry.
+     *
+     * @param <T>
+     *            the type of values in the list signal
+     * @param signal
+     *            the list signal to extract values from. Must not be
+     *            {@code null}.
+     * @return a stream of the current values
+     */
     public static <T> Stream<T> getValues(ListSignal<T> signal) {
         return signal.get().stream().map(Signal::get);
     }
