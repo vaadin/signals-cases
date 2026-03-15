@@ -46,10 +46,11 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
 public class UseCase13View extends VerticalLayout {
 
     private final UserSessionRegistry userSessionRegistry;
-    private static final Map<String, String> routeToTitleMap = buildRouteToTitleMap();
+    private final Map<String, String> routeToTitleMap;
 
     public UseCase13View(UserSessionRegistry userSessionRegistry) {
         this.userSessionRegistry = userSessionRegistry;
+        this.routeToTitleMap = buildRouteToTitleMap();
 
         setSpacing(true);
         setPadding(true);
@@ -341,7 +342,7 @@ public class UseCase13View extends VerticalLayout {
         }
     }
 
-    private static Map<String, String> buildRouteToTitleMap() {
+    private Map<String, String> buildRouteToTitleMap() {
         var routeToTitleMap = new HashMap<String, String>();
         MenuConfiguration.getMenuEntries().forEach(entry -> {
             // Store both with and without leading slash for flexible lookup
