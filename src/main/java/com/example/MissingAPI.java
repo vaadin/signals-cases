@@ -1,14 +1,18 @@
 package com.example;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.virtuallist.VirtualList;
+import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
  * Temporary helper class providing static methods for Signal-based component
@@ -146,5 +150,90 @@ public class MissingAPI {
      */
     public static <T> Stream<T> getValues(ListSignal<T> signal) {
         return signal.get().stream().map(Signal::get);
+    }
+
+    /**
+     * A component's size in pixels, mirroring the future
+     * {@code Component.Size} API from vaadin/flow#23618.
+     */
+    public record ComponentSize(int width, int height) implements Serializable {
+    }
+
+    private static final String RESIZE_EVENT = "component-resize";
+
+    private static final String SETUP_RESIZE_OBSERVER_JS = """
+            const target = $0;
+            const resizeObserver = new ResizeObserver(entries => {
+                for (let entry of entries) {
+                    const width = Math.floor(entry.contentRect.width);
+                    const height = Math.floor(entry.contentRect.height);
+                    const event = new CustomEvent('%s', {
+                        detail: { width: width, height: height }
+                    });
+                    target.dispatchEvent(event);
+                }
+            });
+            resizeObserver.observe(target);
+            target._resizeObserver = resizeObserver;
+            const rect = target.getBoundingClientRect();
+            const event = new CustomEvent('%s', {
+                detail: { width: Math.floor(rect.width), height: Math.floor(rect.height) }
+            });
+            target.dispatchEvent(event);
+            """.formatted(RESIZE_EVENT, RESIZE_EVENT);
+
+    private static final String CLEANUP_RESIZE_OBSERVER_JS = """
+            const target = $0;
+            if (target && target._resizeObserver) {
+                target._resizeObserver.disconnect();
+                delete target._resizeObserver;
+            }
+            """;
+
+    /**
+     * Creates a read-only signal that tracks the size of the given component's
+     * element using a ResizeObserver, with an initial size of (0, 0).
+     *
+     * @see #sizeSignal(Component, ComponentSize)
+     */
+    public static Signal<ComponentSize> sizeSignal(Component component) {
+        return sizeSignal(component, new ComponentSize(0, 0));
+    }
+
+    /**
+     * Creates a read-only signal that tracks the size of the given component's
+     * element using a ResizeObserver.
+     * <p>
+     * This mirrors the future {@code Component.sizeSignal()} API from
+     * vaadin/flow#23618. When that PR merges, replace
+     * {@code MissingAPI.sizeSignal(component)} with
+     * {@code component.sizeSignal()}.
+     */
+    public static Signal<ComponentSize> sizeSignal(Component component,
+            ComponentSize initialSize) {
+        ValueSignal<ComponentSize> signal = new ValueSignal<>(initialSize);
+
+        component.addAttachListener(attachEvent -> {
+            DomListenerRegistration reg = component.getElement()
+                    .addEventListener(RESIZE_EVENT, event -> {
+                        int width = (int) event.getEventData()
+                                .get("event.detail.width").asDouble();
+                        int height = (int) event.getEventData()
+                                .get("event.detail.height").asDouble();
+                        signal.set(new ComponentSize(width, height));
+                    }).addEventData("event.detail.width")
+                    .addEventData("event.detail.height");
+
+            component.getElement().executeJs(SETUP_RESIZE_OBSERVER_JS,
+                    component.getElement());
+
+            component.addDetachListener(detachEvent -> {
+                reg.remove();
+                component.getElement().executeJs(
+                        CLEANUP_RESIZE_OBSERVER_JS, component.getElement());
+            });
+        });
+
+        return signal.asReadonly();
     }
 }
