@@ -4,12 +4,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 
+import com.vaadin.browserless.SpringBrowserlessTest;
+import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.browserless.SpringBrowserlessTest;
-import com.vaadin.browserless.ViewPackages;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,9 +42,8 @@ class UseCase06ViewTest extends SpringBrowserlessTest {
         navigate(UseCase06View.class);
         runPendingSignalsTasks();
 
-        Span subtotalLabel = $view(Span.class).all().stream()
-                .filter(s -> s.getText() != null
-                        && s.getText().startsWith("Subtotal:"))
+        Span subtotalLabel = $view(Span.class).all().stream().filter(
+                s -> s.getText() != null && s.getText().startsWith("Subtotal:"))
                 .findFirst().orElseThrow();
         assertEquals("Subtotal: $0.00", subtotalLabel.getText());
     }
@@ -61,9 +60,8 @@ class UseCase06ViewTest extends SpringBrowserlessTest {
         test(addLaptop).click();
         runPendingSignalsTasks();
 
-        Span subtotalLabel = $view(Span.class).all().stream()
-                .filter(s -> s.getText() != null
-                        && s.getText().startsWith("Subtotal:"))
+        Span subtotalLabel = $view(Span.class).all().stream().filter(
+                s -> s.getText() != null && s.getText().startsWith("Subtotal:"))
                 .findFirst().orElseThrow();
         assertEquals("Subtotal: $999.99", subtotalLabel.getText());
     }
@@ -89,9 +87,8 @@ class UseCase06ViewTest extends SpringBrowserlessTest {
         navigate(UseCase06View.class);
         runPendingSignalsTasks();
 
-        Span shippingLabel = $view(Span.class).all().stream()
-                .filter(s -> s.getText() != null
-                        && s.getText().startsWith("Shipping:"))
+        Span shippingLabel = $view(Span.class).all().stream().filter(
+                s -> s.getText() != null && s.getText().startsWith("Shipping:"))
                 .findFirst().orElseThrow();
         assertEquals("Shipping: $5.99", shippingLabel.getText());
     }
@@ -101,9 +98,8 @@ class UseCase06ViewTest extends SpringBrowserlessTest {
         navigate(UseCase06View.class);
         runPendingSignalsTasks();
 
-        Span totalLabel = $view(Span.class).all().stream()
-                .filter(s -> s.getText() != null
-                        && s.getText().startsWith("Total:"))
+        Span totalLabel = $view(Span.class).all().stream().filter(
+                s -> s.getText() != null && s.getText().startsWith("Total:"))
                 .findFirst().orElseThrow();
         // Subtotal $0 - discount $0 + shipping $5.99 + tax 8% of $0 = $5.99
         assertEquals("Total: $5.99", totalLabel.getText());
@@ -146,9 +142,8 @@ class UseCase06ViewTest extends SpringBrowserlessTest {
         test(addLaptop).click();
         runPendingSignalsTasks();
 
-        Span subtotalLabel = $view(Span.class).all().stream()
-                .filter(s -> s.getText() != null
-                        && s.getText().startsWith("Subtotal:"))
+        Span subtotalLabel = $view(Span.class).all().stream().filter(
+                s -> s.getText() != null && s.getText().startsWith("Subtotal:"))
                 .findFirst().orElseThrow();
         assertEquals("Subtotal: $999.99", subtotalLabel.getText());
 
@@ -178,9 +173,8 @@ class UseCase06ViewTest extends SpringBrowserlessTest {
         test(emptyCartButton).click();
         runPendingSignalsTasks();
 
-        Span subtotalLabel = $view(Span.class).all().stream()
-                .filter(s -> s.getText() != null
-                        && s.getText().startsWith("Subtotal:"))
+        Span subtotalLabel = $view(Span.class).all().stream().filter(
+                s -> s.getText() != null && s.getText().startsWith("Subtotal:"))
                 .findFirst().orElseThrow();
         assertEquals("Subtotal: $0.00", subtotalLabel.getText());
     }

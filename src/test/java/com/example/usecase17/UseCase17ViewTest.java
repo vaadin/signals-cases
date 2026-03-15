@@ -4,10 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Span;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -77,7 +77,8 @@ class UseCase17ViewTest extends SpringBrowserlessTest {
         test(mbSelect).selectItem("ASUS ROG X670E");
         runPendingSignalsTasks();
 
-        // Compatibility count should drop below 13 - find the checks passing span
+        // Compatibility count should drop below 13 - find the checks passing
+        // span
         assertTrue($view(Span.class).all().stream().anyMatch(s -> {
             String text = s.getText();
             return text != null && text.contains("checks passing")
@@ -90,7 +91,7 @@ class UseCase17ViewTest extends SpringBrowserlessTest {
         navigate(UseCase17View.class);
         runPendingSignalsTasks();
 
-        assertTrue($view(Span.class).all().stream().anyMatch(
-                s -> "Power Consumption".equals(s.getText())));
+        assertTrue($view(Span.class).all().stream()
+                .anyMatch(s -> "Power Consumption".equals(s.getText())));
     }
 }

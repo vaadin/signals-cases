@@ -8,10 +8,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -63,9 +63,8 @@ class MUC06ViewTest extends SpringBrowserlessTest {
         assertTrue(getStatText("Total:").contains("4"));
 
         // Simulate User B adding a task via the shared signal
-        muc06Signals.getTasksSignal()
-                .insertLast(new MUC06Signals.Task("task-userB",
-                        "User B's task", false, LocalDate.now()));
+        muc06Signals.getTasksSignal().insertLast(new MUC06Signals.Task(
+                "task-userB", "User B's task", false, LocalDate.now()));
         runPendingSignalsTasks();
 
         // User A's view should reflect the new task
@@ -86,9 +85,8 @@ class MUC06ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // User B adds a task via the shared signal
-        muc06Signals.getTasksSignal()
-                .insertLast(new MUC06Signals.Task("task-userB",
-                        "User B's task", false, LocalDate.now()));
+        muc06Signals.getTasksSignal().insertLast(new MUC06Signals.Task(
+                "task-userB", "User B's task", false, LocalDate.now()));
         runPendingSignalsTasks();
 
         // Both tasks should be visible

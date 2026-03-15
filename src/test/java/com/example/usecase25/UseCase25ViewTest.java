@@ -4,9 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.html.Span;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -36,12 +36,10 @@ class UseCase25ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Verify some initial prices are displayed
-        assertTrue($view(Span.class).all().stream()
-                .anyMatch(s -> s.getText() != null
-                        && s.getText().contains("$189.84")));
-        assertTrue($view(Span.class).all().stream()
-                .anyMatch(s -> s.getText() != null
-                        && s.getText().contains("$141.80")));
+        assertTrue($view(Span.class).all().stream().anyMatch(
+                s -> s.getText() != null && s.getText().contains("$189.84")));
+        assertTrue($view(Span.class).all().stream().anyMatch(
+                s -> s.getText() != null && s.getText().contains("$141.80")));
     }
 
     @Test
@@ -79,8 +77,7 @@ class UseCase25ViewTest extends SpringBrowserlessTest {
 
         // At least some percentage changes should no longer be +0.00%
         assertTrue($view(Span.class).all().stream()
-                .anyMatch(s -> s.getText() != null
-                        && s.getText().endsWith("%")
+                .anyMatch(s -> s.getText() != null && s.getText().endsWith("%")
                         && !"+0.00%".equals(s.getText())),
                 "Expected some non-zero percentage changes after update");
     }

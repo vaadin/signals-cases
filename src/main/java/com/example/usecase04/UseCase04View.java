@@ -56,7 +56,8 @@ public class UseCase04View extends VerticalLayout {
         // Filter UI components with signal bindings
         ComboBox<String> categoryFilter = new ComboBox<>("Category", List.of(
                 "All", "Electronics", "Clothing", "Books", "Home & Garden"));
-        categoryFilter.bindValue(categoryFilterSignal, categoryFilterSignal::set);
+        categoryFilter.bindValue(categoryFilterSignal,
+                categoryFilterSignal::set);
 
         TextField searchField = new TextField("Search");
         searchField.setPlaceholder("Search by name or ID");
