@@ -5,12 +5,11 @@ import jakarta.annotation.security.PermitAll;
 import java.util.Locale;
 import java.util.Map;
 
-import org.jspecify.annotations.Nullable;
-
 import com.example.preferences.UserPreferences;
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -147,7 +146,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         localeSelector.addValueChangeListener(event -> {
             Locale selectedLocale = localeMap.get(event.getValue());
             if (selectedLocale != null) {
-                UI.getCurrent().localeSignal().set(selectedLocale);
+                UI.getCurrent().setLocale(selectedLocale);
             }
         });
 
@@ -161,8 +160,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         Avatar userAvatar = new Avatar();
         userAvatar.getElement().bindProperty("name", currentUserSignal
                 .getUserSignal()
-                .map(user -> user.isAuthenticated() ? user.getUsername()
-                        : ""),
+                .map(user -> user.isAuthenticated() ? user.getUsername() : ""),
                 null);
         userAvatar.getElement().bindProperty("img",
                 currentUserSignal.getUserSignal()
@@ -174,8 +172,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
                 .map(user -> user.isAuthenticated()));
 
         Span userName = new Span(currentUserSignal.getUserSignal()
-                .map(user -> user.isAuthenticated() ? user.getUsername()
-                        : ""));
+                .map(user -> user.isAuthenticated() ? user.getUsername() : ""));
         userName.getStyle().set("color", "var(--lumo-secondary-text-color)")
                 .set("font-size", "var(--lumo-font-size-s)");
 

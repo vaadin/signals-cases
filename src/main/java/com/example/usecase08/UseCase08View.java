@@ -88,7 +88,8 @@ public class UseCase08View extends VerticalLayout {
 
         TextField companyNameField = new TextField("Company Name");
         step2Binder.forField(companyNameField)
-                .withValidator(value -> value != null && !value.trim().isEmpty(),
+                .withValidator(
+                        value -> value != null && !value.trim().isEmpty(),
                         "Company name is required")
                 .bind(FormData::getCompanyName, FormData::setCompanyName);
 
@@ -144,12 +145,13 @@ public class UseCase08View extends VerticalLayout {
         // Update review when entering this step
         Signal.effect(reviewDiv, () -> {
             if (currentStepSignal.get() == Step.REVIEW) {
-                String reviewText = "Name: " + formData.getFirstName() + " " + formData.getLastName() + "\n"
-                        + "Email: " + formData.getEmail() + "\n"
-                        + "Company: " + formData.getCompanyName() + "\n"
-                        + "Size: " + formData.getCompanySize() + "\n"
-                        + "Industry: " + formData.getIndustry() + "\n"
-                        + "Plan: " + formData.getPlan();
+                String reviewText = "Name: " + formData.getFirstName() + " "
+                        + formData.getLastName() + "\n" + "Email: "
+                        + formData.getEmail() + "\n" + "Company: "
+                        + formData.getCompanyName() + "\n" + "Size: "
+                        + formData.getCompanySize() + "\n" + "Industry: "
+                        + formData.getIndustry() + "\n" + "Plan: "
+                        + formData.getPlan();
                 reviewDiv.setText(reviewText);
             }
         });
@@ -171,10 +173,11 @@ public class UseCase08View extends VerticalLayout {
         Button previousButton = new Button("Previous", e -> {
             Step current = currentStepSignal.peek();
             switch (current) {
-                case COMPANY_INFO -> currentStepSignal.set(Step.PERSONAL_INFO);
-                case PLAN_SELECTION -> currentStepSignal.set(Step.COMPANY_INFO);
-                case REVIEW -> currentStepSignal.set(Step.PLAN_SELECTION);
-                default -> {}
+            case COMPANY_INFO -> currentStepSignal.set(Step.PERSONAL_INFO);
+            case PLAN_SELECTION -> currentStepSignal.set(Step.COMPANY_INFO);
+            case REVIEW -> currentStepSignal.set(Step.PLAN_SELECTION);
+            default -> {
+            }
             }
         });
         previousButton.bindVisible(() -> currentStepSignal.get() != Step.PERSONAL_INFO);
@@ -182,27 +185,29 @@ public class UseCase08View extends VerticalLayout {
         Button nextButton = new Button("Next", e -> {
             Step current = currentStepSignal.peek();
             switch (current) {
-                case PERSONAL_INFO -> currentStepSignal.set(Step.COMPANY_INFO);
-                case COMPANY_INFO -> currentStepSignal.set(Step.PLAN_SELECTION);
-                case PLAN_SELECTION -> currentStepSignal.set(Step.REVIEW);
-                default -> {}
+            case PERSONAL_INFO -> currentStepSignal.set(Step.COMPANY_INFO);
+            case COMPANY_INFO -> currentStepSignal.set(Step.PLAN_SELECTION);
+            case PLAN_SELECTION -> currentStepSignal.set(Step.REVIEW);
+            default -> {
+            }
             }
         });
         nextButton.bindVisible(() -> currentStepSignal.get() != Step.REVIEW);
         nextButton.bindEnabled(Signal.computed(() -> {
             Step current = currentStepSignal.get();
             return switch (current) {
-                case PERSONAL_INFO -> step1ValidSignal.get();
-                case COMPANY_INFO -> step2ValidSignal.get();
-                case PLAN_SELECTION -> step3ValidSignal.get();
-                case REVIEW -> false;
+            case PERSONAL_INFO -> step1ValidSignal.get();
+            case COMPANY_INFO -> step2ValidSignal.get();
+            case PLAN_SELECTION -> step3ValidSignal.get();
+            case REVIEW -> false;
             };
         }));
 
         Button submitButton = new Button("Submit", e -> {
             // Handle form submission
-            Notification.show("Form submitted successfully for " +
-                    formData.getFirstName() + " " + formData.getLastName() + "!");
+            Notification.show(
+                    "Form submitted successfully for " + formData.getFirstName()
+                            + " " + formData.getLastName() + "!");
         });
         submitButton.addThemeName("primary");
         submitButton.bindVisible(() -> currentStepSignal.get() == Step.REVIEW);
