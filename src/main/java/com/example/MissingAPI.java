@@ -192,16 +192,6 @@ public class MissingAPI {
 
     /**
      * Creates a read-only signal that tracks the size of the given component's
-     * element using a ResizeObserver, with an initial size of (0, 0).
-     *
-     * @see #sizeSignal(Component, ComponentSize)
-     */
-    public static Signal<ComponentSize> sizeSignal(Component component) {
-        return sizeSignal(component, new ComponentSize(0, 0));
-    }
-
-    /**
-     * Creates a read-only signal that tracks the size of the given component's
      * element using a ResizeObserver.
      * <p>
      * This mirrors the future {@code Component.sizeSignal()} API from
@@ -209,9 +199,9 @@ public class MissingAPI {
      * {@code MissingAPI.sizeSignal(component)} with
      * {@code component.sizeSignal()}.
      */
-    public static Signal<ComponentSize> sizeSignal(Component component,
-            ComponentSize initialSize) {
-        ValueSignal<ComponentSize> signal = new ValueSignal<>(initialSize);
+    public static Signal<ComponentSize> sizeSignal(Component component) {
+        ValueSignal<ComponentSize> signal = new ValueSignal<>(
+                new ComponentSize(0, 0));
 
         component.addAttachListener(attachEvent -> {
             DomListenerRegistration reg = component.getElement()

@@ -58,8 +58,7 @@ public class UseCase11View extends VerticalLayout {
         responsiveContent.getStyle().set("padding", "1em")
                 .set("height", "100%").set("overflow-y", "auto")
                 .set("background-color", "#ffffff");
-        containerSizeSignal = MissingAPI.sizeSignal(responsiveContent,
-                new ComponentSize(600, 400));
+        containerSizeSignal = MissingAPI.sizeSignal(responsiveContent);
         isSmall = containerSizeSignal
                 .map(size -> size.width() < SMALL_BREAKPOINT);
         isMedium = containerSizeSignal.map(size -> size
