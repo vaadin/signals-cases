@@ -7,7 +7,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
-import com.example.MissingAPI;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -197,7 +196,7 @@ public class UseCase24View extends VerticalLayout {
         infoBox.add(new Paragraph(
                 "This use case demonstrates VirtualList bound to a signal-based data source. "
                         + "A ListSignal<Notification> is the source of truth. A computed signal filters by type and read status, "
-                        + "then MissingAPI.bindItems() binds the filtered list to the VirtualList. "
+                        + "then virtualList.bindItems() binds the filtered list to the VirtualList. "
                         + "Each card uses a ComponentRenderer for rich per-item rendering. "
                         + "Actions find the matching ValueSignal in the ListSignal by ID and call set() or remove()."));
 
@@ -206,7 +205,7 @@ public class UseCase24View extends VerticalLayout {
     }
 
     private Div createNotificationCard(Notification notification,
-            ListSignal<Notification> notificationsSignal) {
+            ListSignal<Notification> listSignal) {
         var card = new Div();
         card.getStyle().set("display", "flex").set("align-items", "flex-start")
                 .set("gap", "1em").set("padding", "1em")
@@ -270,7 +269,7 @@ public class UseCase24View extends VerticalLayout {
 
         var toggleReadButton = new Button(
                 notification.read() ? "Mark Unread" : "Mark Read", e -> {
-                    notificationsSignal.get().stream()
+                    listSignal.get().stream()
                             .filter(signal -> signal.get().id()
                                     .equals(notification.id()))
                             .findFirst().ifPresent(signal -> signal.set(signal
@@ -280,9 +279,9 @@ public class UseCase24View extends VerticalLayout {
         toggleReadButton.addThemeName("tertiary");
 
         var dismissButton = new Button("Dismiss", e -> {
-            notificationsSignal.get().stream().filter(
+            listSignal.get().stream().filter(
                     signal -> signal.get().id().equals(notification.id()))
-                    .findFirst().ifPresent(notificationsSignal::remove);
+                    .findFirst().ifPresent(listSignal::remove);
         });
         dismissButton.addThemeName("small");
         dismissButton.addThemeName("tertiary");

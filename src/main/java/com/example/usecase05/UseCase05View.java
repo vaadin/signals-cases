@@ -41,7 +41,6 @@ public class UseCase05View extends VerticalLayout {
         ValueSignal<@Nullable String> stateSignal = new ValueSignal<@Nullable String>(null);
         ValueSignal<@Nullable String> citySignal = new ValueSignal<@Nullable String>(null);
 
-        var states = countrySignal.map(country -> loadStates(country));
         var cities = stateSignal.map(state -> loadCities(countrySignal.get(), state));
 
         // Country selector
@@ -65,9 +64,9 @@ public class UseCase05View extends VerticalLayout {
         citySelect.setItems(List.of()); // Initialize with empty items
         citySelect.bindItems(stateSignal.map(state -> {
             citySignal.set(""); // Reset city when state changes
-            List<String> cities = state != null && !state.isEmpty()
+            List<String> cityList = state != null && !state.isEmpty()
                     ? loadCities(countrySignal.get(), state) : List.of();
-            return cities.stream().map(ValueSignal::new).toList();
+            return cityList.stream().map(ValueSignal::new).toList();
         }));
         citySelect.bindValue(citySignal, citySignal::set);
         citySelect.bindEnabled(() -> !cities.get().isEmpty());
