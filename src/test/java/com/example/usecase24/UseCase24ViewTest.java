@@ -4,11 +4,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 
+import com.vaadin.browserless.SpringBrowserlessTest;
+import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.browserless.SpringBrowserlessTest;
-import com.vaadin.browserless.ViewPackages;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -56,9 +56,8 @@ class UseCase24ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // 8 seed notifications, 5 unread
-        Span countLabel = $view(Span.class).all().stream()
-                .filter(s -> s.getText() != null
-                        && s.getText().contains("Showing"))
+        Span countLabel = $view(Span.class).all().stream().filter(
+                s -> s.getText() != null && s.getText().contains("Showing"))
                 .findFirst().orElseThrow();
         assertTrue(countLabel.getText().contains("8 notification"));
         assertTrue(countLabel.getText().contains("5 unread"));
@@ -84,9 +83,8 @@ class UseCase24ViewTest extends SpringBrowserlessTest {
         test(addInfo).click();
         runPendingSignalsTasks();
 
-        Span countLabel = $view(Span.class).all().stream()
-                .filter(s -> s.getText() != null
-                        && s.getText().contains("Showing"))
+        Span countLabel = $view(Span.class).all().stream().filter(
+                s -> s.getText() != null && s.getText().contains("Showing"))
                 .findFirst().orElseThrow();
         assertTrue(countLabel.getText().contains("9 notification"));
     }
@@ -102,9 +100,8 @@ class UseCase24ViewTest extends SpringBrowserlessTest {
         test(clearAll).click();
         runPendingSignalsTasks();
 
-        Span countLabel = $view(Span.class).all().stream()
-                .filter(s -> s.getText() != null
-                        && s.getText().contains("Showing"))
+        Span countLabel = $view(Span.class).all().stream().filter(
+                s -> s.getText() != null && s.getText().contains("Showing"))
                 .findFirst().orElseThrow();
         assertTrue(countLabel.getText().contains("0 notification"));
     }
@@ -116,15 +113,13 @@ class UseCase24ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         ComboBox<String> typeFilter = (ComboBox<String>) $view(ComboBox.class)
-                .all().stream()
-                .filter(c -> "Type".equals(c.getLabel())).findFirst()
-                .orElseThrow();
+                .all().stream().filter(c -> "Type".equals(c.getLabel()))
+                .findFirst().orElseThrow();
         test(typeFilter).selectItem("ERROR");
         runPendingSignalsTasks();
 
-        Span countLabel = $view(Span.class).all().stream()
-                .filter(s -> s.getText() != null
-                        && s.getText().contains("Showing"))
+        Span countLabel = $view(Span.class).all().stream().filter(
+                s -> s.getText() != null && s.getText().contains("Showing"))
                 .findFirst().orElseThrow();
         assertTrue(countLabel.getText().contains("2 notification"));
     }

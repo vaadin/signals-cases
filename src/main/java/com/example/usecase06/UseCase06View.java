@@ -6,8 +6,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
+import com.example.MissingAPI;
 import com.example.views.MainLayout;
-
 import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.button.Button;
@@ -53,9 +53,8 @@ public class UseCase06View extends VerticalLayout {
 
         // Computed signal for subtotal
         var subtotalSignal = Signal.computed(
-                () -> cartItemsSignal.get().stream().map(ValueSignal::get)
-                        .map(item -> item.product().price()
-                                .multiply(BigDecimal.valueOf(item.quantity())))
+                () -> MissingAPI.getValues(cartItemsSignal)
+                        .map(CartItem::totalPrice)
                         .reduce(BigDecimal.ZERO, BigDecimal::add));
 
         // Computed signal for discount
@@ -70,8 +69,7 @@ public class UseCase06View extends VerticalLayout {
         });
 
         // Computed signal for shipping cost
-        var shippingSignal = Signal
-                .computed(() -> getShippingCost(shippingOptionSignal.get()));
+        var shippingSignal = shippingOptionSignal.map(this::getShippingCost);
 
         // Computed signal for tax (8%)
         var taxSignal = Signal.computed(() -> subtotalSignal.get()
@@ -121,8 +119,7 @@ public class UseCase06View extends VerticalLayout {
         var emptyCart = new Paragraph("Empty cart");
         emptyCart.getStyle().set("margin", "0").set("font-style", "italic")
                 .set("color", "var(--lumo-secondary-text-color)");
-        emptyCart.bindVisible(
-                Signal.computed(() -> cartItemsSignal.get().isEmpty()));
+        emptyCart.bindVisible(cartItemsSignal.map(List::isEmpty));
         cartItemsContainer.add(emptyCart, cartItemsList);
 
         // Options section
@@ -153,30 +150,22 @@ public class UseCase06View extends VerticalLayout {
         var summaryTitle = new H3("Order Summary");
         summaryTitle.getStyle().set("margin-top", "0");
 
-        var subtotalLabel = new Span();
-        subtotalLabel.bindText(subtotalSignal.map(total -> "Subtotal: $"
-                + total.setScale(2, RoundingMode.HALF_UP)));
+        var subtotalLabel = new Span(formatter("Subtotal: $", subtotalSignal));
         subtotalLabel.getStyle().set("display", "block").set("margin-bottom",
                 "0.5em");
 
-        var discountLabel = new Span();
-        discountLabel.bindText(discountSignal.map(discount -> "Discount: -$"
-                + discount.setScale(2, RoundingMode.HALF_UP)));
+        var discountLabel = new Span(formatter("Discount: -$", discountSignal));
         discountLabel.bindVisible(
-                discountSignal.map(d -> d.compareTo(BigDecimal.ZERO) > 0));
+                () -> discountSignal.get().compareTo(BigDecimal.ZERO) > 0);
         discountLabel.getStyle().set("display", "block")
                 .set("margin-bottom", "0.5em")
                 .set("color", "var(--lumo-success-color)");
 
-        var shippingLabel = new Span();
-        shippingLabel.bindText(shippingSignal.map(shipping -> "Shipping: $"
-                + shipping.setScale(2, RoundingMode.HALF_UP)));
+        var shippingLabel = new Span(formatter("Shipping: $", shippingSignal));
         shippingLabel.getStyle().set("display", "block").set("margin-bottom",
                 "0.5em");
 
-        var taxLabel = new Span();
-        taxLabel.bindText(taxSignal.map(
-                tax -> "Tax (8%): $" + tax.setScale(2, RoundingMode.HALF_UP)));
+        var taxLabel = new Span(formatter("Tax (8%): $", taxSignal));
         taxLabel.getStyle().set("display", "block").set("margin-bottom",
                 "0.5em");
 
@@ -185,9 +174,7 @@ public class UseCase06View extends VerticalLayout {
                 .set("border-top", "2px solid var(--lumo-contrast-20pct)")
                 .set("margin", "0.75em 0");
 
-        var totalLabel = new Span();
-        totalLabel.bindText(totalSignal.map(
-                total -> "Total: $" + total.setScale(2, RoundingMode.HALF_UP)));
+        var totalLabel = new Span(formatter("Total: $", totalSignal));
         totalLabel.getStyle().set("display", "block").set("font-weight", "bold")
                 .set("font-size", "1.5em")
                 .set("color", "var(--lumo-primary-color)");
@@ -220,8 +207,7 @@ public class UseCase06View extends VerticalLayout {
                 .set("padding", "0.75em").set("border-radius", "4px")
                 .set("margin-bottom", "0.5em");
 
-        var nameLabel = new Span(product.name() + " - $"
-                + product.price().setScale(2, RoundingMode.HALF_UP));
+        var nameLabel = new Span(format(product.name() + " - $", product.price()));
         nameLabel.getStyle().set("flex-grow", "1").set("font-weight", "500");
 
         var addButton = new Button("Add",
@@ -243,9 +229,8 @@ public class UseCase06View extends VerticalLayout {
                 .set("padding", "0.75em").set("border-radius", "4px")
                 .set("margin-bottom", "0.5em");
 
-        var nameLabel = new Span();
-        nameLabel.bindText(itemSignal.map(item -> item.product().name() + " - $"
-                + item.product().price().setScale(2, RoundingMode.HALF_UP)));
+        var nameLabel = new Span(
+                itemSignal.map(item -> format(item.product().name() + " - $", item.product().price())));
         nameLabel.getStyle().set("flex-grow", "1").set("font-weight", "500");
 
         var quantityField = new IntegerField();
@@ -266,10 +251,8 @@ public class UseCase06View extends VerticalLayout {
             }
         });
 
-        var itemTotalLabel = new Span();
-        itemTotalLabel.bindText(itemSignal.map(item -> "$" + item.product()
-                .price().multiply(BigDecimal.valueOf(item.quantity()))
-                .setScale(2, RoundingMode.HALF_UP)));
+        var itemTotalLabel = new Span(formatter("$", itemSignal.map(CartItem::totalPrice)));
+
         itemTotalLabel.setWidth("100px");
         itemTotalLabel.getStyle().set("text-align", "right")
                 .set("font-weight", "bold")
@@ -287,13 +270,13 @@ public class UseCase06View extends VerticalLayout {
 
     private void addToCart(Product product,
             ListSignal<CartItem> cartItemsSignal) {
-        cartItemsSignal.peek().stream().filter(
+        var existingItem = cartItemsSignal.peek().stream().filter(
                 signal -> signal.peek().product().id().equals(product.id()))
-                .findFirst().ifPresentOrElse(
-                        existing -> existing.set(existing.peek()
-                                .withQuantity(existing.peek().quantity() + 1)),
-                        () -> cartItemsSignal
-                                .insertLast(new CartItem(product, 1)));
+                .findFirst();
+        existingItem.ifPresentOrElse(
+                existing -> existing.update(item -> item.withQuantity(item.quantity() + 1)),
+                () -> cartItemsSignal
+                        .insertLast(new CartItem(product, 1)));
     }
 
     private @Nullable DiscountCode validateDiscountCode(String code) {
@@ -313,4 +296,11 @@ public class UseCase06View extends VerticalLayout {
         };
     }
 
+    private static Signal<String> formatter(String prefix, Signal<BigDecimal> signal) {
+        return () -> format(prefix, signal.get());
+    }
+
+    private static String format(String prefix, BigDecimal amount) {
+        return prefix + amount.setScale(2, RoundingMode.HALF_UP);
+    }
 }

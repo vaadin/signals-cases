@@ -1,8 +1,7 @@
 package com.example.views;
 
-import org.jspecify.annotations.Nullable;
-
 import com.example.signals.UserSessionRegistry;
+import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.html.Div;

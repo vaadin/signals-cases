@@ -49,18 +49,12 @@ public class UseCase02View extends VerticalLayout {
         VisaApplicationData data = new VisaApplicationData();
         binder.setBean(data);
 
-        // Signals for conditional visibility
-        ValueSignal<Boolean> needsVisaSignal = new ValueSignal<>(false);
-        ValueSignal<VisaType> visaTypeSignal = new ValueSignal<>(VisaType.H1B);
-        ValueSignal<Boolean> hasH1BPreviouslySignal = new ValueSignal<>(false);
-
         // Base question: needs visa sponsorship
         Checkbox needsVisaCheckbox = new Checkbox(
                 "Do you require visa sponsorship?");
-        binder.forField(needsVisaCheckbox).bind(
+        var needsVisaSignal = binder.forField(needsVisaCheckbox).bind(
                 VisaApplicationData::getNeedsVisa,
-                VisaApplicationData::setNeedsVisa);
-        needsVisaCheckbox.bindValue(needsVisaSignal, needsVisaSignal::set);
+                VisaApplicationData::setNeedsVisa).valueSignal();
 
         // Level 1: Visa-related fields (shown when needsVisa is true)
         VerticalLayout visaSection = new VerticalLayout();
@@ -68,9 +62,9 @@ public class UseCase02View extends VerticalLayout {
         ComboBox<VisaType> visaTypeSelect = new ComboBox<>("Visa Type",
                 VisaType.values());
         visaTypeSelect.setValue(VisaType.H1B);
-        binder.forField(visaTypeSelect).bind(VisaApplicationData::getVisaType,
-                VisaApplicationData::setVisaType);
-        visaTypeSelect.bindValue(visaTypeSignal, visaTypeSignal::set);
+        var visaTypeSignal = binder.forField(visaTypeSelect).bind(
+                VisaApplicationData::getVisaType,
+                VisaApplicationData::setVisaType).valueSignal();
 
         TextField currentVisaStatus = new TextField("Current Visa Status");
         binder.forField(currentVisaStatus).bind(
@@ -85,11 +79,9 @@ public class UseCase02View extends VerticalLayout {
 
         Checkbox hasH1BPreviouslyCheckbox = new Checkbox(
                 "Have you held an H1-B visa before?");
-        binder.forField(hasH1BPreviouslyCheckbox).bind(
+        var hasH1BPreviouslySignal = binder.forField(hasH1BPreviouslyCheckbox).bind(
                 VisaApplicationData::getHasH1BPreviously,
-                VisaApplicationData::setHasH1BPreviously);
-        hasH1BPreviouslyCheckbox.bindValue(hasH1BPreviouslySignal,
-                hasH1BPreviouslySignal::set);
+                VisaApplicationData::setHasH1BPreviously).valueSignal();
 
         TextField h1bSpecialtyOccupation = new TextField(
                 "Specialty Occupation");
@@ -173,28 +165,24 @@ public class UseCase02View extends VerticalLayout {
                 && visaTypeSignal.get() == VisaType.O1);
 
         // Display area for collected values
+        var resultTextSignal = new ValueSignal<>("");
+
         Div resultDisplay = new Div();
         resultDisplay.getStyle().set("margin-top", "2em").set("padding", "1em")
                 .set("border", "1px solid #ccc").set("border-radius", "4px")
                 .set("background-color", "#f5f5f5");
-        resultDisplay.setVisible(false);
+        resultDisplay.bindVisible(resultTextSignal.map(text -> !text.isBlank()));
 
-        Pre resultText = new Pre();
+        Pre resultText = new Pre(resultTextSignal);
         resultText.getStyle().set("margin", "0");
+
         resultDisplay.add(new H3("Collected Form Data"), resultText);
-        Results results = new Results();
-        resultText.bindText(results.text);
-        Signal.effect(resultText, () -> {
-            results.text.get();
-            Notification.show("Form data displayed below", 2000,
-                    Notification.Position.BOTTOM_START);
-        });
-        resultDisplay.bindVisible(results.visible);
 
         // Show Values button
         Button showValuesButton = new Button("Show Collected Values", event -> {
-            results.text.set(data.toString());
-            results.visible.set(true);
+            resultTextSignal.set(data.toString());
+            Notification.show("Form data displayed below", 2000,
+                    Notification.Position.BOTTOM_START);
         });
         showValuesButton.addThemeName("primary");
 
