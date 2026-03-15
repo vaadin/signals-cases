@@ -10,6 +10,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.card.Card;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -46,22 +47,19 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Menu(order = 14, title = "UC 14: Async Data Loading")
 @PermitAll
 public class UseCase14View extends VerticalLayout {
+    private enum LoadingState {
+        IDLE, LOADING, GENERATING, SUCCESS, ERROR
+    }
 
     private final AnalyticsService analyticsService;
 
-    private final ValueSignal<LoadingState.State> stateSignal = new ValueSignal<>(
-            LoadingState.State.IDLE);
+    private final ValueSignal<LoadingState> stateSignal = new ValueSignal<>(LoadingState.IDLE);
 
     private final ValueSignal<AnalyticsReport> reportDataSignal = new ValueSignal<>(
             AnalyticsReport.empty());
 
-    private final ValueSignal<String> errorSignal = new ValueSignal<>("");
-
     private final ValueSignal<Boolean> shouldFailSignal = new ValueSignal<>(
             false);
-
-    private final ValueSignal<String> loadingMessageSignal = new ValueSignal<>(
-            "");
 
     public UseCase14View(AnalyticsService analyticsService) {
         this.analyticsService = analyticsService;
@@ -86,15 +84,20 @@ public class UseCase14View extends VerticalLayout {
 
         // Disable load button while loading
         Signal<Boolean> isLoadingSignal = stateSignal
-                .map(state -> state == LoadingState.State.LOADING);
-        loadButton.bindEnabled(isLoadingSignal.map(loading -> !loading));
+                .map(state -> state == LoadingState.LOADING || state == LoadingState.GENERATING);
+        loadButton.setDisableOnClick(true);
+        // Can't directly bind when the button updates its own state
+        Signal.effect(loadButton, () -> {
+            if (!isLoadingSignal.get()) {
+                loadButton.setEnabled(true);
+            }
+        });
 
         Div errorToggle = new Div();
         errorToggle.getStyle().set("display", "flex")
                 .set("align-items", "center").set("gap", "0.5em");
 
-        var checkbox = new com.vaadin.flow.component.checkbox.Checkbox(
-                "Simulate Error");
+        var checkbox = new Checkbox("Simulate Error");
         checkbox.bindValue(shouldFailSignal, shouldFailSignal::set);
         errorToggle.add(checkbox);
 
@@ -114,9 +117,7 @@ public class UseCase14View extends VerticalLayout {
         idleMessage.getStyle().set("color", "var(--lumo-secondary-text-color)")
                 .set("font-style", "italic");
         idleContent.add(idleMessage);
-        Signal<Boolean> isIdleSignal = stateSignal
-                .map(state -> state == LoadingState.State.IDLE);
-        idleContent.bindVisible(isIdleSignal);
+        idleContent.bindVisible(() -> stateSignal.get() == LoadingState.IDLE);
 
         // Loading state
         Div loadingContent = new Div();
@@ -128,8 +129,11 @@ public class UseCase14View extends VerticalLayout {
         progressBar.setIndeterminate(true);
         progressBar.setWidth("200px");
 
-        Paragraph loadingMessage = new Paragraph();
-        loadingMessage.bindText(loadingMessageSignal);
+        Paragraph loadingMessage = new Paragraph(() -> switch (stateSignal.get()) {
+            case LOADING -> "Fetching relevant data... (1/2)";
+            case GENERATING -> "Generating report... (2/2)";
+            default -> "";
+        });
         loadingMessage.getStyle().set("color", "var(--lumo-primary-color)");
 
         loadingContent.add(progressBar, loadingMessage);
@@ -137,12 +141,10 @@ public class UseCase14View extends VerticalLayout {
 
         // Success state
         Div successContent = new Div();
-        H3 successTitle = new H3();
-        Signal<String> reportTitleSignal = reportDataSignal
+        H3 successTitle = new H3(reportDataSignal
                 .map(report -> !report.isEmpty()
                         ? "Analytics Report - " + report.getPeriod()
-                        : "Analytics Report");
-        successTitle.bindText(reportTitleSignal);
+                        : "Analytics Report"));
         successTitle.getStyle().set("margin-top", "0").set("color",
                 "var(--lumo-success-color)");
 
@@ -193,9 +195,7 @@ public class UseCase14View extends VerticalLayout {
         metricsGrid.add(revenueCard, ordersCard, conversionCard, usersCard);
 
         successContent.add(successTitle, metricsGrid);
-        Signal<Boolean> isSuccessSignal = stateSignal
-                .map(state -> state == LoadingState.State.SUCCESS);
-        successContent.bindVisible(isSuccessSignal);
+        successContent.bindVisible(() -> stateSignal.get() == LoadingState.SUCCESS);
 
         // Error state
         Div errorContent = new Div();
@@ -212,9 +212,7 @@ public class UseCase14View extends VerticalLayout {
         errorMessage.getStyle().set("margin", "0.5em 0");
 
         errorContent.add(errorTitle, errorMessage);
-        Signal<Boolean> isErrorSignal = stateSignal
-                .map(state -> state == LoadingState.State.ERROR);
-        errorContent.bindVisible(isErrorSignal);
+        errorContent.bindVisible(() -> stateSignal.get() == LoadingState.ERROR);
 
         stateBox.add(idleContent, loadingContent, successContent, errorContent);
 
@@ -228,24 +226,24 @@ public class UseCase14View extends VerticalLayout {
     }
 
     private void loadReport() {
-        stateSignal.set(LoadingState.State.LOADING);
+        stateSignal.set(LoadingState.LOADING);
         reportDataSignal.set(AnalyticsReport.empty());
-        errorSignal.set("");
-        loadingMessageSignal.set("Fetching relevant data... (1/2)");
 
         // Capture on UI thread — .peek() reads without creating a subscription
         boolean shouldFail = shouldFailSignal.peek();
 
-        analyticsService.fetchReportData(shouldFail).thenCompose(rawData -> {
-            loadingMessageSignal.set("Generating report... (2/2)");
-            return analyticsService.generateReportFromData(rawData, shouldFail);
-        }).thenAccept(report -> {
-            reportDataSignal.set(report);
-            stateSignal.set(LoadingState.State.SUCCESS);
-        }).exceptionally(error -> {
-            stateSignal.set(LoadingState.State.ERROR);
-            return null;
-        });
+        analyticsService.fetchReportData(shouldFail)
+                .thenCompose(rawData -> {
+                    stateSignal.set(LoadingState.GENERATING);
+                    return analyticsService.generateReportFromData(rawData,
+                            shouldFail);
+                }).thenAccept(report -> {
+                    reportDataSignal.set(report);
+                    stateSignal.set(LoadingState.SUCCESS);
+                }).exceptionally(error -> {
+                    stateSignal.set(LoadingState.ERROR);
+                    return null;
+                });
     }
 
     private Card createMetricCardWithSignal(String label,
@@ -267,8 +265,7 @@ public class UseCase14View extends VerticalLayout {
         card.setTitle(labelSpan);
 
         // Main content slot for value display
-        Span valueSpan = new Span();
-        valueSpan.bindText(valueSignal);
+        Span valueSpan = new Span(valueSignal);
         valueSpan.getStyle().set("font-size", "var(--lumo-font-size-xxxl)")
                 .set("font-weight", "bold").set("color", color)
                 .set("line-height", "1");
