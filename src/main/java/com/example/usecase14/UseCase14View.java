@@ -236,18 +236,16 @@ public class UseCase14View extends VerticalLayout {
         // Capture on UI thread — .peek() reads without creating a subscription
         boolean shouldFail = shouldFailSignal.peek();
 
-        analyticsService.fetchReportData(shouldFail)
-                .thenCompose(rawData -> {
-                    loadingMessageSignal.set("Generating report... (2/2)");
-                    return analyticsService.generateReportFromData(rawData,
-                            shouldFail);
-                }).thenAccept(report -> {
-                    reportDataSignal.set(report);
-                    stateSignal.set(LoadingState.State.SUCCESS);
-                }).exceptionally(error -> {
-                    stateSignal.set(LoadingState.State.ERROR);
-                    return null;
-                });
+        analyticsService.fetchReportData(shouldFail).thenCompose(rawData -> {
+            loadingMessageSignal.set("Generating report... (2/2)");
+            return analyticsService.generateReportFromData(rawData, shouldFail);
+        }).thenAccept(report -> {
+            reportDataSignal.set(report);
+            stateSignal.set(LoadingState.State.SUCCESS);
+        }).exceptionally(error -> {
+            stateSignal.set(LoadingState.State.ERROR);
+            return null;
+        });
     }
 
     private Card createMetricCardWithSignal(String label,

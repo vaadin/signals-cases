@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H2;
@@ -16,7 +17,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.binder.BinderValidationStatus;
 import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -30,13 +30,18 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PermitAll
 public class UseCase01View extends VerticalLayout {
 
+    public enum SubmissionState {
+        IDLE, SUBMITTING, SUCCESS, ERROR
+    }
+
     /**
      * Simple data class for form binding
      */
     public static class AccountData {
-        private String email = "";
-        private String password = "";
-        private String confirmPassword = "";
+        // Valid sample values to make it easier to try the submission
+        private String email = "user@example.com";
+        private String password = "12345678";
+        private String confirmPassword = "12345678";
 
         public String getEmail() {
             return email;
@@ -95,7 +100,8 @@ public class UseCase01View extends VerticalLayout {
 
         // Binder field bindings with validators
         binder.forField(emailField)
-                .withValidator(new EmailValidator("Please enter a valid email address"))
+                .withValidator(new EmailValidator(
+                        "Please enter a valid email address"))
                 .bind(AccountData::getEmail, AccountData::setEmail);
 
         var passwordBinding = binder.forField(passwordField)
@@ -104,11 +110,11 @@ public class UseCase01View extends VerticalLayout {
                 .bind(AccountData::getPassword, AccountData::setPassword);
 
         // Cross-field validation for password confirmation
-        binder.forField(confirmField)
-                .withValidator(value -> value != null
+        binder.forField(confirmField).withValidator(
+                value -> value != null
                         && value.equals(passwordBinding.valueSignal().get()),
-                        "Passwords do not match")
-                .bind(AccountData::getConfirmPassword, AccountData::setConfirmPassword);
+                "Passwords do not match").bind(AccountData::getConfirmPassword,
+                        AccountData::setConfirmPassword);
 
         binder.setBean(data);
 
@@ -116,25 +122,24 @@ public class UseCase01View extends VerticalLayout {
         Button submitButton = new Button();
 
         // Bind enabled state using Binder's validationStatusSignal combined with submission state
-        Signal<Boolean> isFormValidSignal = binder.validationStatusSignal()
-                .map(BinderValidationStatus::isOk);
-        submitButton.bindEnabled(Signal.computed(() ->
-                isFormValidSignal.get() &&
-                submissionStateSignal.get() != SubmissionState.SUBMITTING));
+        submitButton.bindEnabled(() ->
+                binder.validationStatusSignal().get().isOk() &&
+                submissionStateSignal.get() != SubmissionState.SUBMITTING);
 
         // Bind button text based on submission state
-        submitButton.bindText(submissionStateSignal.map(state -> switch (state) {
-            case IDLE -> "Create Account";
-            case SUBMITTING -> "Creating...";
-            case SUCCESS -> "Success!";
-            case ERROR -> "Retry";
-        }));
+        submitButton
+                .bindText(submissionStateSignal.map(state -> switch (state) {
+                case IDLE -> "Create Account";
+                case SUBMITTING -> "Creating...";
+                case SUCCESS -> "Success!";
+                case ERROR -> "Retry";
+                }));
 
         // Bind theme variant
         submitButton.bindThemeVariant(ButtonVariant.LUMO_SUCCESS,
                 submissionStateSignal.map(SubmissionState.SUCCESS::equals));
         submitButton.bindThemeVariant(ButtonVariant.LUMO_PRIMARY,
-                submissionStateSignal.map(state -> state != SubmissionState.SUCCESS));
+                Signal.not(submissionStateSignal.map(SubmissionState.SUCCESS::equals)));
 
         submitButton.addClickListener(e -> {
             if (!binder.isValid()) {
@@ -143,27 +148,30 @@ public class UseCase01View extends VerticalLayout {
 
             submissionStateSignal.set(SubmissionState.SUBMITTING);
 
+            UI ui = getUI().get();
+
             // Simulate async submission
             CompletableFuture.runAsync(() -> {
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(1000);
                     submissionStateSignal.set(SubmissionState.SUCCESS);
 
-                    // Reset form using Binder
-                    binder.setBean(new AccountData());
+                    // Update UI after success (imperative updates - needs ui.access)
+                    ui.access(() -> {
+                        binder.setBean(new AccountData());
 
-                    // Reset submission state back to IDLE
-                    submissionStateSignal.set(SubmissionState.IDLE);
-
-                    // Show success notification (imperative UI - needs ui.access)
-                    getUI().ifPresent(ui -> ui.access(() -> {
                         Notification notification = Notification
                                 .show("Account created successfully!");
                         notification.addThemeVariants(
                                 NotificationVariant.LUMO_SUCCESS);
                         notification.setDuration(3000);
-                    }));
+                    });
+
+                    // Reset submission state back to IDLE
+                    Thread.sleep(1000);
+                    submissionStateSignal.set(SubmissionState.IDLE);
                 } catch (Exception ex) {
+                    ex.printStackTrace();
                     submissionStateSignal.set(SubmissionState.ERROR);
                 }
             });

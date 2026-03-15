@@ -7,7 +7,6 @@ import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
 import com.example.views.MainLayout;
-
 import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.AttachEvent;

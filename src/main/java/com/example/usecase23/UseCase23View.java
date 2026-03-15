@@ -2,7 +2,6 @@ package com.example.usecase23;
 
 import jakarta.annotation.security.PermitAll;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -10,6 +9,7 @@ import java.util.function.Function;
 
 import com.example.usecase23.ServiceHealth.Status;
 import com.example.views.MainLayout;
+import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -46,7 +46,6 @@ import com.vaadin.flow.theme.lumo.LumoUtility.FontSize;
 import com.vaadin.flow.theme.lumo.LumoUtility.FontWeight;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
-import org.jspecify.annotations.Nullable;
 
 @PageTitle("Use Case 23: Real-time Dashboard")
 @Route(value = "use-case-23", layout = MainLayout.class)
@@ -192,12 +191,13 @@ public class UseCase23View extends Main {
                     () -> "Status: " + statusText.get());
             status.getElement().bindAttribute("title",
                     () -> "Status: " + statusText.get());
-            status.getElement().getThemeList().addAll(List.of("badge", "primary"));
+            status.getElement().getThemeList()
+                    .addAll(List.of("badge", "primary"));
             status.getElement().getThemeList().bind(() -> {
                 return switch (signal.get().getStatus()) {
-                    case EXCELLENT -> List.of("success");
-                    case FAILING -> List.of("error");
-                    default -> List.of();
+                case EXCELLENT -> List.of("success");
+                case FAILING -> List.of("error");
+                default -> List.of();
                 };
             });
             return status;
@@ -424,8 +424,10 @@ public class UseCase23View extends Main {
 
             Span badge = new Span();
             badge.add(icon, percentageSpan);
-            badge.getElement().getThemeList().bind(() ->
-                    successSignal.get() ? List.of("badge","success") : List.of("badge", "error"));
+            badge.getElement().getThemeList()
+                    .bind(() -> successSignal.get()
+                            ? List.of("badge", "success")
+                            : List.of("badge", "error"));
 
             add(h2, valueSpan, badge);
             getStyle().setGap("5px");

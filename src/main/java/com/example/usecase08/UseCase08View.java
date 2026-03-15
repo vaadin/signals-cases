@@ -4,7 +4,6 @@ import jakarta.annotation.security.PermitAll;
 
 import java.util.List;
 
-
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -79,8 +78,7 @@ public class UseCase08View extends VerticalLayout {
         step1Binder.setBean(formData);
 
         step1Layout.add(firstNameField, lastNameField, emailField);
-        step1Layout.bindVisible(
-                currentStepSignal.map(step -> step == Step.PERSONAL_INFO));
+        step1Layout.bindVisible(() -> currentStepSignal.get() == Step.PERSONAL_INFO);
 
         // Step 2: Company Info with Binder
         VerticalLayout step2Layout = new VerticalLayout();
@@ -90,7 +88,8 @@ public class UseCase08View extends VerticalLayout {
 
         TextField companyNameField = new TextField("Company Name");
         step2Binder.forField(companyNameField)
-                .withValidator(value -> value != null && !value.trim().isEmpty(),
+                .withValidator(
+                        value -> value != null && !value.trim().isEmpty(),
                         "Company name is required")
                 .bind(FormData::getCompanyName, FormData::setCompanyName);
 
@@ -112,8 +111,7 @@ public class UseCase08View extends VerticalLayout {
         step2Binder.setBean(formData);
 
         step2Layout.add(companyNameField, companySizeSelect, industrySelect);
-        step2Layout.bindVisible(
-                currentStepSignal.map(step -> step == Step.COMPANY_INFO));
+        step2Layout.bindVisible(() -> currentStepSignal.get() == Step.COMPANY_INFO);
 
         // Step 3: Plan Selection with Binder
         VerticalLayout step3Layout = new VerticalLayout();
@@ -122,24 +120,21 @@ public class UseCase08View extends VerticalLayout {
         Binder<FormData> step3Binder = new Binder<>(FormData.class);
 
         ComboBox<Plan> planSelect = new ComboBox<>("Plan", Plan.values());
-        step3Binder.forField(planSelect)
+        var planSignal = step3Binder.forField(planSelect)
                 .withValidator(value -> value != null, "Please select a plan")
-                .bind(FormData::getPlan, FormData::setPlan);
+                .bind(FormData::getPlan, FormData::setPlan).valueSignal();
 
         step3Binder.setBean(formData);
 
-        Span planDescription = new Span();
-        Signal<Plan> planSignal = step3Binder.validationStatusSignal()
-                .map(status -> formData.getPlan());
-        planDescription.bindText(planSignal.map(plan -> switch (plan) {
+        Span planDescription = new Span(() -> switch (planSignal.get()) {
             case STARTER -> "Perfect for small teams - $29/month";
             case PROFESSIONAL -> "For growing businesses - $99/month";
             case ENTERPRISE -> "Custom solutions - Contact sales";
-        }));
+            case null -> "";
+        });
 
         step3Layout.add(planSelect, planDescription);
-        step3Layout.bindVisible(
-                currentStepSignal.map(step -> step == Step.PLAN_SELECTION));
+        step3Layout.bindVisible(() -> currentStepSignal.get() == Step.PLAN_SELECTION);
 
         // Step 4: Review
         VerticalLayout step4Layout = new VerticalLayout();
@@ -150,19 +145,19 @@ public class UseCase08View extends VerticalLayout {
         // Update review when entering this step
         Signal.effect(reviewDiv, () -> {
             if (currentStepSignal.get() == Step.REVIEW) {
-                String reviewText = "Name: " + formData.getFirstName() + " " + formData.getLastName() + "\n"
-                        + "Email: " + formData.getEmail() + "\n"
-                        + "Company: " + formData.getCompanyName() + "\n"
-                        + "Size: " + formData.getCompanySize() + "\n"
-                        + "Industry: " + formData.getIndustry() + "\n"
-                        + "Plan: " + formData.getPlan();
+                String reviewText = "Name: " + formData.getFirstName() + " "
+                        + formData.getLastName() + "\n" + "Email: "
+                        + formData.getEmail() + "\n" + "Company: "
+                        + formData.getCompanyName() + "\n" + "Size: "
+                        + formData.getCompanySize() + "\n" + "Industry: "
+                        + formData.getIndustry() + "\n" + "Plan: "
+                        + formData.getPlan();
                 reviewDiv.setText(reviewText);
             }
         });
 
         step4Layout.add(reviewDiv);
-        step4Layout.bindVisible(
-                currentStepSignal.map(step -> step == Step.REVIEW));
+        step4Layout.bindVisible(() -> currentStepSignal.get() == Step.REVIEW);
 
         // Validation signals using Binder's validationStatusSignal
         Signal<Boolean> step1ValidSignal = step1Binder.validationStatusSignal()
@@ -178,58 +173,57 @@ public class UseCase08View extends VerticalLayout {
         Button previousButton = new Button("Previous", e -> {
             Step current = currentStepSignal.peek();
             switch (current) {
-                case COMPANY_INFO -> currentStepSignal.set(Step.PERSONAL_INFO);
-                case PLAN_SELECTION -> currentStepSignal.set(Step.COMPANY_INFO);
-                case REVIEW -> currentStepSignal.set(Step.PLAN_SELECTION);
-                default -> {}
+            case COMPANY_INFO -> currentStepSignal.set(Step.PERSONAL_INFO);
+            case PLAN_SELECTION -> currentStepSignal.set(Step.COMPANY_INFO);
+            case REVIEW -> currentStepSignal.set(Step.PLAN_SELECTION);
+            default -> {
+            }
             }
         });
-        previousButton.bindVisible(
-                currentStepSignal.map(step -> step != Step.PERSONAL_INFO));
+        previousButton.bindVisible(() -> currentStepSignal.get() != Step.PERSONAL_INFO);
 
         Button nextButton = new Button("Next", e -> {
             Step current = currentStepSignal.peek();
             switch (current) {
-                case PERSONAL_INFO -> currentStepSignal.set(Step.COMPANY_INFO);
-                case COMPANY_INFO -> currentStepSignal.set(Step.PLAN_SELECTION);
-                case PLAN_SELECTION -> currentStepSignal.set(Step.REVIEW);
-                default -> {}
+            case PERSONAL_INFO -> currentStepSignal.set(Step.COMPANY_INFO);
+            case COMPANY_INFO -> currentStepSignal.set(Step.PLAN_SELECTION);
+            case PLAN_SELECTION -> currentStepSignal.set(Step.REVIEW);
+            default -> {
+            }
             }
         });
-        nextButton.bindVisible(
-                currentStepSignal.map(step -> step != Step.REVIEW));
+        nextButton.bindVisible(() -> currentStepSignal.get() != Step.REVIEW);
         nextButton.bindEnabled(Signal.computed(() -> {
             Step current = currentStepSignal.get();
             return switch (current) {
-                case PERSONAL_INFO -> step1ValidSignal.get();
-                case COMPANY_INFO -> step2ValidSignal.get();
-                case PLAN_SELECTION -> step3ValidSignal.get();
-                case REVIEW -> false;
+            case PERSONAL_INFO -> step1ValidSignal.get();
+            case COMPANY_INFO -> step2ValidSignal.get();
+            case PLAN_SELECTION -> step3ValidSignal.get();
+            case REVIEW -> false;
             };
         }));
 
         Button submitButton = new Button("Submit", e -> {
             // Handle form submission
-            Notification.show("Form submitted successfully for " +
-                    formData.getFirstName() + " " + formData.getLastName() + "!");
+            Notification.show(
+                    "Form submitted successfully for " + formData.getFirstName()
+                            + " " + formData.getLastName() + "!");
         });
         submitButton.addThemeName("primary");
-        submitButton.bindVisible(
-                currentStepSignal.map(step -> step == Step.REVIEW));
+        submitButton.bindVisible(() -> currentStepSignal.get() == Step.REVIEW);
 
         navigationLayout.add(previousButton, nextButton, submitButton);
 
         // Progress indicator
-        Span progressIndicator = new Span();
-        progressIndicator.bindText(currentStepSignal.map(step -> {
-            int stepNumber = switch (step) {
+        Span progressIndicator = new Span(() -> {
+            int stepNumber = switch (currentStepSignal.get()) {
                 case PERSONAL_INFO -> 1;
                 case COMPANY_INFO -> 2;
                 case PLAN_SELECTION -> 3;
                 case REVIEW -> 4;
             };
             return "Step " + stepNumber + " of 4";
-        }));
+        });
         progressIndicator.getStyle().set("font-weight", "bold");
 
         add(title, description, progressIndicator, step1Layout, step2Layout,
