@@ -8,12 +8,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
+
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Safelist;
+import org.jspecify.annotations.Nullable;
 
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -82,21 +83,21 @@ public class UseCase15View extends VerticalLayout {
     private final ValueSignal<String> instantQuerySignal = new ValueSignal<>(
             "");
     private final ValueSignal<String> searchQuerySignal = new ValueSignal<>("");
-    private final ValueSignal<Boolean> isSearchingSignal = new ValueSignal<>(
-            false);
     private final ListSignal<Product> searchResultsSignal = new ListSignal<>();
     private final ValueSignal<Integer> searchCountSignal = new ValueSignal<>(0);
     private final ValueSignal<Integer> keystrokeCountSignal = new ValueSignal<>(
             0);
+    private final ValueSignal<@Nullable CompletableFuture<Void>> currentSearchSignal = new ValueSignal<@Nullable CompletableFuture<Void>>(null);
 
     private final ScheduledExecutorService debounceExecutor = Executors
             .newSingleThreadScheduledExecutor();
-    private final AtomicReference<ScheduledFuture<?>> pendingDebounce = new AtomicReference<>();
-    private final AtomicReference<CompletableFuture<Void>> currentSearch = new AtomicReference<>();
+    private volatile @Nullable ScheduledFuture<?> pendingDebounce = null;
 
     public UseCase15View() {
         setSpacing(true);
         setPadding(true);
+
+        var isSearchingSignal = currentSearchSignal.map(future -> future != null);
 
         H2 title = new H2("Use Case 15: Debounced Search");
 
@@ -186,13 +187,18 @@ public class UseCase15View extends VerticalLayout {
         // Results
         Signal<String> resultsTitleSignal = Signal.computed(() -> {
             var results = searchResultsSignal.get();
-            if (results.isEmpty() && !searchQuerySignal.peek().isEmpty()) {
-                return "No results found";
-            } else if (!results.isEmpty()) {
+            if (results.isEmpty()) {
+                if (searchQuerySignal.get().isEmpty()) {
+                    return "Type to search";
+                } else if (isSearchingSignal.get()) {
+                    return "";
+                } else {
+                    return "No results found";
+                }
+            } else {
                 return results.size() + " result"
                         + (results.size() == 1 ? "" : "s");
             }
-            return "Type to search";
         });
         H3 resultsTitle = new H3(resultsTitleSignal);
 
@@ -201,8 +207,9 @@ public class UseCase15View extends VerticalLayout {
                 .set("flex-direction", "column").set("gap", "0.5em")
                 .set("margin-top", "1em");
 
+        // Peek rather than binding since products are immutable
         resultsContainer.bindChildren(searchResultsSignal,
-                this::createProductCard);
+                productSignal -> createProductCard(productSignal.peek()));
 
         // Info box
         Div infoBox = new Div();
@@ -225,21 +232,16 @@ public class UseCase15View extends VerticalLayout {
     }
 
     @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-    }
-
-    @Override
     protected void onDetach(DetachEvent detachEvent) {
         super.onDetach(detachEvent);
         // Cancel pending debounce
-        ScheduledFuture<?> pending = pendingDebounce.get();
+        ScheduledFuture<?> pending = pendingDebounce;
         if (pending != null) {
             pending.cancel(false);
         }
         debounceExecutor.shutdownNow();
         // Cancel any in-flight search
-        CompletableFuture<Void> search = currentSearch.get();
+        CompletableFuture<Void> search = currentSearchSignal.peek();
         if (search != null) {
             search.cancel(true);
         }
@@ -247,22 +249,21 @@ public class UseCase15View extends VerticalLayout {
 
     private void scheduleDebouncedSearch(String query) {
         // Cancel any pending debounce timer
-        ScheduledFuture<?> pending = pendingDebounce.get();
+        ScheduledFuture<?> pending = pendingDebounce;
         if (pending != null) {
             pending.cancel(false);
         }
 
         // Schedule a new debounced search
-        ScheduledFuture<?> future = debounceExecutor.schedule(() -> {
+        pendingDebounce = debounceExecutor.schedule(() -> {
             searchQuerySignal.set(query);
             performSearch(query);
         }, DEBOUNCE_DELAY_MS, TimeUnit.MILLISECONDS);
-        pendingDebounce.set(future);
     }
 
     private void performSearch(String query) {
         // Cancel previous search if still running
-        CompletableFuture<Void> previousSearch = currentSearch.get();
+        CompletableFuture<Void> previousSearch = currentSearchSignal.peek();;
         if (previousSearch != null && !previousSearch.isDone()) {
             previousSearch.cancel(true);
         }
@@ -273,7 +274,6 @@ public class UseCase15View extends VerticalLayout {
         }
 
         // Set searching state
-        isSearchingSignal.set(true);
         searchCountSignal.set(searchCountSignal.peek() + 1);
 
         // Simulate async search with delay
@@ -289,18 +289,17 @@ public class UseCase15View extends VerticalLayout {
                     // Filter products
                     List<Product> results = ALL_PRODUCTS.stream()
                             .filter(p -> p.matches(query))
-                            .collect(Collectors.toList());
+                            .toList();
 
                     searchResultsSignal.clear();
                     results.forEach(searchResultsSignal::insertLast);
-                    isSearchingSignal.set(false);
+                    currentSearchSignal.set(null);
                 });
 
-        currentSearch.set(searchFuture);
+        currentSearchSignal.set(searchFuture);
     }
 
-    private Div createProductCard(ValueSignal<Product> productSignal) {
-        var product = productSignal.get();
+    private Div createProductCard(Product product) {
         Div card = new Div();
         card.getStyle().set("background-color", "#ffffff")
                 .set("border", "1px solid var(--lumo-contrast-20pct)")
@@ -354,8 +353,6 @@ public class UseCase15View extends VerticalLayout {
     }
 
     private String escapeHtml(String text) {
-        return text.replace("&", "&amp;").replace("<", "&lt;")
-                .replace(">", "&gt;").replace("\"", "&quot;")
-                .replace("'", "&#39;");
+        return Jsoup.clean(text, Safelist.none());
     }
 }

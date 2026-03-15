@@ -5,11 +5,13 @@ import jakarta.annotation.security.PermitAll;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserInfo;
 import com.example.signals.UserSessionRegistry;
 import com.example.views.MainLayout;
-
+import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -24,6 +26,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.shared.SharedValueSignal;
 
 /**
  * Use Case 13: Real-Time Active Users Tracking
@@ -47,20 +50,7 @@ public class UseCase13View extends VerticalLayout {
 
     public UseCase13View(UserSessionRegistry userSessionRegistry) {
         this.userSessionRegistry = userSessionRegistry;
-
-        // Cache route-to-title mappings from MenuConfiguration
-        this.routeToTitleMap = new HashMap<>();
-        MenuConfiguration.getMenuEntries().forEach(entry -> {
-            // Store both with and without leading slash for flexible lookup
-            String path = entry.path();
-            String title = entry.title();
-            routeToTitleMap.put(path, title);
-            if (path.startsWith("/")) {
-                routeToTitleMap.put(path.substring(1), title);
-            } else {
-                routeToTitleMap.put("/" + path, title);
-            }
-        });
+        this.routeToTitleMap = buildRouteToTitleMap();
 
         setSpacing(true);
         setPadding(true);
@@ -74,10 +64,6 @@ public class UseCase13View extends VerticalLayout {
                         + "The ListSignal reactively propagates changes to all sessions without polling. "
                         + "Try opening multiple browser tabs with different users to see live synchronization!");
 
-        // Active users counter
-        Signal<Integer> userCountSignal = Signal.computed(
-                () -> userSessionRegistry.getActiveUsersSignal().get().size());
-
         Div counterBox = new Div();
         counterBox.getStyle()
                 .set("background", "var(--lumo-primary-color-10pct)")
@@ -85,9 +71,8 @@ public class UseCase13View extends VerticalLayout {
                 .set("border-left", "4px solid var(--lumo-primary-color)")
                 .set("margin", "1em 0");
 
-        H3 counterTitle = new H3();
-        counterTitle.bindText(
-                userCountSignal.map(count -> "👥 Currently Online: " + count));
+        H3 counterTitle = new H3(
+                () -> "👥 Currently Online: " + userSessionRegistry.getActiveUsersSignal().get().size());
         counterTitle.getStyle().set("margin", "0");
 
         counterBox.add(counterTitle);
@@ -107,8 +92,7 @@ public class UseCase13View extends VerticalLayout {
         // Reactively bind children to active users list
         userListContainer.bindChildren(
                 userSessionRegistry.getActiveUsersSignal(),
-                userSignal -> createUserCard(userSignal.get(),
-                        currentSessionId));
+                userSignal -> createUserCard(userSignal, currentSessionId));
 
         // Educational info box
         Div infoBox = new Div();
@@ -143,12 +127,12 @@ public class UseCase13View extends VerticalLayout {
                 infoBox);
     }
 
-    private Card createUserCard(UserInfo userInfo, String currentSessionId) {
+    private Card createUserCard(SharedValueSignal<UserInfo> userSignal, String currentSessionId) {
         Card card = new Card();
 
-        boolean isCurrentSession = userInfo.sessionId()
-                .equals(currentSessionId);
-        boolean isTabActive = userInfo.isTabActive();
+        // These never change, so no need for signal bindings
+        boolean isCurrentSession = userSignal.peek().sessionId().equals(currentSessionId);        
+        String username = userSignal.peek().username();
 
         // Highlight current user's session
         if (isCurrentSession) {
@@ -157,10 +141,9 @@ public class UseCase13View extends VerticalLayout {
         }
 
         // Dim inactive tabs
-        if (!isTabActive) {
-            card.getStyle().set("opacity", "0.6").set("filter",
-                    "grayscale(30%)");
-        }
+        var isTabActive = userSignal.map(info -> info.isTabActive());
+        card.getStyle().bind("opacity", () -> isTabActive.get() ? null : "0.6");
+        card.getStyle().bind("filter", () -> isTabActive.get() ? null : "grayscale(30%)");
 
         // Header: Tab Status + Avatar + Username/Nickname + Role Badge
         HorizontalLayout header = new HorizontalLayout();
@@ -168,61 +151,62 @@ public class UseCase13View extends VerticalLayout {
         header.setSpacing(true);
 
         // Tab activity indicator
-        Span tabIndicator = new Span(isTabActive ? "🟢" : "⚫");
-        tabIndicator.getElement().setAttribute("title",
-                isTabActive ? "Tab is active" : "Tab is inactive");
+        Span tabIndicator = new Span(() -> isTabActive.get() ? "🟢" : "⚫");
+        tabIndicator.getElement().bindAttribute("title",
+                () -> isTabActive.get() ? "Tab is active" : "Tab is inactive");
         tabIndicator.getStyle().set("flex-shrink", "0");
 
         // Avatar (using first letter of username)
-        Span avatar = new Span(
-                userInfo.username().substring(0, 1).toUpperCase());
+        Span avatar = new Span(username.substring(0, 1).toUpperCase());
         avatar.getStyle().set("display", "inline-flex")
                 .set("align-items", "center").set("justify-content", "center")
                 .set("width", "40px").set("height", "40px")
                 .set("border-radius", "50%")
-                .set("background", getColorForUser(userInfo.username()))
+                .set("background", getColorForUser(username))
                 .set("color", "white").set("font-weight", "bold")
                 .set("flex-shrink", "0");
 
-        // Display name with nickname if available
-        String displayName = userInfo.nickname() != null
-                && !userInfo.nickname().isEmpty()
-                        ? userInfo.username() + " (" + userInfo.nickname() + ")"
-                        : userInfo.username();
+        Span nameSpan = new Span(() -> {
+            var info = userSignal.get();
+            // Display name with nickname if available
+            String displayName = info.nickname() != null
+                    && !info.nickname().isEmpty()
+                            ? info.username() + " (" + info.nickname() + ")"
+                            : info.username();
 
-        // Add session number if multiple sessions for same user
-        long sessionCount = userSessionRegistry.getActiveUsersSignal().get()
-                .stream()
-                .filter(us -> us.get().username().equals(userInfo.username()))
-                .count();
+            // Add session number if multiple sessions for same user
+            long sessionCount = userSessionRegistry.getActiveUsersSignal().get()
+                    .stream()
+                    .filter(us -> us.get().username().equals(info.username()))
+                    .count();
 
-        if (sessionCount > 1) {
-            // Find this session's number
-            long sessionNumber = 0;
-            for (var us : userSessionRegistry.getActiveUsersSignal().get()) {
-                UserInfo u = us.get();
-                if (u.username().equals(userInfo.username())) {
-                    sessionNumber++;
-                    if (u.sessionId().equals(userInfo.sessionId())) {
-                        break;
+            if (sessionCount > 1) {
+                // Find this session's number
+                long sessionNumber = 0;
+                for (var us : userSessionRegistry.getActiveUsersSignal().get()) {
+                    UserInfo u = us.get();
+                    if (u.username().equals(info.username())) {
+                        sessionNumber++;
+                        if (u.sessionId().equals(info.sessionId())) {
+                            break;
+                        }
                     }
                 }
+                displayName = info.username() + " #" + sessionNumber;
+                if (info.nickname() != null && !info.nickname().isEmpty()) {
+                    displayName += " (" + info.nickname() + ")";
+                }
             }
-            displayName = userInfo.username() + " #" + sessionNumber;
-            if (userInfo.nickname() != null && !userInfo.nickname().isEmpty()) {
-                displayName += " (" + userInfo.nickname() + ")";
+
+            if (isCurrentSession) {
+                displayName += " (YOU)";
             }
-        }
-
-        if (isCurrentSession) {
-            displayName += " (YOU)";
-        }
-
-        Span nameSpan = new Span(displayName);
+            return displayName;
+        });
         nameSpan.getStyle().set("font-weight", "bold").set("flex-grow", "1");
 
         // Role badge
-        Span roleBadge = createRoleBadge(userInfo.username());
+        Span roleBadge = createRoleBadge(username);
 
         header.add(tabIndicator, avatar, nameSpan, roleBadge);
         card.setHeader(header);
@@ -239,9 +223,9 @@ public class UseCase13View extends VerticalLayout {
         viewRow.getStyle().set("gap", "0.5em");
 
         Span viewIcon = new Span("📍");
-        String currentView = userInfo.currentView();
-        Span viewText = new Span(
-                "Viewing: " + (currentView != null ? formatViewName(currentView)
+        Signal<@Nullable String> currentView = userSignal.map(UserInfo::currentView);
+        Span viewText = new Span(() -> "Viewing: "
+                + (currentView.get() != null ? formatViewName(currentView.get())
                         : "Unknown"));
         viewText.getStyle().set("font-size", "var(--lumo-font-size-s)");
 
@@ -254,10 +238,8 @@ public class UseCase13View extends VerticalLayout {
         durationRow.getStyle().set("gap", "0.5em");
 
         Span durationIcon = new Span("🕐");
-        long sessionDuration = System.currentTimeMillis()
-                - userInfo.sessionStartTime();
-        String durationText = formatDuration(sessionDuration);
-        Span durationTextSpan = new Span("Online for " + durationText);
+        Span durationTextSpan = new Span(() -> "Online for " + formatDuration(System.currentTimeMillis()
+                - userSignal.get().sessionStartTime()));
         durationTextSpan.getStyle().set("font-size", "var(--lumo-font-size-s)")
                 .set("color", "var(--lumo-secondary-text-color)");
 
@@ -270,12 +252,14 @@ public class UseCase13View extends VerticalLayout {
         interactionRow.getStyle().set("gap", "0.5em");
 
         Span interactionIcon = new Span("⚡");
-        long timeSinceInteraction = System.currentTimeMillis()
-                - userInfo.lastInteractionTime();
-        String interactionText = timeSinceInteraction < 5000 ? "Just now"
-                : "Last active " + formatDuration(timeSinceInteraction)
-                        + " ago";
-        Span interactionTextSpan = new Span(interactionText);
+        Span interactionTextSpan = new Span(() -> {
+            long timeSinceInteraction = System.currentTimeMillis()
+                    - userSignal.get().lastInteractionTime();
+            String interactionText = timeSinceInteraction < 5000 ? "Just now"
+                    : "Last active " + formatDuration(timeSinceInteraction)
+                            + " ago";
+            return interactionText;
+        });
         interactionTextSpan.getStyle()
                 .set("font-size", "var(--lumo-font-size-s)")
                 .set("color", "var(--lumo-secondary-text-color)");
@@ -356,5 +340,21 @@ public class UseCase13View extends VerticalLayout {
         } else {
             return seconds + " second" + (seconds != 1 ? "s" : "");
         }
+    }
+
+    private Map<String, String> buildRouteToTitleMap() {
+        var routeToTitleMap = new HashMap<String, String>();
+        MenuConfiguration.getMenuEntries().forEach(entry -> {
+            // Store both with and without leading slash for flexible lookup
+            String path = entry.path();
+            String title = entry.title();
+            routeToTitleMap.put(path, title);
+            if (path.startsWith("/")) {
+                routeToTitleMap.put(path.substring(1), title);
+            } else {
+                routeToTitleMap.put("/" + path, title);
+            }
+        });
+        return routeToTitleMap;
     }
 }

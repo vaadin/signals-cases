@@ -1,5 +1,10 @@
 package com.example.signals;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
@@ -17,20 +22,20 @@ public class UserSessionRegistry {
             UserInfo.class);
 
     // Computed signal for display names with session numbers and nicknames
-    private final Signal<java.util.List<String>> displayNamesSignal = Signal
+    private final Signal<List<String>> displayNamesSignal = Signal
             .computed(() -> {
                 var userSignals = activeUsersSignal.get();
 
                 // Count sessions per username for auto-naming
-                java.util.Map<String, Integer> sessionCounts = new java.util.HashMap<>();
+                Map<String, Integer> sessionCounts = new HashMap<>();
                 for (var userSignal : userSignals) {
                     String username = userSignal.get().username();
                     sessionCounts.merge(username, 1, Integer::sum);
                 }
 
                 // Generate display names
-                java.util.Map<String, Integer> currentSessionNumber = new java.util.HashMap<>();
-                java.util.List<String> displayNames = new java.util.ArrayList<>();
+                Map<String, Integer> currentSessionNumber = new HashMap<>();
+                List<String> displayNames = new ArrayList<>();
 
                 for (var userSignal : userSignals) {
                     UserInfo user = userSignal.get();
@@ -69,7 +74,7 @@ public class UserSessionRegistry {
      * Get the computed signal containing formatted display names with session
      * numbers.
      */
-    public Signal<java.util.List<String>> getDisplayNamesSignal() {
+    public Signal<List<String>> getDisplayNamesSignal() {
         return displayNamesSignal;
     }
 
@@ -206,13 +211,13 @@ public class UserSessionRegistry {
     /**
      * Get a reactive signal of display names for users on a specific view.
      */
-    public Signal<java.util.List<String>> getActiveUsersOnView(
+    public Signal<List<String>> getActiveUsersOnView(
             String viewRoute) {
         return Signal.computed(() -> {
             var allUsers = activeUsersSignal.get();
             var allDisplayNames = displayNamesSignal.get();
 
-            java.util.List<String> result = new java.util.ArrayList<>();
+            List<String> result = new ArrayList<>();
             for (int i = 0; i < allUsers.size(); i++) {
                 UserInfo user = allUsers.get(i).get();
                 if (viewRoute.equals(user.currentView())) {
