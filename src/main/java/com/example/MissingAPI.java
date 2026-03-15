@@ -1,11 +1,8 @@
 package com.example;
 
-import java.util.List;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.tabs.TabSheet;
-import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
@@ -15,87 +12,6 @@ import com.vaadin.flow.signals.local.ListSignal;
  * bindings until the official API is implemented in Vaadin.
  */
 public class MissingAPI {
-
-    /**
-     * Binds a Grid's items to a Signal containing a List.
-     * <p>
-     * Creates a reactive effect that updates the grid's items whenever the
-     * signal value changes. If the signal value is {@code null}, the grid is
-     * cleared.
-     *
-     * @param <T>
-     *            the type of items in the grid
-     * @param grid
-     *            the grid to bind. Must not be {@code null}.
-     * @param signal
-     *            a signal containing the list of items. Must not be
-     *            {@code null}.
-     */
-    public static <T> void bindItems(Grid<T> grid, Signal<List<T>> signal) {
-        Signal.effect(grid, () -> {
-            List<T> items = signal.get();
-            if (items != null) {
-                grid.setItems(items);
-            } else {
-                grid.setItems(List.of());
-            }
-        });
-    }
-
-    /**
-     * Binds a VirtualList's items to a Signal containing a List.
-     * <p>
-     * Creates a reactive effect that updates the virtual list's items whenever
-     * the signal value changes. If the signal value is {@code null}, the list
-     * is cleared.
-     *
-     * @param <T>
-     *            the type of items in the virtual list
-     * @param virtualList
-     *            the virtual list to bind. Must not be {@code null}.
-     * @param signal
-     *            a signal containing the list of items. Must not be
-     *            {@code null}.
-     */
-    public static <T> void bindItems(VirtualList<T> virtualList,
-            Signal<List<T>> signal) {
-        Signal.effect(virtualList, () -> {
-            List<T> items = signal.get();
-            if (items != null) {
-                virtualList.setItems(items);
-            } else {
-                virtualList.setItems(List.of());
-            }
-        });
-    }
-
-    /**
-     * Binds a ComboBox's items to a Signal containing a List.
-     * <p>
-     * Creates a reactive effect that updates the combo box's items whenever
-     * the signal value changes. If the signal value is {@code null}, the combo
-     * box is cleared.
-     *
-     * @param <T>
-     *            the type of items in the combo box
-     * @param comboBox
-     *            the combo box to bind. Must not be {@code null}.
-     * @param signal
-     *            a signal containing the list of items. Must not be
-     *            {@code null}.
-     */
-    public static <T> void bindItems(
-            com.vaadin.flow.component.combobox.ComboBox<T> comboBox,
-            Signal<List<T>> signal) {
-        Signal.effect(comboBox, () -> {
-            List<T> items = signal.get();
-            if (items != null) {
-                comboBox.setItems(items);
-            } else {
-                comboBox.setItems(List.of());
-            }
-        });
-    }
 
     /**
      * Synchronizes the selected index between a Tabs component and a writable

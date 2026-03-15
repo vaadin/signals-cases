@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
 
-import com.example.MissingAPI;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -42,7 +41,6 @@ public class UseCase05View extends VerticalLayout {
         ValueSignal<@Nullable String> stateSignal = new ValueSignal<@Nullable String>(null);
         ValueSignal<@Nullable String> citySignal = new ValueSignal<@Nullable String>(null);
 
-        var states = countrySignal.map(country -> loadStates(country));
         var cities = stateSignal.map(state -> loadCities(countrySignal.get(), state));
 
         // Country selector
@@ -52,12 +50,24 @@ public class UseCase05View extends VerticalLayout {
 
         // State selector - computed items based on country
         ComboBox<String> stateSelect = new ComboBox<>("State/Province");
-        MissingAPI.bindItems(stateSelect, states);
+        stateSelect.setItems(List.of()); // Initialize with empty items
+        stateSelect.bindItems(countrySignal.map(country -> {
+            stateSignal.set(""); // Reset state when the country changes
+            List<String> states = country != null && !country.isEmpty()
+                    ? loadStates(country) : List.of();
+            return states.stream().map(ValueSignal::new).toList();
+        }));
         stateSelect.bindValue(stateSignal, stateSignal::set);
 
         // City selector - computed items based on state
         ComboBox<String> citySelect = new ComboBox<>("City");
-        MissingAPI.bindItems(citySelect, cities);
+        citySelect.setItems(List.of()); // Initialize with empty items
+        citySelect.bindItems(stateSignal.map(state -> {
+            citySignal.set(""); // Reset city when state changes
+            List<String> cityList = state != null && !state.isEmpty()
+                    ? loadCities(countrySignal.get(), state) : List.of();
+            return cityList.stream().map(ValueSignal::new).toList();
+        }));
         citySelect.bindValue(citySignal, citySignal::set);
         citySelect.bindEnabled(() -> !cities.get().isEmpty());
 
