@@ -25,19 +25,18 @@ class UseCase11ViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void initialContainerSizeIsMedium() {
+    void initialContainerSizeIsSmall() {
         navigate(UseCase11View.class);
         runPendingSignalsTasks();
 
-        // Default container size is 600x400 which is medium (400-700px)
-        // The medium layout section should be visible, small and large should
-        // not
+        // Initial size from sizeSignal is (0, 0) which is small (< 400px)
+        // until the ResizeObserver reports the actual size from the browser
         assertTrue(
                 $view(H3.class).all().stream().anyMatch(h -> h.getText() != null
-                        && h.getText().contains("Medium Width Layout")));
+                        && h.getText().contains("Small Width Layout")));
         assertFalse(
                 $view(H3.class).all().stream().anyMatch(h -> h.getText() != null
-                        && h.getText().contains("Small Width Layout")));
+                        && h.getText().contains("Medium Width Layout")));
         assertFalse(
                 $view(H3.class).all().stream().anyMatch(h -> h.getText() != null
                         && h.getText().contains("Large Width Layout")));
