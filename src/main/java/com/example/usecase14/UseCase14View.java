@@ -53,7 +53,8 @@ public class UseCase14View extends VerticalLayout {
 
     private final AnalyticsService analyticsService;
 
-    private final ValueSignal<LoadingState> stateSignal = new ValueSignal<>(LoadingState.IDLE);
+    private final ValueSignal<LoadingState> stateSignal = new ValueSignal<>(
+            LoadingState.IDLE);
 
     private final ValueSignal<AnalyticsReport> reportDataSignal = new ValueSignal<>(
             AnalyticsReport.empty());
@@ -84,7 +85,8 @@ public class UseCase14View extends VerticalLayout {
 
         // Disable load button while loading
         Signal<Boolean> isLoadingSignal = stateSignal
-                .map(state -> state == LoadingState.LOADING || state == LoadingState.GENERATING);
+                .map(state -> state == LoadingState.LOADING
+                        || state == LoadingState.GENERATING);
         loadButton.setDisableOnClick(true);
         // Can't directly bind when the button updates its own state
         Signal.effect(loadButton, () -> {
@@ -129,11 +131,12 @@ public class UseCase14View extends VerticalLayout {
         progressBar.setIndeterminate(true);
         progressBar.setWidth("200px");
 
-        Paragraph loadingMessage = new Paragraph(() -> switch (stateSignal.get()) {
-            case LOADING -> "Fetching relevant data... (1/2)";
-            case GENERATING -> "Generating report... (2/2)";
-            default -> "";
-        });
+        Paragraph loadingMessage = new Paragraph(
+                () -> switch (stateSignal.get()) {
+                case LOADING -> "Fetching relevant data... (1/2)";
+                case GENERATING -> "Generating report... (2/2)";
+                default -> "";
+                });
         loadingMessage.getStyle().set("color", "var(--lumo-primary-color)");
 
         loadingContent.add(progressBar, loadingMessage);
@@ -141,8 +144,8 @@ public class UseCase14View extends VerticalLayout {
 
         // Success state
         Div successContent = new Div();
-        H3 successTitle = new H3(reportDataSignal
-                .map(report -> !report.isEmpty()
+        H3 successTitle = new H3(
+                reportDataSignal.map(report -> !report.isEmpty()
                         ? "Analytics Report - " + report.getPeriod()
                         : "Analytics Report"));
         successTitle.getStyle().set("margin-top", "0").set("color",
@@ -195,7 +198,8 @@ public class UseCase14View extends VerticalLayout {
         metricsGrid.add(revenueCard, ordersCard, conversionCard, usersCard);
 
         successContent.add(successTitle, metricsGrid);
-        successContent.bindVisible(() -> stateSignal.get() == LoadingState.SUCCESS);
+        successContent
+                .bindVisible(() -> stateSignal.get() == LoadingState.SUCCESS);
 
         // Error state
         Div errorContent = new Div();
@@ -232,18 +236,16 @@ public class UseCase14View extends VerticalLayout {
         // Capture on UI thread — .peek() reads without creating a subscription
         boolean shouldFail = shouldFailSignal.peek();
 
-        analyticsService.fetchReportData(shouldFail)
-                .thenCompose(rawData -> {
-                    stateSignal.set(LoadingState.GENERATING);
-                    return analyticsService.generateReportFromData(rawData,
-                            shouldFail);
-                }).thenAccept(report -> {
-                    reportDataSignal.set(report);
-                    stateSignal.set(LoadingState.SUCCESS);
-                }).exceptionally(error -> {
-                    stateSignal.set(LoadingState.ERROR);
-                    return null;
-                });
+        analyticsService.fetchReportData(shouldFail).thenCompose(rawData -> {
+            stateSignal.set(LoadingState.GENERATING);
+            return analyticsService.generateReportFromData(rawData, shouldFail);
+        }).thenAccept(report -> {
+            reportDataSignal.set(report);
+            stateSignal.set(LoadingState.SUCCESS);
+        }).exceptionally(error -> {
+            stateSignal.set(LoadingState.ERROR);
+            return null;
+        });
     }
 
     private Card createMetricCardWithSignal(String label,

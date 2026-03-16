@@ -21,7 +21,6 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-02", layout = MainLayout.class)
@@ -52,9 +51,10 @@ public class UseCase02View extends VerticalLayout {
         // Base question: needs visa sponsorship
         Checkbox needsVisaCheckbox = new Checkbox(
                 "Do you require visa sponsorship?");
-        var needsVisaSignal = binder.forField(needsVisaCheckbox).bind(
-                VisaApplicationData::getNeedsVisa,
-                VisaApplicationData::setNeedsVisa).valueSignal();
+        var needsVisaSignal = binder.forField(needsVisaCheckbox)
+                .bind(VisaApplicationData::getNeedsVisa,
+                        VisaApplicationData::setNeedsVisa)
+                .valueSignal();
 
         // Level 1: Visa-related fields (shown when needsVisa is true)
         VerticalLayout visaSection = new VerticalLayout();
@@ -62,9 +62,10 @@ public class UseCase02View extends VerticalLayout {
         ComboBox<VisaType> visaTypeSelect = new ComboBox<>("Visa Type",
                 VisaType.values());
         visaTypeSelect.setValue(VisaType.H1B);
-        var visaTypeSignal = binder.forField(visaTypeSelect).bind(
-                VisaApplicationData::getVisaType,
-                VisaApplicationData::setVisaType).valueSignal();
+        var visaTypeSignal = binder.forField(visaTypeSelect)
+                .bind(VisaApplicationData::getVisaType,
+                        VisaApplicationData::setVisaType)
+                .valueSignal();
 
         TextField currentVisaStatus = new TextField("Current Visa Status");
         binder.forField(currentVisaStatus).bind(
@@ -79,9 +80,10 @@ public class UseCase02View extends VerticalLayout {
 
         Checkbox hasH1BPreviouslyCheckbox = new Checkbox(
                 "Have you held an H1-B visa before?");
-        var hasH1BPreviouslySignal = binder.forField(hasH1BPreviouslyCheckbox).bind(
-                VisaApplicationData::getHasH1BPreviously,
-                VisaApplicationData::setHasH1BPreviously).valueSignal();
+        var hasH1BPreviouslySignal = binder.forField(hasH1BPreviouslyCheckbox)
+                .bind(VisaApplicationData::getHasH1BPreviously,
+                        VisaApplicationData::setHasH1BPreviously)
+                .valueSignal();
 
         TextField h1bSpecialtyOccupation = new TextField(
                 "Specialty Occupation");
@@ -171,7 +173,8 @@ public class UseCase02View extends VerticalLayout {
         resultDisplay.getStyle().set("margin-top", "2em").set("padding", "1em")
                 .set("border", "1px solid #ccc").set("border-radius", "4px")
                 .set("background-color", "#f5f5f5");
-        resultDisplay.bindVisible(resultTextSignal.map(text -> !text.isBlank()));
+        resultDisplay
+                .bindVisible(resultTextSignal.map(text -> !text.isBlank()));
 
         Pre resultText = new Pre(resultTextSignal);
         resultText.getStyle().set("margin", "0");

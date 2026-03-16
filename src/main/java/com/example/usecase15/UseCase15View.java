@@ -9,11 +9,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import com.example.views.MainLayout;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.jspecify.annotations.Nullable;
-
-import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.html.Div;
@@ -87,7 +86,8 @@ public class UseCase15View extends VerticalLayout {
     private final ValueSignal<Integer> searchCountSignal = new ValueSignal<>(0);
     private final ValueSignal<Integer> keystrokeCountSignal = new ValueSignal<>(
             0);
-    private final ValueSignal<@Nullable CompletableFuture<Void>> currentSearchSignal = new ValueSignal<@Nullable CompletableFuture<Void>>(null);
+    private final ValueSignal<@Nullable CompletableFuture<Void>> currentSearchSignal = new ValueSignal<@Nullable CompletableFuture<Void>>(
+            null);
 
     private final ScheduledExecutorService debounceExecutor = Executors
             .newSingleThreadScheduledExecutor();
@@ -97,7 +97,8 @@ public class UseCase15View extends VerticalLayout {
         setSpacing(true);
         setPadding(true);
 
-        var isSearchingSignal = currentSearchSignal.map(future -> future != null);
+        var isSearchingSignal = currentSearchSignal
+                .map(future -> future != null);
 
         H2 title = new H2("Use Case 15: Debounced Search");
 
@@ -263,7 +264,8 @@ public class UseCase15View extends VerticalLayout {
 
     private void performSearch(String query) {
         // Cancel previous search if still running
-        CompletableFuture<Void> previousSearch = currentSearchSignal.peek();;
+        CompletableFuture<Void> previousSearch = currentSearchSignal.peek();
+        ;
         if (previousSearch != null && !previousSearch.isDone()) {
             previousSearch.cancel(true);
         }
@@ -288,8 +290,7 @@ public class UseCase15View extends VerticalLayout {
 
                     // Filter products
                     List<Product> results = ALL_PRODUCTS.stream()
-                            .filter(p -> p.matches(query))
-                            .toList();
+                            .filter(p -> p.matches(query)).toList();
 
                     searchResultsSignal.clear();
                     results.forEach(searchResultsSignal::insertLast);

@@ -122,8 +122,7 @@ public class UseCase19View extends VerticalLayout {
             DataItem item = itemSignal.peek();
             // Update to LOADING state
             itemSignal.set(new DataItem(item.id(), item.name(),
-                    LoadingState.LOADING, null, null,
-                    item.simulatedDelayMs()));
+                    LoadingState.LOADING, null, null, item.simulatedDelayMs()));
 
             // Launch async operation (truly parallel via Spring @Async)
             dataLoadingService.loadDataAsync(item.id(), item.simulatedDelayMs(),
@@ -154,9 +153,8 @@ public class UseCase19View extends VerticalLayout {
         DataItem item = itemSignal.peek();
 
         // Update to LOADING state
-        itemSignal.set(
-                new DataItem(item.id(), item.name(), LoadingState.LOADING,
-                        null, null, item.simulatedDelayMs()));
+        itemSignal.set(new DataItem(item.id(), item.name(),
+                LoadingState.LOADING, null, null, item.simulatedDelayMs()));
 
         // Launch async operation
         dataLoadingService.loadDataAsync(item.id(), item.simulatedDelayMs(),

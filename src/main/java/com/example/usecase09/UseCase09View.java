@@ -23,8 +23,6 @@ import com.vaadin.flow.data.binder.BinderValidationStatus;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-09", layout = MainLayout.class)
 @PageTitle("Use Case 9: Form with Binder Integration and Signal Validation")
@@ -47,7 +45,8 @@ public class UseCase09View extends VerticalLayout {
 
         // Create binder
         Binder<UserRegistration> binder = new Binder<>(UserRegistration.class);
-        var okStatusSignal = binder.validationStatusSignal().map(BinderValidationStatus::isOk);
+        var okStatusSignal = binder.validationStatusSignal()
+                .map(BinderValidationStatus::isOk);
 
         // Create form fields
         TextField usernameField = new TextField("Username");
@@ -71,21 +70,23 @@ public class UseCase09View extends VerticalLayout {
                         "Please enter a valid email address")
                 .bind("email");
 
-        var passwordSignal = binder
-                .forField(passwordField)
+        var passwordSignal = binder.forField(passwordField)
                 .withValidator(value -> value != null && value.length() >= 8,
                         "Password must be at least 8 characters")
                 .bind("password").valueSignal();
         // cross-field validation using field Binding.valueSignal()
-        binder.forField(confirmPasswordField).withValidator(
-                value -> Objects.equals(value, passwordSignal.get()),
-                "Passwords do not match").bind("confirmPassword");
+        binder.forField(confirmPasswordField)
+                .withValidator(
+                        value -> Objects.equals(value, passwordSignal.get()),
+                        "Passwords do not match")
+                .bind("confirmPassword");
 
-        var accountTypeSignal = binder.forField(accountTypeSelect).bind("accountType").valueSignal();
+        var accountTypeSignal = binder.forField(accountTypeSelect)
+                .bind("accountType").valueSignal();
 
         // another cross-field validation, this one uses a helper method
-        binder.forField(ageField)
-                .withValidator(age -> validateAge(age, accountTypeSignal.get()), value -> {
+        binder.forField(ageField).withValidator(
+                age -> validateAge(age, accountTypeSignal.get()), value -> {
                     AccountType accountType = accountTypeSignal.get();
                     if (accountType == AccountType.BUSINESS) {
                         return "Business accounts require age 18 or older";
@@ -115,10 +116,13 @@ public class UseCase09View extends VerticalLayout {
 
         // Form status
         Div statusDiv = new Div();
-        Span statusLabel = new Span(() -> okStatusSignal.get() ? "Form is valid - Ready to submit"
-                : "Please complete all required fields correctly");
-        statusLabel.getStyle().bind("color", () -> okStatusSignal.get() ? "green" : "orange");
-        statusLabel.getStyle().bind("font-weight", () -> okStatusSignal.get() ? "bold" : "normal");
+        Span statusLabel = new Span(
+                () -> okStatusSignal.get() ? "Form is valid - Ready to submit"
+                        : "Please complete all required fields correctly");
+        statusLabel.getStyle().bind("color",
+                () -> okStatusSignal.get() ? "green" : "orange");
+        statusLabel.getStyle().bind("font-weight",
+                () -> okStatusSignal.get() ? "bold" : "normal");
         statusDiv.add(statusLabel);
 
         add(title, description, usernameField, emailField, passwordField,

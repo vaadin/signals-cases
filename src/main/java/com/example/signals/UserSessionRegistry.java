@@ -211,8 +211,7 @@ public class UserSessionRegistry {
     /**
      * Get a reactive signal of display names for users on a specific view.
      */
-    public Signal<List<String>> getActiveUsersOnView(
-            String viewRoute) {
+    public Signal<List<String>> getActiveUsersOnView(String viewRoute) {
         return Signal.computed(() -> {
             var allUsers = activeUsersSignal.get();
             var allDisplayNames = displayNamesSignal.get();
