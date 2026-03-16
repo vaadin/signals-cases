@@ -163,7 +163,6 @@ public class MissingAPI {
     private static final String RESIZE_EVENT = "component-resize";
 
     private static final String SETUP_RESIZE_OBSERVER_JS = """
-            const target = $0;
             const resizeObserver = new ResizeObserver(entries => {
                 for (let entry of entries) {
                     const width = Math.floor(entry.contentRect.width);
@@ -171,16 +170,16 @@ public class MissingAPI {
                     const event = new CustomEvent('%s', {
                         detail: { width: width, height: height }
                     });
-                    target.dispatchEvent(event);
+                    this.dispatchEvent(event);
                 }
             });
-            resizeObserver.observe(target);
-            window[$1] = resizeObserver;
-            const rect = target.getBoundingClientRect();
+            resizeObserver.observe(this);
+            window[$0] = resizeObserver;
+            const rect = this.getBoundingClientRect();
             const event = new CustomEvent('%s', {
                 detail: { width: Math.floor(rect.width), height: Math.floor(rect.height) }
             });
-            target.dispatchEvent(event);
+            this.dispatchEvent(event);
             """.formatted(RESIZE_EVENT, RESIZE_EVENT);
 
     private static final String CLEANUP_RESIZE_OBSERVER_JS = """
@@ -208,16 +207,12 @@ public class MissingAPI {
 
             DomListenerRegistration reg = component.getElement()
                     .addEventListener(RESIZE_EVENT, event -> {
-                        int width = (int) event.getEventData()
-                                .get("event.detail.width").asDouble();
-                        int height = (int) event.getEventData()
-                                .get("event.detail.height").asDouble();
-                        signal.set(new ComponentSize(width, height));
-                    }).addEventData("event.detail.width")
-                    .addEventData("event.detail.height");
+                        signal.set(event.getEventDetail(
+                                ComponentSize.class));
+                    });
 
             component.getElement().executeJs(SETUP_RESIZE_OBSERVER_JS,
-                    component.getElement(), cleanupKey);
+                    cleanupKey);
 
             component.addDetachListener(detachEvent -> {
                 detachEvent.unregisterListener();
