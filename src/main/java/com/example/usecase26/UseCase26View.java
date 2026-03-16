@@ -30,6 +30,10 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PermitAll
 public class UseCase26View extends VerticalLayout {
 
+    private final ValueSignal<@Nullable Country> countrySignal = new ValueSignal<@Nullable Country>(
+            null);
+    private final ListSignal<String> creationLog = new ListSignal<>();
+
     public UseCase26View() {
         setSpacing(true);
         setPadding(true);
@@ -41,15 +45,11 @@ public class UseCase26View extends VerticalLayout {
                 "This use case demonstrates lazy component creation using bindVisible().onChange(). "
                         + "Address form fields are only instantiated when a country is first selected, "
                         + "avoiding upfront creation of heavy components like ComboBoxes with many items. "
-                        + "US/Germany/UK use create-once-keep pattern; Japan uses create-and-destroy pattern.");
+                        + "US uses create-once-keep pattern; Japan uses create-and-destroy pattern.");
 
-        // Signals
-        var countrySignal = new ValueSignal<@Nullable Country>(null);
+        // Derived signals
         Signal<Boolean> showUS = countrySignal.map(c -> c == Country.US);
-        Signal<Boolean> showDE = countrySignal.map(c -> c == Country.GERMANY);
         Signal<Boolean> showJP = countrySignal.map(c -> c == Country.JAPAN);
-        Signal<Boolean> showUK = countrySignal.map(c -> c == Country.UK);
-        var creationLog = new ListSignal<String>();
 
         // Country selector
         var countrySelect = new ComboBox<Country>("Country", Country.values());
@@ -58,31 +58,13 @@ public class UseCase26View extends VerticalLayout {
 
         // Pattern A: Create once, keep (US)
         var usWrapper = new Div();
-        MissingAPI.lazyPopulate(usWrapper, showUS, w -> {
-            populateUSForm(w);
-            creationLog.insertLast("Created US address form");
-        });
-
-        // Pattern A: Create once, keep (Germany)
-        var deWrapper = new Div();
-        MissingAPI.lazyPopulate(deWrapper, showDE, w -> {
-            populateGermanForm(w);
-            creationLog.insertLast("Created Germany address form");
-        });
+        MissingAPI.lazyPopulate(usWrapper, showUS, this::populateUSForm);
 
         // Pattern B: Create and destroy (Japan)
         var jpWrapper = new Div();
-        MissingAPI.lazyPopulateRecreating(jpWrapper, showJP, w -> {
-            populateJapanForm(w);
-            creationLog.insertLast("Created Japan address form");
-        }, w -> creationLog.insertLast("Destroyed Japan address form"));
-
-        // Pattern A: Create once, keep (UK)
-        var ukWrapper = new Div();
-        MissingAPI.lazyPopulate(ukWrapper, showUK, w -> {
-            populateUKForm(w);
-            creationLog.insertLast("Created UK address form");
-        });
+        MissingAPI.lazyPopulateRecreating(jpWrapper, showJP,
+                this::populateJapanForm,
+                w -> creationLog.insertLast("Destroyed Japan address form"));
 
         // Creation log panel
         var logPanel = new Div();
@@ -91,12 +73,11 @@ public class UseCase26View extends VerticalLayout {
         logPanel.add(new H3("Creation Log"));
         var logEntries = new Div();
         logEntries.bindChildren(creationLog,
-                entrySignal -> new Div(new Span(entrySignal.get())));
+                entrySignal -> new Div(new Span(entrySignal.peek())));
         logPanel.add(logEntries);
 
         // Main content: forms on the left, log on the right
-        var formsArea = new Div(countrySelect, usWrapper, deWrapper, jpWrapper,
-                ukWrapper);
+        var formsArea = new Div(countrySelect, usWrapper, jpWrapper);
         formsArea.getStyle().set("flex", "1");
 
         var contentLayout = new HorizontalLayout(formsArea, logPanel);
@@ -128,24 +109,7 @@ public class UseCase26View extends VerticalLayout {
         layout.add(stateCombo);
         layout.add(new TextField("ZIP"));
         wrapper.add(layout);
-    }
-
-    private void populateGermanForm(Div wrapper) {
-        var layout = new VerticalLayout();
-        layout.setPadding(false);
-        layout.add(new H3("German Address"));
-        layout.add(new TextField("Straße"));
-        layout.add(new TextField("Hausnummer"));
-        layout.add(new TextField("PLZ"));
-        layout.add(new TextField("Ort"));
-        var bundeslandCombo = new ComboBox<String>("Bundesland",
-                List.of("Baden-Württemberg", "Bayern", "Berlin", "Brandenburg",
-                        "Bremen", "Hamburg", "Hessen", "Mecklenburg-Vorpommern",
-                        "Niedersachsen", "Nordrhein-Westfalen",
-                        "Rheinland-Pfalz", "Saarland", "Sachsen",
-                        "Sachsen-Anhalt", "Schleswig-Holstein", "Thüringen"));
-        layout.add(bundeslandCombo);
-        wrapper.add(layout);
+        creationLog.insertLast("Created US address form");
     }
 
     private void populateJapanForm(Div wrapper) {
@@ -169,17 +133,6 @@ public class UseCase26View extends VerticalLayout {
         layout.add(new TextField("Ward"));
         layout.add(new TextField("Block"));
         wrapper.add(layout);
-    }
-
-    private void populateUKForm(Div wrapper) {
-        var layout = new VerticalLayout();
-        layout.setPadding(false);
-        layout.add(new H3("UK Address"));
-        layout.add(new TextField("Address Line 1"));
-        layout.add(new TextField("Address Line 2"));
-        layout.add(new TextField("Town/City"));
-        layout.add(new TextField("County"));
-        layout.add(new TextField("Postcode"));
-        wrapper.add(layout);
+        creationLog.insertLast("Created Japan address form");
     }
 }
