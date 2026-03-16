@@ -135,19 +135,7 @@ public class UseCase16View extends VerticalLayout
             String query = searchQuerySignal.get();
             String category = categorySignal.get();
 
-            StringBuilder url = new StringBuilder(baseUrl);
-            if (!query.isEmpty() || !category.equals("All")) {
-                url.append("?");
-                if (!query.isEmpty()) {
-                    url.append("q=").append(query);
-                }
-                if (!category.equals("All")) {
-                    if (!query.isEmpty())
-                        url.append("&");
-                    url.append("category=").append(category);
-                }
-            }
-            return url.toString();
+            return buildUrl(baseUrl, query, category);
         });
 
         Paragraph urlDisplay = new Paragraph(currentUrlSignal);
@@ -178,11 +166,10 @@ public class UseCase16View extends VerticalLayout
         shareLinks.add(link1, link2, link3);
 
         // Results
-        Signal<String> resultsTitleSignal = Signal.computed(() -> {
+        H3 resultsTitle = new H3(() -> {
             int size = filteredArticlesSignal.get().size();
             return size + " article" + (size == 1 ? "" : "s") + " found";
         });
-        H3 resultsTitle = new H3(resultsTitleSignal);
 
         Div resultsContainer = new Div();
         resultsContainer.getStyle().set("display", "flex")
@@ -212,7 +199,8 @@ public class UseCase16View extends VerticalLayout
     }
 
     private Div createArticleCard(ValueSignal<Article> articleSignal) {
-        var article = articleSignal.get();
+        // Articles are read-only so no need to create bindings
+        var article = articleSignal.peek();
         Div card = new Div();
         card.getStyle().set("background-color", "#ffffff")
                 .set("border", "1px solid var(--lumo-contrast-20pct)")
@@ -286,20 +274,26 @@ public class UseCase16View extends VerticalLayout
         isInitializing = false;
     }
 
-    private void updateUrl(String query, String category) {
-        StringBuilder urlParams = new StringBuilder();
-        if (!query.isEmpty()) {
-            urlParams.append("q=").append(query);
+    private String buildUrl(String baseUrl, String query, String category) {
+        StringBuilder url = new StringBuilder(baseUrl);
+        if (!query.isEmpty() || !category.equals("All")) {
+            url.append("?");
+            if (!query.isEmpty()) {
+                url.append("q=").append(query);
+            }
+            if (!category.equals("All")) {
+                if (!query.isEmpty())
+                    url.append("&");
+                url.append("category=").append(category);
+            }
         }
-        if (!category.equals("All")) {
-            if (!urlParams.isEmpty())
-                urlParams.append("&");
-            urlParams.append("category=").append(category);
-        }
+        return url.toString();
+    }    
 
+    private void updateUrl(String query, String category) {
+        String url = buildUrl("use-case-16", query, category);
+        
         // Update browser URL without triggering navigation
-        String url = "use-case-16"
-                + (!urlParams.isEmpty() ? "?" + urlParams : "");
         UI.getCurrent().getPage().getHistory().replaceState(null, url);
     }
 
