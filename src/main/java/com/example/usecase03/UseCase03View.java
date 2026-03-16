@@ -121,7 +121,8 @@ public class UseCase03View extends VerticalLayout {
         tabsheet.setWidthFull();
         tabsheet.add(rectangleTab, createRectangleControls());
         tabsheet.add(starTab, createStarControls());
-        MissingAPI.tabsSyncSelectedIndex(tabsheet, selectedShapeSignal, selectedShapeSignal::set);
+        MissingAPI.tabsSyncSelectedIndex(tabsheet, selectedShapeSignal,
+                selectedShapeSignal::set);
 
         // Reset button
         Button resetButton = new Button("Reset to Defaults", e -> resetAll());
@@ -446,25 +447,23 @@ public class UseCase03View extends VerticalLayout {
         );
 
         // Custom renderer to show color swatch
-        combo.setRenderer(
-                new ComponentRenderer<>(color -> {
-                    HorizontalLayout layout = new HorizontalLayout();
-                    layout.setAlignItems(HorizontalLayout.Alignment.CENTER);
-                    layout.setSpacing(true);
+        combo.setRenderer(new ComponentRenderer<>(color -> {
+            HorizontalLayout layout = new HorizontalLayout();
+            layout.setAlignItems(HorizontalLayout.Alignment.CENTER);
+            layout.setSpacing(true);
 
-                    Div swatch = new Div();
-                    swatch.getStyle().set("width", "20px").set("height", "20px")
-                            .set("background-color", color)
-                            .set("border",
-                                    "1px solid var(--lumo-contrast-20pct)")
-                            .set("border-radius", "4px");
+            Div swatch = new Div();
+            swatch.getStyle().set("width", "20px").set("height", "20px")
+                    .set("background-color", color)
+                    .set("border", "1px solid var(--lumo-contrast-20pct)")
+                    .set("border-radius", "4px");
 
-                    Span text = new Span(color);
-                    text.getStyle().set("font-size", "var(--lumo-font-size-s)");
+            Span text = new Span(color);
+            text.getStyle().set("font-size", "var(--lumo-font-size-s)");
 
-                    layout.add(swatch, text);
-                    return layout;
-                }));
+            layout.add(swatch, text);
+            return layout;
+        }));
 
         return combo;
     }

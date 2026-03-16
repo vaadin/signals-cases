@@ -10,8 +10,7 @@ public record CartItem(Product product, int quantity) {
     }
 
     public BigDecimal totalPrice() {
-        return product()
-                .price().multiply(BigDecimal.valueOf(quantity()))
+        return product().price().multiply(BigDecimal.valueOf(quantity()))
                 .setScale(2, RoundingMode.HALF_UP);
     }
 }

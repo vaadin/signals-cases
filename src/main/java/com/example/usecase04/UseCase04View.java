@@ -66,7 +66,8 @@ public class UseCase04View extends VerticalLayout {
         Checkbox inStockCheckbox = new Checkbox("Show in-stock items only");
         inStockCheckbox.bindValue(inStockOnlySignal, inStockOnlySignal::set);
 
-        // Use Signal.effect to configure DataView when any filter signal changes
+        // Use Signal.effect to configure DataView when any filter signal
+        // changes
         Signal.effect(grid, () -> {
             // Read values outside the filter callback to register dependencies
             String category = categoryFilterSignal.get();

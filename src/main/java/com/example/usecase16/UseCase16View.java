@@ -288,11 +288,11 @@ public class UseCase16View extends VerticalLayout
             }
         }
         return url.toString();
-    }    
+    }
 
     private void updateUrl(String query, String category) {
         String url = buildUrl("use-case-16", query, category);
-        
+
         // Update browser URL without triggering navigation
         UI.getCurrent().getPage().getHistory().replaceState(null, url);
     }

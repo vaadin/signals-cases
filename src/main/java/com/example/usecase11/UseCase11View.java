@@ -55,15 +55,14 @@ public class UseCase11View extends VerticalLayout {
         // Create responsive content container first so we can set up the size
         // signal before building other panels that depend on it
         responsiveContent = new Div();
-        responsiveContent.getStyle().set("padding", "1em")
-                .set("height", "100%").set("overflow-y", "auto")
-                .set("background-color", "#ffffff");
+        responsiveContent.getStyle().set("padding", "1em").set("height", "100%")
+                .set("overflow-y", "auto").set("background-color", "#ffffff");
         containerSizeSignal = MissingAPI.sizeSignal(responsiveContent);
         isSmall = containerSizeSignal
                 .map(size -> size.width() < SMALL_BREAKPOINT);
-        isMedium = containerSizeSignal.map(size -> size
-                .width() >= SMALL_BREAKPOINT
-                && size.width() < LARGE_BREAKPOINT);
+        isMedium = containerSizeSignal
+                .map(size -> size.width() >= SMALL_BREAKPOINT
+                        && size.width() < LARGE_BREAKPOINT);
         isLarge = containerSizeSignal
                 .map(size -> size.width() >= LARGE_BREAKPOINT);
 
@@ -126,11 +125,13 @@ public class UseCase11View extends VerticalLayout {
                 .set("padding", "1em").set("border-radius", "4px")
                 .set("margin", "1em 0");
 
-        Paragraph widthPara = new Paragraph(() -> "Width: " + containerSizeSignal.get().width() + "px");
+        Paragraph widthPara = new Paragraph(
+                () -> "Width: " + containerSizeSignal.get().width() + "px");
         widthPara.getStyle().set("font-family", "monospace").set("margin",
                 "0.25em 0");
 
-        Paragraph heightPara = new Paragraph(() -> "Height: " + containerSizeSignal.get().height() + "px");
+        Paragraph heightPara = new Paragraph(
+                () -> "Height: " + containerSizeSignal.get().height() + "px");
         heightPara.getStyle().set("font-family", "monospace").set("margin",
                 "0.25em 0");
 
@@ -225,8 +226,10 @@ public class UseCase11View extends VerticalLayout {
         // Set responsive flex layout based on container size
         gridContainer.getStyle().set("display", "flex").set("margin", "1em 0");
 
-        gridContainer.getStyle().bind("flex-direction", () -> isSmall.get() ? "column" : "row");
-        gridContainer.getStyle().bind("flex-wrap", () -> isSmall.get() ? "nowrap" : "wrap");
+        gridContainer.getStyle().bind("flex-direction",
+                () -> isSmall.get() ? "column" : "row");
+        gridContainer.getStyle().bind("flex-wrap",
+                () -> isSmall.get() ? "nowrap" : "wrap");
 
         return gridContainer;
     }

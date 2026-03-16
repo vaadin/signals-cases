@@ -77,9 +77,9 @@ public class MissingAPI {
     /**
      * Binds a ComboBox's items to a Signal containing a List.
      * <p>
-     * Creates a reactive effect that updates the combo box's items whenever
-     * the signal value changes. If the signal value is {@code null}, the combo
-     * box is cleared.
+     * Creates a reactive effect that updates the combo box's items whenever the
+     * signal value changes. If the signal value is {@code null}, the combo box
+     * is cleared.
      *
      * @param <T>
      *            the type of items in the combo box
@@ -124,7 +124,8 @@ public class MissingAPI {
      *            {@code null}.
      */
     public static void tabsSyncSelectedIndex(TabSheet tabs,
-            Signal<Integer> numberSignal, SerializableConsumer<Integer> writeCallback) {
+            Signal<Integer> numberSignal,
+            SerializableConsumer<Integer> writeCallback) {
         Signal.effect(tabs, () -> {
             Integer index = numberSignal.get();
             if (index != null) {
@@ -154,8 +155,8 @@ public class MissingAPI {
     }
 
     /**
-     * A component's size in pixels, mirroring the future
-     * {@code Component.Size} API from vaadin/flow#23618.
+     * A component's size in pixels, mirroring the future {@code Component.Size}
+     * API from vaadin/flow#23618.
      */
     public record ComponentSize(int width, int height) implements Serializable {
     }
@@ -180,7 +181,8 @@ public class MissingAPI {
                 detail: { width: Math.floor(rect.width), height: Math.floor(rect.height) }
             });
             this.dispatchEvent(event);
-            """.formatted(RESIZE_EVENT, RESIZE_EVENT);
+            """
+            .formatted(RESIZE_EVENT, RESIZE_EVENT);
 
     private static final String CLEANUP_RESIZE_OBSERVER_JS = """
             if (window[$0]) {
@@ -207,8 +209,7 @@ public class MissingAPI {
 
             DomListenerRegistration reg = component.getElement()
                     .addEventListener(RESIZE_EVENT, event -> {
-                        signal.set(event.getEventDetail(
-                                ComponentSize.class));
+                        signal.set(event.getEventDetail(ComponentSize.class));
                     });
 
             component.getElement().executeJs(SETUP_RESIZE_OBSERVER_JS,
@@ -217,8 +218,8 @@ public class MissingAPI {
             component.addDetachListener(detachEvent -> {
                 detachEvent.unregisterListener();
                 reg.remove();
-                detachEvent.getUI().getPage().executeJs(
-                        CLEANUP_RESIZE_OBSERVER_JS, cleanupKey);
+                detachEvent.getUI().getPage()
+                        .executeJs(CLEANUP_RESIZE_OBSERVER_JS, cleanupKey);
             });
         });
 
