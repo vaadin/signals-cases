@@ -4,7 +4,6 @@ import jakarta.annotation.security.PermitAll;
 
 import java.util.List;
 
-import com.example.MissingAPI;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -58,12 +57,11 @@ public class UseCase26View extends VerticalLayout {
 
         // Pattern A: Create once, keep (US)
         var usWrapper = new Div();
-        MissingAPI.lazyPopulate(usWrapper, showUS, this::populateUSForm);
+        LazyPopulate.once(usWrapper, showUS, this::populateUSForm);
 
         // Pattern B: Create and destroy (Japan)
         var jpWrapper = new Div();
-        MissingAPI.lazyPopulateRecreating(jpWrapper, showJP,
-                this::populateJapanForm,
+        LazyPopulate.recreating(jpWrapper, showJP, this::populateJapanForm,
                 w -> creationLog.insertLast("Destroyed Japan address form"));
 
         // Creation log panel
