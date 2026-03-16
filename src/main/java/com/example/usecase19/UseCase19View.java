@@ -3,7 +3,6 @@ package com.example.usecase19;
 import jakarta.annotation.security.PermitAll;
 
 import com.example.service.DataLoadingService;
-import com.example.usecase14.LoadingState;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -102,17 +101,17 @@ public class UseCase19View extends VerticalLayout {
      */
     private void initializeDataItems() {
         itemsSignal.insertLast(new DataItem("1", "Dashboard Metrics",
-                LoadingState.State.IDLE, null, null, 1500));
+                LoadingState.IDLE, null, null, 1500));
         itemsSignal.insertLast(new DataItem("2", "User Statistics",
-                LoadingState.State.IDLE, null, null, 3000));
+                LoadingState.IDLE, null, null, 3000));
         itemsSignal.insertLast(new DataItem("3", "Sales Report",
-                LoadingState.State.IDLE, null, null, 2000));
+                LoadingState.IDLE, null, null, 2000));
         itemsSignal.insertLast(new DataItem("4", "Inventory Status",
-                LoadingState.State.IDLE, null, null, 2500));
+                LoadingState.IDLE, null, null, 2500));
         itemsSignal.insertLast(new DataItem("5", "Performance Data",
-                LoadingState.State.IDLE, null, null, 1000));
+                LoadingState.IDLE, null, null, 1000));
         itemsSignal.insertLast(new DataItem("6", "Analytics Summary",
-                LoadingState.State.IDLE, null, null, 3500));
+                LoadingState.IDLE, null, null, 3500));
     }
 
     /**
@@ -123,7 +122,7 @@ public class UseCase19View extends VerticalLayout {
             DataItem item = itemSignal.peek();
             // Update to LOADING state
             itemSignal.set(new DataItem(item.id(), item.name(),
-                    LoadingState.State.LOADING, null, null,
+                    LoadingState.LOADING, null, null,
                     item.simulatedDelayMs()));
 
             // Launch async operation (truly parallel via Spring @Async)
@@ -133,14 +132,14 @@ public class UseCase19View extends VerticalLayout {
                         // Signals are thread-safe - update directly from
                         // background thread
                         itemSignal.set(new DataItem(item.id(), item.name(),
-                                LoadingState.State.SUCCESS, data, null,
+                                LoadingState.SUCCESS, data, null,
                                 item.simulatedDelayMs()));
                     }).exceptionally(error -> {
                         // Update to ERROR state
                         // Signals are thread-safe - update directly from
                         // background thread
                         itemSignal.set(new DataItem(item.id(), item.name(),
-                                LoadingState.State.ERROR, null,
+                                LoadingState.ERROR, null,
                                 extractErrorMessage(error),
                                 item.simulatedDelayMs()));
                         return null;
@@ -156,7 +155,7 @@ public class UseCase19View extends VerticalLayout {
 
         // Update to LOADING state
         itemSignal.set(
-                new DataItem(item.id(), item.name(), LoadingState.State.LOADING,
+                new DataItem(item.id(), item.name(), LoadingState.LOADING,
                         null, null, item.simulatedDelayMs()));
 
         // Launch async operation
@@ -164,12 +163,12 @@ public class UseCase19View extends VerticalLayout {
                 simulateErrorsSignal.peek()).thenAccept(data -> {
                     // Update to SUCCESS state
                     itemSignal.set(new DataItem(item.id(), item.name(),
-                            LoadingState.State.SUCCESS, data, null,
+                            LoadingState.SUCCESS, data, null,
                             item.simulatedDelayMs()));
                 }).exceptionally(error -> {
                     // Update to ERROR state
                     itemSignal.set(new DataItem(item.id(), item.name(),
-                            LoadingState.State.ERROR, null,
+                            LoadingState.ERROR, null,
                             extractErrorMessage(error),
                             item.simulatedDelayMs()));
                     return null;
@@ -220,7 +219,7 @@ public class UseCase19View extends VerticalLayout {
 
         idleContent.add(idleIcon, idleText);
         Signal<Boolean> isIdleSignal = itemSignal
-                .map(item -> item.state() == LoadingState.State.IDLE);
+                .map(item -> item.state() == LoadingState.IDLE);
         idleContent.bindVisible(isIdleSignal);
 
         // LOADING state content
@@ -238,7 +237,7 @@ public class UseCase19View extends VerticalLayout {
 
         loadingContent.add(progressBar, loadingText);
         Signal<Boolean> isLoadingSignal = itemSignal
-                .map(item -> item.state() == LoadingState.State.LOADING);
+                .map(item -> item.state() == LoadingState.LOADING);
         loadingContent.bindVisible(isLoadingSignal);
 
         // SUCCESS state content
@@ -273,7 +272,7 @@ public class UseCase19View extends VerticalLayout {
 
         successContent.add(successHeader, dataContent);
         Signal<Boolean> isSuccessSignal = itemSignal
-                .map(item -> item.state() == LoadingState.State.SUCCESS);
+                .map(item -> item.state() == LoadingState.SUCCESS);
         successContent.bindVisible(isSuccessSignal);
 
         // ERROR state content
@@ -311,7 +310,7 @@ public class UseCase19View extends VerticalLayout {
 
         errorContent.add(errorHeader, errorMessage, retryButton);
         Signal<Boolean> isErrorSignal = itemSignal
-                .map(item -> item.state() == LoadingState.State.ERROR);
+                .map(item -> item.state() == LoadingState.ERROR);
         errorContent.bindVisible(isErrorSignal);
 
         // Add all state contents to card
@@ -321,7 +320,7 @@ public class UseCase19View extends VerticalLayout {
         Signal<String> borderColorSignal = itemSignal.map(item -> {
             return switch (item.state()) {
             case IDLE -> "var(--lumo-contrast-20pct)";
-            case LOADING -> "var(--lumo-primary-color)";
+            case LOADING, GENERATING -> "var(--lumo-primary-color)";
             case SUCCESS -> "var(--lumo-success-color)";
             case ERROR -> "var(--lumo-error-color)";
             };

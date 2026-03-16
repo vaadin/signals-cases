@@ -2,6 +2,8 @@ package com.example.usecase10;
 
 import jakarta.annotation.security.PermitAll;
 
+import java.util.UUID;
+
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -132,27 +134,18 @@ public class UseCase10View extends VerticalLayout {
         upload.setWidth("100%");
 
         // Status label bound to signal
-        Paragraph statusLabel = new Paragraph();
+        Paragraph statusLabel = new Paragraph(uploadStateSignal.map(UploadState::label));
         statusLabel.getStyle().set("font-weight", "bold");
-        statusLabel.bindText(uploadStateSignal.map(UploadState::label));
 
         // Progress bar bound to signal
         ProgressBar progressBar = new ProgressBar(0, 100, 0);
         progressBar.setWidth("100%");
-        Signal<Double> progressValue = uploadStateSignal.map(state -> {
-            if (state instanceof UploadState.InProgress p) {
-                return (double) p.progressPercent();
-            }
-            if (state instanceof UploadState.Succeeded) {
-                return 100.0;
-            }
-            return 0.0;
+        progressBar.bindValue(() -> switch (uploadStateSignal.get()) {
+            case UploadState.InProgress p -> (double) p.progressPercent();
+            case UploadState.Succeeded _ -> 100.0;
+            default -> 0.0;
         });
-        progressBar.bindValue(progressValue);
-
-        Signal<Boolean> showProgress = uploadStateSignal
-                .map(s -> s instanceof UploadState.InProgress);
-        progressBar.bindVisible(showProgress);
+        progressBar.bindVisible(() -> uploadStateSignal.get() instanceof UploadState.InProgress);
 
         card.add(upload, statusLabel, progressBar);
     }
@@ -162,10 +155,9 @@ public class UseCase10View extends VerticalLayout {
     // ---------------------------------------------------------------
 
     private void buildShortcutCard(Div card) {
-        Span shortcutLabel = new Span();
+        Span shortcutLabel = new Span(lastShortcutSignal);
         shortcutLabel.getStyle().set("font-weight", "bold").set("font-size",
                 "1.1em");
-        shortcutLabel.bindText(lastShortcutSignal);
 
         Paragraph hint = new Paragraph(
                 "Try pressing Ctrl+K, Ctrl+B, or Ctrl+J");
@@ -182,7 +174,7 @@ public class UseCase10View extends VerticalLayout {
 
     private void buildDarkModeCard(Div card) {
         Div indicator = createStatusIndicator(
-                darkModeSignal.map(dark -> dark ? "Dark Mode" : "Light Mode"),
+                () -> darkModeSignal.get() ? "Dark Mode" : "Light Mode",
                 darkModeSignal);
 
         Paragraph hint = new Paragraph(
@@ -213,14 +205,13 @@ public class UseCase10View extends VerticalLayout {
 
         Signal<String> summarySignal = Signal.computed(() -> {
             // Upload
-            UploadState upload = uploadStateSignal.get();
-            String uploadPart = switch (upload) {
-            case UploadState.Idle ignored -> "Upload: idle";
-            case UploadState.InProgress p ->
-                "Upload: " + p.progressPercent() + "%";
-            case UploadState.Succeeded s ->
-                "Upload: done (" + s.fileName() + ")";
-            case UploadState.Failed f -> "Upload: FAILED";
+            String uploadPart = switch (uploadStateSignal.get()) {
+                case UploadState.Idle _ -> "Upload: idle";
+                case UploadState.InProgress p ->
+                    "Upload: " + p.progressPercent() + "%";
+                case UploadState.Succeeded s ->
+                    "Upload: done (" + s.fileName() + ")";
+                case UploadState.Failed _ -> "Upload: FAILED";
             };
 
             // Shortcut
@@ -233,14 +224,13 @@ public class UseCase10View extends VerticalLayout {
             return uploadPart + "  |  " + shortcutPart + "  |  " + darkPart;
         });
 
-        Paragraph summaryText = new Paragraph();
+        Paragraph summaryText = new Paragraph(summarySignal);
         summaryText.getStyle().set("font-family", "monospace")
                 .set("font-size", "1.1em").set("font-weight", "bold")
                 .set("padding", "0.75em")
                 .set("background-color", "var(--lumo-base-color)")
                 .set("border-radius", "4px")
                 .set("border", "1px solid var(--lumo-contrast-20pct)");
-        summaryText.bindText(summarySignal);
 
         section.add(heading, intro, summaryText);
         return section;
@@ -265,12 +255,26 @@ public class UseCase10View extends VerticalLayout {
                 () -> lastShortcutSignal.set("Ctrl+J"), Key.KEY_J,
                 KeyModifier.CONTROL);
 
+        String unregisterKey = UUID.randomUUID().toString();
+
         // Bridge: prefers-color-scheme: dark → darkModeSignal
-        getElement().executeJs("const el = $0;"
-                + "const mq = window.matchMedia('(prefers-color-scheme: dark)');"
-                + "const update = (e) => el.$server.onDarkModeChange(e.matches);"
-                + "mq.addEventListener('change', update);"
-                + "el.$server.onDarkModeChange(mq.matches);", getElement());
+        getElement().executeJs("""
+            const mq = window.matchMedia('(prefers-color-scheme: dark)');
+            const update = (e) => this.$server.onDarkModeChange(mq.matches);
+            mq.addEventListener('change', update);
+            window[$0] = () => mq.removeEventListener('change', update);
+            update();
+        """, unregisterKey);
+
+        addDetachListener(detach -> {
+            detach.unregisterListener();
+            detach.getUI().getPage().executeJs("""
+                if (window[$0]) {
+                  window[$0]();
+                  delete window[$0];
+                }        
+            """, unregisterKey);
+        });
     }
 
     @ClientCallable
@@ -312,13 +316,11 @@ public class UseCase10View extends VerticalLayout {
         Span dot = new Span();
         dot.getStyle().set("width", "12px").set("height", "12px")
                 .set("border-radius", "50%").set("display", "inline-block");
-        dot.getStyle().bind("background-color",
-                activeSignal.map(dark -> dark ? "var(--lumo-contrast-80pct)"
-                        : "var(--lumo-contrast-30pct)"));
+        dot.getStyle().bind("background-color", () -> activeSignal.get() ? "var(--lumo-contrast-80pct)"
+                : "var(--lumo-contrast-30pct)");
 
-        Span label = new Span();
+        Span label = new Span(labelSignal);
         label.getStyle().set("font-weight", "bold").set("font-size", "1.1em");
-        label.bindText(labelSignal);
 
         row.add(dot, label);
         return row;

@@ -16,7 +16,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.slider.Slider;
 import com.vaadin.flow.component.tabs.Tab;
-import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.component.tabs.TabSheet;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -31,38 +32,38 @@ import com.vaadin.flow.signals.local.ValueSignal;
 public class UseCase03View extends VerticalLayout {
 
     // Rectangle signals (green) - top left position
-    private final ValueSignal<Integer> rectXSignal = new ValueSignal<>(100);
-    private final ValueSignal<Integer> rectYSignal = new ValueSignal<>(50);
-    private final ValueSignal<Integer> rectWidthSignal = new ValueSignal<>(150);
-    private final ValueSignal<Integer> rectHeightSignal = new ValueSignal<>(80);
+    private final ValueSignal<Integer> rectXSignal = new ValueSignal<>(0);
+    private final ValueSignal<Integer> rectYSignal = new ValueSignal<>(0);
+    private final ValueSignal<Integer> rectWidthSignal = new ValueSignal<>(0);
+    private final ValueSignal<Integer> rectHeightSignal = new ValueSignal<>(0);
     private final ValueSignal<Integer> rectCornerRadiusSignal = new ValueSignal<>(
-            10);
+            0);
     private final ValueSignal<String> rectFillSignal = new ValueSignal<>(
-            "#10b981");
+            "#fff");
     private final ValueSignal<String> rectStrokeSignal = new ValueSignal<>(
-            "#059669");
+            "#fff");
     private final ValueSignal<Integer> rectStrokeWidthSignal = new ValueSignal<>(
-            2);
+            0);
     private final ValueSignal<Double> rectOpacitySignal = new ValueSignal<>(
-            1.0);
+            0.0);
     private final ValueSignal<Integer> rectRotationSignal = new ValueSignal<>(
             0);
 
     // Star signals (orange) - below rectangle
-    private final ValueSignal<Integer> starPointsSignal = new ValueSignal<>(5);
-    private final ValueSignal<Integer> starSizeSignal = new ValueSignal<>(50);
-    private final ValueSignal<Integer> starCxSignal = new ValueSignal<>(175);
-    private final ValueSignal<Integer> starCySignal = new ValueSignal<>(300);
+    private final ValueSignal<Integer> starPointsSignal = new ValueSignal<>(0);
+    private final ValueSignal<Integer> starSizeSignal = new ValueSignal<>(0);
+    private final ValueSignal<Integer> starCxSignal = new ValueSignal<>(0);
+    private final ValueSignal<Integer> starCySignal = new ValueSignal<>(0);
     private final ValueSignal<Integer> starRotationSignal = new ValueSignal<>(
             0);
     private final ValueSignal<String> starFillSignal = new ValueSignal<>(
-            "#f59e0b");
+            "#fff");
     private final ValueSignal<String> starStrokeSignal = new ValueSignal<>(
-            "#d97706");
+            "#fff");
     private final ValueSignal<Integer> starStrokeWidthSignal = new ValueSignal<>(
-            2);
+            0);
     private final ValueSignal<Double> starOpacitySignal = new ValueSignal<>(
-            1.0);
+            0.0);
 
     // Selected shape tracking
     private final ValueSignal<Integer> selectedShapeSignal = new ValueSignal<>(
@@ -72,6 +73,8 @@ public class UseCase03View extends VerticalLayout {
     private Element starElement = new Element("polygon");
 
     public UseCase03View() {
+        resetAll();
+
         setSpacing(true);
         setPadding(true);
         setWidthFull();
@@ -114,34 +117,18 @@ public class UseCase03View extends VerticalLayout {
         Tab rectangleTab = new Tab("\uD83D\uDFE9 Rectangle");
         Tab starTab = new Tab("⭐\uFE0F Star");
 
-        Tabs shapeTabs = new Tabs(rectangleTab, starTab);
-        MissingAPI.tabsSyncSelectedIndex(shapeTabs, selectedShapeSignal);
-        shapeTabs.setWidthFull();
-
-        // Controls container that shows only the selected shape's controls
-        Div controlsContainer = new Div();
-        controlsContainer.setWidthFull();
-
-        // Show/hide controls based on selected shape
-
-        // Rectangle controls
-        Div rectangleControls = createRectangleControls();
-        rectangleControls.bindVisible(
-                selectedShapeSignal.map(Integer.valueOf(0)::equals));
-
-        // Star controls
-        Div starControls = createStarControls();
-        starControls.bindVisible(
-                selectedShapeSignal.map(Integer.valueOf(1)::equals));
-
-        controlsContainer.add(rectangleControls, starControls);
+        var tabsheet = new TabSheet();
+        tabsheet.setWidthFull();
+        tabsheet.add(rectangleTab, createRectangleControls());
+        tabsheet.add(starTab, createStarControls());
+        MissingAPI.tabsSyncSelectedIndex(tabsheet, selectedShapeSignal, selectedShapeSignal::set);
 
         // Reset button
         Button resetButton = new Button("Reset to Defaults", e -> resetAll());
         resetButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
         resetButton.setWidthFull();
 
-        panel.add(shapeTabs, controlsContainer, resetButton);
+        panel.add(tabsheet, resetButton);
         return panel;
     }
 
@@ -221,17 +208,16 @@ public class UseCase03View extends VerticalLayout {
         rect.bindAttribute("stroke", rectStrokeSignal);
 
         // Stroke width increases when selected
-        Signal<String> rectStrokeWidthComputed = Signal.computed(() -> {
+        rect.bindAttribute("stroke-width", () -> {
             int baseWidth = rectStrokeWidthSignal.get();
-            boolean isSelected = "rectangle".equals(selectedShapeSignal.get());
+            boolean isSelected = selectedShapeSignal.get() == 0;
             return String.valueOf(isSelected ? baseWidth + 2 : baseWidth);
         });
-        rect.bindAttribute("stroke-width", rectStrokeWidthComputed);
 
         rect.bindAttribute("opacity", rectOpacitySignal.map(String::valueOf));
 
         // Computed transform attribute (rotate around center)
-        Signal<String> rectTransformSignal = Signal.computed(() -> {
+        rect.bindAttribute("transform", Signal.computed(() -> {
             int x = rectXSignal.get();
             int y = rectYSignal.get();
             int w = rectWidthSignal.get();
@@ -241,8 +227,7 @@ public class UseCase03View extends VerticalLayout {
             int rotation = rectRotationSignal.get();
             return String.format("rotate(%d %d %d)", rotation, centerX,
                     centerY);
-        });
-        rect.bindAttribute("transform", rectTransformSignal);
+        }));
 
         rect.setAttribute("filter", "drop-shadow(2px 2px 4px rgba(0,0,0,0.2))");
 
@@ -253,30 +238,28 @@ public class UseCase03View extends VerticalLayout {
         Element polygon = new Element("polygon");
 
         // Computed points attribute (complex calculation) - centered at origin
-        Signal<String> starPointsAttrSignal = Signal.computed(() -> {
+        polygon.bindAttribute("points", Signal.computed(() -> {
             int n = starPointsSignal.get();
             int size = starSizeSignal.get();
             return generateStarPoints(n, size, 0, 0); // Generate at origin
-        });
-        polygon.bindAttribute("points", starPointsAttrSignal);
+        }));
 
         // Bind styling attributes
         polygon.bindAttribute("fill", starFillSignal);
         polygon.bindAttribute("stroke", starStrokeSignal);
 
         // Stroke width increases when selected
-        Signal<String> starStrokeWidthComputed = Signal.computed(() -> {
+        polygon.bindAttribute("stroke-width", () -> {
             int baseWidth = starStrokeWidthSignal.get();
-            boolean isSelected = "star".equals(selectedShapeSignal.get());
+            boolean isSelected = selectedShapeSignal.get() == 1;
             return String.valueOf(isSelected ? baseWidth + 2 : baseWidth);
         });
-        polygon.bindAttribute("stroke-width", starStrokeWidthComputed);
 
         polygon.bindAttribute("opacity",
                 starOpacitySignal.map(String::valueOf));
 
         // Computed transform: translate to position, then rotate
-        Signal<String> starTransformSignal = Signal.computed(() -> {
+        polygon.bindAttribute("transform", Signal.computed(() -> {
             int rotation = starRotationSignal.get();
             int cx = starCxSignal.get();
             int cy = starCySignal.get();
@@ -284,8 +267,7 @@ public class UseCase03View extends VerticalLayout {
             // rotate
             return String.format("translate(%d %d) rotate(%d)", cx, cy,
                     rotation);
-        });
-        polygon.bindAttribute("transform", starTransformSignal);
+        }));
 
         polygon.setAttribute("filter",
                 "drop-shadow(2px 2px 4px rgba(0,0,0,0.2))");
@@ -465,7 +447,7 @@ public class UseCase03View extends VerticalLayout {
 
         // Custom renderer to show color swatch
         combo.setRenderer(
-                new com.vaadin.flow.data.renderer.ComponentRenderer<>(color -> {
+                new ComponentRenderer<>(color -> {
                     HorizontalLayout layout = new HorizontalLayout();
                     layout.setAlignItems(HorizontalLayout.Alignment.CENTER);
                     layout.setSpacing(true);
@@ -546,8 +528,8 @@ public class UseCase03View extends VerticalLayout {
 
     private void bindSliderToInteger(Slider slider,
             ValueSignal<Integer> integerSignal) {
-        slider.bindValue(integerSignal.map(Integer::doubleValue), integerSignal
-                .updater((current, doubleValue) -> doubleValue.intValue()));
+        slider.bindValue(integerSignal.map(Integer::doubleValue),
+                value -> integerSignal.set(value.intValue()));
     }
 
 }
