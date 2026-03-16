@@ -91,11 +91,11 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
         avatarsContainer.bindChildren(
                 userSessionRegistry.getActiveUsersSignal(), userSignal -> {
-                    var user = userSignal.get();
+                    var user = userSignal.peek();
                     var users = userSessionRegistry.getActiveUsersSignal()
-                            .get();
+                            .peek();
                     var displayNames = userSessionRegistry
-                            .getDisplayNamesSignal().get();
+                            .getDisplayNamesSignal().peek();
                     int index = users.indexOf(userSignal);
                     String displayName = index >= 0
                             && index < displayNames.size()
