@@ -78,7 +78,8 @@ public class UseCase08View extends VerticalLayout {
         step1Binder.setBean(formData);
 
         step1Layout.add(firstNameField, lastNameField, emailField);
-        step1Layout.bindVisible(() -> currentStepSignal.get() == Step.PERSONAL_INFO);
+        step1Layout.bindVisible(
+                () -> currentStepSignal.get() == Step.PERSONAL_INFO);
 
         // Step 2: Company Info with Binder
         VerticalLayout step2Layout = new VerticalLayout();
@@ -111,7 +112,8 @@ public class UseCase08View extends VerticalLayout {
         step2Binder.setBean(formData);
 
         step2Layout.add(companyNameField, companySizeSelect, industrySelect);
-        step2Layout.bindVisible(() -> currentStepSignal.get() == Step.COMPANY_INFO);
+        step2Layout.bindVisible(
+                () -> currentStepSignal.get() == Step.COMPANY_INFO);
 
         // Step 3: Plan Selection with Binder
         VerticalLayout step3Layout = new VerticalLayout();
@@ -127,14 +129,15 @@ public class UseCase08View extends VerticalLayout {
         step3Binder.setBean(formData);
 
         Span planDescription = new Span(() -> switch (planSignal.get()) {
-            case STARTER -> "Perfect for small teams - $29/month";
-            case PROFESSIONAL -> "For growing businesses - $99/month";
-            case ENTERPRISE -> "Custom solutions - Contact sales";
-            case null -> "";
+        case STARTER -> "Perfect for small teams - $29/month";
+        case PROFESSIONAL -> "For growing businesses - $99/month";
+        case ENTERPRISE -> "Custom solutions - Contact sales";
+        case null -> "";
         });
 
         step3Layout.add(planSelect, planDescription);
-        step3Layout.bindVisible(() -> currentStepSignal.get() == Step.PLAN_SELECTION);
+        step3Layout.bindVisible(
+                () -> currentStepSignal.get() == Step.PLAN_SELECTION);
 
         // Step 4: Review
         VerticalLayout step4Layout = new VerticalLayout();
@@ -180,7 +183,8 @@ public class UseCase08View extends VerticalLayout {
             }
             }
         });
-        previousButton.bindVisible(() -> currentStepSignal.get() != Step.PERSONAL_INFO);
+        previousButton.bindVisible(
+                () -> currentStepSignal.get() != Step.PERSONAL_INFO);
 
         Button nextButton = new Button("Next", e -> {
             Step current = currentStepSignal.peek();
@@ -217,10 +221,10 @@ public class UseCase08View extends VerticalLayout {
         // Progress indicator
         Span progressIndicator = new Span(() -> {
             int stepNumber = switch (currentStepSignal.get()) {
-                case PERSONAL_INFO -> 1;
-                case COMPANY_INFO -> 2;
-                case PLAN_SELECTION -> 3;
-                case REVIEW -> 4;
+            case PERSONAL_INFO -> 1;
+            case COMPANY_INFO -> 2;
+            case PLAN_SELECTION -> 3;
+            case REVIEW -> 4;
             };
             return "Step " + stepNumber + " of 4";
         });

@@ -5,13 +5,12 @@ import jakarta.annotation.security.PermitAll;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jspecify.annotations.Nullable;
-
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserInfo;
 import com.example.signals.UserSessionRegistry;
 import com.example.views.MainLayout;
-import com.vaadin.flow.component.avatar.Avatar;
+import org.jspecify.annotations.Nullable;
+
 import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -71,8 +70,8 @@ public class UseCase13View extends VerticalLayout {
                 .set("border-left", "4px solid var(--lumo-primary-color)")
                 .set("margin", "1em 0");
 
-        H3 counterTitle = new H3(
-                () -> "👥 Currently Online: " + userSessionRegistry.getActiveUsersSignal().get().size());
+        H3 counterTitle = new H3(() -> "👥 Currently Online: "
+                + userSessionRegistry.getActiveUsersSignal().get().size());
         counterTitle.getStyle().set("margin", "0");
 
         counterBox.add(counterTitle);
@@ -127,11 +126,13 @@ public class UseCase13View extends VerticalLayout {
                 infoBox);
     }
 
-    private Card createUserCard(SharedValueSignal<UserInfo> userSignal, String currentSessionId) {
+    private Card createUserCard(SharedValueSignal<UserInfo> userSignal,
+            String currentSessionId) {
         Card card = new Card();
 
         // These never change, so no need for signal bindings
-        boolean isCurrentSession = userSignal.peek().sessionId().equals(currentSessionId);        
+        boolean isCurrentSession = userSignal.peek().sessionId()
+                .equals(currentSessionId);
         String username = userSignal.peek().username();
 
         // Highlight current user's session
@@ -143,7 +144,8 @@ public class UseCase13View extends VerticalLayout {
         // Dim inactive tabs
         var isTabActive = userSignal.map(info -> info.isTabActive());
         card.getStyle().bind("opacity", () -> isTabActive.get() ? null : "0.6");
-        card.getStyle().bind("filter", () -> isTabActive.get() ? null : "grayscale(30%)");
+        card.getStyle().bind("filter",
+                () -> isTabActive.get() ? null : "grayscale(30%)");
 
         // Header: Tab Status + Avatar + Username/Nickname + Role Badge
         HorizontalLayout header = new HorizontalLayout();
@@ -183,7 +185,8 @@ public class UseCase13View extends VerticalLayout {
             if (sessionCount > 1) {
                 // Find this session's number
                 long sessionNumber = 0;
-                for (var us : userSessionRegistry.getActiveUsersSignal().get()) {
+                for (var us : userSessionRegistry.getActiveUsersSignal()
+                        .get()) {
                     UserInfo u = us.get();
                     if (u.username().equals(info.username())) {
                         sessionNumber++;
@@ -223,7 +226,8 @@ public class UseCase13View extends VerticalLayout {
         viewRow.getStyle().set("gap", "0.5em");
 
         Span viewIcon = new Span("📍");
-        Signal<@Nullable String> currentView = userSignal.map(UserInfo::currentView);
+        Signal<@Nullable String> currentView = userSignal
+                .map(UserInfo::currentView);
         Span viewText = new Span(() -> "Viewing: "
                 + (currentView.get() != null ? formatViewName(currentView.get())
                         : "Unknown"));
@@ -238,8 +242,9 @@ public class UseCase13View extends VerticalLayout {
         durationRow.getStyle().set("gap", "0.5em");
 
         Span durationIcon = new Span("🕐");
-        Span durationTextSpan = new Span(() -> "Online for " + formatDuration(System.currentTimeMillis()
-                - userSignal.get().sessionStartTime()));
+        Span durationTextSpan = new Span(
+                () -> "Online for " + formatDuration(System.currentTimeMillis()
+                        - userSignal.get().sessionStartTime()));
         durationTextSpan.getStyle().set("font-size", "var(--lumo-font-size-s)")
                 .set("color", "var(--lumo-secondary-text-color)");
 
