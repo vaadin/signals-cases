@@ -107,7 +107,7 @@ public class UseCase13View extends VerticalLayout {
         // Reactively bind children to active users list
         userListContainer.bindChildren(
                 userSessionRegistry.getActiveUsersSignal(),
-                userSignal -> createUserCard(userSignal.get(),
+                userSignal -> createUserCard(userSignal.peek(),
                         currentSessionId));
 
         // Educational info box
@@ -191,16 +191,16 @@ public class UseCase13View extends VerticalLayout {
                         : userInfo.username();
 
         // Add session number if multiple sessions for same user
-        long sessionCount = userSessionRegistry.getActiveUsersSignal().get()
+        long sessionCount = userSessionRegistry.getActiveUsersSignal().peek()
                 .stream()
-                .filter(us -> us.get().username().equals(userInfo.username()))
+                .filter(us -> us.peek().username().equals(userInfo.username()))
                 .count();
 
         if (sessionCount > 1) {
             // Find this session's number
             long sessionNumber = 0;
-            for (var us : userSessionRegistry.getActiveUsersSignal().get()) {
-                UserInfo u = us.get();
+            for (var us : userSessionRegistry.getActiveUsersSignal().peek()) {
+                UserInfo u = us.peek();
                 if (u.username().equals(userInfo.username())) {
                     sessionNumber++;
                     if (u.sessionId().equals(userInfo.sessionId())) {

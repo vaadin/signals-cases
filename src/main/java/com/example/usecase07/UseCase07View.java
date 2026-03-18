@@ -1,5 +1,6 @@
 package com.example.usecase07;
 
+import com.example.MissingAPI;
 import jakarta.annotation.security.PermitAll;
 
 import java.math.BigDecimal;
@@ -88,7 +89,7 @@ public class UseCase07View extends VerticalLayout {
         invoiceGrid = new Grid<>(Invoice.class);
         invoiceGrid.setColumns("id", "customerName", "dueDate", "total",
                 "status");
-        invoiceGrid.bindItems(invoiceListSignal);
+        MissingAPI.bindItems(invoiceGrid, invoiceListSignal);
         invoiceGrid.asSingleSelect().addValueChangeListener(e -> {
             Invoice selected = e.getValue();
             selectedInvoiceSignal
@@ -168,13 +169,13 @@ public class UseCase07View extends VerticalLayout {
             Button button = new Button();
             button.setTooltipText("Remove Line Item");
             button.addClickListener(e -> {
-                removeLineItem(invoiceDetailsSignal.get(), lineItem);
+                removeLineItem(invoiceDetailsSignal.peek(), lineItem);
             });
             button.setIcon(VaadinIcon.CLOSE.create());
             return button;
         });
 
-        lineItemsGrid.bindItems(lineItemsSignal);
+        MissingAPI.bindItems(lineItemsGrid, lineItemsSignal);
         Signal.effect(lineItemsGrid, () -> {
             updateFooterTotal(lineItemsGrid);
             lineItemsSignal.get()
@@ -273,7 +274,7 @@ public class UseCase07View extends VerticalLayout {
         detailsPanel.add(customerInfo, new H3("Line Items"),
                 new Span("(Double-click a cell to edit)"));
         detailsPanel.add(new Button("Add Line Item",
-                e -> addNewLineItem(invoiceDetailsSignal.get())));
+                e -> addNewLineItem(invoiceDetailsSignal.peek())));
         detailsPanel.addAndExpand(lineItemsGrid);
         detailsPanel.add(paymentStatus);
         detailsPanel

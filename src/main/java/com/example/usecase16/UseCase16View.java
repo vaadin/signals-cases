@@ -212,7 +212,7 @@ public class UseCase16View extends VerticalLayout
     }
 
     private Div createArticleCard(ValueSignal<Article> articleSignal) {
-        var article = articleSignal.get();
+        var article = articleSignal.peek();
         Div card = new Div();
         card.getStyle().set("background-color", "#ffffff")
                 .set("border", "1px solid var(--lumo-contrast-20pct)")

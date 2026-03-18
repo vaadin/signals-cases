@@ -1144,7 +1144,7 @@ public class UseCase17View extends VerticalLayout {
     }
 
     private Div createComponentSummaryItem(ValueSignal<Component> compSignal) {
-        var comp = compSignal.get();
+        var comp = compSignal.peek();
         Div item = new Div();
         item.getStyle().set("margin-bottom", "0.5em").set("display", "flex")
                 .set("justify-content", "space-between");
@@ -1161,7 +1161,7 @@ public class UseCase17View extends VerticalLayout {
     }
 
     private Div createCompatibilityCheckDiv(ValueSignal<String> statusSignal) {
-        var status = statusSignal.get();
+        var status = statusSignal.peek();
         Div checkDiv = new Div();
         checkDiv.getStyle().set("padding", "0.25em 0").set("font-size",
                 "0.9em");

@@ -1,5 +1,7 @@
 package com.example;
 
+import com.vaadin.flow.signals.local.ListSignal;
+import com.vaadin.flow.signals.shared.SharedListSignal;
 import java.util.List;
 
 import com.vaadin.flow.component.grid.Grid;
@@ -17,15 +19,12 @@ public class MissingAPI {
     /**
      * Binds a Grid's items to a Signal containing a List.
      */
-    public static <T> void bindItems(Grid<T> grid, Signal<List<T>> signal) {
-        Signal.effect(grid, () -> {
-            List<T> items = signal.get();
-            if (items != null) {
-                grid.setItems(items);
-            } else {
-                grid.setItems(List.of());
-            }
-        });
+    public static <T> void bindItems(Grid<T> grid, ListSignal<T> signal) {
+        Signal.effect(grid, () -> grid.setItems(signal.getValues().toList()));
+    }
+
+    public static <T> void bindItems(Grid<T> grid, SharedListSignal<T> signal) {
+        Signal.effect(grid, () -> grid.setItems(signal.getValues().toList()));
     }
 
     /**
