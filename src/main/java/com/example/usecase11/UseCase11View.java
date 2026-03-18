@@ -2,11 +2,11 @@ package com.example.usecase11;
 
 import jakarta.annotation.security.PermitAll;
 
+import com.example.MissingAPI;
+import com.example.MissingAPI.ComponentSize;
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -17,7 +17,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
  * Use Case 11: Responsive Layout with Container Size Signal
@@ -38,49 +37,34 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PermitAll
 public class UseCase11View extends VerticalLayout {
 
-    public static class ContainerSize {
-        private final int width;
-        private final int height;
+    private static final int SMALL_BREAKPOINT = 400;
+    private static final int LARGE_BREAKPOINT = 700;
 
-        public ContainerSize(int width, int height) {
-            this.width = width;
-            this.height = height;
-        }
+    private final Signal<ComponentSize> containerSizeSignal;
+    private final Signal<Boolean> isSmall;
+    private final Signal<Boolean> isMedium;
+    private final Signal<Boolean> isLarge;
 
-        public int getWidth() {
-            return width;
-        }
-
-        public int getHeight() {
-            return height;
-        }
-
-        public boolean isSmall() {
-            return width < 400; // Small breakpoint
-        }
-
-        public boolean isMedium() {
-            return width >= 400 && width < 700; // Medium breakpoint
-        }
-
-        public boolean isLarge() {
-            return width >= 700; // Large breakpoint
-        }
-
-        @Override
-        public String toString() {
-            return width + "×" + height + "px";
-        }
-    }
-
-    private final ValueSignal<ContainerSize> containerSizeSignal = new ValueSignal<>(
-            new ContainerSize(600, 400));
     private Div responsiveContent;
 
     public UseCase11View() {
         setSpacing(true);
         setPadding(true);
         setSizeFull();
+
+        // Create responsive content container first so we can set up the size
+        // signal before building other panels that depend on it
+        responsiveContent = new Div();
+        responsiveContent.getStyle().set("padding", "1em").set("height", "100%")
+                .set("overflow-y", "auto").set("background-color", "#ffffff");
+        containerSizeSignal = MissingAPI.sizeSignal(responsiveContent);
+        isSmall = containerSizeSignal
+                .map(size -> size.width() < SMALL_BREAKPOINT);
+        isMedium = containerSizeSignal
+                .map(size -> size.width() >= SMALL_BREAKPOINT
+                        && size.width() < LARGE_BREAKPOINT);
+        isLarge = containerSizeSignal
+                .map(size -> size.width() >= LARGE_BREAKPOINT);
 
         H2 title = new H2(
                 "Use Case 11: Responsive Content in Resizable Container");
@@ -100,8 +84,8 @@ public class UseCase11View extends VerticalLayout {
         // Left side: Static info panel
         Div infoPanel = createInfoPanel();
 
-        // Right side: Responsive content area
-        responsiveContent = createResponsiveContent();
+        // Right side: Populate responsive content
+        populateResponsiveContent(responsiveContent);
 
         splitLayout.addToPrimary(responsiveContent);
         splitLayout.addToSecondary(infoPanel);
@@ -141,31 +125,25 @@ public class UseCase11View extends VerticalLayout {
                 .set("padding", "1em").set("border-radius", "4px")
                 .set("margin", "1em 0");
 
-        Paragraph widthPara = new Paragraph();
+        Paragraph widthPara = new Paragraph(
+                () -> "Width: " + containerSizeSignal.get().width() + "px");
         widthPara.getStyle().set("font-family", "monospace").set("margin",
                 "0.25em 0");
-        Signal<String> widthText = containerSizeSignal
-                .map(size -> "Width: " + size.getWidth() + "px");
-        widthPara.bindText(widthText);
 
-        Paragraph heightPara = new Paragraph();
+        Paragraph heightPara = new Paragraph(
+                () -> "Height: " + containerSizeSignal.get().height() + "px");
         heightPara.getStyle().set("font-family", "monospace").set("margin",
                 "0.25em 0");
-        Signal<String> heightText = containerSizeSignal
-                .map(size -> "Height: " + size.getHeight() + "px");
-        heightPara.bindText(heightText);
 
-        Paragraph breakpointPara = new Paragraph();
-        breakpointPara.getStyle().set("font-weight", "bold").set("margin",
-                "0.5em 0 0 0");
-        Signal<String> breakpointText = containerSizeSignal.map(size -> {
-            if (size.isSmall())
+        Paragraph breakpointPara = new Paragraph(() -> {
+            if (isSmall.get())
                 return "📱 Small (< 400px)";
-            if (size.isMedium())
+            if (isMedium.get())
                 return "💻 Medium (400-700px)";
             return "🖥️ Large (≥ 700px)";
         });
-        breakpointPara.bindText(breakpointText);
+        breakpointPara.getStyle().set("font-weight", "bold").set("margin",
+                "0.5em 0 0 0");
 
         sizeDisplay.add(widthPara, heightPara, breakpointPara);
 
@@ -173,18 +151,12 @@ public class UseCase11View extends VerticalLayout {
         return panel;
     }
 
-    private Div createResponsiveContent() {
-        Div container = new Div();
-        container.getStyle().set("padding", "1em").set("height", "100%")
-                .set("overflow-y", "auto").set("background-color", "#ffffff");
-
+    private void populateResponsiveContent(Div container) {
         // Small width content
         Div smallContent = createSection("📱 Small Width Layout",
                 "This is the mobile view (width < 400px). Navigation is stacked vertically, "
                         + "and complex UI elements are simplified or hidden.",
                 "#fff3e0");
-        Signal<Boolean> isSmall = containerSizeSignal
-                .map(ContainerSize::isSmall);
         smallContent.bindVisible(isSmall);
 
         // Medium width content
@@ -192,8 +164,6 @@ public class UseCase11View extends VerticalLayout {
                 "This is the tablet view (400px ≤ width < 700px). Navigation can be horizontal, "
                         + "and more content is visible with a balanced layout.",
                 "#f3e5f5");
-        Signal<Boolean> isMedium = containerSizeSignal
-                .map(ContainerSize::isMedium);
         mediumContent.bindVisible(isMedium);
 
         // Large width content
@@ -201,8 +171,6 @@ public class UseCase11View extends VerticalLayout {
                 "This is the desktop view (width ≥ 700px). All features are visible, "
                         + "with multi-column layouts and detailed information.",
                 "#e8f5e9");
-        Signal<Boolean> isLarge = containerSizeSignal
-                .map(ContainerSize::isLarge);
         largeContent.bindVisible(isLarge);
 
         // Responsive card grid
@@ -211,7 +179,6 @@ public class UseCase11View extends VerticalLayout {
 
         container.add(smallContent, mediumContent, largeContent, cardGridTitle,
                 cardGrid);
-        return container;
     }
 
     private Div createSection(String title, String content,
@@ -257,71 +224,14 @@ public class UseCase11View extends VerticalLayout {
         }
 
         // Set responsive flex layout based on container size
-        Signal<String> flexDirection = containerSizeSignal.map(size -> {
-            if (size.isSmall())
-                return "column"; // Stack vertically in small containers
-            return "row"; // Row layout in larger containers
-        });
-
-        Signal<String> flexWrap = containerSizeSignal
-                .map(size -> size.isSmall() ? "nowrap" : "wrap");
-
         gridContainer.getStyle().set("display", "flex").set("margin", "1em 0");
 
-        gridContainer.getStyle().bind("flex-direction", flexDirection);
-        gridContainer.getStyle().bind("flex-wrap", flexWrap);
+        gridContainer.getStyle().bind("flex-direction",
+                () -> isSmall.get() ? "column" : "row");
+        gridContainer.getStyle().bind("flex-wrap",
+                () -> isSmall.get() ? "nowrap" : "wrap");
 
         return gridContainer;
     }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-
-        // Set up ResizeObserver to monitor the responsive content area
-        String script = """
-                const targetElement = $1;
-                const resizeObserver = new ResizeObserver(entries => {
-                    for (let entry of entries) {
-                        const width = Math.floor(entry.contentRect.width);
-                        const height = Math.floor(entry.contentRect.height);
-                        $0.$server.updateContainerSize(width, height);
-                    }
-                });
-                resizeObserver.observe(targetElement);
-
-                // Store observer for cleanup
-                targetElement._resizeObserver = resizeObserver;
-
-                // Report initial size
-                const rect = targetElement.getBoundingClientRect();
-                $0.$server.updateContainerSize(Math.floor(rect.width), Math.floor(rect.height));
-                """;
-
-        getElement().executeJs(script, getElement(), responsiveContent);
-    }
-
-    @Override
-    protected void onDetach(DetachEvent detachEvent) {
-        super.onDetach(detachEvent);
-
-        // Clean up ResizeObserver
-        String cleanupScript = """
-                const targetElement = $0;
-                if (targetElement && targetElement._resizeObserver) {
-                    targetElement._resizeObserver.disconnect();
-                    delete targetElement._resizeObserver;
-                }
-                """;
-
-        getElement().executeJs(cleanupScript, responsiveContent);
-    }
-
-    /**
-     * Called from JavaScript when the container is resized
-     */
-    @com.vaadin.flow.component.ClientCallable
-    public void updateContainerSize(int width, int height) {
-        containerSizeSignal.set(new ContainerSize(width, height));
-    }
 }

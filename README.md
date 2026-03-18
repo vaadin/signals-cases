@@ -8,7 +8,7 @@ The Vaadin Signal API provides reactive state management for Vaadin Flow applica
 
 ## Use Cases
 
-### Single-User Use Cases (23 total)
+### Single-User Use Cases
 
 1. **Dynamic Button State** - Form validation with reactive button enable/disable
 2. **Progressive Disclosure** - Nested conditional form sections
@@ -16,11 +16,9 @@ The Vaadin Signal API provides reactive state management for Vaadin Flow applica
 4. **Filtered Data Grid** - Client-side filtering and sorting
 5. **Cascading Selector** - Dependent dropdown menus (country → state → city)
 6. **Shopping Cart** - Real-time cart totals and item management
-7. **Master-Detail Invoice** - Invoice header with reactive line item calculations
 8. **Multi-Step Wizard** - Form wizard with validation and navigation
 9. **Form with Binder Integration** - Vaadin Binder with signal-based validation
 11. **Responsive Layout** - Window size as signal for responsive UI
-12. **Dynamic View Title** - Reactive page title sync with browser tab
 13. **Current User Signal** - Application-wide user context from Spring Security
 14. **Async Data Loading** - Loading/success/error states for async operations
 15. **Debounced Search** - Search-as-you-type with 300ms debouncing

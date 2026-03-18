@@ -121,10 +121,11 @@ public class UseCase01View extends VerticalLayout {
         // Submit button with signal-based text and theme
         Button submitButton = new Button();
 
-        // Bind enabled state using Binder's validationStatusSignal combined with submission state
-        submitButton.bindEnabled(() ->
-                binder.validationStatusSignal().get().isOk() &&
-                submissionStateSignal.get() != SubmissionState.SUBMITTING);
+        // Bind enabled state using Binder's validationStatusSignal combined
+        // with submission state
+        submitButton.bindEnabled(() -> binder.validationStatusSignal().get()
+                .isOk()
+                && submissionStateSignal.get() != SubmissionState.SUBMITTING);
 
         // Bind button text based on submission state
         submitButton
@@ -138,8 +139,8 @@ public class UseCase01View extends VerticalLayout {
         // Bind theme variant
         submitButton.bindThemeVariant(ButtonVariant.LUMO_SUCCESS,
                 submissionStateSignal.map(SubmissionState.SUCCESS::equals));
-        submitButton.bindThemeVariant(ButtonVariant.LUMO_PRIMARY,
-                Signal.not(submissionStateSignal.map(SubmissionState.SUCCESS::equals)));
+        submitButton.bindThemeVariant(ButtonVariant.LUMO_PRIMARY, Signal.not(
+                submissionStateSignal.map(SubmissionState.SUCCESS::equals)));
 
         submitButton.addClickListener(e -> {
             if (!binder.isValid()) {
@@ -156,7 +157,8 @@ public class UseCase01View extends VerticalLayout {
                     Thread.sleep(1000);
                     submissionStateSignal.set(SubmissionState.SUCCESS);
 
-                    // Update UI after success (imperative updates - needs ui.access)
+                    // Update UI after success (imperative updates - needs
+                    // ui.access)
                     ui.access(() -> {
                         binder.setBean(new AccountData());
 

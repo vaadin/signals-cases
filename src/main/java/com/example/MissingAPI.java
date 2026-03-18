@@ -1,13 +1,19 @@
 package com.example;
 
-import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.shared.SharedListSignal;
+import java.io.Serializable;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Stream;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.virtuallist.VirtualList;
+import com.vaadin.flow.dom.DomListenerRegistration;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
@@ -18,6 +24,18 @@ public class MissingAPI {
 
     /**
      * Binds a Grid's items to a Signal containing a List.
+     * <p>
+     * Creates a reactive effect that updates the grid's items whenever the
+     * signal value changes. If the signal value is {@code null}, the grid is
+     * cleared.
+     *
+     * @param <T>
+     *            the type of items in the grid
+     * @param grid
+     *            the grid to bind. Must not be {@code null}.
+     * @param signal
+     *            a signal containing the list of items. Must not be
+     *            {@code null}.
      */
     public static <T> void bindItems(Grid<T> grid, ListSignal<T> signal) {
         Signal.effect(grid, () -> grid.setItems(signal.getValues().toList()));
@@ -29,6 +47,18 @@ public class MissingAPI {
 
     /**
      * Binds a VirtualList's items to a Signal containing a List.
+     * <p>
+     * Creates a reactive effect that updates the virtual list's items whenever
+     * the signal value changes. If the signal value is {@code null}, the list
+     * is cleared.
+     *
+     * @param <T>
+     *            the type of items in the virtual list
+     * @param virtualList
+     *            the virtual list to bind. Must not be {@code null}.
+     * @param signal
+     *            a signal containing the list of items. Must not be
+     *            {@code null}.
      */
     public static <T> void bindItems(VirtualList<T> virtualList,
             Signal<List<T>> signal) {
@@ -44,6 +74,18 @@ public class MissingAPI {
 
     /**
      * Binds a ComboBox's items to a Signal containing a List.
+     * <p>
+     * Creates a reactive effect that updates the combo box's items whenever the
+     * signal value changes. If the signal value is {@code null}, the combo box
+     * is cleared.
+     *
+     * @param <T>
+     *            the type of items in the combo box
+     * @param comboBox
+     *            the combo box to bind. Must not be {@code null}.
+     * @param signal
+     *            a signal containing the list of items. Must not be
+     *            {@code null}.
      */
     public static <T> void bindItems(
             com.vaadin.flow.component.combobox.ComboBox<T> comboBox,
@@ -74,9 +116,14 @@ public class MissingAPI {
      *            A writable integer signal that will receive the current
      *            selected index of the Tabs and can also update it. Must not be
      *            {@code null}.
+     * @param writeCallback
+     *            A callback invoked to write the new selected index back to the
+     *            signal when the user changes the tab in the UI. Must not be
+     *            {@code null}.
      */
-    public static void tabsSyncSelectedIndex(Tabs tabs,
-            ValueSignal<Integer> numberSignal) {
+    public static void tabsSyncSelectedIndex(TabSheet tabs,
+            Signal<Integer> numberSignal,
+            SerializableConsumer<Integer> writeCallback) {
         Signal.effect(tabs, () -> {
             Integer index = numberSignal.get();
             if (index != null) {
@@ -84,7 +131,96 @@ public class MissingAPI {
             }
         });
         tabs.addSelectedChangeListener(event -> {
-            numberSignal.set(event.getSource().getSelectedIndex());
+            writeCallback.accept(event.getSource().getSelectedIndex());
         });
+    }
+
+    /**
+     * Extracts the current values from a {@link ListSignal} as a stream.
+     * <p>
+     * Each entry in the list signal is itself a signal; this method unwraps
+     * them by calling {@link Signal#get()} on each entry.
+     *
+     * @param <T>
+     *            the type of values in the list signal
+     * @param signal
+     *            the list signal to extract values from. Must not be
+     *            {@code null}.
+     * @return a stream of the current values
+     */
+    public static <T> Stream<T> getValues(ListSignal<T> signal) {
+        return signal.get().stream().map(Signal::get);
+    }
+
+    /**
+     * A component's size in pixels, mirroring the future {@code Component.Size}
+     * API from vaadin/flow#23618.
+     */
+    public record ComponentSize(int width, int height) implements Serializable {
+    }
+
+    private static final String RESIZE_EVENT = "component-resize";
+
+    private static final String SETUP_RESIZE_OBSERVER_JS = """
+            const resizeObserver = new ResizeObserver(entries => {
+                for (let entry of entries) {
+                    const width = Math.floor(entry.contentRect.width);
+                    const height = Math.floor(entry.contentRect.height);
+                    const event = new CustomEvent('%s', {
+                        detail: { width: width, height: height }
+                    });
+                    this.dispatchEvent(event);
+                }
+            });
+            resizeObserver.observe(this);
+            window[$0] = resizeObserver;
+            const rect = this.getBoundingClientRect();
+            const event = new CustomEvent('%s', {
+                detail: { width: Math.floor(rect.width), height: Math.floor(rect.height) }
+            });
+            this.dispatchEvent(event);
+            """
+            .formatted(RESIZE_EVENT, RESIZE_EVENT);
+
+    private static final String CLEANUP_RESIZE_OBSERVER_JS = """
+            if (window[$0]) {
+                window[$0].disconnect();
+                delete window[$0];
+            }
+            """;
+
+    /**
+     * Creates a read-only signal that tracks the size of the given component's
+     * element using a ResizeObserver.
+     * <p>
+     * This mirrors the future {@code Component.sizeSignal()} API from
+     * vaadin/flow#23618. When that PR merges, replace
+     * {@code MissingAPI.sizeSignal(component)} with
+     * {@code component.sizeSignal()}.
+     */
+    public static Signal<ComponentSize> sizeSignal(Component component) {
+        ValueSignal<ComponentSize> signal = new ValueSignal<>(
+                new ComponentSize(0, 0));
+
+        component.addAttachListener(attachEvent -> {
+            String cleanupKey = UUID.randomUUID().toString();
+
+            DomListenerRegistration reg = component.getElement()
+                    .addEventListener(RESIZE_EVENT, event -> {
+                        signal.set(event.getEventDetail(ComponentSize.class));
+                    });
+
+            component.getElement().executeJs(SETUP_RESIZE_OBSERVER_JS,
+                    cleanupKey);
+
+            component.addDetachListener(detachEvent -> {
+                detachEvent.unregisterListener();
+                reg.remove();
+                detachEvent.getUI().getPage()
+                        .executeJs(CLEANUP_RESIZE_OBSERVER_JS, cleanupKey);
+            });
+        });
+
+        return signal.asReadonly();
     }
 }

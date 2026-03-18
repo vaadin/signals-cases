@@ -3,6 +3,10 @@ package com.example.usecase18;
 import com.example.MissingAPI;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
@@ -37,6 +41,9 @@ import com.vaadin.flow.signals.shared.SharedListSignal;
 import com.vaadin.flow.signals.shared.SharedValueSignal;
 
 public abstract class AbstractTaskChatView extends VerticalLayout {
+
+    private static final Logger logger = LoggerFactory
+            .getLogger(AbstractTaskChatView.class);
 
     // Signals injected via constructor
     protected final SharedListSignal<Task> tasksSignal;
@@ -307,8 +314,9 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
             deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR,
                     ButtonVariant.LUMO_SMALL);
             deleteButton.addClickListener(e -> {
-                tasksSignal.get().stream().filter(sig -> sig.get().equals(task))
-                        .findFirst().ifPresent(tasksSignal::remove);
+                tasksSignal.peek().stream()
+                        .filter(sig -> sig.peek().equals(task)).findFirst()
+                        .ifPresent(tasksSignal::remove);
             });
 
             actions.add(editButton, deleteButton);
@@ -329,8 +337,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
 
     private void openEditDialog(Task task) {
         // Find the signal for this task
-        var taskSignalOpt = tasksSignal.get().stream()
-                .filter(sig -> sig.get().id().equals(task.id())).findFirst();
+        var taskSignalOpt = tasksSignal.peek().stream()
+                .filter(sig -> sig.peek().id().equals(task.id())).findFirst();
 
         if (taskSignalOpt.isEmpty()) {
             return;
@@ -463,8 +471,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
 
         // Get reference to the last message signal (assistant message) for
         // updates
-        var assistantMessageSignal = chatMessagesSignal.get()
-                .get(chatMessagesSignal.get().size() - 1);
+        var msgs = chatMessagesSignal.peek();
+        var assistantMessageSignal = msgs.get(msgs.size() - 1);
 
         // Accumulate streaming content
         StringBuilder streamingContent = new StringBuilder();
@@ -486,22 +494,40 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
                     messageInputEnabledSignal.set(true);
                 }, () -> {
                     // Streaming complete - re-enable input
+                    if (streamingContent.isEmpty()) {
+                        assistantMessageSignal
+                                .set(new ChatMessageData("Assistant",
+                                        "Done!", assistantTimestamp));
+                    }
                     messageInputEnabledSignal.set(true);
                 });
     }
 
     private void updateTaskField(String taskId,
             java.util.function.Function<Task, Task> updater) {
-        tasksSignal.get().stream().filter(sig -> sig.get().id().equals(taskId))
-                .findFirst()
-                .ifPresent(sig -> sig.set(updater.apply(sig.get())));
+        var tasks = tasksSignal.peek();
+        var match = tasks.stream()
+                .filter(sig -> sig.peek().id().equals(taskId)).findFirst();
+
+        if (match.isEmpty()) {
+            logger.warn("Task not found: {} (available: {})", taskId,
+                    tasks.stream().map(sig -> sig.peek().id()).toList());
+            return;
+        }
+
+        var signal = match.get();
+        Task oldValue = signal.peek();
+        Task newValue = updater.apply(oldValue);
+        logger.debug("Updating task {}: {} -> {}", taskId, oldValue.status(),
+                newValue.status());
+        signal.set(newValue);
     }
 
     private TaskContext createTaskContext() {
         return new TaskContext() {
             @Override
             public java.util.List<Task> getAllTasks() {
-                return tasksSignal.get().stream().map(SharedValueSignal::get)
+                return tasksSignal.peek().stream().map(sig -> sig.peek())
                         .toList();
             }
 
@@ -512,9 +538,15 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
 
             @Override
             public void removeTask(String taskId) {
-                tasksSignal.get().stream()
-                        .filter(sig -> sig.get().id().equals(taskId))
-                        .findFirst().ifPresent(tasksSignal::remove);
+                var match = tasksSignal.peek().stream()
+                        .filter(sig -> sig.peek().id().equals(taskId))
+                        .findFirst();
+                if (match.isEmpty()) {
+                    logger.warn("Cannot remove task, not found: {}", taskId);
+                    return;
+                }
+                logger.debug("Removing task: {}", taskId);
+                tasksSignal.remove(match.get());
             }
 
             @Override
