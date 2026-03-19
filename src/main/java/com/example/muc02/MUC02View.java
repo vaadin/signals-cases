@@ -77,7 +77,7 @@ public class MUC02View extends VerticalLayout {
         canvas.setWidthFull();
         canvas.getStyle().set("position", "relative")
                 .set("background-color", "#f5f5f5")
-                .set("border", "2px solid #e0e0e0").set("border-radius", "4px")
+                .set("outline", "2px solid #e0e0e0").set("border-radius", "4px")
                 .set("height", "400px").set("margin", "1em 0")
                 .set("cursor", "crosshair");
 
