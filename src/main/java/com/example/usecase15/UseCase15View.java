@@ -2,6 +2,8 @@ package com.example.usecase15;
 
 import jakarta.annotation.security.PermitAll;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -51,7 +53,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 public class UseCase15View extends VerticalLayout {
 
     public record Product(String id, String name, String category,
-            double price) {
+            BigDecimal price) {
         public boolean matches(String query) {
             String lowerQuery = query.toLowerCase();
             return name.toLowerCase().contains(lowerQuery)
@@ -61,21 +63,21 @@ public class UseCase15View extends VerticalLayout {
 
     // Sample product database
     private static final List<Product> ALL_PRODUCTS = List.of(
-            new Product("1", "Laptop Pro 15", "Electronics", 1299.99),
-            new Product("2", "Wireless Mouse", "Electronics", 29.99),
-            new Product("3", "Mechanical Keyboard", "Electronics", 89.99),
-            new Product("4", "Office Chair", "Furniture", 249.99),
-            new Product("5", "Standing Desk", "Furniture", 499.99),
-            new Product("6", "Coffee Mug", "Kitchen", 12.99),
-            new Product("7", "Water Bottle", "Kitchen", 19.99),
-            new Product("8", "Notebook Set", "Stationery", 15.99),
-            new Product("9", "Pen Collection", "Stationery", 24.99),
-            new Product("10", "Desk Lamp", "Furniture", 39.99),
-            new Product("11", "USB-C Hub", "Electronics", 49.99),
-            new Product("12", "Headphones", "Electronics", 149.99),
-            new Product("13", "Monitor 27\"", "Electronics", 399.99),
-            new Product("14", "Webcam HD", "Electronics", 79.99),
-            new Product("15", "Bookshelf", "Furniture", 129.99));
+            new Product("1", "Laptop Pro 15", "Electronics", new BigDecimal("1299.99")),
+            new Product("2", "Wireless Mouse", "Electronics", new BigDecimal("29.99")),
+            new Product("3", "Mechanical Keyboard", "Electronics", new BigDecimal("89.99")),
+            new Product("4", "Office Chair", "Furniture", new BigDecimal("249.99")),
+            new Product("5", "Standing Desk", "Furniture", new BigDecimal("499.99")),
+            new Product("6", "Coffee Mug", "Kitchen", new BigDecimal("12.99")),
+            new Product("7", "Water Bottle", "Kitchen", new BigDecimal("19.99")),
+            new Product("8", "Notebook Set", "Stationery", new BigDecimal("15.99")),
+            new Product("9", "Pen Collection", "Stationery", new BigDecimal("24.99")),
+            new Product("10", "Desk Lamp", "Furniture", new BigDecimal("39.99")),
+            new Product("11", "USB-C Hub", "Electronics", new BigDecimal("49.99")),
+            new Product("12", "Headphones", "Electronics", new BigDecimal("149.99")),
+            new Product("13", "Monitor 27\"", "Electronics", new BigDecimal("399.99")),
+            new Product("14", "Webcam HD", "Electronics", new BigDecimal("79.99")),
+            new Product("15", "Bookshelf", "Furniture", new BigDecimal("129.99")));
 
     private static final long DEBOUNCE_DELAY_MS = 1000;
 
@@ -323,7 +325,7 @@ public class UseCase15View extends VerticalLayout {
 
         leftSide.add(nameDiv, categoryDiv);
 
-        Div priceDiv = new Div("$" + String.format("%.2f", product.price()));
+        Div priceDiv = new Div("$" + product.price().setScale(2, RoundingMode.HALF_UP));
         priceDiv.getStyle().set("font-weight", "bold").set("color",
                 "var(--lumo-primary-color)");
 

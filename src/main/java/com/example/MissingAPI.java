@@ -1,5 +1,6 @@
 package com.example;
 
+import com.vaadin.flow.signals.shared.SharedListSignal;
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
@@ -36,15 +37,12 @@ public class MissingAPI {
      *            a signal containing the list of items. Must not be
      *            {@code null}.
      */
-    public static <T> void bindItems(Grid<T> grid, Signal<List<T>> signal) {
-        Signal.effect(grid, () -> {
-            List<T> items = signal.get();
-            if (items != null) {
-                grid.setItems(items);
-            } else {
-                grid.setItems(List.of());
-            }
-        });
+    public static <T> void bindItems(Grid<T> grid, ListSignal<T> signal) {
+        Signal.effect(grid, () -> grid.setItems(signal.getValues().toList()));
+    }
+
+    public static <T> void bindItems(Grid<T> grid, SharedListSignal<T> signal) {
+        Signal.effect(grid, () -> grid.setItems(signal.getValues().toList()));
     }
 
     /**

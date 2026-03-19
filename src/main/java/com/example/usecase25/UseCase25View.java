@@ -2,6 +2,8 @@ package com.example.usecase25;
 
 import jakarta.annotation.security.PermitAll;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -124,7 +126,7 @@ public class UseCase25View extends Main {
         // Price
         Span price = new Span();
         price.bindText(stockSignal.map(
-                q -> String.format(java.util.Locale.US, "$%.2f", q.price())));
+                q -> "$" + q.price().setScale(2, RoundingMode.HALF_UP)));
         price.getStyle().set("text-align", "right")
                 .set("font-family", "monospace").set("font-weight", "600")
                 .set("border-radius", "4px").set("padding", "2px 6px");
@@ -132,9 +134,8 @@ public class UseCase25View extends Main {
         // Change
         Span change = new Span();
         change.bindText(stockSignal.map(q -> {
-            String prefix = q.change() >= 0 ? "+" : "";
-            return prefix
-                    + String.format(java.util.Locale.US, "%.2f", q.change());
+            String prefix = q.change().compareTo(BigDecimal.ZERO) >= 0 ? "+" : "";
+            return prefix + q.change().setScale(2, RoundingMode.HALF_UP);
         }));
         change.getStyle().set("text-align", "right").set("font-family",
                 "monospace");
@@ -142,9 +143,8 @@ public class UseCase25View extends Main {
         // % Change
         Span pctChange = new Span();
         pctChange.bindText(stockSignal.map(q -> {
-            String prefix = q.changePercent() >= 0 ? "+" : "";
-            return prefix + String.format(java.util.Locale.US, "%.2f%%",
-                    q.changePercent());
+            String prefix = q.changePercent().compareTo(BigDecimal.ZERO) >= 0 ? "+" : "";
+            return prefix + q.changePercent().setScale(2, RoundingMode.HALF_UP) + "%";
         }));
         pctChange.getStyle().set("text-align", "right").set("font-family",
                 "monospace");
@@ -154,7 +154,7 @@ public class UseCase25View extends Main {
                 change.getElement(), pctChange.getElement());
         Signal.effect(row, () -> {
             StockQuote current = stockSignal.get();
-            String flashClass = current.change() >= 0 ? "price-up"
+            String flashClass = current.change().compareTo(BigDecimal.ZERO) >= 0 ? "price-up"
                     : "price-down";
             flashTargets.forEach(el -> el.flashClass(flashClass));
         });

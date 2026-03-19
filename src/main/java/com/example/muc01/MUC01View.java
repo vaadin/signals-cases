@@ -84,7 +84,7 @@ public class MUC01View extends VerticalLayout {
 
         // Bind message list to UI
         messagesContainer.bindChildren(muc01Signals.getMessagesSignal(),
-                msgSignal -> createMessageComponent(msgSignal.get()));
+                msgSignal -> createMessageComponent(msgSignal.peek()));
 
         // Message input
         TextField messageInput = new TextField();

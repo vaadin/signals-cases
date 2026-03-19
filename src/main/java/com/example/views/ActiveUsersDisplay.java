@@ -115,7 +115,7 @@ public class ActiveUsersDisplay extends Div {
 
     private HorizontalLayout createUserItem(
             com.vaadin.flow.signals.Signal<com.example.signals.UserInfo> userSignal) {
-        var user = userSignal.get();
+        var user = userSignal.peek();
         String displayName = user.nickname() != null
                 && !user.nickname().isEmpty() ? user.nickname()
                         : user.username();
