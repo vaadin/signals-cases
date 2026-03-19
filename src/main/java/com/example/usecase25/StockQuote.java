@@ -1,5 +1,7 @@
 package com.example.usecase25;
 
-record StockQuote(String symbol, String name, double price, double change,
-        double changePercent) {
+import java.math.BigDecimal;
+
+record StockQuote(String symbol, String name, BigDecimal price, BigDecimal change,
+        BigDecimal changePercent) {
 }

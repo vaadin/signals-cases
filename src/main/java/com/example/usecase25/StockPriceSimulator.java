@@ -1,5 +1,7 @@
 package com.example.usecase25;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Random;
 
@@ -9,14 +11,14 @@ import com.vaadin.flow.signals.local.ValueSignal;
 class StockPriceSimulator {
 
     static final List<StockQuote> INITIAL_STOCKS = List.of(
-            new StockQuote("AAPL", "Apple Inc.", 189.84, 0, 0),
-            new StockQuote("GOOGL", "Alphabet Inc.", 141.80, 0, 0),
-            new StockQuote("MSFT", "Microsoft Corp.", 378.91, 0, 0),
-            new StockQuote("AMZN", "Amazon.com Inc.", 178.25, 0, 0),
-            new StockQuote("TSLA", "Tesla Inc.", 248.42, 0, 0),
-            new StockQuote("NVDA", "NVIDIA Corp.", 495.22, 0, 0),
-            new StockQuote("META", "Meta Platforms", 390.42, 0, 0),
-            new StockQuote("NFLX", "Netflix Inc.", 476.58, 0, 0));
+            new StockQuote("AAPL", "Apple Inc.", new BigDecimal("189.84"), BigDecimal.ZERO, BigDecimal.ZERO),
+            new StockQuote("GOOGL", "Alphabet Inc.", new BigDecimal("141.80"), BigDecimal.ZERO, BigDecimal.ZERO),
+            new StockQuote("MSFT", "Microsoft Corp.", new BigDecimal("378.91"), BigDecimal.ZERO, BigDecimal.ZERO),
+            new StockQuote("AMZN", "Amazon.com Inc.", new BigDecimal("178.25"), BigDecimal.ZERO, BigDecimal.ZERO),
+            new StockQuote("TSLA", "Tesla Inc.", new BigDecimal("248.42"), BigDecimal.ZERO, BigDecimal.ZERO),
+            new StockQuote("NVDA", "NVIDIA Corp.", new BigDecimal("495.22"), BigDecimal.ZERO, BigDecimal.ZERO),
+            new StockQuote("META", "Meta Platforms", new BigDecimal("390.42"), BigDecimal.ZERO, BigDecimal.ZERO),
+            new StockQuote("NFLX", "Netflix Inc.", new BigDecimal("476.58"), BigDecimal.ZERO, BigDecimal.ZERO));
 
     private static final Random random = new Random();
 
@@ -28,16 +30,18 @@ class StockPriceSimulator {
             ValueSignal<StockQuote> stockSignal = entries.get(index);
 
             StockQuote current = stockSignal.peek();
-            double oldPrice = current.price();
+            BigDecimal oldPrice = current.price();
 
             // Random price change: -2% to +2%
             double changePct = (random.nextDouble() - 0.5) * 4.0;
-            double priceChange = oldPrice * changePct / 100.0;
-            double newPrice = Math.max(1.0, oldPrice + priceChange);
+            BigDecimal priceChange = oldPrice.multiply(BigDecimal.valueOf(changePct))
+                    .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+            BigDecimal newPrice = oldPrice.add(priceChange).max(new BigDecimal("1.0"));
 
-            double totalChange = newPrice - INITIAL_STOCKS.get(index).price();
-            double totalChangePct = (totalChange
-                    / INITIAL_STOCKS.get(index).price()) * 100.0;
+            BigDecimal totalChange = newPrice.subtract(INITIAL_STOCKS.get(index).price());
+            BigDecimal totalChangePct = totalChange
+                    .divide(INITIAL_STOCKS.get(index).price(), 4, RoundingMode.HALF_UP)
+                    .multiply(new BigDecimal("100"));
 
             stockSignal.set(new StockQuote(current.symbol(), current.name(),
                     newPrice, totalChange, totalChangePct));
