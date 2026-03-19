@@ -7,9 +7,9 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.virtuallist.VirtualList;
+import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.signals.Signal;
@@ -23,42 +23,45 @@ import com.vaadin.flow.signals.local.ValueSignal;
 public class MissingAPI {
 
     /**
-     * Binds a Grid's items to a Signal containing a List.
+     * Binds a component's items to a Signal containing a List.
      * <p>
-     * Creates a reactive effect that updates the grid's items whenever the
-     * signal value changes. If the signal value is {@code null}, the grid is
-     * cleared.
+     * Creates a reactive effect that updates the component's items whenever the
+     * signal value changes. If the signal value is {@code null}, the component
+     * is cleared.
      *
      * @param <T>
-     *            the type of items in the grid
-     * @param grid
-     *            the grid to bind. Must not be {@code null}.
+     *            the type of items
+     * @param <C>
+     *            the component type, must implement {@link HasItems}
+     * @param component
+     *            the component to bind. Must not be {@code null}.
      * @param signal
      *            a signal containing the list of items. Must not be
      *            {@code null}.
      */
-    public static <T> void bindItems(Grid<T> grid, ListSignal<T> signal) {
-        Signal.effect(grid, () -> grid.setItems(signal.getValues().toList()));
+    public static <T, C extends Component & HasListDataView<T, ?>> void bindItems(
+            C component, Signal<List<T>> signal) {
+        Signal.effect(component, () -> {
+            List<T> items = signal.get();
+            if (items != null) {
+                component.setItems(items);
+            } else {
+                component.setItems(List.of());
+            }
+        });
     }
 
-    public static <T> void bindItems(Grid<T> grid, SharedListSignal<T> signal) {
-        Signal.effect(grid, () -> grid.setItems(signal.getValues().toList()));
+    public static <T, C extends Component & HasListDataView<T, ?>> void bindItems(
+            C component, SharedListSignal<T> signal) {
+        Signal.effect(component,
+                () -> component.setItems(signal.getValues().toList()));
     }
 
     /**
      * Binds a VirtualList's items to a Signal containing a List.
      * <p>
-     * Creates a reactive effect that updates the virtual list's items whenever
-     * the signal value changes. If the signal value is {@code null}, the list
-     * is cleared.
-     *
-     * @param <T>
-     *            the type of items in the virtual list
-     * @param virtualList
-     *            the virtual list to bind. Must not be {@code null}.
-     * @param signal
-     *            a signal containing the list of items. Must not be
-     *            {@code null}.
+     * VirtualList implements {@code HasItems} but not
+     * {@link HasListDataView}, so it needs a separate overload.
      */
     public static <T> void bindItems(VirtualList<T> virtualList,
             Signal<List<T>> signal) {
@@ -68,34 +71,6 @@ public class MissingAPI {
                 virtualList.setItems(items);
             } else {
                 virtualList.setItems(List.of());
-            }
-        });
-    }
-
-    /**
-     * Binds a ComboBox's items to a Signal containing a List.
-     * <p>
-     * Creates a reactive effect that updates the combo box's items whenever the
-     * signal value changes. If the signal value is {@code null}, the combo box
-     * is cleared.
-     *
-     * @param <T>
-     *            the type of items in the combo box
-     * @param comboBox
-     *            the combo box to bind. Must not be {@code null}.
-     * @param signal
-     *            a signal containing the list of items. Must not be
-     *            {@code null}.
-     */
-    public static <T> void bindItems(
-            com.vaadin.flow.component.combobox.ComboBox<T> comboBox,
-            Signal<List<T>> signal) {
-        Signal.effect(comboBox, () -> {
-            List<T> items = signal.get();
-            if (items != null) {
-                comboBox.setItems(items);
-            } else {
-                comboBox.setItems(List.of());
             }
         });
     }
