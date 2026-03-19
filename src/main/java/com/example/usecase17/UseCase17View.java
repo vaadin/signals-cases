@@ -45,403 +45,29 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @PermitAll
 public class UseCase17View extends VerticalLayout {
 
-    // ==================== Component Model Classes ====================
-
-    public static class Component {
-        protected String id;
-        protected String name;
-        protected BigDecimal price;
-
-        public Component(String id, String name, BigDecimal price) {
-            this.id = id;
-            this.name = name;
-            this.price = price;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public BigDecimal getPrice() {
-            return price;
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
-    }
-
-    public static class CPU extends Component {
-        private String socket;
-        private int tdp;
-        private int score;
-
-        public CPU(String id, String name, BigDecimal price, String socket, int tdp,
-                int score) {
-            super(id, name, price);
-            this.socket = socket;
-            this.tdp = tdp;
-            this.score = score;
-        }
-
-        public String getSocket() {
-            return socket;
-        }
-
-        public int getTdp() {
-            return tdp;
-        }
-
-        public int getScore() {
-            return score;
-        }
-    }
-
-    public static class Motherboard extends Component {
-        private String socket;
-        private String ramType;
-        private int maxRamSpeed;
-        private int maxRamCapacity;
-        private String formFactor;
-        private int m2Slots;
-        private int sataSlots;
-
-        public Motherboard(String id, String name, BigDecimal price, String socket,
-                String ramType, int maxRamSpeed, int maxRamCapacity,
-                String formFactor, int m2Slots, int sataSlots) {
-            super(id, name, price);
-            this.socket = socket;
-            this.ramType = ramType;
-            this.maxRamSpeed = maxRamSpeed;
-            this.maxRamCapacity = maxRamCapacity;
-            this.formFactor = formFactor;
-            this.m2Slots = m2Slots;
-            this.sataSlots = sataSlots;
-        }
-
-        public String getSocket() {
-            return socket;
-        }
-
-        public String getRamType() {
-            return ramType;
-        }
-
-        public int getMaxRamSpeed() {
-            return maxRamSpeed;
-        }
-
-        public int getMaxRamCapacity() {
-            return maxRamCapacity;
-        }
-
-        public String getFormFactor() {
-            return formFactor;
-        }
-
-        public int getM2Slots() {
-            return m2Slots;
-        }
-
-        public int getSataSlots() {
-            return sataSlots;
-        }
-    }
-
-    public static class RAM extends Component {
-        private String type;
-        private int speed;
-        private int capacity;
-
-        public RAM(String id, String name, BigDecimal price, String type, int speed,
-                int capacity) {
-            super(id, name, price);
-            this.type = type;
-            this.speed = speed;
-            this.capacity = capacity;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public int getSpeed() {
-            return speed;
-        }
-
-        public int getCapacity() {
-            return capacity;
-        }
-    }
-
-    public static class GPU extends Component {
-        private int powerConsumption;
-        private int lengthMm;
-        private int score;
-
-        public GPU(String id, String name, BigDecimal price, int powerConsumption,
-                int lengthMm, int score) {
-            super(id, name, price);
-            this.powerConsumption = powerConsumption;
-            this.lengthMm = lengthMm;
-            this.score = score;
-        }
-
-        public int getPowerConsumption() {
-            return powerConsumption;
-        }
-
-        public int getLengthMm() {
-            return lengthMm;
-        }
-
-        public int getScore() {
-            return score;
-        }
-    }
-
-    public static class Storage extends Component {
-        private String type;
-        private int capacityGB;
-        private int speedMBps;
-
-        public Storage(String id, String name, BigDecimal price, String type,
-                int capacityGB, int speedMBps) {
-            super(id, name, price);
-            this.type = type;
-            this.capacityGB = capacityGB;
-            this.speedMBps = speedMBps;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public int getCapacityGB() {
-            return capacityGB;
-        }
-
-        public int getSpeedMBps() {
-            return speedMBps;
-        }
-    }
-
-    public static class PSU extends Component {
-        private int wattage;
-        private String formFactor;
-        private String efficiency;
-
-        public PSU(String id, String name, BigDecimal price, int wattage,
-                String formFactor, String efficiency) {
-            super(id, name, price);
-            this.wattage = wattage;
-            this.formFactor = formFactor;
-            this.efficiency = efficiency;
-        }
-
-        public int getWattage() {
-            return wattage;
-        }
-
-        public String getFormFactor() {
-            return formFactor;
-        }
-
-        public String getEfficiency() {
-            return efficiency;
-        }
-    }
-
-    public static class Case extends Component {
-        private String formFactor;
-        private int gpuClearanceMm;
-        private int cpuCoolerClearanceMm;
-        private String psuFormFactor;
-
-        public Case(String id, String name, BigDecimal price, String formFactor,
-                int gpuClearanceMm, int cpuCoolerClearanceMm,
-                String psuFormFactor) {
-            super(id, name, price);
-            this.formFactor = formFactor;
-            this.gpuClearanceMm = gpuClearanceMm;
-            this.cpuCoolerClearanceMm = cpuCoolerClearanceMm;
-            this.psuFormFactor = psuFormFactor;
-        }
-
-        public String getFormFactor() {
-            return formFactor;
-        }
-
-        public int getGpuClearanceMm() {
-            return gpuClearanceMm;
-        }
-
-        public int getCpuCoolerClearanceMm() {
-            return cpuCoolerClearanceMm;
-        }
-
-        public String getPsuFormFactor() {
-            return psuFormFactor;
-        }
-    }
-
-    public static class Cooler extends Component {
-        private String type;
-        private int heightMm;
-        private int maxTdp;
-        private String[] compatibleSockets;
-
-        public Cooler(String id, String name, BigDecimal price, String type,
-                int heightMm, int maxTdp, String... compatibleSockets) {
-            super(id, name, price);
-            this.type = type;
-            this.heightMm = heightMm;
-            this.maxTdp = maxTdp;
-            this.compatibleSockets = compatibleSockets;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public int getHeightMm() {
-            return heightMm;
-        }
-
-        public int getMaxTdp() {
-            return maxTdp;
-        }
-
-        public String[] getCompatibleSockets() {
-            return compatibleSockets;
-        }
-    }
-
-    // ==================== Sample Data ====================
-
-    private static final List<CPU> ALL_CPUS = Arrays.asList(
-            new CPU("cpu1", "Intel Core i9-14900K", new BigDecimal("589"), "LGA1700", 125, 100),
-            new CPU("cpu2", "Intel Core i7-14700K", new BigDecimal("419"), "LGA1700", 125, 85),
-            new CPU("cpu3", "Intel Core i5-14600K", new BigDecimal("319"), "LGA1700", 125, 70),
-            new CPU("cpu4", "AMD Ryzen 9 7950X", new BigDecimal("549"), "AM5", 170, 98),
-            new CPU("cpu5", "AMD Ryzen 7 7700X", new BigDecimal("349"), "AM5", 105, 80),
-            new CPU("cpu6", "AMD Ryzen 5 7600X", new BigDecimal("229"), "AM5", 105, 65),
-            new CPU("cpu0", "None", new BigDecimal("0"), "None", 0, 0));
-
-    private static final List<Motherboard> ALL_MOTHERBOARDS = Arrays.asList(
-            new Motherboard("mb1", "ASUS ROG Z790", new BigDecimal("389"), "LGA1700", "DDR5",
-                    7200, 128, "ATX", 4, 6),
-            new Motherboard("mb2", "MSI MPG Z790", new BigDecimal("299"), "LGA1700", "DDR5", 6400,
-                    128, "ATX", 3, 6),
-            new Motherboard("mb3", "ASUS TUF B760", new BigDecimal("189"), "LGA1700", "DDR5",
-                    5600, 128, "ATX", 2, 4),
-            new Motherboard("mb4", "ASUS ROG X670E", new BigDecimal("429"), "AM5", "DDR5", 6400,
-                    128, "ATX", 4, 6),
-            new Motherboard("mb5", "MSI MPG X670", new BigDecimal("319"), "AM5", "DDR5", 6000,
-                    128, "ATX", 3, 6),
-            new Motherboard("mb6", "ASUS TUF B650", new BigDecimal("199"), "AM5", "DDR5", 5600,
-                    128, "ATX", 2, 4),
-            new Motherboard("mb0", "None", new BigDecimal("0"), "None", "None", 0, 0, "None", 0,
-                    0));
-
-    private static final List<RAM> ALL_RAM = Arrays.asList(
-            new RAM("ram1", "32GB DDR5-6000 (2x16GB)", new BigDecimal("129"), "DDR5", 6000, 32),
-            new RAM("ram2", "32GB DDR5-5600 (2x16GB)", new BigDecimal("99"), "DDR5", 5600, 32),
-            new RAM("ram3", "64GB DDR5-6000 (2x32GB)", new BigDecimal("219"), "DDR5", 6000, 64),
-            new RAM("ram4", "16GB DDR5-5600 (2x8GB)", new BigDecimal("59"), "DDR5", 5600, 16),
-            new RAM("ram5", "32GB DDR4-3200 (2x16GB)", new BigDecimal("79"), "DDR4", 3200, 32),
-            new RAM("ram6", "16GB DDR4-3200 (2x8GB)", new BigDecimal("45"), "DDR4", 3200, 16),
-            new RAM("ram0", "None", new BigDecimal("0"), "None", 0, 0));
-
-    private static final List<GPU> ALL_GPUS = Arrays.asList(
-            new GPU("gpu1", "NVIDIA RTX 4090", new BigDecimal("1599"), 450, 336, 100),
-            new GPU("gpu2", "NVIDIA RTX 4080", new BigDecimal("1199"), 320, 310, 88),
-            new GPU("gpu3", "NVIDIA RTX 4070 Ti", new BigDecimal("799"), 285, 285, 75),
-            new GPU("gpu4", "AMD RX 7900 XTX", new BigDecimal("999"), 355, 320, 85),
-            new GPU("gpu5", "AMD RX 7900 XT", new BigDecimal("849"), 315, 305, 78),
-            new GPU("gpu6", "NVIDIA RTX 4060 Ti", new BigDecimal("499"), 160, 244, 55),
-            new GPU("gpu0", "None", new BigDecimal("0"), 0, 0, 0));
-
-    private static final List<Storage> ALL_STORAGE = Arrays.asList(
-            new Storage("stor1", "2TB Samsung 990 Pro (NVMe)", new BigDecimal("189"), "M.2 NVMe",
-                    2000, 7450),
-            new Storage("stor2", "1TB Samsung 990 Pro (NVMe)", new BigDecimal("109"), "M.2 NVMe",
-                    1000, 7450),
-            new Storage("stor3", "2TB Samsung 870 EVO (SATA SSD)", new BigDecimal("149"),
-                    "2.5\" SATA", 2000, 560),
-            new Storage("stor4", "1TB Samsung 870 EVO (SATA SSD)", new BigDecimal("89"),
-                    "2.5\" SATA", 1000, 560),
-            new Storage("stor5", "4TB Seagate Barracuda (HDD)", new BigDecimal("89"),
-                    "3.5\" SATA", 4000, 190),
-            new Storage("stor6", "2TB WD Blue (HDD)", new BigDecimal("54"), "3.5\" SATA", 2000,
-                    180),
-            new Storage("stor7", "None", new BigDecimal("0"), "None", 0, 0));
-
-    private static final List<PSU> ALL_PSUS = Arrays.asList(
-            new PSU("psu1", "1000W Corsair RM1000x (80+ Gold)", new BigDecimal("199"), 1000,
-                    "ATX", "80+ Gold"),
-            new PSU("psu2", "850W Corsair RM850x (80+ Gold)", new BigDecimal("149"), 850, "ATX",
-                    "80+ Gold"),
-            new PSU("psu3", "750W Corsair RM750x (80+ Gold)", new BigDecimal("119"), 750, "ATX",
-                    "80+ Gold"),
-            new PSU("psu4", "650W Corsair RM650x (80+ Gold)", new BigDecimal("99"), 650, "ATX",
-                    "80+ Gold"),
-            new PSU("psu5", "550W Corsair RM550x (80+ Gold)", new BigDecimal("79"), 550, "ATX",
-                    "80+ Gold"),
-            new PSU("psu0", "None", new BigDecimal("0"), 0, "None", "None"));
-
-    private static final List<Case> ALL_CASES = Arrays.asList(
-            new Case("case1", "NZXT H7 Flow (ATX)", new BigDecimal("129"), "ATX", 400, 185,
-                    "ATX"),
-            new Case("case2", "Fractal Design North (ATX)", new BigDecimal("139"), "ATX", 360,
-                    170, "ATX"),
-            new Case("case3", "Lian Li O11 Dynamic (ATX)", new BigDecimal("149"), "ATX", 420, 167,
-                    "ATX"),
-            new Case("case4", "Corsair 4000D Airflow (ATX)", new BigDecimal("104"), "ATX", 360,
-                    170, "ATX"),
-            new Case("case0", "None", new BigDecimal("0"), "None", 0, 0, "None"));
-
-    private static final List<Cooler> ALL_COOLERS = Arrays.asList(
-            new Cooler("cool1", "Noctua NH-D15 (Air)", new BigDecimal("109"), "Air", 165, 180,
-                    "LGA1700", "AM5"),
-            new Cooler("cool2", "be quiet! Dark Rock Pro 4 (Air)", new BigDecimal("89"), "Air",
-                    162, 250, "LGA1700", "AM5"),
-            new Cooler("cool3", "Arctic Liquid Freezer II 360 (AIO)", new BigDecimal("149"),
-                    "AIO", 60, 350, "LGA1700", "AM5"),
-            new Cooler("cool4", "NZXT Kraken X63 (AIO)", new BigDecimal("139"), "AIO", 58, 280,
-                    "LGA1700", "AM5"),
-            new Cooler("cool5", "Cooler Master Hyper 212 (Air)", new BigDecimal("49"), "Air", 158,
-                    150, "LGA1700", "AM5"),
-            new Cooler("cool0", "None", new BigDecimal("0"), "None", 0, 0, "None", "None"));
-
     // ==================== Signal Declarations (~70 total) ====================
 
     // 1. Component Selection Signals (12)
     private final ValueSignal<CPU> cpuSignal = new ValueSignal<>(
-            ALL_CPUS.get(ALL_CPUS.size() - 1)); // None
+            PCData.ALL_CPUS.get(PCData.ALL_CPUS.size() - 1)); // None
     private final ValueSignal<Motherboard> motherboardSignal = new ValueSignal<>(
-            ALL_MOTHERBOARDS.get(ALL_MOTHERBOARDS.size() - 1)); // None
+            PCData.ALL_MOTHERBOARDS.get(PCData.ALL_MOTHERBOARDS.size() - 1)); // None
     private final ValueSignal<RAM> ramSignal = new ValueSignal<>(
-            ALL_RAM.get(ALL_RAM.size() - 1)); // None
+            PCData.ALL_RAM.get(PCData.ALL_RAM.size() - 1)); // None
     private final ValueSignal<GPU> gpuSignal = new ValueSignal<>(
-            ALL_GPUS.get(ALL_GPUS.size() - 1)); // None
+            PCData.ALL_GPUS.get(PCData.ALL_GPUS.size() - 1)); // None
     private final ValueSignal<Storage> storage1Signal = new ValueSignal<>(
-            ALL_STORAGE.get(ALL_STORAGE.size() - 1)); // None
+            PCData.ALL_STORAGE.get(PCData.ALL_STORAGE.size() - 1)); // None
     private final ValueSignal<Storage> storage2Signal = new ValueSignal<>(
-            ALL_STORAGE.get(ALL_STORAGE.size() - 1)); // None
+            PCData.ALL_STORAGE.get(PCData.ALL_STORAGE.size() - 1)); // None
     private final ValueSignal<Storage> storage3Signal = new ValueSignal<>(
-            ALL_STORAGE.get(ALL_STORAGE.size() - 1)); // None
+            PCData.ALL_STORAGE.get(PCData.ALL_STORAGE.size() - 1)); // None
     private final ValueSignal<PSU> psuSignal = new ValueSignal<>(
-            ALL_PSUS.get(ALL_PSUS.size() - 1)); // None
+            PCData.ALL_PSUS.get(PCData.ALL_PSUS.size() - 1)); // None
     private final ValueSignal<Case> caseSignal = new ValueSignal<>(
-            ALL_CASES.get(ALL_CASES.size() - 1)); // None
+            PCData.ALL_CASES.get(PCData.ALL_CASES.size() - 1)); // None
     private final ValueSignal<Cooler> coolerSignal = new ValueSignal<>(
-            ALL_COOLERS.get(ALL_COOLERS.size() - 1)); // None
+            PCData.ALL_COOLERS.get(PCData.ALL_COOLERS.size() - 1)); // None
 
     // 2. Computed Price Signals (10)
     private Signal<BigDecimal> cpuPriceSignal;
@@ -909,18 +535,18 @@ public class UseCase17View extends VerticalLayout {
         header.getStyle().set("margin-top", "0");
 
         column.add(header);
-        column.add(createComponentSelector("CPU", ALL_CPUS, cpuSignal));
-        column.add(createComponentSelector("Motherboard", ALL_MOTHERBOARDS,
+        column.add(createComponentSelector("CPU", PCData.ALL_CPUS, cpuSignal));
+        column.add(createComponentSelector("Motherboard", PCData.ALL_MOTHERBOARDS,
                 motherboardSignal));
-        column.add(createComponentSelector("RAM", ALL_RAM, ramSignal));
-        column.add(createComponentSelector("GPU", ALL_GPUS, gpuSignal));
-        column.add(createComponentSelector("Primary Storage", ALL_STORAGE,
+        column.add(createComponentSelector("RAM", PCData.ALL_RAM, ramSignal));
+        column.add(createComponentSelector("GPU", PCData.ALL_GPUS, gpuSignal));
+        column.add(createComponentSelector("Primary Storage", PCData.ALL_STORAGE,
                 storage1Signal));
-        column.add(createComponentSelector("Secondary Storage", ALL_STORAGE,
+        column.add(createComponentSelector("Secondary Storage", PCData.ALL_STORAGE,
                 storage2Signal));
-        column.add(createComponentSelector("PSU", ALL_PSUS, psuSignal));
-        column.add(createComponentSelector("Case", ALL_CASES, caseSignal));
-        column.add(createComponentSelector("CPU Cooler", ALL_COOLERS,
+        column.add(createComponentSelector("PSU", PCData.ALL_PSUS, psuSignal));
+        column.add(createComponentSelector("Case", PCData.ALL_CASES, caseSignal));
+        column.add(createComponentSelector("CPU Cooler", PCData.ALL_COOLERS,
                 coolerSignal));
 
         return column;
@@ -1180,16 +806,16 @@ public class UseCase17View extends VerticalLayout {
     }
 
     private void resetBuild() {
-        cpuSignal.set(ALL_CPUS.get(ALL_CPUS.size() - 1)); // None
+        cpuSignal.set(PCData.ALL_CPUS.get(PCData.ALL_CPUS.size() - 1)); // None
         motherboardSignal
-                .set(ALL_MOTHERBOARDS.get(ALL_MOTHERBOARDS.size() - 1)); // None
-        ramSignal.set(ALL_RAM.get(ALL_RAM.size() - 1)); // None
-        gpuSignal.set(ALL_GPUS.get(ALL_GPUS.size() - 1)); // None
-        storage1Signal.set(ALL_STORAGE.get(ALL_STORAGE.size() - 1)); // None
-        storage2Signal.set(ALL_STORAGE.get(ALL_STORAGE.size() - 1)); // None
-        storage3Signal.set(ALL_STORAGE.get(ALL_STORAGE.size() - 1)); // None
-        psuSignal.set(ALL_PSUS.get(ALL_PSUS.size() - 1)); // None
-        caseSignal.set(ALL_CASES.get(ALL_CASES.size() - 1)); // None
-        coolerSignal.set(ALL_COOLERS.get(ALL_COOLERS.size() - 1)); // None
+                .set(PCData.ALL_MOTHERBOARDS.get(PCData.ALL_MOTHERBOARDS.size() - 1)); // None
+        ramSignal.set(PCData.ALL_RAM.get(PCData.ALL_RAM.size() - 1)); // None
+        gpuSignal.set(PCData.ALL_GPUS.get(PCData.ALL_GPUS.size() - 1)); // None
+        storage1Signal.set(PCData.ALL_STORAGE.get(PCData.ALL_STORAGE.size() - 1)); // None
+        storage2Signal.set(PCData.ALL_STORAGE.get(PCData.ALL_STORAGE.size() - 1)); // None
+        storage3Signal.set(PCData.ALL_STORAGE.get(PCData.ALL_STORAGE.size() - 1)); // None
+        psuSignal.set(PCData.ALL_PSUS.get(PCData.ALL_PSUS.size() - 1)); // None
+        caseSignal.set(PCData.ALL_CASES.get(PCData.ALL_CASES.size() - 1)); // None
+        coolerSignal.set(PCData.ALL_COOLERS.get(PCData.ALL_COOLERS.size() - 1)); // None
     }
 }
