@@ -6,7 +6,7 @@ import com.vaadin.flow.signals.shared.SharedMapSignal;
 import com.vaadin.flow.signals.shared.SharedValueSignal;
 
 /**
- * Application-scoped signals for MUC04: Form Locking
+ * Application-scoped signals for MUC04: Collaborative Form Editing.
  */
 @Component
 public class MUC04Signals {
@@ -14,15 +14,14 @@ public class MUC04Signals {
     public record FieldLock(String username, String sessionId) {
     }
 
-    private final SharedValueSignal<String> companyNameSignal = new SharedValueSignal<>(
-            "");
-    private final SharedValueSignal<String> addressSignal = new SharedValueSignal<>(
-            "");
-    private final SharedValueSignal<String> phoneSignal = new SharedValueSignal<>(
-            "");
-    // MapSignal where key is fieldName and value is FieldLock
-    private final SharedMapSignal<FieldLock> fieldLocksSignal = new SharedMapSignal<>(
-            FieldLock.class);
+    private final SharedValueSignal<String> companyNameSignal =
+            new SharedValueSignal<>("");
+    private final SharedValueSignal<String> addressSignal =
+            new SharedValueSignal<>("");
+    private final SharedValueSignal<String> phoneSignal =
+            new SharedValueSignal<>("");
+    private final SharedMapSignal<FieldLock> fieldLocksSignal =
+            new SharedMapSignal<>(FieldLock.class);
 
     public SharedValueSignal<String> getCompanyNameSignal() {
         return companyNameSignal;
@@ -40,14 +39,15 @@ public class MUC04Signals {
         return fieldLocksSignal;
     }
 
-    public void lockField(String fieldName, String username, String sessionId) {
+    public void startEditing(String fieldName, String username,
+            String sessionId) {
         fieldLocksSignal.put(fieldName, new FieldLock(username, sessionId));
     }
 
-    public void unlockField(String fieldName, String username,
+    public void stopEditing(String fieldName, String username,
             String sessionId) {
-        SharedValueSignal<FieldLock> lockSignal = fieldLocksSignal.peek()
-                .get(fieldName);
+        SharedValueSignal<FieldLock> lockSignal =
+                fieldLocksSignal.peek().get(fieldName);
         if (lockSignal != null) {
             FieldLock lock = lockSignal.peek();
             if (lock != null && username.equals(lock.username())
@@ -55,17 +55,5 @@ public class MUC04Signals {
                 fieldLocksSignal.remove(fieldName);
             }
         }
-    }
-
-    public boolean isFieldLockedByOther(String fieldName, String username,
-            String sessionId) {
-        SharedValueSignal<FieldLock> lockSignal = fieldLocksSignal.peek()
-                .get(fieldName);
-        if (lockSignal == null) {
-            return false;
-        }
-        FieldLock lockOwner = lockSignal.peek();
-        return lockOwner != null && !(username.equals(lockOwner.username())
-                && sessionId.equals(lockOwner.sessionId()));
     }
 }

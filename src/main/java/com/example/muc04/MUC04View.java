@@ -1,5 +1,9 @@
 package com.example.muc04;
 
+import java.util.ArrayList;
+import java.util.IdentityHashMap;
+import java.util.Map;
+
 import jakarta.annotation.security.PermitAll;
 
 import com.example.security.CurrentUserSignal;
@@ -11,12 +15,15 @@ import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -25,201 +32,202 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
+import com.vaadin.flow.signals.shared.SharedValueSignal;
 
 /**
- * Multi-User Case 4: Collaborative Form Editing with Locking
+ * Multi-User Case 4: Collaborative Form Editing
  *
- * Demonstrates field-level locking for collaborative editing: - Show who is
- * editing which field - Lock fields when another user is editing - Conflict
- * detection on submit - Real-time editing indicators
- *
- * Key Patterns: - Field lock status Signal<Map<Field, User>> - Optimistic
- * locking - Show editing indicators - Merge conflict detection
+ * Demonstrates collaborative editing with field-highlighter and optional
+ * field-level locking:
+ * <ul>
+ * <li>Show who is editing which field via colored outlines and user tags</li>
+ * <li>Optionally lock fields when another user is editing</li>
+ * <li>Real-time editing indicators</li>
+ * </ul>
  */
+@JsModule("@vaadin/field-highlighter/src/vaadin-field-highlighter.js")
 @Route(value = "muc-04", layout = MainLayout.class)
 @PageTitle("Multi-User Case 4: Collaborative Editing")
 @Menu(order = 53, title = "MUC 4: Collaborative Editing")
 @PermitAll
 public class MUC04View extends VerticalLayout {
 
+    private static final int USER_COLOR_COUNT = 7;
+
     private final String currentUser;
     private final MUC04Signals muc04Signals;
-    private final UserSessionRegistry userSessionRegistry;
+    private final ValueSignal<Boolean> lockingEnabledSignal =
+            new ValueSignal<>(false);
     private @Nullable String sessionId;
-    private final java.util.IdentityHashMap<com.vaadin.flow.signals.shared.SharedValueSignal<MUC04Signals.FieldLock>, String> lockKeyMap = new java.util.IdentityHashMap<>();
+    private final IdentityHashMap<SharedValueSignal<MUC04Signals.FieldLock>, String> lockKeyMap =
+            new IdentityHashMap<>();
 
     public MUC04View(CurrentUserSignal currentUserSignal,
             MUC04Signals muc04Signals,
             UserSessionRegistry userSessionRegistry) {
-        CurrentUserSignal.UserInfo userInfo = currentUserSignal.getUserSignal()
-                .peek();
+        CurrentUserSignal.UserInfo userInfo =
+                currentUserSignal.getUserSignal().peek();
         if (userInfo == null || !userInfo.isAuthenticated()) {
             throw new IllegalStateException(
                     "User must be authenticated to access this view");
         }
         this.currentUser = userInfo.getUsername();
         this.muc04Signals = muc04Signals;
-        this.userSessionRegistry = userSessionRegistry;
 
         setSpacing(true);
         setPadding(true);
 
-        H2 title = new H2(
-                "Multi-User Case 4: Collaborative Form Editing with Locking");
+        Checkbox lockingCheckbox = new Checkbox("Enable field locking");
+        lockingCheckbox.bindValue(lockingEnabledSignal,
+                lockingEnabledSignal::set);
 
-        Paragraph description = new Paragraph(
-                "This demonstrates collaborative form editing with field-level locking. "
-                        + "When you focus a field, it becomes locked for other users. "
-                        + "Other users see who is editing each field and are prevented from concurrent edits.");
-
-        // Company Name field
-        TextField companyNameField = createLockedField("companyName",
+        TextField companyNameField = createCollaborativeField("companyName",
                 "Company Name", muc04Signals.getCompanyNameSignal());
-
-        // Address field
-        TextField addressField = createLockedField("address", "Address",
+        TextField addressField = createCollaborativeField("address", "Address",
                 muc04Signals.getAddressSignal());
+        TextField phoneField = createCollaborativeField("phone",
+                "Phone Number", muc04Signals.getPhoneSignal());
 
-        // Phone field
-        TextField phoneField = createLockedField("phone", "Phone Number",
-                muc04Signals.getPhoneSignal());
+        ActiveUsersDisplay activeSessionsBox =
+                new ActiveUsersDisplay(userSessionRegistry, "muc-04");
 
-        // Active sessions display
-        ActiveUsersDisplay activeSessionsBox = new ActiveUsersDisplay(
-                userSessionRegistry, "muc-04");
+        Div editorsDiv = createEditorsPanel();
 
-        // Active editors display
-        H3 editorsTitle = new H3("Active Editors");
+        ValueSignal<Boolean> showSaveSuccessSignal = new ValueSignal<>(false);
+        Paragraph successMsg = new Paragraph("Changes saved successfully");
+        successMsg.getStyle().set("color", "green");
+        successMsg.bindVisible(showSaveSuccessSignal);
+
+        Button saveButton = new Button("Save Changes", event -> {
+            showSaveSuccessSignal.set(true);
+            event.getSource().getUI().ifPresent(ui -> ui.access(() -> {
+                showSaveSuccessSignal.set(false);
+            }));
+        });
+        saveButton.addThemeName("primary");
+
+        add(new H2("Multi-User Case 4: Collaborative Form Editing"),
+                new Paragraph(
+                        "This demonstrates collaborative form editing with "
+                                + "field-highlighter. When you focus a field, "
+                                + "other users see who is editing via colored "
+                                + "outlines. Enable field locking to prevent "
+                                + "concurrent edits."),
+                activeSessionsBox, new H3("Shared Form Data"),
+                lockingCheckbox, companyNameField, addressField, phoneField,
+                saveButton, successMsg, new H3("Active Editors"), editorsDiv);
+    }
+
+    private Div createEditorsPanel() {
         Div editorsDiv = new Div();
         editorsDiv.getStyle().set("background-color", "#e3f2fd")
                 .set("padding", "1em").set("border-radius", "4px");
 
-        // Empty state message
         Span emptyMsg = new Span("No fields are currently being edited");
         emptyMsg.getStyle().set("font-style", "italic");
         emptyMsg.bindVisible(muc04Signals.getFieldLocksSignal()
-                .map(locks -> locks.isEmpty()));
+                .map(Map::isEmpty));
         editorsDiv.add(emptyMsg);
 
-        // Lock entries container (must be separate since bindChildren
-        // requires exclusive ownership of its children)
         Div locksContainer = new Div();
         editorsDiv.add(locksContainer);
 
         locksContainer
                 .bindChildren(muc04Signals.getFieldLocksSignal().map(locks -> {
                     lockKeyMap.clear();
-                    locks.forEach((key, signal) -> lockKeyMap.put(signal, key));
-                    return new java.util.ArrayList<>(locks.values());
-                }), this::createLockItem);
+                    locks.forEach(
+                            (key, signal) -> lockKeyMap.put(signal, key));
+                    return new ArrayList<>(locks.values());
+                }), this::createEditorItem);
 
-        // Save success message with signal-driven visibility
-        ValueSignal<Boolean> showSaveSuccessSignal = new ValueSignal<>(false);
-        Paragraph successMsg = new Paragraph("✓ Changes saved successfully");
-        successMsg.getStyle().set("color", "green");
-        successMsg.bindVisible(showSaveSuccessSignal);
-
-        // Save button
-        Button saveButton = new Button("Save Changes", event -> {
-            showSaveSuccessSignal.set(true);
-            new Thread(() -> {
-                try {
-                    Thread.sleep(2000);
-                    showSaveSuccessSignal.set(false);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }).start();
-        });
-        saveButton.addThemeName("primary");
-
-        // Info box
-        Div infoBox = new Div();
-        infoBox.getStyle().set("background-color", "#fff3e0")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("margin-top", "1em").set("font-style", "italic");
-        infoBox.add(new Paragraph(
-                "💡 Field-level locking prevents edit conflicts in collaborative scenarios. "
-                        + "When a user focuses on a field, other users see it's locked. "
-                        + "In production, this would include:\n"
-                        + "• Automatic lock timeout after inactivity\n"
-                        + "• Optimistic locking on save with conflict detection\n"
-                        + "• Real-time value synchronization\n"
-                        + "• Merge strategies for concurrent edits"));
-
-        add(title, description, activeSessionsBox, new H3("Shared Form Data"),
-                companyNameField, addressField, phoneField, saveButton,
-                successMsg, editorsTitle, editorsDiv, infoBox);
+        return editorsDiv;
     }
 
-    private TextField createLockedField(String fieldName, String label,
-            com.vaadin.flow.signals.shared.SharedValueSignal<String> signal) {
+    private TextField createCollaborativeField(String fieldName, String label,
+            SharedValueSignal<String> signal) {
         TextField field = new TextField(label);
         field.setWidthFull();
 
-        // Bind value
         field.bindValue(signal, signal::set);
 
-        // Lock field when focused
         field.addFocusListener(event -> {
             if (sessionId != null) {
-                muc04Signals.lockField(fieldName, currentUser, sessionId);
+                muc04Signals.startEditing(fieldName, currentUser, sessionId);
             }
         });
 
-        // Unlock when blurred
         field.addBlurListener(event -> {
             if (sessionId != null) {
-                muc04Signals.unlockField(fieldName, currentUser, sessionId);
+                muc04Signals.stopEditing(fieldName, currentUser, sessionId);
             }
         });
 
-        // Show who is editing
-        Signal<String> helperTextSignal = muc04Signals.getFieldLocksSignal()
-                .map(locks -> {
-                    com.vaadin.flow.signals.shared.SharedValueSignal<MUC04Signals.FieldLock> lockSignal = locks
-                            .get(fieldName);
-                    if (lockSignal == null) {
-                        return "Available to edit";
-                    }
-                    MUC04Signals.FieldLock lock = lockSignal.get();
-                    if (lock == null) {
-                        return "Available to edit";
-                    } else if (sessionId != null
-                            && lock.username().equals(currentUser)
-                            && lock.sessionId().equals(sessionId)) {
-                        return "You are editing this field";
-                    } else {
-                        return "🔒 " + lock.username()
-                                + " is editing this field";
-                    }
-                });
-        field.bindHelperText(helperTextSignal);
+        field.getElement().executeJs(
+                "customElements.get('vaadin-field-highlighter').init(this)");
 
-        // Disable if locked by another user
-        Signal<Boolean> enabledSignal = muc04Signals.getFieldLocksSignal()
-                .map(locks -> {
-                    com.vaadin.flow.signals.shared.SharedValueSignal<MUC04Signals.FieldLock> lockSignal = locks
-                            .get(fieldName);
-                    if (lockSignal == null) {
+        Signal.effect(field, () -> updateFieldHighlighter(field, fieldName));
+
+        Signal<Boolean> enabledSignal = lockingEnabledSignal.map(
+                lockingEnabled -> {
+                    if (!lockingEnabled) {
                         return true;
                     }
-                    MUC04Signals.FieldLock lock = lockSignal.get();
-                    return lock == null || (sessionId != null
-                            && lock.username().equals(currentUser)
-                            && lock.sessionId().equals(sessionId));
+                    return !isEditedByOtherUser(fieldName);
                 });
         field.bindEnabled(enabledSignal);
 
         return field;
     }
 
+    private void updateFieldHighlighter(TextField field, String fieldName) {
+        var locks = muc04Signals.getFieldLocksSignal().get();
+        var lockSignal = locks.get(fieldName);
+
+        if (lockSignal == null) {
+            clearFieldHighlighter(field);
+            return;
+        }
+
+        MUC04Signals.FieldLock lock = lockSignal.get();
+        if (lock != null && !isCurrentSession(lock)) {
+            int colorIndex =
+                    Math.abs(lock.username().hashCode()) % USER_COLOR_COUNT;
+            field.getElement().executeJs(
+                    "customElements.get('vaadin-field-highlighter')"
+                            + ".setUsers(this, [{id: $0, name: $1, colorIndex: $2}])",
+                    lock.username().hashCode(), lock.username(), colorIndex);
+        } else {
+            clearFieldHighlighter(field);
+        }
+    }
+
+    private void clearFieldHighlighter(TextField field) {
+        field.getElement().executeJs(
+                "customElements.get('vaadin-field-highlighter')"
+                        + ".setUsers(this, [])");
+    }
+
+    private boolean isEditedByOtherUser(String fieldName) {
+        var locks = muc04Signals.getFieldLocksSignal().get();
+        var lockSignal = locks.get(fieldName);
+        if (lockSignal == null) {
+            return false;
+        }
+        MUC04Signals.FieldLock lock = lockSignal.get();
+        return lock != null && !isCurrentSession(lock);
+    }
+
+    private boolean isCurrentSession(MUC04Signals.FieldLock lock) {
+        return sessionId != null && lock.username().equals(currentUser)
+                && lock.sessionId().equals(sessionId);
+    }
+
     private String formatFieldName(String fieldName) {
         return switch (fieldName) {
-        case "companyName" -> "Company Name";
-        case "address" -> "Address";
-        case "phone" -> "Phone Number";
-        default -> fieldName;
+            case "companyName" -> "Company Name";
+            case "address" -> "Address";
+            case "phone" -> "Phone Number";
+            default -> fieldName;
         };
     }
 
@@ -229,23 +237,20 @@ public class MUC04View extends VerticalLayout {
         this.sessionId = SessionIdHelper.getCurrentSessionId();
     }
 
-    private HorizontalLayout createLockItem(
-            com.vaadin.flow.signals.shared.SharedValueSignal<MUC04Signals.FieldLock> lockSignal) {
+    private HorizontalLayout createEditorItem(
+            SharedValueSignal<MUC04Signals.FieldLock> lockSignal) {
         String fieldName = lockKeyMap.getOrDefault(lockSignal, "");
         String fieldLabel = formatFieldName(fieldName);
 
         MUC04Signals.FieldLock lock = lockSignal.peek();
-        boolean isCurrentSession = sessionId != null
-                && lock.username().equals(currentUser)
-                && lock.sessionId().equals(sessionId);
+        boolean isCurrentUser = isCurrentSession(lock);
 
         HorizontalLayout item = new HorizontalLayout();
         item.setSpacing(true);
-        item.setAlignItems(
-                com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
+        item.setAlignItems(FlexComponent.Alignment.CENTER);
         item.getStyle().set("padding", "0.5em")
                 .set("background-color",
-                        isCurrentSession ? "#fff3e0" : "transparent")
+                        isCurrentUser ? "#fff3e0" : "transparent")
                 .set("border-radius", "4px");
 
         Image avatar = new Image(
@@ -255,8 +260,7 @@ public class MUC04View extends VerticalLayout {
         avatar.getStyle().set("border-radius", "50%").set("object-fit",
                 "cover");
 
-        Span label = new Span(
-                String.format("🔒 %s: %s", fieldLabel, lock.username()));
+        Span label = new Span("%s: %s".formatted(fieldLabel, lock.username()));
 
         item.add(avatar, label);
         return item;
