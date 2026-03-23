@@ -64,7 +64,11 @@ public class UserSessionRegistry {
             });
 
     /**
-     * Get the signal containing the list of active users.
+     * Get the signal containing the list of active users. The signal changes
+     * every time a user is registered or unregistered. This also happens on
+     * every browser refresh, because {@code MainLayout}'s detach listener
+     * unregisters the user and the subsequent {@code BeforeEnterEvent}
+     * registers the user again.
      */
     public SharedListSignal<UserInfo> getActiveUsersSignal() {
         return activeUsersSignal;
