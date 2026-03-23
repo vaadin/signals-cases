@@ -772,15 +772,14 @@ public class UseCase17View extends VerticalLayout {
     }
 
     private Div createComponentSummaryItem(ValueSignal<Component> compSignal) {
-        var comp = compSignal.peek();
         Div item = new Div();
         item.getStyle().set("margin-bottom", "0.5em").set("display", "flex")
                 .set("justify-content", "space-between");
 
-        Span name = new Span(comp.getName());
+        Span name = new Span(() -> compSignal.get().getName());
         name.getStyle().set("flex", "1");
 
-        Span price = new Span("$" + comp.getPrice().setScale(0, RoundingMode.HALF_UP));
+        Span price = new Span(() -> "$" + compSignal.get().getPrice().setScale(0, RoundingMode.HALF_UP));
         price.getStyle().set("font-weight", "bold").set("color",
                 "var(--lumo-primary-color)");
 
@@ -789,11 +788,10 @@ public class UseCase17View extends VerticalLayout {
     }
 
     private Div createCompatibilityCheckDiv(ValueSignal<String> statusSignal) {
-        var status = statusSignal.peek();
         Div checkDiv = new Div();
         checkDiv.getStyle().set("padding", "0.25em 0").set("font-size",
                 "0.9em");
-        checkDiv.getElement().setProperty("innerHTML", status);
+        checkDiv.getElement().bindProperty("innerHTML", statusSignal, null);
         return checkDiv;
     }
 
