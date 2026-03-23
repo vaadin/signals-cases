@@ -39,11 +39,12 @@ public class SignalFieldHighlighter extends FieldHighlighterInitializer {
     /**
      * Represents a user to display in the field-highlighter.
      *
-     * @param id         unique user identifier
+     * @param id         unique user identifier (includes session)
      * @param name       display name shown in the user tag
      * @param colorIndex index into the user color palette (0-6)
+     * @param sessionId  unique session identifier
      */
-    public record User(int id, String name, int colorIndex) {
+    public record User(int id, String name, int colorIndex, String sessionId) {
 
         /**
          * Creates a user from a display name, deriving a stable id and color
@@ -53,8 +54,21 @@ public class SignalFieldHighlighter extends FieldHighlighterInitializer {
          * @return a new user instance
          */
         public static User fromName(String name) {
-            return new User(name.hashCode(), name,
-                    Math.abs(name.hashCode()) % COLOR_COUNT);
+            return fromNameAndSession(name, java.util.UUID.randomUUID().toString());
+        }
+
+        /**
+         * Creates a user from a display name and session ID, deriving a stable
+         * id and color from the combination.
+         *
+         * @param name      the display name
+         * @param sessionId the session identifier
+         * @return a new user instance
+         */
+        public static User fromNameAndSession(String name, String sessionId) {
+            String combined = name + "#" + sessionId;
+            return new User(combined.hashCode(), name,
+                    Math.abs(name.hashCode()) % COLOR_COUNT, sessionId);
         }
     }
 
@@ -109,7 +123,7 @@ public class SignalFieldHighlighter extends FieldHighlighterInitializer {
                     .map(Signal::get)
                     .filter(u -> u != null
                             && (localUser == null
-                                    || u.id() != localUser.id()))
+                                    || !u.sessionId().equals(localUser.sessionId())))
                     .toList();
             setUsers(field.getElement(), users);
         });
@@ -157,6 +171,7 @@ public class SignalFieldHighlighter extends FieldHighlighterInitializer {
         node.put("id", user.id());
         node.put("name", user.name());
         node.put("colorIndex", user.colorIndex());
+        // sessionId is not sent to the client, only used server-side
         return node;
     }
 }

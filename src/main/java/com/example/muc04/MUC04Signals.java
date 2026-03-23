@@ -39,13 +39,19 @@ public class MUC04Signals {
     }
 
     public void startEditing(String fieldName, User user) {
-        getFieldEditors(fieldName).insertLast(user);
+        var editors = getFieldEditors(fieldName);
+        boolean alreadyEditing = editors.peek().stream()
+                .map(entry -> entry.peek())
+                .anyMatch(u -> u != null && u.sessionId().equals(user.sessionId()));
+        if (!alreadyEditing) {
+            editors.insertLast(user);
+        }
     }
 
     public void stopEditing(String fieldName, User user) {
         getFieldEditors(fieldName).peek().stream().filter(entry -> {
             var u = entry.peek();
-            return u != null && u.id() == user.id();
+            return u != null && u.sessionId().equals(user.sessionId());
         }).findFirst().ifPresent(getFieldEditors(fieldName)::remove);
     }
 }

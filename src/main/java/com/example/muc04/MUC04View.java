@@ -1,5 +1,7 @@
 package com.example.muc04;
 
+import java.util.Map;
+
 import com.example.muc04.SignalFieldHighlighter.User;
 import com.example.security.CurrentUserSignal;
 import com.example.security.CurrentUserSignal.UserInfo;
@@ -50,7 +52,10 @@ public class MUC04View extends VerticalLayout {
             MUC04Signals muc04Signals,
             UserSessionRegistry userSessionRegistry) {
         UserInfo userInfo = currentUserSignal.getUserSignal().peek();
-        this.currentUser = User.fromName(userInfo.getUsername());
+        String sessionId = com.vaadin.flow.server.VaadinSession.getCurrent()
+                .getSession().getId();
+        this.currentUser = User.fromNameAndSession(userInfo.getUsername(),
+                sessionId);
         this.muc04Signals = muc04Signals;
 
         setSpacing(true);
@@ -70,7 +75,7 @@ public class MUC04View extends VerticalLayout {
         var activeSessionsBox = new ActiveUsersDisplay(userSessionRegistry,
                 "muc-04");
 
-        var editorsDiv = createEditorsPanel();
+        var typingStatusBanner = createTypingStatusBanner();
 
         var saveButton = new Button("Save Changes",
                 _ -> Notification.show("Changes saved successfully"));
@@ -79,73 +84,157 @@ public class MUC04View extends VerticalLayout {
         add(new H2("Multi-User Case 4: Collaborative Form Editing"),
                 new Paragraph(
                         "This demonstrates collaborative form editing with "
-                                + "field-highlighter. When you focus a field, "
+                                + "field-highlighter. When you type in a field, "
                                 + "other users see who is editing via colored "
                                 + "outlines. Enable field locking to prevent "
                                 + "concurrent edits."), activeSessionsBox,
                 new H3("Shared Form Data"), lockingCheckbox, companyNameField,
-                addressField, phoneField, saveButton, new H3("Active Editors"),
-                editorsDiv);
+                addressField, phoneField, saveButton, typingStatusBanner);
     }
 
-    private Div createEditorsPanel() {
-        var editorsDiv = new Div();
-        editorsDiv.getStyle().set("background-color", "#e3f2fd")
-                .set("padding", "1em").set("border-radius", "4px");
+    private Div createTypingStatusBanner() {
+        var banner = new Div();
+        banner.getStyle()
+                .set("position", "fixed")
+                .set("bottom", "20px")
+                .set("left", "50%")
+                .set("transform", "translateX(-50%)")
+                .set("background", "linear-gradient(135deg, #667eea 0%, #764ba2 100%)")
+                .set("color", "white")
+                .set("padding", "12px 24px")
+                .set("border-radius", "24px")
+                .set("font-size", "14px")
+                .set("font-weight", "500")
+                .set("z-index", "1000")
+                .set("box-shadow", "0 4px 12px rgba(0,0,0,0.3)")
+                .set("display", "flex")
+                .set("align-items", "center")
+                .set("gap", "8px")
+                .set("animation", "slideUp 0.3s ease-out");
 
-        addFieldEditorList(editorsDiv, "companyName", "Company Name");
-        addFieldEditorList(editorsDiv, "address", "Address");
-        addFieldEditorList(editorsDiv, "phone", "Phone Number");
+        // Add CSS animation
+        banner.getElement().executeJs(
+            "const style = document.createElement('style');" +
+            "style.textContent = '@keyframes slideUp { from { transform: translate(-50%, 20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }';" +
+            "document.head.appendChild(style);");
 
-        return editorsDiv;
-    }
+        // Map to track field name to display name
+        var fieldLabels = Map.of(
+                "companyName", "Company Name",
+                "address", "Address",
+                "phone", "Phone Number"
+        );
 
-    private void addFieldEditorList(Div container, String fieldName,
-            String label) {
-        var editors = muc04Signals.getFieldEditors(fieldName);
+        // Typing indicator icon (animated dots)
+        var typingIcon = new Span("✍️");
+        typingIcon.getStyle()
+                .set("font-size", "16px")
+                .set("animation", "pulse 1.5s ease-in-out infinite");
 
-        var fieldDiv = new Div();
-        fieldDiv.bindVisible(editors.map(list -> !list.isEmpty()));
+        banner.getElement().executeJs(
+            "const style = document.createElement('style');" +
+            "style.textContent = '@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }';" +
+            "document.head.appendChild(style);");
 
-        var fieldLabel = new Span(label + ": ");
-        fieldLabel.getStyle().set("font-weight", "bold");
-        fieldDiv.add(fieldLabel);
+        var statusText = new Span();
+        statusText.getStyle().set("line-height", "1.4");
 
-        var namesContainer = new Div();
-        namesContainer.getStyle().set("display", "inline");
-        namesContainer.bindChildren(editors, this::createEditorName);
-        fieldDiv.add(namesContainer);
+        // Combine all editors into a single signal with improved formatting
+        var allEditorsSignal = Signal.computed(() -> {
+            var messages = new java.util.ArrayList<String>();
 
-        container.add(fieldDiv);
-    }
+            for (var entry : fieldLabels.entrySet()) {
+                var fieldName = entry.getKey();
+                var fieldLabel = entry.getValue();
+                var editors = muc04Signals.getFieldEditors(fieldName).get();
 
-    private Span createEditorName(SharedValueSignal<User> userSignal) {
-        var user = userSignal.peek();
-        var name = new Span(user.name());
-        name.getStyle().set("margin-right", "0.5em");
-        return name;
+                for (var editorSignal : editors) {
+                    var user = editorSignal.get();
+                    if (user != null && !user.sessionId().equals(currentUser.sessionId())) {
+                        messages.add(user.name() + " is editing \"" + fieldLabel + "\"");
+                    }
+                }
+            }
+
+            if (messages.isEmpty()) {
+                return "";
+            } else if (messages.size() == 1) {
+                return messages.get(0);
+            } else {
+                return String.join(" | ", messages);
+            }
+        });
+
+        statusText.bindText(allEditorsSignal);
+        banner.bindVisible(allEditorsSignal.map(text -> !text.isEmpty()));
+        banner.add(typingIcon, statusText);
+
+        return banner;
     }
 
     private TextField createCollaborativeField(String fieldName, String label,
             SharedValueSignal<String> signal) {
         var field = new TextField(label);
         field.setWidthFull();
+
+        // Enable eager value synchronization for immediate updates
+        field.setValueChangeMode(
+                com.vaadin.flow.data.value.ValueChangeMode.EAGER);
+
         field.bindValue(signal, signal::set);
-        field.addFocusListener(
-                _ -> muc04Signals.startEditing(fieldName, currentUser));
+
+        // Start editing on value change (immediate feedback while typing)
+        field.addValueChangeListener(event -> {
+            if (event.isFromClient()) {
+                muc04Signals.startEditing(fieldName, currentUser);
+            }
+        });
+
         field.addBlurListener(
                 _ -> muc04Signals.stopEditing(fieldName, currentUser));
 
         var editors = muc04Signals.getFieldEditors(fieldName);
         SignalFieldHighlighter.bind(field, editors, currentUser);
 
-        // Disable field if locking is enabled and another user is editing
+        // Add visual highlighting when others are editing
+        Signal.effect(field, () -> {
+            var otherEditors = editors.get().stream()
+                    .map(Signal::get)
+                    .filter(u -> u != null && !u.sessionId().equals(currentUser.sessionId()))
+                    .toList();
+
+            if (!otherEditors.isEmpty()) {
+                var firstEditor = otherEditors.get(0);
+                var colors = new String[] {
+                    "#e91e63", "#9c27b0", "#673ab7",
+                    "#3f51b5", "#2196f3", "#009688", "#ff9800"
+                };
+                var color = colors[firstEditor.colorIndex() % colors.length];
+
+                // Apply light background and subtle border to the input
+                field.getElement().executeJs(
+                    "const input = this.shadowRoot ? this.shadowRoot.querySelector('input, textarea') : null;" +
+                    "if (input) {" +
+                    "  input.style.setProperty('border', '1px solid " + color + "', 'important');" +
+                    "  input.style.setProperty('background-color', '" + color + "08', 'important');" +
+                    "}");
+            } else {
+                field.getElement().executeJs(
+                    "const input = this.shadowRoot ? this.shadowRoot.querySelector('input, textarea') : null;" +
+                    "if (input) {" +
+                    "  input.style.removeProperty('border');" +
+                    "  input.style.removeProperty('background-color');" +
+                    "}");
+            }
+        });
+
+        // Disable field if locking is enabled and another session is editing
         var enabledSignal = lockingEnabledSignal.map(lockingEnabled -> {
             if (!lockingEnabled) {
                 return true;
             }
             return editors.get().stream().map(Signal::get)
-                    .noneMatch(u -> u != null && u.id() != currentUser.id());
+                    .noneMatch(u -> u != null && !u.sessionId().equals(currentUser.sessionId()));
         });
         field.bindEnabled(enabledSignal);
 
