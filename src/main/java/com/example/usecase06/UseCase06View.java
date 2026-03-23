@@ -52,10 +52,9 @@ public class UseCase06View extends VerticalLayout {
         var shippingOptionSignal = new ValueSignal<>(ShippingOption.STANDARD);
 
         // Computed signal for subtotal
-        var subtotalSignal = Signal.computed(
-                () -> MissingAPI.getValues(cartItemsSignal)
-                        .map(CartItem::totalPrice)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add));
+        var subtotalSignal = Signal.computed(() -> MissingAPI
+                .getValues(cartItemsSignal).map(CartItem::totalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
 
         // Computed signal for discount
         var discountSignal = Signal.computed(() -> {
@@ -207,7 +206,8 @@ public class UseCase06View extends VerticalLayout {
                 .set("padding", "0.75em").set("border-radius", "4px")
                 .set("margin-bottom", "0.5em");
 
-        var nameLabel = new Span(format(product.name() + " - $", product.price()));
+        var nameLabel = new Span(
+                format(product.name() + " - $", product.price()));
         nameLabel.getStyle().set("flex-grow", "1").set("font-weight", "500");
 
         var addButton = new Button("Add",
@@ -230,7 +230,8 @@ public class UseCase06View extends VerticalLayout {
                 .set("margin-bottom", "0.5em");
 
         var nameLabel = new Span(
-                itemSignal.map(item -> format(item.product().name() + " - $", item.product().price())));
+                itemSignal.map(item -> format(item.product().name() + " - $",
+                        item.product().price())));
         nameLabel.getStyle().set("flex-grow", "1").set("font-weight", "500");
 
         var quantityField = new IntegerField();
@@ -251,7 +252,8 @@ public class UseCase06View extends VerticalLayout {
             }
         });
 
-        var itemTotalLabel = new Span(formatter("$", itemSignal.map(CartItem::totalPrice)));
+        var itemTotalLabel = new Span(
+                formatter("$", itemSignal.map(CartItem::totalPrice)));
 
         itemTotalLabel.setWidth("100px");
         itemTotalLabel.getStyle().set("text-align", "right")
@@ -274,9 +276,9 @@ public class UseCase06View extends VerticalLayout {
                 signal -> signal.peek().product().id().equals(product.id()))
                 .findFirst();
         existingItem.ifPresentOrElse(
-                existing -> existing.update(item -> item.withQuantity(item.quantity() + 1)),
-                () -> cartItemsSignal
-                        .insertLast(new CartItem(product, 1)));
+                existing -> existing
+                        .update(item -> item.withQuantity(item.quantity() + 1)),
+                () -> cartItemsSignal.insertLast(new CartItem(product, 1)));
     }
 
     private @Nullable DiscountCode validateDiscountCode(String code) {
@@ -296,7 +298,8 @@ public class UseCase06View extends VerticalLayout {
         };
     }
 
-    private static Signal<String> formatter(String prefix, Signal<BigDecimal> signal) {
+    private static Signal<String> formatter(String prefix,
+            Signal<BigDecimal> signal) {
         return () -> format(prefix, signal.get());
     }
 

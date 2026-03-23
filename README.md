@@ -75,7 +75,7 @@ src/main/java/com/example/
 
 ## Running the Application
 
-1. **Prerequisites**: Java 21+, Maven 3.9+
+1. **Prerequisites**: Java 25+, Maven 3.9+
 2. **Build**: `mvn clean install`
 3. **Run**: `mvn spring-boot:run`
 4. **Access**: Open http://localhost:8080
@@ -135,7 +135,7 @@ All users see real-time updates via Vaadin's automatic UI synchronization.
 - **Vaadin 25.1-SNAPSHOT** - Web framework with Signal API
 - **Spring Boot 4.0.1** - Application framework
 - **Spring Security** - Authentication and authorization
-- **Java 21** - Language and platform
+- **Java 25** - Language and platform
 - **Maven** - Build tool
 
 ## Related Resources

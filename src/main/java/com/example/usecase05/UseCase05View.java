@@ -5,10 +5,9 @@ import jakarta.annotation.security.PermitAll;
 import java.util.List;
 import java.util.Map;
 
-import org.jspecify.annotations.Nullable;
-
 import com.example.MissingAPI;
 import com.example.views.MainLayout;
+import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.H2;
@@ -39,11 +38,14 @@ public class UseCase05View extends VerticalLayout {
         // Create signals for selections - use first country as default
         List<String> countries = loadCountries();
         ValueSignal<String> countrySignal = new ValueSignal<>(countries.get(0));
-        ValueSignal<@Nullable String> stateSignal = new ValueSignal<@Nullable String>(null);
-        ValueSignal<@Nullable String> citySignal = new ValueSignal<@Nullable String>(null);
+        ValueSignal<@Nullable String> stateSignal = new ValueSignal<@Nullable String>(
+                null);
+        ValueSignal<@Nullable String> citySignal = new ValueSignal<@Nullable String>(
+                null);
 
         var states = countrySignal.map(country -> loadStates(country));
-        var cities = stateSignal.map(state -> loadCities(countrySignal.get(), state));
+        var cities = stateSignal
+                .map(state -> loadCities(countrySignal.get(), state));
 
         // Country selector
         ComboBox<String> countrySelect = new ComboBox<>("Country");
@@ -84,7 +86,8 @@ public class UseCase05View extends VerticalLayout {
         return statesByCountry.getOrDefault(country, List.of());
     }
 
-    private List<String> loadCities(@Nullable String country, @Nullable String state) {
+    private List<String> loadCities(@Nullable String country,
+            @Nullable String state) {
         if (country == null || state == null) {
             return List.of();
         }

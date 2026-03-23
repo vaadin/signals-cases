@@ -2,6 +2,8 @@ package com.example.usecase17;
 
 import jakarta.annotation.security.PermitAll;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
 
@@ -48,9 +50,9 @@ public class UseCase17View extends VerticalLayout {
     public static class Component {
         protected String id;
         protected String name;
-        protected double price;
+        protected BigDecimal price;
 
-        public Component(String id, String name, double price) {
+        public Component(String id, String name, BigDecimal price) {
             this.id = id;
             this.name = name;
             this.price = price;
@@ -64,7 +66,7 @@ public class UseCase17View extends VerticalLayout {
             return name;
         }
 
-        public double getPrice() {
+        public BigDecimal getPrice() {
             return price;
         }
 
@@ -79,7 +81,7 @@ public class UseCase17View extends VerticalLayout {
         private int tdp;
         private int score;
 
-        public CPU(String id, String name, double price, String socket, int tdp,
+        public CPU(String id, String name, BigDecimal price, String socket, int tdp,
                 int score) {
             super(id, name, price);
             this.socket = socket;
@@ -109,7 +111,7 @@ public class UseCase17View extends VerticalLayout {
         private int m2Slots;
         private int sataSlots;
 
-        public Motherboard(String id, String name, double price, String socket,
+        public Motherboard(String id, String name, BigDecimal price, String socket,
                 String ramType, int maxRamSpeed, int maxRamCapacity,
                 String formFactor, int m2Slots, int sataSlots) {
             super(id, name, price);
@@ -156,7 +158,7 @@ public class UseCase17View extends VerticalLayout {
         private int speed;
         private int capacity;
 
-        public RAM(String id, String name, double price, String type, int speed,
+        public RAM(String id, String name, BigDecimal price, String type, int speed,
                 int capacity) {
             super(id, name, price);
             this.type = type;
@@ -182,7 +184,7 @@ public class UseCase17View extends VerticalLayout {
         private int lengthMm;
         private int score;
 
-        public GPU(String id, String name, double price, int powerConsumption,
+        public GPU(String id, String name, BigDecimal price, int powerConsumption,
                 int lengthMm, int score) {
             super(id, name, price);
             this.powerConsumption = powerConsumption;
@@ -208,7 +210,7 @@ public class UseCase17View extends VerticalLayout {
         private int capacityGB;
         private int speedMBps;
 
-        public Storage(String id, String name, double price, String type,
+        public Storage(String id, String name, BigDecimal price, String type,
                 int capacityGB, int speedMBps) {
             super(id, name, price);
             this.type = type;
@@ -234,7 +236,7 @@ public class UseCase17View extends VerticalLayout {
         private String formFactor;
         private String efficiency;
 
-        public PSU(String id, String name, double price, int wattage,
+        public PSU(String id, String name, BigDecimal price, int wattage,
                 String formFactor, String efficiency) {
             super(id, name, price);
             this.wattage = wattage;
@@ -261,7 +263,7 @@ public class UseCase17View extends VerticalLayout {
         private int cpuCoolerClearanceMm;
         private String psuFormFactor;
 
-        public Case(String id, String name, double price, String formFactor,
+        public Case(String id, String name, BigDecimal price, String formFactor,
                 int gpuClearanceMm, int cpuCoolerClearanceMm,
                 String psuFormFactor) {
             super(id, name, price);
@@ -294,7 +296,7 @@ public class UseCase17View extends VerticalLayout {
         private int maxTdp;
         private String[] compatibleSockets;
 
-        public Cooler(String id, String name, double price, String type,
+        public Cooler(String id, String name, BigDecimal price, String type,
                 int heightMm, int maxTdp, String... compatibleSockets) {
             super(id, name, price);
             this.type = type;
@@ -323,99 +325,99 @@ public class UseCase17View extends VerticalLayout {
     // ==================== Sample Data ====================
 
     private static final List<CPU> ALL_CPUS = Arrays.asList(
-            new CPU("cpu1", "Intel Core i9-14900K", 589, "LGA1700", 125, 100),
-            new CPU("cpu2", "Intel Core i7-14700K", 419, "LGA1700", 125, 85),
-            new CPU("cpu3", "Intel Core i5-14600K", 319, "LGA1700", 125, 70),
-            new CPU("cpu4", "AMD Ryzen 9 7950X", 549, "AM5", 170, 98),
-            new CPU("cpu5", "AMD Ryzen 7 7700X", 349, "AM5", 105, 80),
-            new CPU("cpu6", "AMD Ryzen 5 7600X", 229, "AM5", 105, 65),
-            new CPU("cpu0", "None", 0, "None", 0, 0));
+            new CPU("cpu1", "Intel Core i9-14900K", new BigDecimal("589"), "LGA1700", 125, 100),
+            new CPU("cpu2", "Intel Core i7-14700K", new BigDecimal("419"), "LGA1700", 125, 85),
+            new CPU("cpu3", "Intel Core i5-14600K", new BigDecimal("319"), "LGA1700", 125, 70),
+            new CPU("cpu4", "AMD Ryzen 9 7950X", new BigDecimal("549"), "AM5", 170, 98),
+            new CPU("cpu5", "AMD Ryzen 7 7700X", new BigDecimal("349"), "AM5", 105, 80),
+            new CPU("cpu6", "AMD Ryzen 5 7600X", new BigDecimal("229"), "AM5", 105, 65),
+            new CPU("cpu0", "None", new BigDecimal("0"), "None", 0, 0));
 
     private static final List<Motherboard> ALL_MOTHERBOARDS = Arrays.asList(
-            new Motherboard("mb1", "ASUS ROG Z790", 389, "LGA1700", "DDR5",
+            new Motherboard("mb1", "ASUS ROG Z790", new BigDecimal("389"), "LGA1700", "DDR5",
                     7200, 128, "ATX", 4, 6),
-            new Motherboard("mb2", "MSI MPG Z790", 299, "LGA1700", "DDR5", 6400,
+            new Motherboard("mb2", "MSI MPG Z790", new BigDecimal("299"), "LGA1700", "DDR5", 6400,
                     128, "ATX", 3, 6),
-            new Motherboard("mb3", "ASUS TUF B760", 189, "LGA1700", "DDR5",
+            new Motherboard("mb3", "ASUS TUF B760", new BigDecimal("189"), "LGA1700", "DDR5",
                     5600, 128, "ATX", 2, 4),
-            new Motherboard("mb4", "ASUS ROG X670E", 429, "AM5", "DDR5", 6400,
+            new Motherboard("mb4", "ASUS ROG X670E", new BigDecimal("429"), "AM5", "DDR5", 6400,
                     128, "ATX", 4, 6),
-            new Motherboard("mb5", "MSI MPG X670", 319, "AM5", "DDR5", 6000,
+            new Motherboard("mb5", "MSI MPG X670", new BigDecimal("319"), "AM5", "DDR5", 6000,
                     128, "ATX", 3, 6),
-            new Motherboard("mb6", "ASUS TUF B650", 199, "AM5", "DDR5", 5600,
+            new Motherboard("mb6", "ASUS TUF B650", new BigDecimal("199"), "AM5", "DDR5", 5600,
                     128, "ATX", 2, 4),
-            new Motherboard("mb0", "None", 0, "None", "None", 0, 0, "None", 0,
+            new Motherboard("mb0", "None", new BigDecimal("0"), "None", "None", 0, 0, "None", 0,
                     0));
 
     private static final List<RAM> ALL_RAM = Arrays.asList(
-            new RAM("ram1", "32GB DDR5-6000 (2x16GB)", 129, "DDR5", 6000, 32),
-            new RAM("ram2", "32GB DDR5-5600 (2x16GB)", 99, "DDR5", 5600, 32),
-            new RAM("ram3", "64GB DDR5-6000 (2x32GB)", 219, "DDR5", 6000, 64),
-            new RAM("ram4", "16GB DDR5-5600 (2x8GB)", 59, "DDR5", 5600, 16),
-            new RAM("ram5", "32GB DDR4-3200 (2x16GB)", 79, "DDR4", 3200, 32),
-            new RAM("ram6", "16GB DDR4-3200 (2x8GB)", 45, "DDR4", 3200, 16),
-            new RAM("ram0", "None", 0, "None", 0, 0));
+            new RAM("ram1", "32GB DDR5-6000 (2x16GB)", new BigDecimal("129"), "DDR5", 6000, 32),
+            new RAM("ram2", "32GB DDR5-5600 (2x16GB)", new BigDecimal("99"), "DDR5", 5600, 32),
+            new RAM("ram3", "64GB DDR5-6000 (2x32GB)", new BigDecimal("219"), "DDR5", 6000, 64),
+            new RAM("ram4", "16GB DDR5-5600 (2x8GB)", new BigDecimal("59"), "DDR5", 5600, 16),
+            new RAM("ram5", "32GB DDR4-3200 (2x16GB)", new BigDecimal("79"), "DDR4", 3200, 32),
+            new RAM("ram6", "16GB DDR4-3200 (2x8GB)", new BigDecimal("45"), "DDR4", 3200, 16),
+            new RAM("ram0", "None", new BigDecimal("0"), "None", 0, 0));
 
     private static final List<GPU> ALL_GPUS = Arrays.asList(
-            new GPU("gpu1", "NVIDIA RTX 4090", 1599, 450, 336, 100),
-            new GPU("gpu2", "NVIDIA RTX 4080", 1199, 320, 310, 88),
-            new GPU("gpu3", "NVIDIA RTX 4070 Ti", 799, 285, 285, 75),
-            new GPU("gpu4", "AMD RX 7900 XTX", 999, 355, 320, 85),
-            new GPU("gpu5", "AMD RX 7900 XT", 849, 315, 305, 78),
-            new GPU("gpu6", "NVIDIA RTX 4060 Ti", 499, 160, 244, 55),
-            new GPU("gpu0", "None", 0, 0, 0, 0));
+            new GPU("gpu1", "NVIDIA RTX 4090", new BigDecimal("1599"), 450, 336, 100),
+            new GPU("gpu2", "NVIDIA RTX 4080", new BigDecimal("1199"), 320, 310, 88),
+            new GPU("gpu3", "NVIDIA RTX 4070 Ti", new BigDecimal("799"), 285, 285, 75),
+            new GPU("gpu4", "AMD RX 7900 XTX", new BigDecimal("999"), 355, 320, 85),
+            new GPU("gpu5", "AMD RX 7900 XT", new BigDecimal("849"), 315, 305, 78),
+            new GPU("gpu6", "NVIDIA RTX 4060 Ti", new BigDecimal("499"), 160, 244, 55),
+            new GPU("gpu0", "None", new BigDecimal("0"), 0, 0, 0));
 
     private static final List<Storage> ALL_STORAGE = Arrays.asList(
-            new Storage("stor1", "2TB Samsung 990 Pro (NVMe)", 189, "M.2 NVMe",
+            new Storage("stor1", "2TB Samsung 990 Pro (NVMe)", new BigDecimal("189"), "M.2 NVMe",
                     2000, 7450),
-            new Storage("stor2", "1TB Samsung 990 Pro (NVMe)", 109, "M.2 NVMe",
+            new Storage("stor2", "1TB Samsung 990 Pro (NVMe)", new BigDecimal("109"), "M.2 NVMe",
                     1000, 7450),
-            new Storage("stor3", "2TB Samsung 870 EVO (SATA SSD)", 149,
+            new Storage("stor3", "2TB Samsung 870 EVO (SATA SSD)", new BigDecimal("149"),
                     "2.5\" SATA", 2000, 560),
-            new Storage("stor4", "1TB Samsung 870 EVO (SATA SSD)", 89,
+            new Storage("stor4", "1TB Samsung 870 EVO (SATA SSD)", new BigDecimal("89"),
                     "2.5\" SATA", 1000, 560),
-            new Storage("stor5", "4TB Seagate Barracuda (HDD)", 89,
+            new Storage("stor5", "4TB Seagate Barracuda (HDD)", new BigDecimal("89"),
                     "3.5\" SATA", 4000, 190),
-            new Storage("stor6", "2TB WD Blue (HDD)", 54, "3.5\" SATA", 2000,
+            new Storage("stor6", "2TB WD Blue (HDD)", new BigDecimal("54"), "3.5\" SATA", 2000,
                     180),
-            new Storage("stor7", "None", 0, "None", 0, 0));
+            new Storage("stor7", "None", new BigDecimal("0"), "None", 0, 0));
 
     private static final List<PSU> ALL_PSUS = Arrays.asList(
-            new PSU("psu1", "1000W Corsair RM1000x (80+ Gold)", 199, 1000,
+            new PSU("psu1", "1000W Corsair RM1000x (80+ Gold)", new BigDecimal("199"), 1000,
                     "ATX", "80+ Gold"),
-            new PSU("psu2", "850W Corsair RM850x (80+ Gold)", 149, 850, "ATX",
+            new PSU("psu2", "850W Corsair RM850x (80+ Gold)", new BigDecimal("149"), 850, "ATX",
                     "80+ Gold"),
-            new PSU("psu3", "750W Corsair RM750x (80+ Gold)", 119, 750, "ATX",
+            new PSU("psu3", "750W Corsair RM750x (80+ Gold)", new BigDecimal("119"), 750, "ATX",
                     "80+ Gold"),
-            new PSU("psu4", "650W Corsair RM650x (80+ Gold)", 99, 650, "ATX",
+            new PSU("psu4", "650W Corsair RM650x (80+ Gold)", new BigDecimal("99"), 650, "ATX",
                     "80+ Gold"),
-            new PSU("psu5", "550W Corsair RM550x (80+ Gold)", 79, 550, "ATX",
+            new PSU("psu5", "550W Corsair RM550x (80+ Gold)", new BigDecimal("79"), 550, "ATX",
                     "80+ Gold"),
-            new PSU("psu0", "None", 0, 0, "None", "None"));
+            new PSU("psu0", "None", new BigDecimal("0"), 0, "None", "None"));
 
     private static final List<Case> ALL_CASES = Arrays.asList(
-            new Case("case1", "NZXT H7 Flow (ATX)", 129, "ATX", 400, 185,
+            new Case("case1", "NZXT H7 Flow (ATX)", new BigDecimal("129"), "ATX", 400, 185,
                     "ATX"),
-            new Case("case2", "Fractal Design North (ATX)", 139, "ATX", 360,
+            new Case("case2", "Fractal Design North (ATX)", new BigDecimal("139"), "ATX", 360,
                     170, "ATX"),
-            new Case("case3", "Lian Li O11 Dynamic (ATX)", 149, "ATX", 420, 167,
+            new Case("case3", "Lian Li O11 Dynamic (ATX)", new BigDecimal("149"), "ATX", 420, 167,
                     "ATX"),
-            new Case("case4", "Corsair 4000D Airflow (ATX)", 104, "ATX", 360,
+            new Case("case4", "Corsair 4000D Airflow (ATX)", new BigDecimal("104"), "ATX", 360,
                     170, "ATX"),
-            new Case("case0", "None", 0, "None", 0, 0, "None"));
+            new Case("case0", "None", new BigDecimal("0"), "None", 0, 0, "None"));
 
     private static final List<Cooler> ALL_COOLERS = Arrays.asList(
-            new Cooler("cool1", "Noctua NH-D15 (Air)", 109, "Air", 165, 180,
+            new Cooler("cool1", "Noctua NH-D15 (Air)", new BigDecimal("109"), "Air", 165, 180,
                     "LGA1700", "AM5"),
-            new Cooler("cool2", "be quiet! Dark Rock Pro 4 (Air)", 89, "Air",
+            new Cooler("cool2", "be quiet! Dark Rock Pro 4 (Air)", new BigDecimal("89"), "Air",
                     162, 250, "LGA1700", "AM5"),
-            new Cooler("cool3", "Arctic Liquid Freezer II 360 (AIO)", 149,
+            new Cooler("cool3", "Arctic Liquid Freezer II 360 (AIO)", new BigDecimal("149"),
                     "AIO", 60, 350, "LGA1700", "AM5"),
-            new Cooler("cool4", "NZXT Kraken X63 (AIO)", 139, "AIO", 58, 280,
+            new Cooler("cool4", "NZXT Kraken X63 (AIO)", new BigDecimal("139"), "AIO", 58, 280,
                     "LGA1700", "AM5"),
-            new Cooler("cool5", "Cooler Master Hyper 212 (Air)", 49, "Air", 158,
+            new Cooler("cool5", "Cooler Master Hyper 212 (Air)", new BigDecimal("49"), "Air", 158,
                     150, "LGA1700", "AM5"),
-            new Cooler("cool0", "None", 0, "None", 0, 0, "None", "None"));
+            new Cooler("cool0", "None", new BigDecimal("0"), "None", 0, 0, "None", "None"));
 
     // ==================== Signal Declarations (~70 total) ====================
 
@@ -442,17 +444,17 @@ public class UseCase17View extends VerticalLayout {
             ALL_COOLERS.get(ALL_COOLERS.size() - 1)); // None
 
     // 2. Computed Price Signals (10)
-    private Signal<Double> cpuPriceSignal;
-    private Signal<Double> motherboardPriceSignal;
-    private Signal<Double> ramPriceSignal;
-    private Signal<Double> gpuPriceSignal;
-    private Signal<Double> storage1PriceSignal;
-    private Signal<Double> storage2PriceSignal;
-    private Signal<Double> storage3PriceSignal;
-    private Signal<Double> psuPriceSignal;
-    private Signal<Double> casePriceSignal;
-    private Signal<Double> coolerPriceSignal;
-    private Signal<Double> totalPriceSignal;
+    private Signal<BigDecimal> cpuPriceSignal;
+    private Signal<BigDecimal> motherboardPriceSignal;
+    private Signal<BigDecimal> ramPriceSignal;
+    private Signal<BigDecimal> gpuPriceSignal;
+    private Signal<BigDecimal> storage1PriceSignal;
+    private Signal<BigDecimal> storage2PriceSignal;
+    private Signal<BigDecimal> storage3PriceSignal;
+    private Signal<BigDecimal> psuPriceSignal;
+    private Signal<BigDecimal> casePriceSignal;
+    private Signal<BigDecimal> coolerPriceSignal;
+    private Signal<BigDecimal> totalPriceSignal;
 
     // 3. Computed Power Signals (6)
     private Signal<Integer> cpuPowerSignal;
@@ -522,31 +524,31 @@ public class UseCase17View extends VerticalLayout {
 
     private void initializePriceSignals() {
         cpuPriceSignal = cpuSignal
-                .map(cpu -> cpu != null ? cpu.getPrice() : 0.0);
+                .map(cpu -> cpu != null ? cpu.getPrice() : BigDecimal.ZERO);
         motherboardPriceSignal = motherboardSignal
-                .map(mb -> mb != null ? mb.getPrice() : 0.0);
+                .map(mb -> mb != null ? mb.getPrice() : BigDecimal.ZERO);
         ramPriceSignal = ramSignal
-                .map(ram -> ram != null ? ram.getPrice() : 0.0);
+                .map(ram -> ram != null ? ram.getPrice() : BigDecimal.ZERO);
         gpuPriceSignal = gpuSignal
-                .map(gpu -> gpu != null ? gpu.getPrice() : 0.0);
+                .map(gpu -> gpu != null ? gpu.getPrice() : BigDecimal.ZERO);
         storage1PriceSignal = storage1Signal
-                .map(s -> s != null ? s.getPrice() : 0.0);
+                .map(s -> s != null ? s.getPrice() : BigDecimal.ZERO);
         storage2PriceSignal = storage2Signal
-                .map(s -> s != null ? s.getPrice() : 0.0);
+                .map(s -> s != null ? s.getPrice() : BigDecimal.ZERO);
         storage3PriceSignal = storage3Signal
-                .map(s -> s != null ? s.getPrice() : 0.0);
+                .map(s -> s != null ? s.getPrice() : BigDecimal.ZERO);
         psuPriceSignal = psuSignal
-                .map(psu -> psu != null ? psu.getPrice() : 0.0);
-        casePriceSignal = caseSignal.map(c -> c != null ? c.getPrice() : 0.0);
+                .map(psu -> psu != null ? psu.getPrice() : BigDecimal.ZERO);
+        casePriceSignal = caseSignal.map(c -> c != null ? c.getPrice() : BigDecimal.ZERO);
         coolerPriceSignal = coolerSignal
-                .map(cooler -> cooler != null ? cooler.getPrice() : 0.0);
+                .map(cooler -> cooler != null ? cooler.getPrice() : BigDecimal.ZERO);
 
         totalPriceSignal = Signal.computed(
-                () -> cpuPriceSignal.get() + motherboardPriceSignal.get()
-                        + ramPriceSignal.get() + gpuPriceSignal.get()
-                        + storage1PriceSignal.get() + storage2PriceSignal.get()
-                        + storage3PriceSignal.get() + psuPriceSignal.get()
-                        + casePriceSignal.get() + coolerPriceSignal.get());
+                () -> cpuPriceSignal.get().add(motherboardPriceSignal.get())
+                        .add(ramPriceSignal.get()).add(gpuPriceSignal.get())
+                        .add(storage1PriceSignal.get()).add(storage2PriceSignal.get())
+                        .add(storage3PriceSignal.get()).add(psuPriceSignal.get())
+                        .add(casePriceSignal.get()).add(coolerPriceSignal.get()));
     }
 
     private void initializePowerSignals() {
@@ -886,7 +888,7 @@ public class UseCase17View extends VerticalLayout {
         Signal<String> cartButtonText = Signal.computed(() -> {
             if (canBuildSignal.get()) {
                 return "Add to Cart ($"
-                        + String.format("%.0f", totalPriceSignal.get()) + ")";
+                        + totalPriceSignal.get().setScale(0, RoundingMode.HALF_UP) + ")";
             }
             return "Complete Build First";
         });
@@ -962,7 +964,7 @@ public class UseCase17View extends VerticalLayout {
             if (storage1Signal.get() != null)
                 selectedComponentsSignal.insertLast(storage1Signal.get());
             if (storage2Signal.get() != null
-                    && storage2Signal.get().getPrice() > 0)
+                    && storage2Signal.get().getPrice().compareTo(BigDecimal.ZERO) > 0)
                 selectedComponentsSignal.insertLast(storage2Signal.get());
             if (psuSignal.get() != null)
                 selectedComponentsSignal.insertLast(psuSignal.get());
@@ -989,7 +991,7 @@ public class UseCase17View extends VerticalLayout {
 
         // Price box
         Div priceBox = createStatBox("Total Price",
-                totalPriceSignal.map(p -> "$" + String.format("%.0f", p)),
+                totalPriceSignal.map(p -> "$" + p.setScale(0, RoundingMode.HALF_UP)),
                 "#e8f5e9");
 
         // Power box
@@ -1151,7 +1153,7 @@ public class UseCase17View extends VerticalLayout {
         Span name = new Span(() -> compSignal.get().getName());
         name.getStyle().set("flex", "1");
 
-        Span price = new Span(() -> "$" + String.format("%.0f", compSignal.get().getPrice()));
+        Span price = new Span(() -> "$" + compSignal.get().getPrice().setScale(0, RoundingMode.HALF_UP));
         price.getStyle().set("font-weight", "bold").set("color",
                 "var(--lumo-primary-color)");
 
