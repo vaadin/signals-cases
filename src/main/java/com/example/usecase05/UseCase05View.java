@@ -5,7 +5,6 @@ import jakarta.annotation.security.PermitAll;
 import java.util.List;
 import java.util.Map;
 
-import com.example.MissingAPI;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -16,6 +15,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 @Route(value = "use-case-05", layout = MainLayout.class)
@@ -54,12 +54,13 @@ public class UseCase05View extends VerticalLayout {
 
         // State selector - computed items based on country
         ComboBox<String> stateSelect = new ComboBox<>("State/Province");
-        MissingAPI.bindItems(stateSelect, states);
+        Signal.effect(stateSelect,
+                () -> stateSelect.setItems(states.get()));
         stateSelect.bindValue(stateSignal, stateSignal::set);
 
         // City selector - computed items based on state
         ComboBox<String> citySelect = new ComboBox<>("City");
-        MissingAPI.bindItems(citySelect, cities);
+        Signal.effect(citySelect, () -> citySelect.setItems(cities.get()));
         citySelect.bindValue(citySignal, citySignal::set);
         citySelect.bindEnabled(() -> !cities.get().isEmpty());
 
