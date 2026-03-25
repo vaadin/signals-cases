@@ -7,7 +7,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
-import com.example.MissingAPI;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
@@ -178,7 +177,8 @@ public class UseCase24View extends VerticalLayout {
                 notification -> createNotificationCard(notification,
                         notificationsSignal)));
 
-        MissingAPI.bindItems(virtualList, filteredSignal);
+        Signal.effect(virtualList,
+                () -> virtualList.setItems(filteredSignal.get()));
 
         // Empty state
         var emptyState = new Paragraph(
@@ -196,7 +196,7 @@ public class UseCase24View extends VerticalLayout {
         infoBox.add(new Paragraph(
                 "This use case demonstrates VirtualList bound to a signal-based data source. "
                         + "A ListSignal<Notification> is the source of truth. A computed signal filters by type and read status, "
-                        + "then MissingAPI.bindItems() binds the filtered list to the VirtualList. "
+                        + "then Signal.effect() binds the filtered list to the VirtualList. "
                         + "Each card uses a ComponentRenderer for rich per-item rendering. "
                         + "Actions find the matching ValueSignal in the ListSignal by ID and call set() or remove()."));
 
