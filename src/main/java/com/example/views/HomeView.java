@@ -55,7 +55,7 @@ public class HomeView extends VerticalLayout {
         stats.add(
                 createStat("29",
                         "Total use cases (23 single-user + 6 multi-user)"),
-                createStat("23", "Single-user use cases across 14 categories"),
+                createStat("23", "Single-user use cases across 11 categories"),
                 createStat("6", "Multi-user collaboration use cases"));
 
         // Categories
@@ -67,12 +67,14 @@ public class HomeView extends VerticalLayout {
                 "Dynamic button state, progressive disclosure with nested conditions"),
                 createCategory("SVG / Graphics", "UC03",
                         "Interactive SVG shape editor with attribute binding"),
-                createCategory("Lists & Grids", "UC04, UC06-07",
-                        "Filtered data grid, shopping cart, master-detail invoice"),
+                createCategory("Lists & Grids", "UC04, UC06",
+                        "Filtered data grid, shopping cart"),
                 createCategory("Forms", "UC05, UC08-09",
                         "Cascading selector, multi-step wizard, Binder integration"),
-                createCategory("Browser Integration", "UC11-13",
-                        "Responsive layout, dynamic view title, current user signal"),
+                createCategory("Events & Layout", "UC10-11",
+                        "Bridging events to signals, responsive layout"),
+                createCategory("User Context", "UC13",
+                        "Real-time active users with current user signal"),
                 createCategory("Async & Search", "UC14-16",
                         "Async data loading, debounced search, URL state integration"),
                 createCategory("Complex State & AI", "UC17-18",
@@ -81,22 +83,18 @@ public class HomeView extends VerticalLayout {
                         "Parallel data loading with individual spinners, user preferences"),
                 createCategory("i18n, Mapping & Dashboard", "UC21-23",
                         "Reactive i18n, two-way mapped signals, real-time dashboard"),
-                createCategory("VirtualList", "UC24",
-                        "VirtualList with signal data source, notification inbox"),
+                createCategory("VirtualList & Streaming", "UC24-25",
+                        "VirtualList notification inbox, real-time stock ticker"),
                 createCategory("Multi-User Collaboration", "MUC01-04, MUC06-07",
-                        "Chat, cursors, click race game, locking, shared tasks, shared LLM tasks"));
+                        "Chat, cursors, click race game, collaborative editing, shared tasks, shared LLM tasks"));
 
         // Documentation Link
         H2 docsTitle = new H2("Documentation");
         Paragraph docs = new Paragraph();
-        docs.add(new Span("For detailed documentation, see "));
-        docs.add(new Anchor("https://github.com/vaadin/platform/issues/8366",
-                "vaadin/platform#8366 - Signal API Proposal"));
-        docs.add(new Span(" and the "));
-        docs.add(new Anchor(
-                "https://github.com/vaadin/signals-cases/blob/main/signal-use-cases.md",
-                "signal-use-cases.md"));
-        docs.add(new Span(" file in this project."));
+        docs.add(new Span("For detailed documentation, see the "));
+        docs.add(new Anchor("https://vaadin.com/docs/latest/flow/ui-state",
+                "Vaadin UI State Management documentation"));
+        docs.add(new Span("."));
 
         // Getting Started
         H2 gettingStartedTitle = new H2("Getting Started");
