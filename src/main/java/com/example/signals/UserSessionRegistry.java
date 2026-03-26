@@ -64,7 +64,11 @@ public class UserSessionRegistry {
             });
 
     /**
-     * Get the signal containing the list of active users.
+     * Get the signal containing the list of active users. The signal changes
+     * every time a user is registered or unregistered. This also happens on
+     * every browser refresh, because {@code MainLayout}'s detach listener
+     * unregisters the user and the subsequent {@code BeforeEnterEvent}
+     * registers the user again.
      */
     public SharedListSignal<UserInfo> getActiveUsersSignal() {
         return activeUsersSignal;
@@ -189,6 +193,24 @@ public class UserSessionRegistry {
                         .equals(userSignal.peek().getCompositeKey()))
                 .findFirst().map(userSignal -> userSignal.peek().nickname())
                 .orElse(null);
+    }
+
+    /**
+     * Get a reactive signal for a user's display name, given their composite
+     * key (username:sessionId). Updates automatically when the user's nickname
+     * or the active users list changes.
+     */
+    public Signal<String> getDisplayNameSignal(String compositeKey) {
+        return Signal.cached(() -> {
+            var users = activeUsersSignal.get();
+            var names = displayNamesSignal.get();
+            for (int i = 0; i < users.size() && i < names.size(); i++) {
+                if (compositeKey.equals(users.get(i).get().getCompositeKey())) {
+                    return names.get(i);
+                }
+            }
+            return compositeKey;
+        });
     }
 
     /**

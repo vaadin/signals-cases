@@ -1,6 +1,5 @@
 package com.example.usecase18;
 
-import com.example.MissingAPI;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -326,9 +325,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES,
                 GridVariant.LUMO_COMPACT);
 
-        // Bind directly to ListSignal - it will register dependencies on all
-        // individual ValueSignals
-        MissingAPI.bindItems(grid, tasksSignal);
+        Signal.effect(grid,
+                () -> grid.setItems(tasksSignal.getValues().toList()));
 
         gridContainer.add(grid);
         gridContainer.setFlexGrow(1, grid);

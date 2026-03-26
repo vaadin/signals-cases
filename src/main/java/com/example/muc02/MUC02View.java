@@ -77,7 +77,7 @@ public class MUC02View extends VerticalLayout {
         canvas.setWidthFull();
         canvas.getStyle().set("position", "relative")
                 .set("background-color", "#f5f5f5")
-                .set("border", "2px solid #e0e0e0").set("border-radius", "4px")
+                .set("outline", "2px solid #e0e0e0").set("border-radius", "4px")
                 .set("height", "400px").set("margin", "1em 0")
                 .set("cursor", "crosshair");
 
@@ -172,21 +172,9 @@ public class MUC02View extends VerticalLayout {
         return cursorKeyMap.getOrDefault(positionSignal, "");
     }
 
-    private java.util.Map<String, String> buildDisplayNameMap() {
-        var users = userSessionRegistry.getActiveUsersSignal().peek();
-        var displayNames = userSessionRegistry.getDisplayNamesSignal().peek();
-        java.util.Map<String, String> map = new java.util.HashMap<>();
-        for (int i = 0; i < users.size() && i < displayNames.size(); i++) {
-            map.put(users.get(i).peek().getCompositeKey(), displayNames.get(i));
-        }
-        return map;
-    }
-
     private HorizontalLayout createCursorListItem(
             SharedValueSignal<MUC02Signals.CursorPosition> positionSignal) {
         String sessionKey = lookupSessionKey(positionSignal);
-        String displayName = buildDisplayNameMap().getOrDefault(sessionKey,
-                "[" + sessionKey + "]");
         String username = sessionKey.split(":")[0];
 
         HorizontalLayout userItem = new HorizontalLayout();
@@ -204,7 +192,8 @@ public class MUC02View extends VerticalLayout {
                 "cover");
 
         Div userLabel = new Div();
-        userLabel.setText(displayName);
+        userLabel.bindText(
+                userSessionRegistry.getDisplayNameSignal(sessionKey));
         userLabel.getStyle().set("font-weight", "500");
 
         Div positionLabel = new Div(
@@ -220,8 +209,6 @@ public class MUC02View extends VerticalLayout {
     private Div createCursorIndicator(
             SharedValueSignal<MUC02Signals.CursorPosition> positionSignal) {
         String sessionKey = lookupSessionKey(positionSignal);
-        String displayName = buildDisplayNameMap().getOrDefault(sessionKey,
-                "[" + sessionKey + "]");
 
         Div cursorIndicator = new Div();
         cursorIndicator.getStyle().set("position", "absolute")
@@ -238,7 +225,8 @@ public class MUC02View extends VerticalLayout {
                 .map(pos -> pos != null ? pos.y() + "px" : "0px"));
 
         Div label = new Div();
-        label.setText(displayName);
+        label.bindText(
+                userSessionRegistry.getDisplayNameSignal(sessionKey));
         label.getStyle().set("position", "absolute").set("top", "25px")
                 .set("left", "0").set("white-space", "nowrap")
                 .set("background-color", "rgba(0, 0, 0, 0.7)")
