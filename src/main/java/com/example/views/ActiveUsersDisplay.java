@@ -15,6 +15,8 @@ import com.vaadin.flow.signals.Signal;
  */
 public class ActiveUsersDisplay extends Div {
 
+    private final UserSessionRegistry userSessionRegistry;
+
     /**
      * Creates an active users display showing all users with default styling
      * and "Active sessions" label.
@@ -72,6 +74,7 @@ public class ActiveUsersDisplay extends Div {
     public ActiveUsersDisplay(UserSessionRegistry userSessionRegistry,
             String labelText, @Nullable String viewRoute,
             boolean showAccentBorder) {
+        this.userSessionRegistry = userSessionRegistry;
         // Container styling
         getStyle().set("background-color", "#fff3e0").set("padding", "0.75em")
                 .set("border-radius", "4px").set("margin-bottom", "1em")
@@ -116,9 +119,8 @@ public class ActiveUsersDisplay extends Div {
     private HorizontalLayout createUserItem(
             com.vaadin.flow.signals.Signal<com.example.signals.UserInfo> userSignal) {
         var user = userSignal.peek();
-        String displayName = user.nickname() != null
-                && !user.nickname().isEmpty() ? user.nickname()
-                        : user.username();
+        Signal<String> displayNameSignal = userSessionRegistry
+                .getDisplayNameSignal(user.getCompositeKey());
 
         HorizontalLayout userItem = new HorizontalLayout();
         userItem.setSpacing(true);
@@ -128,10 +130,12 @@ public class ActiveUsersDisplay extends Div {
                 .set("background-color", "rgba(255, 255, 255, 0.7)")
                 .set("border-radius", "16px");
 
-        Avatar avatar = new Avatar(displayName);
+        Avatar avatar = new Avatar();
+        avatar.getElement().bindProperty("name", displayNameSignal, null);
         avatar.setImage(MainLayout.getProfilePicturePath(user.username()));
 
-        Span nameLabel = new Span(displayName);
+        Span nameLabel = new Span();
+        nameLabel.bindText(displayNameSignal);
         nameLabel.getStyle().set("font-size", "var(--lumo-font-size-s)");
 
         userItem.add(avatar, nameLabel);

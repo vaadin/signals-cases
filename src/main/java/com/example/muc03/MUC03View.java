@@ -228,23 +228,13 @@ public class MUC03View extends VerticalLayout {
 
     private HorizontalLayout createLeaderboardItem(
             com.vaadin.flow.signals.shared.SharedValueSignal<Integer> scoreSignal) {
-        var users = userSessionRegistry.getActiveUsersSignal().peek();
-        var displayNames = userSessionRegistry.getDisplayNamesSignal().peek();
-
         String sessionKey = scoreKeyMap.getOrDefault(scoreSignal, "");
-
-        // Build display name mapping
-        java.util.Map<String, String> displayNameMap = new java.util.HashMap<>();
-        for (int i = 0; i < users.size() && i < displayNames.size(); i++) {
-            String key = users.get(i).peek().getCompositeKey();
-            displayNameMap.put(key, displayNames.get(i));
-        }
-
-        String displayName = displayNameMap.getOrDefault(sessionKey,
-                sessionKey);
         boolean isCurrentSession = sessionId != null
                 && sessionKey.equals(currentUser + ":" + sessionId);
         String username = sessionKey.split(":")[0];
+
+        com.vaadin.flow.signals.Signal<String> displayNameSignal = userSessionRegistry
+                .getDisplayNameSignal(sessionKey);
 
         HorizontalLayout item = new HorizontalLayout();
         item.setSpacing(true);
@@ -264,8 +254,9 @@ public class MUC03View extends VerticalLayout {
                 "cover");
 
         Span nameLabel = new Span();
-        nameLabel.bindText(scoreSignal.map(
-                score -> String.format("%s: %d points", displayName, score)));
+        nameLabel.bindText(com.vaadin.flow.signals.Signal.computed(() ->
+                String.format("%s: %d points",
+                        displayNameSignal.get(), scoreSignal.get())));
 
         item.add(avatar, nameLabel);
         return item;
