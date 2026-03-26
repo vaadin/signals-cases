@@ -6,6 +6,7 @@ import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
 import com.example.views.ActiveUsersDisplay;
+import com.example.views.ColoredAvatar;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -14,7 +15,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -252,12 +252,8 @@ public class MUC04View extends VerticalLayout {
                 .set("border-left", "3px solid " + userColor)
                 .set("border-radius", "4px");
 
-        Image avatar = new Image(
-                MainLayout.getProfilePicturePath(lock.username()), "");
-        avatar.setWidth("32px");
-        avatar.setHeight("32px");
-        avatar.getStyle().set("border-radius", "50%").set("object-fit",
-                "cover");
+        ColoredAvatar avatar = new ColoredAvatar(lock.username(),
+                userColor, 32);
 
         Span label = new Span(
                 String.format("🔒 %s: %s", fieldLabel, lock.username()));

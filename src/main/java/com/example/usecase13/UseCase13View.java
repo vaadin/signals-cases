@@ -8,6 +8,7 @@ import java.util.Map;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserInfo;
 import com.example.signals.UserSessionRegistry;
+import com.example.views.ColoredAvatar;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -158,15 +159,9 @@ public class UseCase13View extends VerticalLayout {
                 () -> isTabActive.get() ? "Tab is active" : "Tab is inactive");
         tabIndicator.getStyle().set("flex-shrink", "0");
 
-        // Avatar (using first letter of username)
-        Span avatar = new Span(username.substring(0, 1).toUpperCase());
-        avatar.getStyle().set("display", "inline-flex")
-                .set("align-items", "center").set("justify-content", "center")
-                .set("width", "40px").set("height", "40px")
-                .set("border-radius", "50%")
-                .set("background", userSignal.peek().color())
-                .set("color", "white").set("font-weight", "bold")
-                .set("flex-shrink", "0");
+        // Avatar with colored ring
+        ColoredAvatar avatar = new ColoredAvatar(username,
+                userSignal.peek().color(), 40);
 
         Span nameSpan = new Span(() -> {
             var info = userSignal.get();
