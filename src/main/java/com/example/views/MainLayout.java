@@ -97,8 +97,8 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
                             .getDisplayNameSignal(user.getCompositeKey());
 
                     Avatar avatar = new Avatar();
-                    avatar.getElement().bindProperty("name",
-                            displayNameSignal, null);
+                    Signal.effect(avatar,
+                            () -> avatar.setName(displayNameSignal.get()));
                     avatar.setImage(getProfilePicturePath(user.username()));
                     return avatar;
                 });

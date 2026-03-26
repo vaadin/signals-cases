@@ -131,7 +131,7 @@ public class ActiveUsersDisplay extends Div {
                 .set("border-radius", "16px");
 
         Avatar avatar = new Avatar();
-        avatar.getElement().bindProperty("name", displayNameSignal, null);
+        Signal.effect(avatar, () -> avatar.setName(displayNameSignal.get()));
         avatar.setImage(MainLayout.getProfilePicturePath(user.username()));
 
         Span nameLabel = new Span();

@@ -201,7 +201,7 @@ public class UserSessionRegistry {
      * or the active users list changes.
      */
     public Signal<String> getDisplayNameSignal(String compositeKey) {
-        return Signal.computed(() -> {
+        return Signal.cached(() -> {
             var users = activeUsersSignal.get();
             var names = displayNamesSignal.get();
             for (int i = 0; i < users.size() && i < names.size(); i++) {

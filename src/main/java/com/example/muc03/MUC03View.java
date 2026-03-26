@@ -25,6 +25,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Multi-User Case 3: Competitive Button Click Game
@@ -233,7 +234,7 @@ public class MUC03View extends VerticalLayout {
                 && sessionKey.equals(currentUser + ":" + sessionId);
         String username = sessionKey.split(":")[0];
 
-        com.vaadin.flow.signals.Signal<String> displayNameSignal = userSessionRegistry
+        var displayNameSignal = userSessionRegistry
                 .getDisplayNameSignal(sessionKey);
 
         HorizontalLayout item = new HorizontalLayout();
@@ -254,7 +255,7 @@ public class MUC03View extends VerticalLayout {
                 "cover");
 
         Span nameLabel = new Span();
-        nameLabel.bindText(com.vaadin.flow.signals.Signal.computed(() ->
+        nameLabel.bindText(Signal.computed(() ->
                 String.format("%s: %d points",
                         displayNameSignal.get(), scoreSignal.get())));
 
