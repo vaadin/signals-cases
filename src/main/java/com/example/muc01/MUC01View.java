@@ -133,9 +133,12 @@ public class MUC01View extends VerticalLayout {
     }
 
     private Div createMessageComponent(MUC01Signals.Message message) {
+        String senderColor = userSessionRegistry
+                .getUserColorByUsername(message.username());
+
         Div messageDiv = new Div();
         messageDiv.getStyle().set("background-color", "#ffffff")
-                .set("border-left", "3px solid var(--lumo-primary-color)")
+                .set("border-left", "3px solid " + senderColor)
                 .set("padding", "0.75em").set("margin-bottom", "0.5em")
                 .set("border-radius", "4px").set("display", "flex")
                 .set("gap", "0.75em");
@@ -160,7 +163,7 @@ public class MUC01View extends VerticalLayout {
         Div author = new Div();
         author.setText(message.author());
         author.getStyle().set("font-weight", "bold").set("color",
-                "var(--lumo-primary-color)");
+                senderColor);
 
         Div timestamp = new Div();
         timestamp.setText(message.getFormattedTimestamp());

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,23 @@ import com.vaadin.flow.signals.shared.SharedListSignal;
  */
 @Component
 public class UserSessionRegistry {
+
+    private static final String[] COLOR_PALETTE = {
+            "#E91E63", // Pink
+            "#2196F3", // Blue
+            "#4CAF50", // Green
+            "#FF9800", // Orange
+            "#9C27B0", // Purple
+            "#00BCD4", // Cyan
+            "#F44336", // Red
+            "#009688", // Teal
+            "#FF5722", // Deep Orange
+            "#3F51B5", // Indigo
+            "#8BC34A", // Light Green
+            "#795548", // Brown
+    };
+
+    private final AtomicInteger colorIndex = new AtomicInteger(0);
 
     private final SharedListSignal<UserInfo> activeUsersSignal = new SharedListSignal<>(
             UserInfo.class);
@@ -106,8 +124,10 @@ public class UserSessionRegistry {
                         .equals(userSignal.peek().getCompositeKey()));
 
         if (!exists) {
-            activeUsersSignal.insertLast(
-                    new UserInfo(username, sessionId, initialRoute, null));
+            String color = nextColor();
+            activeUsersSignal.insertLast(new UserInfo(username, sessionId,
+                    initialRoute, null, System.currentTimeMillis(), true,
+                    System.currentTimeMillis(), color));
         } else if (initialRoute != null) {
             // User already registered, just update the route
             updateUserView(username, sessionId, initialRoute);
@@ -291,6 +311,36 @@ public class UserSessionRegistry {
                     userSignal.set(oldInfo.withLastInteractionTime(
                             System.currentTimeMillis()));
                 });
+    }
+
+    /**
+     * Get the assigned color for a user session, or the default color if not
+     * found.
+     */
+    public String getUserColor(String username, String sessionId) {
+        String compositeKey = username + ":" + sessionId;
+        return activeUsersSignal.peek().stream()
+                .filter(userSignal -> compositeKey
+                        .equals(userSignal.peek().getCompositeKey()))
+                .findFirst().map(userSignal -> userSignal.peek().color())
+                .orElse("#9E9E9E");
+    }
+
+    /**
+     * Get the assigned color for a username (first matching session). Useful
+     * when sessionId is not available (e.g., chat messages).
+     */
+    public String getUserColorByUsername(String username) {
+        return activeUsersSignal.peek().stream()
+                .filter(userSignal -> username
+                        .equals(userSignal.peek().username()))
+                .findFirst().map(userSignal -> userSignal.peek().color())
+                .orElse("#9E9E9E");
+    }
+
+    private String nextColor() {
+        int index = colorIndex.getAndIncrement();
+        return COLOR_PALETTE[index % COLOR_PALETTE.length];
     }
 
 }
