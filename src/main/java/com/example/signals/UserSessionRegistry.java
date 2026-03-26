@@ -196,6 +196,24 @@ public class UserSessionRegistry {
     }
 
     /**
+     * Get a reactive signal for a user's display name, given their composite
+     * key (username:sessionId). Updates automatically when the user's nickname
+     * or the active users list changes.
+     */
+    public Signal<String> getDisplayNameSignal(String compositeKey) {
+        return Signal.cached(() -> {
+            var users = activeUsersSignal.get();
+            var names = displayNamesSignal.get();
+            for (int i = 0; i < users.size() && i < names.size(); i++) {
+                if (compositeKey.equals(users.get(i).get().getCompositeKey())) {
+                    return names.get(i);
+                }
+            }
+            return compositeKey;
+        });
+    }
+
+    /**
      * Update the current view for a user session.
      */
     public void updateUserView(String username, String sessionId,

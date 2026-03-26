@@ -32,6 +32,7 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -92,17 +93,12 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         avatarsContainer.bindChildren(
                 userSessionRegistry.getActiveUsersSignal(), userSignal -> {
                     var user = userSignal.peek();
-                    var users = userSessionRegistry.getActiveUsersSignal()
-                            .peek();
-                    var displayNames = userSessionRegistry
-                            .getDisplayNamesSignal().peek();
-                    int index = users.indexOf(userSignal);
-                    String displayName = index >= 0
-                            && index < displayNames.size()
-                                    ? displayNames.get(index)
-                                    : user.username();
+                    Signal<String> displayNameSignal = userSessionRegistry
+                            .getDisplayNameSignal(user.getCompositeKey());
 
-                    Avatar avatar = new Avatar(displayName);
+                    Avatar avatar = new Avatar();
+                    Signal.effect(avatar,
+                            () -> avatar.setName(displayNameSignal.get()));
                     avatar.setImage(getProfilePicturePath(user.username()));
                     return avatar;
                 });
