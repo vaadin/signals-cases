@@ -159,11 +159,7 @@ public class MUC02View extends VerticalLayout {
             var cursors = muc02Signals.getSessionCursorsSignal().get();
             cursorKeyMap.clear();
             cursors.forEach((key, signal) -> cursorKeyMap.put(signal, key));
-            String ownKey = currentUser + ":" + sessionId;
-            return cursors.entrySet().stream()
-                    .filter(entry -> sessionId == null
-                            || !entry.getKey().equals(ownKey))
-                    .map(java.util.Map.Entry::getValue).toList();
+            return new java.util.ArrayList<>(cursors.values());
         }), this::createCursorIndicator);
     }
 
