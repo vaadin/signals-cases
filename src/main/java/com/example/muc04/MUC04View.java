@@ -239,6 +239,9 @@ public class MUC04View extends VerticalLayout {
                 && lock.username().equals(currentUser)
                 && lock.sessionId().equals(sessionId);
 
+        String userColor = userSessionRegistry.getUserColor(lock.username(),
+                lock.sessionId());
+
         HorizontalLayout item = new HorizontalLayout();
         item.setSpacing(true);
         item.setAlignItems(
@@ -246,6 +249,7 @@ public class MUC04View extends VerticalLayout {
         item.getStyle().set("padding", "0.5em")
                 .set("background-color",
                         isCurrentSession ? "#fff3e0" : "transparent")
+                .set("border-left", "3px solid " + userColor)
                 .set("border-radius", "4px");
 
         Image avatar = new Image(

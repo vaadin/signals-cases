@@ -164,7 +164,7 @@ public class UseCase13View extends VerticalLayout {
                 .set("align-items", "center").set("justify-content", "center")
                 .set("width", "40px").set("height", "40px")
                 .set("border-radius", "50%")
-                .set("background", getColorForUser(username))
+                .set("background", userSignal.peek().color())
                 .set("color", "white").set("font-weight", "bold")
                 .set("flex-shrink", "0");
 
@@ -275,14 +275,6 @@ public class UseCase13View extends VerticalLayout {
         card.add(content);
 
         return card;
-    }
-
-    private String getColorForUser(String username) {
-        // Deterministic color based on username
-        int hash = username.hashCode();
-        String[] colors = { "#4CAF50", "#2196F3", "#FF9800", "#9C27B0",
-                "#F44336", "#00BCD4" };
-        return colors[Math.abs(hash) % colors.length];
     }
 
     private Span createRoleBadge(String username) {

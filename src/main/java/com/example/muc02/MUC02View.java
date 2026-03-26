@@ -168,10 +168,22 @@ public class MUC02View extends VerticalLayout {
         return cursorKeyMap.getOrDefault(positionSignal, "");
     }
 
+    private java.util.Map<String, String> buildColorMap() {
+        var users = userSessionRegistry.getActiveUsersSignal().peek();
+        java.util.Map<String, String> map = new java.util.HashMap<>();
+        for (var userSignal : users) {
+            var user = userSignal.peek();
+            map.put(user.getCompositeKey(), user.color());
+        }
+        return map;
+    }
+
     private HorizontalLayout createCursorListItem(
             SharedValueSignal<MUC02Signals.CursorPosition> positionSignal) {
         String sessionKey = lookupSessionKey(positionSignal);
         String username = sessionKey.split(":")[0];
+        String userColor = buildColorMap().getOrDefault(sessionKey,
+                "#9E9E9E");
 
         HorizontalLayout userItem = new HorizontalLayout();
         userItem.setSpacing(true);
@@ -179,6 +191,12 @@ public class MUC02View extends VerticalLayout {
                 com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
         userItem.setWidthFull();
         userItem.getStyle().set("margin-bottom", "0.5em");
+
+        Div colorDot = new Div();
+        colorDot.getStyle().set("width", "12px").set("height", "12px")
+                .set("border-radius", "50%")
+                .set("background-color", userColor)
+                .set("flex-shrink", "0");
 
         Image avatar = new Image(MainLayout.getProfilePicturePath(username),
                 "");
@@ -198,18 +216,20 @@ public class MUC02View extends VerticalLayout {
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("margin-left", "auto");
 
-        userItem.add(avatar, userLabel, positionLabel);
+        userItem.add(colorDot, avatar, userLabel, positionLabel);
         return userItem;
     }
 
     private Div createCursorIndicator(
             SharedValueSignal<MUC02Signals.CursorPosition> positionSignal) {
         String sessionKey = lookupSessionKey(positionSignal);
+        String userColor = buildColorMap().getOrDefault(sessionKey,
+                "#9E9E9E");
 
         Div cursorIndicator = new Div();
         cursorIndicator.getStyle().set("position", "absolute")
                 .set("width", "20px").set("height", "20px")
-                .set("background-color", "var(--lumo-primary-color)")
+                .set("background-color", userColor)
                 .set("border-radius", "50%").set("border", "2px solid white")
                 .set("pointer-events", "none")
                 .set("transform", "translate(-50%, -50%)")
@@ -225,7 +245,7 @@ public class MUC02View extends VerticalLayout {
                 userSessionRegistry.getDisplayNameSignal(sessionKey));
         label.getStyle().set("position", "absolute").set("top", "25px")
                 .set("left", "0").set("white-space", "nowrap")
-                .set("background-color", "rgba(0, 0, 0, 0.7)")
+                .set("background-color", userColor)
                 .set("color", "white").set("padding", "2px 6px")
                 .set("border-radius", "3px").set("font-size", "0.75em");
 
