@@ -32,6 +32,24 @@ public class UserSessionRegistry {
             "#3F51B5", // Indigo
             "#8BC34A", // Light Green
             "#795548", // Brown
+            "#607D8B", // Blue Grey
+            "#CDDC39", // Lime
+            "#673AB7", // Deep Purple
+            "#FFC107", // Amber
+            "#03A9F4", // Light Blue
+            "#E040FB", // Pink Accent
+            "#00E676", // Green Accent
+            "#FF6D00", // Orange Accent
+            "#304FFE", // Indigo Accent
+            "#76FF03", // Light Green Accent
+            "#D50000", // Red Accent
+            "#00B8D4", // Cyan Accent
+            "#6D4C41", // Brown Dark
+            "#AA00FF", // Purple Accent
+            "#64DD17", // Lime Accent
+            "#C51162", // Pink Dark
+            "#0091EA", // Light Blue Accent
+            "#FFD600", // Yellow Accent
     };
 
     private final AtomicInteger colorIndex = new AtomicInteger(0);
