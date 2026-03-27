@@ -34,28 +34,15 @@ public class SignalFieldHighlighter extends FieldHighlighterInitializer {
     private static final String FH_CLASS =
             "customElements.get('vaadin-field-highlighter')";
 
-    private static final int COLOR_COUNT = 7;
-
     /**
      * Represents a user to display in the field-highlighter.
      *
      * @param id         unique user identifier
      * @param name       display name shown in the user tag
-     * @param colorIndex index into the user color palette (0-6)
+     * @param colorIndex index into the user color palette
+     *                   ({@code --vaadin-user-color-N} CSS properties)
      */
     public record User(int id, String name, int colorIndex) {
-
-        /**
-         * Creates a user from a display name, deriving a stable id and color
-         * from the name's hash code.
-         *
-         * @param name the display name
-         * @return a new user instance
-         */
-        public static User fromName(String name) {
-            return new User(name.hashCode(), name,
-                    Math.abs(name.hashCode()) % COLOR_COUNT);
-        }
     }
 
     private SignalFieldHighlighter() {

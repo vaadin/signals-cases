@@ -3,6 +3,7 @@ package com.example.muc04;
 import com.example.muc04.SignalFieldHighlighter.User;
 import com.example.security.CurrentUserSignal;
 import com.example.security.CurrentUserSignal.UserInfo;
+import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
 import com.example.views.ActiveUsersDisplay;
 import com.example.views.ColoredAvatar;
@@ -51,7 +52,12 @@ public class MUC04View extends VerticalLayout {
             MUC04Signals muc04Signals,
             UserSessionRegistry userSessionRegistry) {
         UserInfo userInfo = currentUserSignal.getUserSignal().peek();
-        this.currentUser = User.fromName(userInfo.getUsername());
+        String username = userInfo.getUsername();
+        String sessionId = SessionIdHelper.getCurrentSessionId();
+        int colorIndex = userSessionRegistry.getUserColorIndex(username,
+                sessionId);
+        this.currentUser = new User(
+                (username + ":" + sessionId).hashCode(), username, colorIndex);
         this.muc04Signals = muc04Signals;
 
         setSpacing(true);

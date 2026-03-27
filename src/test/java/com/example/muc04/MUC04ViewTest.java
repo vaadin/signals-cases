@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class MUC04ViewTest extends SpringBrowserlessTest {
 
     private static final SignalFieldHighlighter.User OTHER_USER =
-            SignalFieldHighlighter.User.fromName("otherUser");
+            new SignalFieldHighlighter.User(99, "otherUser", 1);
 
     @Autowired
     private MUC04Signals muc04Signals;
