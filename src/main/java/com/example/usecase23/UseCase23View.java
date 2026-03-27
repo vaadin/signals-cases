@@ -139,8 +139,8 @@ public class UseCase23View extends Main {
         bindData(chart, newYorkSeries, newYorkTimelineSignal);
         bindData(chart, tokyoSeries, tokyoTimelineSignal);
 
-        Signal.effect(chart, () -> xAxis.setCategories(timelineCategoriesSignal
-                .get().stream().map(Signal::get).toArray(String[]::new)));
+        Signal.effect(chart, () -> xAxis.setCategories(
+                timelineCategoriesSignal.getValues().toArray(String[]::new)));
 
         conf.addSeries(berlinSeries);
         conf.addSeries(londonSeries);
@@ -165,12 +165,8 @@ public class UseCase23View extends Main {
 
     private static void bindData(Chart chart, ListSeries series,
             ListSignal<Number> signal) {
-        Signal.effect(chart, () -> {
-            series.setData(signal.get().stream().map(Signal::get)
-                    .toArray(Number[]::new));
-            // TODO issue of getting the values from ListSignal instead of
-            // Signal<Number>
-        });
+        Signal.effect(chart,
+                () -> series.setData(signal.getValues().toArray(Number[]::new)));
     }
 
     private Component createServiceHealth() {
@@ -389,10 +385,13 @@ public class UseCase23View extends Main {
                     signal.peek().doubleValue(), signal.peek().doubleValue()));
 
             // update previous value when the main signal changes
+            // Uses runWithoutTransaction since we must track previous state
+            // No infinite loop risk: effect depends on signal, not changeSignal
             Signal.effect(this, () -> {
                 double current = signal.get().doubleValue();
                 double previous = changeSignal.peek().current();
-                changeSignal.set(new Change(previous, current));
+                Signal.runWithoutTransaction(
+                        () -> changeSignal.set(new Change(previous, current)));
             });
 
             // Computed signal for percentage change
@@ -415,8 +414,8 @@ public class UseCase23View extends Main {
             valueSpan.bindText(signal.map(format::apply));
 
             Span percentageSpan = new Span();
-            percentageSpan.bindText(prefixSignal
-                    .map(prefix -> prefix + percentageSignal.get()));
+            percentageSpan.bindText(Signal.computed(
+                    () -> prefixSignal.get() + percentageSignal.get()));
 
             Icon icon = new Icon(iconSignal);
             icon.setSize("10px");
