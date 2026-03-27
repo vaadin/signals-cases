@@ -30,4 +30,3 @@ public class Component {
         return name;
     }
 }
-

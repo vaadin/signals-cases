@@ -252,8 +252,8 @@ public class MUC04View extends VerticalLayout {
                 .set("border-left", "3px solid " + userColor)
                 .set("border-radius", "4px");
 
-        ColoredAvatar avatar = new ColoredAvatar(lock.username(),
-                userColor, 32);
+        ColoredAvatar avatar = new ColoredAvatar(lock.username(), userColor,
+                32);
 
         Span label = new Span(
                 String.format("🔒 %s: %s", fieldLabel, lock.username()));

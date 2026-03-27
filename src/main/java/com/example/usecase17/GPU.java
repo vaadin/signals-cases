@@ -27,4 +27,3 @@ public class GPU extends Component {
         return score;
     }
 }
-

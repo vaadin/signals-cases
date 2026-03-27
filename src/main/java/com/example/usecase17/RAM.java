@@ -27,4 +27,3 @@ public class RAM extends Component {
         return capacity;
     }
 }
-

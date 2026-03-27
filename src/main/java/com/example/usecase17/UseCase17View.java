@@ -165,16 +165,17 @@ public class UseCase17View extends VerticalLayout {
                 .map(s -> s != null ? s.getPrice() : BigDecimal.ZERO);
         psuPriceSignal = psuSignal
                 .map(psu -> psu != null ? psu.getPrice() : BigDecimal.ZERO);
-        casePriceSignal = caseSignal.map(c -> c != null ? c.getPrice() : BigDecimal.ZERO);
-        coolerPriceSignal = coolerSignal
-                .map(cooler -> cooler != null ? cooler.getPrice() : BigDecimal.ZERO);
+        casePriceSignal = caseSignal
+                .map(c -> c != null ? c.getPrice() : BigDecimal.ZERO);
+        coolerPriceSignal = coolerSignal.map(
+                cooler -> cooler != null ? cooler.getPrice() : BigDecimal.ZERO);
 
-        totalPriceSignal = Signal.computed(
-                () -> cpuPriceSignal.get().add(motherboardPriceSignal.get())
-                        .add(ramPriceSignal.get()).add(gpuPriceSignal.get())
-                        .add(storage1PriceSignal.get()).add(storage2PriceSignal.get())
-                        .add(storage3PriceSignal.get()).add(psuPriceSignal.get())
-                        .add(casePriceSignal.get()).add(coolerPriceSignal.get()));
+        totalPriceSignal = Signal.computed(() -> cpuPriceSignal.get()
+                .add(motherboardPriceSignal.get()).add(ramPriceSignal.get())
+                .add(gpuPriceSignal.get()).add(storage1PriceSignal.get())
+                .add(storage2PriceSignal.get()).add(storage3PriceSignal.get())
+                .add(psuPriceSignal.get()).add(casePriceSignal.get())
+                .add(coolerPriceSignal.get()));
     }
 
     private void initializePowerSignals() {
@@ -513,8 +514,8 @@ public class UseCase17View extends VerticalLayout {
 
         Signal<String> cartButtonText = Signal.computed(() -> {
             if (canBuildSignal.get()) {
-                return "Add to Cart ($"
-                        + totalPriceSignal.get().setScale(0, RoundingMode.HALF_UP) + ")";
+                return "Add to Cart ($" + totalPriceSignal.get().setScale(0,
+                        RoundingMode.HALF_UP) + ")";
             }
             return "Complete Build First";
         });
@@ -536,16 +537,17 @@ public class UseCase17View extends VerticalLayout {
 
         column.add(header);
         column.add(createComponentSelector("CPU", PCData.ALL_CPUS, cpuSignal));
-        column.add(createComponentSelector("Motherboard", PCData.ALL_MOTHERBOARDS,
-                motherboardSignal));
+        column.add(createComponentSelector("Motherboard",
+                PCData.ALL_MOTHERBOARDS, motherboardSignal));
         column.add(createComponentSelector("RAM", PCData.ALL_RAM, ramSignal));
         column.add(createComponentSelector("GPU", PCData.ALL_GPUS, gpuSignal));
-        column.add(createComponentSelector("Primary Storage", PCData.ALL_STORAGE,
-                storage1Signal));
-        column.add(createComponentSelector("Secondary Storage", PCData.ALL_STORAGE,
-                storage2Signal));
+        column.add(createComponentSelector("Primary Storage",
+                PCData.ALL_STORAGE, storage1Signal));
+        column.add(createComponentSelector("Secondary Storage",
+                PCData.ALL_STORAGE, storage2Signal));
         column.add(createComponentSelector("PSU", PCData.ALL_PSUS, psuSignal));
-        column.add(createComponentSelector("Case", PCData.ALL_CASES, caseSignal));
+        column.add(
+                createComponentSelector("Case", PCData.ALL_CASES, caseSignal));
         column.add(createComponentSelector("CPU Cooler", PCData.ALL_COOLERS,
                 coolerSignal));
 
@@ -589,8 +591,8 @@ public class UseCase17View extends VerticalLayout {
                 selectedComponentsSignal.insertLast(gpuSignal.get());
             if (storage1Signal.get() != null)
                 selectedComponentsSignal.insertLast(storage1Signal.get());
-            if (storage2Signal.get() != null
-                    && storage2Signal.get().getPrice().compareTo(BigDecimal.ZERO) > 0)
+            if (storage2Signal.get() != null && storage2Signal.get().getPrice()
+                    .compareTo(BigDecimal.ZERO) > 0)
                 selectedComponentsSignal.insertLast(storage2Signal.get());
             if (psuSignal.get() != null)
                 selectedComponentsSignal.insertLast(psuSignal.get());
@@ -617,7 +619,8 @@ public class UseCase17View extends VerticalLayout {
 
         // Price box
         Div priceBox = createStatBox("Total Price",
-                totalPriceSignal.map(p -> "$" + p.setScale(0, RoundingMode.HALF_UP)),
+                totalPriceSignal
+                        .map(p -> "$" + p.setScale(0, RoundingMode.HALF_UP)),
                 "#e8f5e9");
 
         // Power box
@@ -779,7 +782,8 @@ public class UseCase17View extends VerticalLayout {
         Span name = new Span(() -> compSignal.get().getName());
         name.getStyle().set("flex", "1");
 
-        Span price = new Span(() -> "$" + compSignal.get().getPrice().setScale(0, RoundingMode.HALF_UP));
+        Span price = new Span(() -> "$" + compSignal.get().getPrice()
+                .setScale(0, RoundingMode.HALF_UP));
         price.getStyle().set("font-weight", "bold").set("color",
                 "var(--lumo-primary-color)");
 
@@ -805,13 +809,16 @@ public class UseCase17View extends VerticalLayout {
 
     private void resetBuild() {
         cpuSignal.set(PCData.ALL_CPUS.get(PCData.ALL_CPUS.size() - 1)); // None
-        motherboardSignal
-                .set(PCData.ALL_MOTHERBOARDS.get(PCData.ALL_MOTHERBOARDS.size() - 1)); // None
+        motherboardSignal.set(PCData.ALL_MOTHERBOARDS
+                .get(PCData.ALL_MOTHERBOARDS.size() - 1)); // None
         ramSignal.set(PCData.ALL_RAM.get(PCData.ALL_RAM.size() - 1)); // None
         gpuSignal.set(PCData.ALL_GPUS.get(PCData.ALL_GPUS.size() - 1)); // None
-        storage1Signal.set(PCData.ALL_STORAGE.get(PCData.ALL_STORAGE.size() - 1)); // None
-        storage2Signal.set(PCData.ALL_STORAGE.get(PCData.ALL_STORAGE.size() - 1)); // None
-        storage3Signal.set(PCData.ALL_STORAGE.get(PCData.ALL_STORAGE.size() - 1)); // None
+        storage1Signal
+                .set(PCData.ALL_STORAGE.get(PCData.ALL_STORAGE.size() - 1)); // None
+        storage2Signal
+                .set(PCData.ALL_STORAGE.get(PCData.ALL_STORAGE.size() - 1)); // None
+        storage3Signal
+                .set(PCData.ALL_STORAGE.get(PCData.ALL_STORAGE.size() - 1)); // None
         psuSignal.set(PCData.ALL_PSUS.get(PCData.ALL_PSUS.size() - 1)); // None
         caseSignal.set(PCData.ALL_CASES.get(PCData.ALL_CASES.size() - 1)); // None
         coolerSignal.set(PCData.ALL_COOLERS.get(PCData.ALL_COOLERS.size() - 1)); // None

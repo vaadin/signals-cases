@@ -21,8 +21,7 @@ public class ColoredAvatar extends Div {
 
         add(img);
         getStyle().set("width", sizePx + "px").set("height", sizePx + "px")
-                .set("border-radius", "50%")
-                .set("border", "3px solid " + color).set("flex-shrink", "0")
-                .set("box-sizing", "border-box");
+                .set("border-radius", "50%").set("border", "3px solid " + color)
+                .set("flex-shrink", "0").set("box-sizing", "border-box");
     }
 }

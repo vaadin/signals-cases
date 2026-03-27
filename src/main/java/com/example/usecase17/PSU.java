@@ -27,4 +27,3 @@ public class PSU extends Component {
         return efficiency;
     }
 }
-
