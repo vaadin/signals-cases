@@ -305,7 +305,7 @@ public class UseCase23View extends Main {
      * Callback invoked by the scheduler service with new dashboard data. This
      * method only updates signals - no UI access or chart drawing.
      */
-    private void onDataUpdate(DashboardData data) {
+    void onDataUpdate(DashboardData data) {
         // Update highlight card signals
         currentUsersSignal.set(data.currentUsers());
         viewEventsSignal.set(data.viewEvents());
