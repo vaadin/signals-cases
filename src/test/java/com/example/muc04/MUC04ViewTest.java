@@ -22,8 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class MUC04ViewTest extends SpringBrowserlessTest {
 
-    private static final SignalFieldHighlighter.User OTHER_USER =
-            new SignalFieldHighlighter.User(99, "otherUser", 1);
+    private static final SignalFieldHighlighter.User OTHER_USER = new SignalFieldHighlighter.User(
+            99, "otherUser", 1);
 
     @Autowired
     private MUC04Signals muc04Signals;

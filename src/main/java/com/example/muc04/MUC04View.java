@@ -1,14 +1,15 @@
 package com.example.muc04;
 
+import jakarta.annotation.security.PermitAll;
+
 import com.example.muc04.SignalFieldHighlighter.User;
 import com.example.security.CurrentUserSignal;
 import com.example.security.CurrentUserSignal.UserInfo;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
 import com.example.views.ActiveUsersDisplay;
-import com.example.views.ColoredAvatar;
 import com.example.views.MainLayout;
-import jakarta.annotation.security.PermitAll;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
@@ -56,8 +57,8 @@ public class MUC04View extends VerticalLayout {
         String sessionId = SessionIdHelper.getCurrentSessionId();
         int colorIndex = userSessionRegistry.getUserColorIndex(username,
                 sessionId);
-        this.currentUser = new User(
-                (username + ":" + sessionId).hashCode(), username, colorIndex);
+        this.currentUser = new User((username + ":" + sessionId).hashCode(),
+                username, colorIndex);
         this.muc04Signals = muc04Signals;
 
         setSpacing(true);
@@ -89,10 +90,10 @@ public class MUC04View extends VerticalLayout {
                                 + "field-highlighter. When you focus a field, "
                                 + "other users see who is editing via colored "
                                 + "outlines. Enable field locking to prevent "
-                                + "concurrent edits."), activeSessionsBox,
-                new H3("Shared Form Data"), lockingCheckbox, companyNameField,
-                addressField, phoneField, saveButton, new H3("Active Editors"),
-                editorsDiv);
+                                + "concurrent edits."),
+                activeSessionsBox, new H3("Shared Form Data"), lockingCheckbox,
+                companyNameField, addressField, phoneField, saveButton,
+                new H3("Active Editors"), editorsDiv);
     }
 
     private Div createEditorsPanel() {
@@ -157,53 +158,5 @@ public class MUC04View extends VerticalLayout {
         field.bindEnabled(enabledSignal);
 
         return field;
-    }
-
-    private String formatFieldName(String fieldName) {
-        return switch (fieldName) {
-        case "companyName" -> "Company Name";
-        case "address" -> "Address";
-        case "phone" -> "Phone Number";
-        default -> fieldName;
-        };
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        this.sessionId = SessionIdHelper.getCurrentSessionId();
-    }
-
-    private HorizontalLayout createLockItem(
-            com.vaadin.flow.signals.shared.SharedValueSignal<MUC04Signals.FieldLock> lockSignal) {
-        String fieldName = lockKeyMap.getOrDefault(lockSignal, "");
-        String fieldLabel = formatFieldName(fieldName);
-
-        MUC04Signals.FieldLock lock = lockSignal.peek();
-        boolean isCurrentSession = sessionId != null
-                && lock.username().equals(currentUser)
-                && lock.sessionId().equals(sessionId);
-
-        String userColor = userSessionRegistry.getUserColor(lock.username(),
-                lock.sessionId());
-
-        HorizontalLayout item = new HorizontalLayout();
-        item.setSpacing(true);
-        item.setAlignItems(
-                com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
-        item.getStyle().set("padding", "0.5em")
-                .set("background-color",
-                        isCurrentSession ? "#fff3e0" : "transparent")
-                .set("border-left", "3px solid " + userColor)
-                .set("border-radius", "4px");
-
-        ColoredAvatar avatar = new ColoredAvatar(lock.username(), userColor,
-                32);
-
-        Span label = new Span(
-                String.format("🔒 %s: %s", fieldLabel, lock.username()));
-
-        item.add(avatar, label);
-        return item;
     }
 }
