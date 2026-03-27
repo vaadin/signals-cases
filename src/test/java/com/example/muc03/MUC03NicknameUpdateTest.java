@@ -81,8 +81,11 @@ class MUC03NicknameUpdateTest extends SpringBrowserlessTest {
                                 && s.getText().contains("CoolPlayer")),
                 "Leaderboard should show nickname");
 
-        // Clear the nickname
+        // Clear the nickname — flush twice because the reactive chain goes
+        // through multiple levels (userSignal → displayNamesSignal →
+        // getDisplayNameSignal → bindText)
         userSessionRegistry.setNickname("userB", "sessionB", "");
+        runPendingSignalsTasks();
         runPendingSignalsTasks();
 
         // Should revert to username
