@@ -158,4 +158,52 @@ public class MUC04View extends VerticalLayout {
 
         return field;
     }
+
+    private String formatFieldName(String fieldName) {
+        return switch (fieldName) {
+        case "companyName" -> "Company Name";
+        case "address" -> "Address";
+        case "phone" -> "Phone Number";
+        default -> fieldName;
+        };
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        this.sessionId = SessionIdHelper.getCurrentSessionId();
+    }
+
+    private HorizontalLayout createLockItem(
+            com.vaadin.flow.signals.shared.SharedValueSignal<MUC04Signals.FieldLock> lockSignal) {
+        String fieldName = lockKeyMap.getOrDefault(lockSignal, "");
+        String fieldLabel = formatFieldName(fieldName);
+
+        MUC04Signals.FieldLock lock = lockSignal.peek();
+        boolean isCurrentSession = sessionId != null
+                && lock.username().equals(currentUser)
+                && lock.sessionId().equals(sessionId);
+
+        String userColor = userSessionRegistry.getUserColor(lock.username(),
+                lock.sessionId());
+
+        HorizontalLayout item = new HorizontalLayout();
+        item.setSpacing(true);
+        item.setAlignItems(
+                com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
+        item.getStyle().set("padding", "0.5em")
+                .set("background-color",
+                        isCurrentSession ? "#fff3e0" : "transparent")
+                .set("border-left", "3px solid " + userColor)
+                .set("border-radius", "4px");
+
+        ColoredAvatar avatar = new ColoredAvatar(lock.username(), userColor,
+                32);
+
+        Span label = new Span(
+                String.format("🔒 %s: %s", fieldLabel, lock.username()));
+
+        item.add(avatar, label);
+        return item;
+    }
 }

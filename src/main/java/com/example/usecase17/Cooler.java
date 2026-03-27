@@ -33,4 +33,3 @@ public class Cooler extends Component {
         return compatibleSockets;
     }
 }
-

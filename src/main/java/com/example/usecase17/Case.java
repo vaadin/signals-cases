@@ -34,4 +34,3 @@ public class Case extends Component {
         return psuFormFactor;
     }
 }
-

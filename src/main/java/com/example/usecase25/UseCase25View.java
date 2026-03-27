@@ -125,8 +125,8 @@ public class UseCase25View extends Main {
 
         // Price
         Span price = new Span();
-        price.bindText(stockSignal.map(
-                q -> "$" + q.price().setScale(2, RoundingMode.HALF_UP)));
+        price.bindText(stockSignal
+                .map(q -> "$" + q.price().setScale(2, RoundingMode.HALF_UP)));
         price.getStyle().set("text-align", "right")
                 .set("font-family", "monospace").set("font-weight", "600")
                 .set("border-radius", "4px").set("padding", "2px 6px");
@@ -134,7 +134,8 @@ public class UseCase25View extends Main {
         // Change
         Span change = new Span();
         change.bindText(stockSignal.map(q -> {
-            String prefix = q.change().compareTo(BigDecimal.ZERO) >= 0 ? "+" : "";
+            String prefix = q.change().compareTo(BigDecimal.ZERO) >= 0 ? "+"
+                    : "";
             return prefix + q.change().setScale(2, RoundingMode.HALF_UP);
         }));
         change.getStyle().set("text-align", "right").set("font-family",
@@ -143,8 +144,11 @@ public class UseCase25View extends Main {
         // % Change
         Span pctChange = new Span();
         pctChange.bindText(stockSignal.map(q -> {
-            String prefix = q.changePercent().compareTo(BigDecimal.ZERO) >= 0 ? "+" : "";
-            return prefix + q.changePercent().setScale(2, RoundingMode.HALF_UP) + "%";
+            String prefix = q.changePercent().compareTo(BigDecimal.ZERO) >= 0
+                    ? "+"
+                    : "";
+            return prefix + q.changePercent().setScale(2, RoundingMode.HALF_UP)
+                    + "%";
         }));
         pctChange.getStyle().set("text-align", "right").set("font-family",
                 "monospace");
@@ -154,7 +158,8 @@ public class UseCase25View extends Main {
                 change.getElement(), pctChange.getElement());
         Signal.effect(row, () -> {
             StockQuote current = stockSignal.get();
-            String flashClass = current.change().compareTo(BigDecimal.ZERO) >= 0 ? "price-up"
+            String flashClass = current.change().compareTo(BigDecimal.ZERO) >= 0
+                    ? "price-up"
                     : "price-down";
             flashTargets.forEach(el -> el.flashClass(flashClass));
         });

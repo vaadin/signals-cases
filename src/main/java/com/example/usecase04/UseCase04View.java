@@ -93,15 +93,26 @@ public class UseCase04View extends VerticalLayout {
 
     private List<Product> loadProducts() {
         // Stub implementation - returns mock data
-        return List.of(new Product("P001", "Laptop", "Electronics", new BigDecimal("999.99"), 15),
-                new Product("P002", "T-Shirt", "Clothing", new BigDecimal("19.99"), 50),
-                new Product("P003", "Java Programming Book", "Books", new BigDecimal("49.99"), 0),
-                new Product("P004", "Garden Hose", "Home & Garden", new BigDecimal("29.99"), 30),
-                new Product("P005", "Wireless Mouse", "Electronics", new BigDecimal("25.99"), 0),
-                new Product("P006", "Jeans", "Clothing", new BigDecimal("59.99"), 20),
-                new Product("P007", "Fiction Novel", "Books", new BigDecimal("14.99"), 100),
-                new Product("P008", "Plant Pot", "Home & Garden", new BigDecimal("12.99"), 45),
-                new Product("P009", "Keyboard", "Electronics", new BigDecimal("79.99"), 8),
-                new Product("P010", "Winter Jacket", "Clothing", new BigDecimal("129.99"), 5));
+        return List.of(
+                new Product("P001", "Laptop", "Electronics",
+                        new BigDecimal("999.99"), 15),
+                new Product("P002", "T-Shirt", "Clothing",
+                        new BigDecimal("19.99"), 50),
+                new Product("P003", "Java Programming Book", "Books",
+                        new BigDecimal("49.99"), 0),
+                new Product("P004", "Garden Hose", "Home & Garden",
+                        new BigDecimal("29.99"), 30),
+                new Product("P005", "Wireless Mouse", "Electronics",
+                        new BigDecimal("25.99"), 0),
+                new Product("P006", "Jeans", "Clothing",
+                        new BigDecimal("59.99"), 20),
+                new Product("P007", "Fiction Novel", "Books",
+                        new BigDecimal("14.99"), 100),
+                new Product("P008", "Plant Pot", "Home & Garden",
+                        new BigDecimal("12.99"), 45),
+                new Product("P009", "Keyboard", "Electronics",
+                        new BigDecimal("79.99"), 8),
+                new Product("P010", "Winter Jacket", "Clothing",
+                        new BigDecimal("129.99"), 5));
     }
 }

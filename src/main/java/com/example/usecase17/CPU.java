@@ -27,4 +27,3 @@ public class CPU extends Component {
         return score;
     }
 }
-
