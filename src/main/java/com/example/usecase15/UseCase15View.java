@@ -281,7 +281,6 @@ public class UseCase15View extends VerticalLayout {
     private void performSearch(String query) {
         // Cancel previous search if still running
         CompletableFuture<Void> previousSearch = currentSearchSignal.peek();
-        ;
         if (previousSearch != null && !previousSearch.isDone()) {
             previousSearch.cancel(true);
         }
