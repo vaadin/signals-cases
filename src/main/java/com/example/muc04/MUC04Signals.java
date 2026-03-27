@@ -21,6 +21,8 @@ public class MUC04Signals {
             "");
     private final SharedValueSignal<String> phoneSignal = new SharedValueSignal<>(
             "");
+    private final SharedValueSignal<Boolean> lockingEnabledSignal = new SharedValueSignal<>(
+            false);
     private final Map<String, SharedListSignal<User>> fieldEditors = new HashMap<>();
 
     public SharedValueSignal<String> getCompanyNameSignal() {
@@ -33,6 +35,10 @@ public class MUC04Signals {
 
     public SharedValueSignal<String> getPhoneSignal() {
         return phoneSignal;
+    }
+
+    public SharedValueSignal<Boolean> getLockingEnabledSignal() {
+        return lockingEnabledSignal;
     }
 
     public SharedListSignal<User> getFieldEditors(String fieldName) {

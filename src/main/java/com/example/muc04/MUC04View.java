@@ -24,7 +24,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.flow.signals.shared.SharedValueSignal;
 
 /**
@@ -46,8 +45,7 @@ public class MUC04View extends VerticalLayout {
 
     private final User currentUser;
     private final MUC04Signals muc04Signals;
-    private final ValueSignal<Boolean> lockingEnabledSignal = new ValueSignal<>(
-            false);
+    private final SharedValueSignal<Boolean> lockingEnabledSignal;
 
     public MUC04View(CurrentUserSignal currentUserSignal,
             MUC04Signals muc04Signals,
@@ -60,6 +58,7 @@ public class MUC04View extends VerticalLayout {
         this.currentUser = new User((username + ":" + sessionId).hashCode(),
                 username, colorIndex);
         this.muc04Signals = muc04Signals;
+        this.lockingEnabledSignal = muc04Signals.getLockingEnabledSignal();
 
         setSpacing(true);
         setPadding(true);
