@@ -204,7 +204,7 @@ public class UseCase24View extends VerticalLayout {
                 emptyState, infoBox);
     }
 
-    private Div createNotificationCard(Notification notification,
+    Div createNotificationCard(Notification notification,
             ListSignal<Notification> notificationsSignal) {
         var card = new Div();
         card.getStyle().set("display", "flex").set("align-items", "flex-start")
