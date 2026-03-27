@@ -93,7 +93,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         avatarsContainer.bindChildren(
                 userSessionRegistry.getActiveUsersSignal(), userSignal -> {
                     var user = userSignal.peek();
-                    return new ColoredAvatar(user.username(), user.color(),
+                    return new ColoredAvatar(user.username(), user.cssColor(),
                             32);
                 });
 

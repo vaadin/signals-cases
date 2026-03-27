@@ -161,7 +161,7 @@ public class UseCase13View extends VerticalLayout {
 
         // Avatar with colored ring
         ColoredAvatar avatar = new ColoredAvatar(username,
-                userSignal.peek().color(), 40);
+                userSignal.peek().cssColor(), 40);
 
         Span nameSpan = new Span(() -> {
             var info = userSignal.get();

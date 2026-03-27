@@ -173,7 +173,7 @@ public class MUC02View extends VerticalLayout {
         java.util.Map<String, String> map = new java.util.HashMap<>();
         for (var userSignal : users) {
             var user = userSignal.peek();
-            map.put(user.getCompositeKey(), user.color());
+            map.put(user.getCompositeKey(), user.cssColor());
         }
         return map;
     }
