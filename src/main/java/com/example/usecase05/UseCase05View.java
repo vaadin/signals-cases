@@ -44,8 +44,8 @@ public class UseCase05View extends VerticalLayout {
                 null);
 
         var states = countrySignal.map(country -> loadStates(country));
-        var cities = stateSignal
-                .map(state -> loadCities(countrySignal.get(), state));
+        var cities = Signal.computed(
+                () -> loadCities(countrySignal.get(), stateSignal.get()));
 
         // Country selector
         ComboBox<String> countrySelect = new ComboBox<>("Country");
