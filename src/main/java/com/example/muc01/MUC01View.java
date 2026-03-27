@@ -6,6 +6,7 @@ import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
 import com.example.views.ActiveUsersDisplay;
+import com.example.views.ColoredAvatar;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -15,7 +16,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -144,12 +144,8 @@ public class MUC01View extends VerticalLayout {
                 .set("gap", "0.75em");
 
         // Avatar
-        Image avatar = new Image(
-                MainLayout.getProfilePicturePath(message.username()), "");
-        avatar.setWidth("40px");
-        avatar.setHeight("40px");
-        avatar.getStyle().set("border-radius", "50%").set("object-fit", "cover")
-                .set("flex-shrink", "0");
+        ColoredAvatar avatar = new ColoredAvatar(message.username(),
+                senderColor, 40);
 
         // Content area (header + text)
         Div contentArea = new Div();

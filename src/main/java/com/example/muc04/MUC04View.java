@@ -5,6 +5,7 @@ import com.example.security.CurrentUserSignal;
 import com.example.security.CurrentUserSignal.UserInfo;
 import com.example.signals.UserSessionRegistry;
 import com.example.views.ActiveUsersDisplay;
+import com.example.views.ColoredAvatar;
 import com.example.views.MainLayout;
 import jakarta.annotation.security.PermitAll;
 import com.vaadin.flow.component.button.Button;

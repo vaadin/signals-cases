@@ -19,39 +19,6 @@ import com.vaadin.flow.signals.shared.SharedListSignal;
 @Component
 public class UserSessionRegistry {
 
-    private static final String[] COLOR_PALETTE = {
-            "#E91E63", // Pink
-            "#2196F3", // Blue
-            "#4CAF50", // Green
-            "#FF9800", // Orange
-            "#9C27B0", // Purple
-            "#00BCD4", // Cyan
-            "#F44336", // Red
-            "#009688", // Teal
-            "#FF5722", // Deep Orange
-            "#3F51B5", // Indigo
-            "#8BC34A", // Light Green
-            "#795548", // Brown
-            "#607D8B", // Blue Grey
-            "#CDDC39", // Lime
-            "#673AB7", // Deep Purple
-            "#FFC107", // Amber
-            "#03A9F4", // Light Blue
-            "#E040FB", // Pink Accent
-            "#00E676", // Green Accent
-            "#FF6D00", // Orange Accent
-            "#304FFE", // Indigo Accent
-            "#76FF03", // Light Green Accent
-            "#D50000", // Red Accent
-            "#00B8D4", // Cyan Accent
-            "#6D4C41", // Brown Dark
-            "#AA00FF", // Purple Accent
-            "#64DD17", // Lime Accent
-            "#C51162", // Pink Dark
-            "#0091EA", // Light Blue Accent
-            "#FFD600", // Yellow Accent
-    };
-
     private final AtomicInteger colorIndex = new AtomicInteger(0);
 
     private final SharedListSignal<UserInfo> activeUsersSignal = new SharedListSignal<>(
@@ -142,7 +109,7 @@ public class UserSessionRegistry {
                         .equals(userSignal.peek().getCompositeKey()));
 
         if (!exists) {
-            String color = nextColor();
+            int color = nextColorIndex();
             activeUsersSignal.insertLast(new UserInfo(username, sessionId,
                     initialRoute, null, System.currentTimeMillis(), true,
                     System.currentTimeMillis(), color));
@@ -332,33 +299,44 @@ public class UserSessionRegistry {
     }
 
     /**
-     * Get the assigned color for a user session, or the default color if not
-     * found.
+     * Get the assigned color index for a user session, or -1 if not found.
+     */
+    public int getUserColorIndex(String username, String sessionId) {
+        String compositeKey = username + ":" + sessionId;
+        return activeUsersSignal.peek().stream()
+                .filter(userSignal -> compositeKey
+                        .equals(userSignal.peek().getCompositeKey()))
+                .findFirst().map(userSignal -> userSignal.peek().colorIndex())
+                .orElse(-1);
+    }
+
+    /**
+     * Get the CSS color variable for a user session, e.g.
+     * {@code var(--vaadin-user-color-3)}.
      */
     public String getUserColor(String username, String sessionId) {
         String compositeKey = username + ":" + sessionId;
         return activeUsersSignal.peek().stream()
                 .filter(userSignal -> compositeKey
                         .equals(userSignal.peek().getCompositeKey()))
-                .findFirst().map(userSignal -> userSignal.peek().color())
+                .findFirst().map(userSignal -> userSignal.peek().cssColor())
                 .orElse("#9E9E9E");
     }
 
     /**
-     * Get the assigned color for a username (first matching session). Useful
-     * when sessionId is not available (e.g., chat messages).
+     * Get the CSS color variable for a username (first matching session).
+     * Useful when sessionId is not available (e.g., chat messages).
      */
     public String getUserColorByUsername(String username) {
         return activeUsersSignal.peek().stream()
                 .filter(userSignal -> username
                         .equals(userSignal.peek().username()))
-                .findFirst().map(userSignal -> userSignal.peek().color())
+                .findFirst().map(userSignal -> userSignal.peek().cssColor())
                 .orElse("#9E9E9E");
     }
 
-    private String nextColor() {
-        int index = colorIndex.getAndIncrement();
-        return COLOR_PALETTE[index % COLOR_PALETTE.length];
+    private int nextColorIndex() {
+        return colorIndex.getAndIncrement() % UserInfo.COLOR_COUNT;
     }
 
 }
