@@ -132,8 +132,8 @@ public class UseCase24View extends VerticalLayout {
 
         // Action row
         var markAllReadButton = new Button("Mark All Read", e -> {
-            notificationsSignal.get().forEach(signal -> {
-                Notification n = signal.get();
+            notificationsSignal.peek().forEach(signal -> {
+                Notification n = signal.peek();
                 if (!n.read()) {
                     signal.set(n.withRead(true));
                 }

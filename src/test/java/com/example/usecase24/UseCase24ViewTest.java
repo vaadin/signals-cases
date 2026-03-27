@@ -106,6 +106,32 @@ class UseCase24ViewTest extends SpringBrowserlessTest {
         assertTrue(countLabel.getText().contains("0 notification"));
     }
 
+    @Test
+    void markAllReadSetsUnreadToZero() {
+        navigate(UseCase24View.class);
+        runPendingSignalsTasks();
+
+        // Verify we start with 5 unread
+        Span countLabel = $view(Span.class).all().stream().filter(
+                s -> s.getText() != null && s.getText().contains("Showing"))
+                .findFirst().orElseThrow();
+        assertTrue(countLabel.getText().contains("5 unread"));
+
+        // Click Mark All Read
+        Button markAllRead = $view(Button.class).all().stream()
+                .filter(b -> "Mark All Read".equals(b.getText())).findFirst()
+                .orElseThrow();
+        test(markAllRead).click();
+        runPendingSignalsTasks();
+
+        // Verify 0 unread
+        countLabel = $view(Span.class).all().stream().filter(
+                s -> s.getText() != null && s.getText().contains("Showing"))
+                .findFirst().orElseThrow();
+        assertTrue(countLabel.getText().contains("0 unread"),
+                "Expected 0 unread but got: " + countLabel.getText());
+    }
+
     @SuppressWarnings("unchecked")
     @Test
     void filterByTypeNarrowsResults() {
