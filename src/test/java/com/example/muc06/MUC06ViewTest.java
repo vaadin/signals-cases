@@ -11,8 +11,13 @@ import org.springframework.test.annotation.DirtiesContext;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.TextField;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -118,5 +123,77 @@ class MUC06ViewTest extends SpringBrowserlessTest {
         // User A should see the updated completed count
         assertTrue(getStatText("Completed:").contains("2"),
                 "Completed count should increase when other user completes a task");
+    }
+
+    @Test
+    void otherUserCompletingTaskUpdatesCheckbox() {
+        navigate(MUC06View.class);
+        runPendingSignalsTasks();
+
+        // Find the first unchecked checkbox (corresponds to first incomplete task)
+        Checkbox firstCheckbox = $view(Checkbox.class).all().stream()
+                .filter(cb -> !cb.getValue()).findFirst().orElseThrow();
+        assertFalse(firstCheckbox.getValue(),
+                "Checkbox should initially be unchecked");
+
+        // Simulate User B completing the first incomplete task via the shared signal
+        var tasks = muc06Signals.getTasksSignal().peek();
+        for (var taskSignal : tasks) {
+            MUC06Signals.Task task = taskSignal.peek();
+            if (!task.completed()) {
+                taskSignal.set(new MUC06Signals.Task(task.id(), task.title(),
+                        true, task.dueDate()));
+                break;
+            }
+        }
+        runPendingSignalsTasks();
+
+        // User A's checkbox should now be checked
+        assertTrue(firstCheckbox.getValue(),
+                "Checkbox should update when other user completes the task");
+    }
+
+    @Test
+    void otherUserRenamingTaskUpdatesTitleField() {
+        navigate(MUC06View.class);
+        runPendingSignalsTasks();
+
+        // Get the first text field (first task's title)
+        TextField firstTitle = $view(TextField.class).first();
+        String originalTitle = firstTitle.getValue();
+
+        // Simulate User B renaming the first task via the shared signal
+        var tasks = muc06Signals.getTasksSignal().peek();
+        var firstTaskSignal = tasks.getFirst();
+        MUC06Signals.Task task = firstTaskSignal.peek();
+        firstTaskSignal.set(new MUC06Signals.Task(task.id(),
+                "Renamed by User B", task.completed(), task.dueDate()));
+        runPendingSignalsTasks();
+
+        // User A's text field should show the new title
+        assertEquals("Renamed by User B", firstTitle.getValue(),
+                "Title field should update when other user renames the task");
+    }
+
+    @Test
+    void otherUserChangingDueDateUpdatesDatePicker() {
+        navigate(MUC06View.class);
+        runPendingSignalsTasks();
+
+        // Get the first date picker
+        DatePicker firstDatePicker = $view(DatePicker.class).first();
+        LocalDate newDate = LocalDate.of(2030, 12, 25);
+
+        // Simulate User B changing the due date via the shared signal
+        var tasks = muc06Signals.getTasksSignal().peek();
+        var firstTaskSignal = tasks.getFirst();
+        MUC06Signals.Task task = firstTaskSignal.peek();
+        firstTaskSignal.set(new MUC06Signals.Task(task.id(), task.title(),
+                task.completed(), newDate));
+        runPendingSignalsTasks();
+
+        // User A's date picker should show the new date
+        assertEquals(newDate, firstDatePicker.getValue(),
+                "Date picker should update when other user changes due date");
     }
 }
