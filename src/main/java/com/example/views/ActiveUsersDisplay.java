@@ -3,7 +3,6 @@ package com.example.views;
 import com.example.signals.UserSessionRegistry;
 import org.jspecify.annotations.Nullable;
 
-import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -130,9 +129,8 @@ public class ActiveUsersDisplay extends Div {
                 .set("background-color", "rgba(255, 255, 255, 0.7)")
                 .set("border-radius", "16px");
 
-        Avatar avatar = new Avatar();
-        Signal.effect(avatar, () -> avatar.setName(displayNameSignal.get()));
-        avatar.setImage(MainLayout.getProfilePicturePath(user.username()));
+        ColoredAvatar avatar = new ColoredAvatar(user.username(),
+                user.color(), 32);
 
         Span nameLabel = new Span();
         nameLabel.bindText(displayNameSignal);
