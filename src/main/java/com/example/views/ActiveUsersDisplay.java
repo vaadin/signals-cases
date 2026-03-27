@@ -130,7 +130,7 @@ public class ActiveUsersDisplay extends Div {
                 .set("border-radius", "16px");
 
         ColoredAvatar avatar = new ColoredAvatar(user.username(),
-                user.color(), 32);
+                user.cssColor(), 32);
 
         Span nameLabel = new Span();
         nameLabel.bindText(displayNameSignal);

@@ -1,4 +1,37 @@
-/* Add your styles here */
+/* User session color palette — used by field-highlighter (via colorIndex)
+   and by Java components (via var(--vaadin-user-color-N)) */
+html {
+    --vaadin-user-color-0: #E91E63;  /* Pink */
+    --vaadin-user-color-1: #2196F3;  /* Blue */
+    --vaadin-user-color-2: #4CAF50;  /* Green */
+    --vaadin-user-color-3: #FF9800;  /* Orange */
+    --vaadin-user-color-4: #9C27B0;  /* Purple */
+    --vaadin-user-color-5: #00BCD4;  /* Cyan */
+    --vaadin-user-color-6: #F44336;  /* Red */
+    --vaadin-user-color-7: #009688;  /* Teal */
+    --vaadin-user-color-8: #FF5722;  /* Deep Orange */
+    --vaadin-user-color-9: #3F51B5;  /* Indigo */
+    --vaadin-user-color-10: #8BC34A; /* Light Green */
+    --vaadin-user-color-11: #795548; /* Brown */
+    --vaadin-user-color-12: #607D8B; /* Blue Grey */
+    --vaadin-user-color-13: #CDDC39; /* Lime */
+    --vaadin-user-color-14: #673AB7; /* Deep Purple */
+    --vaadin-user-color-15: #FFC107; /* Amber */
+    --vaadin-user-color-16: #03A9F4; /* Light Blue */
+    --vaadin-user-color-17: #E040FB; /* Pink Accent */
+    --vaadin-user-color-18: #00E676; /* Green Accent */
+    --vaadin-user-color-19: #FF6D00; /* Orange Accent */
+    --vaadin-user-color-20: #304FFE; /* Indigo Accent */
+    --vaadin-user-color-21: #76FF03; /* Light Green Accent */
+    --vaadin-user-color-22: #D50000; /* Red Accent */
+    --vaadin-user-color-23: #00B8D4; /* Cyan Accent */
+    --vaadin-user-color-24: #6D4C41; /* Brown Dark */
+    --vaadin-user-color-25: #AA00FF; /* Purple Accent */
+    --vaadin-user-color-26: #64DD17; /* Lime Accent */
+    --vaadin-user-color-27: #C51162; /* Pink Dark */
+    --vaadin-user-color-28: #0091EA; /* Light Blue Accent */
+    --vaadin-user-color-29: #FFD600; /* Yellow Accent */
+}
 
 .price-up {
     color: var(--lumo-success-color);

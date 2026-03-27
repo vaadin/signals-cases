@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @DirtiesContext
@@ -19,27 +19,29 @@ class UserSessionRegistryColorTest {
     private UserSessionRegistry registry;
 
     @Test
-    void thirtySessionsGetDistinctColors() {
-        Set<String> colors = new HashSet<>();
+    void thirtySessionsGetDistinctColorIndices() {
+        Set<Integer> indices = new HashSet<>();
         for (int i = 0; i < 30; i++) {
             registry.registerUser("user" + i, "session" + i);
-            String color = registry.getUserColor("user" + i, "session" + i);
-            assertNotEquals("#9E9E9E", color,
-                    "Session " + i + " should have an assigned color");
-            colors.add(color);
+            int colorIndex = registry.getUserColorIndex("user" + i,
+                    "session" + i);
+            assertTrue(colorIndex >= 0 && colorIndex < UserInfo.COLOR_COUNT,
+                    "Color index should be in range [0, " + UserInfo.COLOR_COUNT
+                            + ") but was " + colorIndex);
+            indices.add(colorIndex);
         }
-        assertEquals(30, colors.size(),
-                "All 30 sessions should have distinct colors");
+        assertEquals(30, indices.size(),
+                "All 30 sessions should have distinct color indices");
     }
 
     @Test
-    void colorsWrapAfterPaletteExhausted() {
+    void colorIndicesWrapAfterPaletteExhausted() {
         for (int i = 0; i < 31; i++) {
             registry.registerUser("wrap" + i, "s" + i);
         }
-        String first = registry.getUserColor("wrap0", "s0");
-        String thirtyFirst = registry.getUserColor("wrap30", "s30");
+        int first = registry.getUserColorIndex("wrap0", "s0");
+        int thirtyFirst = registry.getUserColorIndex("wrap30", "s30");
         assertEquals(first, thirtyFirst,
-                "Color should wrap around after palette is exhausted");
+                "Color index should wrap around after palette is exhausted");
     }
 }
