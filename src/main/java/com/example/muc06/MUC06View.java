@@ -162,49 +162,33 @@ public class MUC06View extends VerticalLayout {
             SharedValueSignal<MUC06Signals.Task> taskSignal,
             SharedListSignal<MUC06Signals.Task> tasksSignal) {
 
-        // Checkbox for completed status - two-way reactive binding
+        // Checkbox for completed status - two-way binding via map + updater
         Checkbox checkbox = new Checkbox();
         checkbox.setAriaLabel("Task completed");
-        checkbox.bindValue(
-                taskSignal.map(MUC06Signals.Task::completed),
-                value -> {
-                    MUC06Signals.Task current = taskSignal.peek();
-                    taskSignal.set(new MUC06Signals.Task(current.id(),
-                            current.title(), value, current.dueDate()));
-                });
+        checkbox.bindValue(taskSignal.map(MUC06Signals.Task::completed),
+                taskSignal.updater((task, completed) -> new MUC06Signals.Task(
+                        task.id(), task.title(), completed, task.dueDate())));
 
-        // TextField for title - two-way reactive binding
+        // TextField for title - two-way binding via map + updater
         TextField titleField = new TextField();
         titleField.setPlaceholder("Task title...");
         titleField.setWidth("400px");
         titleField.bindValue(
                 taskSignal.map(t -> t.title() != null ? t.title() : ""),
-                value -> {
-                    MUC06Signals.Task current = taskSignal.peek();
-                    taskSignal.set(new MUC06Signals.Task(current.id(), value,
-                            current.completed(), current.dueDate()));
-                });
+                taskSignal.updater((task, title) -> new MUC06Signals.Task(
+                        task.id(), title, task.completed(), task.dueDate())));
 
-        // Reactive strikethrough styling for completed tasks
-        Signal.effect(titleField, () -> {
-            if (taskSignal.get().completed()) {
-                titleField.getStyle().set("text-decoration", "line-through");
-            } else {
-                titleField.getStyle().remove("text-decoration");
-            }
-        });
+        // Reactive strikethrough styling - direct style binding
+        titleField.getStyle().bind("text-decoration",
+                taskSignal.map(t -> t.completed() ? "line-through" : "none"));
 
-        // DatePicker for due date - two-way reactive binding
+        // DatePicker for due date - two-way binding via map + updater
         DatePicker datePicker = new DatePicker();
         datePicker.setPlaceholder("Due date");
         datePicker.setWidth("180px");
-        datePicker.bindValue(
-                taskSignal.map(MUC06Signals.Task::dueDate),
-                value -> {
-                    MUC06Signals.Task current = taskSignal.peek();
-                    taskSignal.set(new MUC06Signals.Task(current.id(),
-                            current.title(), current.completed(), value));
-                });
+        datePicker.bindValue(taskSignal.map(MUC06Signals.Task::dueDate),
+                taskSignal.updater((task, dueDate) -> new MUC06Signals.Task(
+                        task.id(), task.title(), task.completed(), dueDate)));
 
         // Delete button
         Button deleteButton = new Button(new Icon(VaadinIcon.TRASH));
