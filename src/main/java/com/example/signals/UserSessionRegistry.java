@@ -210,7 +210,14 @@ public class UserSessionRegistry {
             var users = activeUsersSignal.get();
             var names = displayNamesSignal.get();
             for (int i = 0; i < users.size() && i < names.size(); i++) {
-                if (compositeKey.equals(users.get(i).get().getCompositeKey())) {
+                // Use peek() to avoid subscribing to individual user signals
+                // directly. displayNamesSignal already tracks those changes,
+                // so subscribing here would create a diamond dependency that
+                // can cause glitches (stale reads when this signal recomputes
+                // before displayNamesSignal). The composite key (username +
+                // sessionId) is immutable per entry, so peek() is safe.
+                if (compositeKey
+                        .equals(users.get(i).peek().getCompositeKey())) {
                     return names.get(i);
                 }
             }
