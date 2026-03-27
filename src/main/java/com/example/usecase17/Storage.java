@@ -27,4 +27,3 @@ public class Storage extends Component {
         return speedMBps;
     }
 }
-

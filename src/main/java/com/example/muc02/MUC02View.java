@@ -182,8 +182,7 @@ public class MUC02View extends VerticalLayout {
             SharedValueSignal<MUC02Signals.CursorPosition> positionSignal) {
         String sessionKey = lookupSessionKey(positionSignal);
         String username = sessionKey.split(":")[0];
-        String userColor = buildColorMap().getOrDefault(sessionKey,
-                "#9E9E9E");
+        String userColor = buildColorMap().getOrDefault(sessionKey, "#9E9E9E");
 
         HorizontalLayout userItem = new HorizontalLayout();
         userItem.setSpacing(true);
@@ -194,15 +193,14 @@ public class MUC02View extends VerticalLayout {
 
         Div colorDot = new Div();
         colorDot.getStyle().set("width", "12px").set("height", "12px")
-                .set("border-radius", "50%")
-                .set("background-color", userColor)
+                .set("border-radius", "50%").set("background-color", userColor)
                 .set("flex-shrink", "0");
 
         ColoredAvatar avatar = new ColoredAvatar(username, userColor, 32);
 
         Div userLabel = new Div();
-        userLabel.bindText(
-                userSessionRegistry.getDisplayNameSignal(sessionKey));
+        userLabel
+                .bindText(userSessionRegistry.getDisplayNameSignal(sessionKey));
         userLabel.getStyle().set("font-weight", "500");
 
         Div positionLabel = new Div(
@@ -218,15 +216,13 @@ public class MUC02View extends VerticalLayout {
     private Div createCursorIndicator(
             SharedValueSignal<MUC02Signals.CursorPosition> positionSignal) {
         String sessionKey = lookupSessionKey(positionSignal);
-        String userColor = buildColorMap().getOrDefault(sessionKey,
-                "#9E9E9E");
+        String userColor = buildColorMap().getOrDefault(sessionKey, "#9E9E9E");
 
         Div cursorIndicator = new Div();
         cursorIndicator.getStyle().set("position", "absolute")
                 .set("width", "20px").set("height", "20px")
-                .set("background-color", userColor)
-                .set("border-radius", "50%").set("border", "2px solid white")
-                .set("pointer-events", "none")
+                .set("background-color", userColor).set("border-radius", "50%")
+                .set("border", "2px solid white").set("pointer-events", "none")
                 .set("transform", "translate(-50%, -50%)")
                 .set("z-index", "1000");
 
@@ -236,13 +232,12 @@ public class MUC02View extends VerticalLayout {
                 .map(pos -> pos != null ? pos.y() + "px" : "0px"));
 
         Div label = new Div();
-        label.bindText(
-                userSessionRegistry.getDisplayNameSignal(sessionKey));
+        label.bindText(userSessionRegistry.getDisplayNameSignal(sessionKey));
         label.getStyle().set("position", "absolute").set("top", "25px")
                 .set("left", "0").set("white-space", "nowrap")
-                .set("background-color", userColor)
-                .set("color", "white").set("padding", "2px 6px")
-                .set("border-radius", "3px").set("font-size", "0.75em");
+                .set("background-color", userColor).set("color", "white")
+                .set("padding", "2px 6px").set("border-radius", "3px")
+                .set("font-size", "0.75em");
 
         cursorIndicator.add(label);
         return cursorIndicator;
