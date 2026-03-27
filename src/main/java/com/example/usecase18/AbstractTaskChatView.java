@@ -436,6 +436,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
 
         // Message input
         messageInput = new MessageInput();
+        messageInput.setWidthFull();
         messageInput.bindEnabled(messageInputEnabledSignal);
         messageInput.addSubmitListener(this::onMessageSubmit);
 

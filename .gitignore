@@ -15,3 +15,4 @@ vite.generated.ts
 
 .playwright-mcp
 .vaadin-node-tasks.lock
+.claude-contained/
