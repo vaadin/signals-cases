@@ -795,7 +795,8 @@ public class UseCase17View extends VerticalLayout {
         Div checkDiv = new Div();
         checkDiv.getStyle().set("padding", "0.25em 0").set("font-size",
                 "0.9em");
-        checkDiv.getElement().bindProperty("innerHTML", statusSignal, null);
+        @SuppressWarnings("NullAway")
+        var binding = checkDiv.getElement().bindProperty("innerHTML", statusSignal, null);
         return checkDiv;
     }
 

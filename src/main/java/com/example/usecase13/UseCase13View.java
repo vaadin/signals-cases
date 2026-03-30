@@ -144,8 +144,10 @@ public class UseCase13View extends VerticalLayout {
 
         // Dim inactive tabs
         var isTabActive = userSignal.map(info -> info.isTabActive());
-        card.getStyle().bind("opacity", () -> isTabActive.get() ? null : "0.6");
-        card.getStyle().bind("filter",
+        @SuppressWarnings("NullAway") // null removes the style
+        var opacityBinding = card.getStyle().bind("opacity", () -> isTabActive.get() ? null : "0.6");
+        @SuppressWarnings("NullAway") // null removes the style
+        var filterBinding = card.getStyle().bind("filter",
                 () -> isTabActive.get() ? null : "grayscale(30%)");
 
         // Header: Tab Status + Avatar + Username/Nickname + Role Badge

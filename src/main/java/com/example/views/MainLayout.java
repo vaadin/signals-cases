@@ -147,11 +147,13 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         userDisplay.getStyle().set("margin-right", "1em");
 
         Avatar userAvatar = new Avatar();
-        userAvatar.getElement().bindProperty("name", currentUserSignal
+        @SuppressWarnings("NullAway")
+        var nameBinding = userAvatar.getElement().bindProperty("name", currentUserSignal
                 .getUserSignal()
                 .map(user -> user.isAuthenticated() ? user.getUsername() : ""),
                 null);
-        userAvatar.getElement().bindProperty("img",
+        @SuppressWarnings("NullAway")
+        var imgBinding = userAvatar.getElement().bindProperty("img",
                 currentUserSignal.getUserSignal()
                         .map(user -> user.isAuthenticated()
                                 ? getProfilePicturePath(user.getUsername())
