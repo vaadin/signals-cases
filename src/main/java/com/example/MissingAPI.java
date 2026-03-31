@@ -126,7 +126,7 @@ public class MissingAPI {
             DomListenerRegistration reg = component.getElement()
                     .addEventListener(RESIZE_EVENT, event -> {
                         signal.set(event.getEventDetail(ComponentSize.class));
-                    });
+                    }).addEventData("event.detail");
 
             component.getElement().executeJs(SETUP_RESIZE_OBSERVER_JS,
                     cleanupKey);
