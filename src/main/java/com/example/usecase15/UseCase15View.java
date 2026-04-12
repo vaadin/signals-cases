@@ -63,21 +63,35 @@ public class UseCase15View extends VerticalLayout {
 
     // Sample product database
     private static final List<Product> ALL_PRODUCTS = List.of(
-            new Product("1", "Laptop Pro 15", "Electronics", new BigDecimal("1299.99")),
-            new Product("2", "Wireless Mouse", "Electronics", new BigDecimal("29.99")),
-            new Product("3", "Mechanical Keyboard", "Electronics", new BigDecimal("89.99")),
-            new Product("4", "Office Chair", "Furniture", new BigDecimal("249.99")),
-            new Product("5", "Standing Desk", "Furniture", new BigDecimal("499.99")),
+            new Product("1", "Laptop Pro 15", "Electronics",
+                    new BigDecimal("1299.99")),
+            new Product("2", "Wireless Mouse", "Electronics",
+                    new BigDecimal("29.99")),
+            new Product("3", "Mechanical Keyboard", "Electronics",
+                    new BigDecimal("89.99")),
+            new Product("4", "Office Chair", "Furniture",
+                    new BigDecimal("249.99")),
+            new Product("5", "Standing Desk", "Furniture",
+                    new BigDecimal("499.99")),
             new Product("6", "Coffee Mug", "Kitchen", new BigDecimal("12.99")),
-            new Product("7", "Water Bottle", "Kitchen", new BigDecimal("19.99")),
-            new Product("8", "Notebook Set", "Stationery", new BigDecimal("15.99")),
-            new Product("9", "Pen Collection", "Stationery", new BigDecimal("24.99")),
-            new Product("10", "Desk Lamp", "Furniture", new BigDecimal("39.99")),
-            new Product("11", "USB-C Hub", "Electronics", new BigDecimal("49.99")),
-            new Product("12", "Headphones", "Electronics", new BigDecimal("149.99")),
-            new Product("13", "Monitor 27\"", "Electronics", new BigDecimal("399.99")),
-            new Product("14", "Webcam HD", "Electronics", new BigDecimal("79.99")),
-            new Product("15", "Bookshelf", "Furniture", new BigDecimal("129.99")));
+            new Product("7", "Water Bottle", "Kitchen",
+                    new BigDecimal("19.99")),
+            new Product("8", "Notebook Set", "Stationery",
+                    new BigDecimal("15.99")),
+            new Product("9", "Pen Collection", "Stationery",
+                    new BigDecimal("24.99")),
+            new Product("10", "Desk Lamp", "Furniture",
+                    new BigDecimal("39.99")),
+            new Product("11", "USB-C Hub", "Electronics",
+                    new BigDecimal("49.99")),
+            new Product("12", "Headphones", "Electronics",
+                    new BigDecimal("149.99")),
+            new Product("13", "Monitor 27\"", "Electronics",
+                    new BigDecimal("399.99")),
+            new Product("14", "Webcam HD", "Electronics",
+                    new BigDecimal("79.99")),
+            new Product("15", "Bookshelf", "Furniture",
+                    new BigDecimal("129.99")));
 
     private static final long DEBOUNCE_DELAY_MS = 1000;
 
@@ -267,7 +281,6 @@ public class UseCase15View extends VerticalLayout {
     private void performSearch(String query) {
         // Cancel previous search if still running
         CompletableFuture<Void> previousSearch = currentSearchSignal.peek();
-        ;
         if (previousSearch != null && !previousSearch.isDone()) {
             previousSearch.cancel(true);
         }
@@ -325,7 +338,8 @@ public class UseCase15View extends VerticalLayout {
 
         leftSide.add(nameDiv, categoryDiv);
 
-        Div priceDiv = new Div("$" + product.price().setScale(2, RoundingMode.HALF_UP));
+        Div priceDiv = new Div(
+                "$" + product.price().setScale(2, RoundingMode.HALF_UP));
         priceDiv.getStyle().set("font-weight", "bold").set("color",
                 "var(--lumo-primary-color)");
 

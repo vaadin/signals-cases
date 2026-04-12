@@ -48,15 +48,13 @@ public record UserInfo(String username, String sessionId,
     // Helper to create updated instance with new view
     public UserInfo withCurrentView(@Nullable String newView) {
         return new UserInfo(username, sessionId, newView, nickname,
-                sessionStartTime, isTabActive, lastInteractionTime,
-                colorIndex);
+                sessionStartTime, isTabActive, lastInteractionTime, colorIndex);
     }
 
     // Helper to create updated instance with new nickname
     public UserInfo withNickname(@Nullable String newNickname) {
         return new UserInfo(username, sessionId, currentView, newNickname,
-                sessionStartTime, isTabActive, lastInteractionTime,
-                colorIndex);
+                sessionStartTime, isTabActive, lastInteractionTime, colorIndex);
     }
 
     // Helper to create updated instance with new tab activity state

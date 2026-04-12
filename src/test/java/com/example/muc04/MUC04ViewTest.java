@@ -9,6 +9,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.textfield.TextField;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,6 +21,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @WithMockUser
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class MUC04ViewTest extends SpringBrowserlessTest {
+
+    private static final SignalFieldHighlighter.User OTHER_USER = new SignalFieldHighlighter.User(
+            99, "otherUser", 1);
 
     @Autowired
     private MUC04Signals muc04Signals;
@@ -40,7 +44,7 @@ class MUC04ViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void fieldsEnabledWhenNoLocks() {
+    void fieldsEnabledWhenNoEditors() {
         navigate(MUC04View.class);
         runPendingSignalsTasks();
 
@@ -49,57 +53,54 @@ class MUC04ViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void otherUserLockingFieldDisablesItForCurrentUser() {
+    void fieldsRemainEnabledWhenLockingDisabled() {
         navigate(MUC04View.class);
         runPendingSignalsTasks();
 
-        // Simulate User B locking the Company Name field
-        muc04Signals.lockField("companyName", "otherUser", "otherSession");
+        muc04Signals.startEditing("companyName", OTHER_USER);
         runPendingSignalsTasks();
 
-        // Company Name should be disabled for the current user
-        TextField companyNameField = getFieldByLabel("Company Name");
-        assertFalse(companyNameField.isEnabled(),
-                "Field locked by other user should be disabled");
-
-        // Other fields should remain enabled
+        assertTrue(getFieldByLabel("Company Name").isEnabled(),
+                "Field should remain enabled when locking is off");
         assertTrue(getFieldByLabel("Address").isEnabled());
         assertTrue(getFieldByLabel("Phone Number").isEnabled());
     }
 
     @Test
-    void lockShowsWhoIsEditing() {
+    void fieldDisabledWhenLockingEnabledAndOtherUserEdits() {
         navigate(MUC04View.class);
         runPendingSignalsTasks();
 
-        // Simulate User B locking the Address field
-        muc04Signals.lockField("address", "otherUser", "otherSession");
+        Checkbox lockingCheckbox = $view(Checkbox.class).first();
+        test(lockingCheckbox).click();
         runPendingSignalsTasks();
 
-        // Helper text should indicate who is editing
-        TextField addressField = getFieldByLabel("Address");
-        assertTrue(
-                addressField.getHelperText() != null
-                        && addressField.getHelperText().contains("otherUser"),
-                "Helper text should show the locking user's name");
+        muc04Signals.startEditing("companyName", OTHER_USER);
+        runPendingSignalsTasks();
+
+        assertFalse(getFieldByLabel("Company Name").isEnabled(),
+                "Field should be disabled when locking is on and another user is editing");
+        assertTrue(getFieldByLabel("Address").isEnabled());
+        assertTrue(getFieldByLabel("Phone Number").isEnabled());
     }
 
     @Test
-    void unlockingFieldReenablesIt() {
+    void fieldReenabledWhenLockingToggledOff() {
         navigate(MUC04View.class);
         runPendingSignalsTasks();
 
-        // User B locks the field
-        muc04Signals.lockField("phone", "otherUser", "otherSession");
-        runPendingSignalsTasks();
-        assertFalse(getFieldByLabel("Phone Number").isEnabled());
-
-        // User B unlocks the field
-        muc04Signals.unlockField("phone", "otherUser", "otherSession");
+        Checkbox lockingCheckbox = $view(Checkbox.class).first();
+        test(lockingCheckbox).click();
+        muc04Signals.startEditing("companyName", OTHER_USER);
         runPendingSignalsTasks();
 
-        assertTrue(getFieldByLabel("Phone Number").isEnabled(),
-                "Field should be re-enabled after unlock");
+        assertFalse(getFieldByLabel("Company Name").isEnabled());
+
+        test(lockingCheckbox).click();
+        runPendingSignalsTasks();
+
+        assertTrue(getFieldByLabel("Company Name").isEnabled(),
+                "Field should be re-enabled when locking is toggled off");
     }
 
     @Test
@@ -107,12 +108,10 @@ class MUC04ViewTest extends SpringBrowserlessTest {
         navigate(MUC04View.class);
         runPendingSignalsTasks();
 
-        // User A types a company name
         TextField companyNameField = getFieldByLabel("Company Name");
         test(companyNameField).setValue("Acme Corp");
         runPendingSignalsTasks();
 
-        // The shared signal should reflect the value (visible to all users)
         assertEquals("Acme Corp", muc04Signals.getCompanyNameSignal().peek());
     }
 
@@ -121,11 +120,9 @@ class MUC04ViewTest extends SpringBrowserlessTest {
         navigate(MUC04View.class);
         runPendingSignalsTasks();
 
-        // Simulate User B setting the address via the shared signal
         muc04Signals.getAddressSignal().set("123 Main St");
         runPendingSignalsTasks();
 
-        // User A's view should show the updated value
         TextField addressField = getFieldByLabel("Address");
         assertEquals("123 Main St", addressField.getValue());
     }

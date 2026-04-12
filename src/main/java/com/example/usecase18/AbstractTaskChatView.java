@@ -2,16 +2,14 @@ package com.example.usecase18;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
 import com.example.signals.UserSessionRegistry;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
@@ -37,7 +35,6 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.flow.signals.shared.SharedListSignal;
-import com.vaadin.flow.signals.shared.SharedValueSignal;
 
 public abstract class AbstractTaskChatView extends VerticalLayout {
 
@@ -439,6 +436,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
 
         // Message input
         messageInput = new MessageInput();
+        messageInput.setWidthFull();
         messageInput.bindEnabled(messageInputEnabledSignal);
         messageInput.addSubmitListener(this::onMessageSubmit);
 
@@ -493,9 +491,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
                 }, () -> {
                     // Streaming complete - re-enable input
                     if (streamingContent.isEmpty()) {
-                        assistantMessageSignal
-                                .set(new ChatMessageData("Assistant",
-                                        "Done!", assistantTimestamp));
+                        assistantMessageSignal.set(new ChatMessageData(
+                                "Assistant", "Done!", assistantTimestamp));
                     }
                     messageInputEnabledSignal.set(true);
                 });
@@ -504,8 +501,8 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
     private void updateTaskField(String taskId,
             java.util.function.Function<Task, Task> updater) {
         var tasks = tasksSignal.peek();
-        var match = tasks.stream()
-                .filter(sig -> sig.peek().id().equals(taskId)).findFirst();
+        var match = tasks.stream().filter(sig -> sig.peek().id().equals(taskId))
+                .findFirst();
 
         if (match.isEmpty()) {
             logger.warn("Task not found: {} (available: {})", taskId,

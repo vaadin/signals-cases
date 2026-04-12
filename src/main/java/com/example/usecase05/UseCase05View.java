@@ -54,8 +54,7 @@ public class UseCase05View extends VerticalLayout {
 
         // State selector - computed items based on country
         ComboBox<String> stateSelect = new ComboBox<>("State/Province");
-        Signal.effect(stateSelect,
-                () -> stateSelect.setItems(states.get()));
+        Signal.effect(stateSelect, () -> stateSelect.setItems(states.get()));
         stateSelect.bindValue(stateSignal, stateSignal::set);
 
         // City selector - computed items based on state

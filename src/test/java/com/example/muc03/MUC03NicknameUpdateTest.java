@@ -1,12 +1,12 @@
 package com.example.muc03;
 
+import com.example.signals.UserSessionRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 
-import com.example.signals.UserSessionRegistry;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.html.Span;
@@ -38,8 +38,9 @@ class MUC03NicknameUpdateTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Verify userB's name appears in the leaderboard
-        assertTrue($view(Span.class).all().stream().anyMatch(
-                        s -> s.getText() != null
+        assertTrue(
+                $view(Span.class).all().stream()
+                        .anyMatch(s -> s.getText() != null
                                 && s.getText().contains("userB")
                                 && s.getText().contains("1 points")),
                 "Leaderboard should show userB with 1 point");
@@ -49,15 +50,17 @@ class MUC03NicknameUpdateTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // The leaderboard should now show the nickname instead
-        assertTrue($view(Span.class).all().stream().anyMatch(
-                        s -> s.getText() != null
+        assertTrue(
+                $view(Span.class).all().stream()
+                        .anyMatch(s -> s.getText() != null
                                 && s.getText().contains("CoolPlayer")
                                 && s.getText().contains("1 points")),
                 "Leaderboard should update to show nickname 'CoolPlayer'");
 
         // The old username should no longer appear in the score label
-        assertTrue($view(Span.class).all().stream().noneMatch(
-                        s -> s.getText() != null
+        assertTrue(
+                $view(Span.class).all().stream()
+                        .noneMatch(s -> s.getText() != null
                                 && s.getText().contains("userB")
                                 && s.getText().contains("1 points")),
                 "Leaderboard should no longer show 'userB' in score label");
@@ -76,8 +79,9 @@ class MUC03NicknameUpdateTest extends SpringBrowserlessTest {
         muc03Signals.awardPoint("userB", "sessionB");
         runPendingSignalsTasks();
 
-        assertTrue($view(Span.class).all().stream().anyMatch(
-                        s -> s.getText() != null
+        assertTrue(
+                $view(Span.class).all().stream()
+                        .anyMatch(s -> s.getText() != null
                                 && s.getText().contains("CoolPlayer")),
                 "Leaderboard should show nickname");
 
@@ -89,8 +93,9 @@ class MUC03NicknameUpdateTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Should revert to username
-        assertTrue($view(Span.class).all().stream().anyMatch(
-                        s -> s.getText() != null
+        assertTrue(
+                $view(Span.class).all().stream()
+                        .anyMatch(s -> s.getText() != null
                                 && s.getText().contains("userB")
                                 && s.getText().contains("1 points")),
                 "Leaderboard should revert to username when nickname cleared");

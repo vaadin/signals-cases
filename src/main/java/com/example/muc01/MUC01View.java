@@ -158,8 +158,7 @@ public class MUC01View extends VerticalLayout {
 
         Div author = new Div();
         author.setText(message.author());
-        author.getStyle().set("font-weight", "bold").set("color",
-                senderColor);
+        author.getStyle().set("font-weight", "bold").set("color", senderColor);
 
         Div timestamp = new Div();
         timestamp.setText(message.getFormattedTimestamp());

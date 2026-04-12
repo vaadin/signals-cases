@@ -255,9 +255,8 @@ public class MUC03View extends VerticalLayout {
                 "cover");
 
         Span nameLabel = new Span();
-        nameLabel.bindText(Signal.computed(() ->
-                String.format("%s: %d points",
-                        displayNameSignal.get(), scoreSignal.get())));
+        nameLabel.bindText(Signal.computed(() -> String.format("%s: %d points",
+                displayNameSignal.get(), scoreSignal.get())));
 
         item.add(avatar, nameLabel);
         return item;
