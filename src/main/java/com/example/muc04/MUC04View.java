@@ -55,13 +55,22 @@ public class MUC04View extends VerticalLayout {
         String sessionId = SessionIdHelper.getCurrentSessionId();
         int colorIndex = userSessionRegistry.getUserColorIndex(username,
                 sessionId);
-        this.currentUser = new User((username + ":" + sessionId).hashCode(),
-                username, colorIndex);
+        String compositeKey = username + ":" + sessionId;
+        int userId = compositeKey.hashCode();
+        Signal<String> displayNameSignal = userSessionRegistry
+                .getDisplayNameSignal(compositeKey);
+        this.currentUser = new User(userId,
+                displayNameSignal.peek(), colorIndex);
         this.muc04Signals = muc04Signals;
         this.lockingEnabledSignal = muc04Signals.getLockingEnabledSignal();
 
         setSpacing(true);
         setPadding(true);
+
+        // Update field editor entries when display name changes
+        Signal.effect(this,
+                () -> muc04Signals.updateUserName(userId,
+                        displayNameSignal.get()));
 
         var lockingCheckbox = new Checkbox("Enable field locking");
         lockingCheckbox.bindValue(lockingEnabledSignal,
