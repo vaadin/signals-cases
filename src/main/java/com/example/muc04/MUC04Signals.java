@@ -56,4 +56,18 @@ public class MUC04Signals {
             return u != null && u.id() == user.id();
         }).findFirst().ifPresent(getFieldEditors(fieldName)::remove);
     }
+
+    /**
+     * Update the display name for a user across all field editor lists.
+     */
+    public void updateUserName(int userId, String newName) {
+        for (var editors : fieldEditors.values()) {
+            for (var entry : editors.peek()) {
+                var user = entry.peek();
+                if (user != null && user.id() == userId) {
+                    entry.set(new User(user.id(), newName, user.colorIndex()));
+                }
+            }
+        }
+    }
 }
