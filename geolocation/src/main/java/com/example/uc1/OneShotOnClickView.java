@@ -1,0 +1,70 @@
+package com.example.uc1;
+
+import com.example.views.MainLayout;
+
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.geolocation.GeolocationError;
+import com.vaadin.flow.component.geolocation.GeolocationPending;
+import com.vaadin.flow.component.geolocation.GeolocationPosition;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.map.Map;
+import com.vaadin.flow.component.map.configuration.Coordinate;
+import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.Route;
+
+/**
+ * UC1 — One-shot request on user click.
+ * <p>
+ * Classic "Use my location" button. The click handler calls
+ * {@code Geolocation.get(...)} and reacts to either the returned
+ * {@link GeolocationPosition} or a {@link GeolocationError}. On success the map
+ * below is centered on the result and a marker is dropped.
+ */
+@Route(value = "uc1", layout = MainLayout.class)
+@Menu(order = 1, title = "UC1 — One-shot request")
+public class OneShotOnClickView extends VerticalLayout {
+
+    public OneShotOnClickView() {
+        add(new H1("UC1 — One-shot request on user click"));
+        add(new Paragraph(
+                "Click the button below to request the current position once."));
+
+        Span result = new Span("(no reading yet)");
+
+        Map map = new Map();
+        map.setHeight("400px");
+        map.setWidthFull();
+
+        Button locate = new Button("Use my location", e -> {
+            UI.getCurrent().getGeolocation().get(value -> {
+                switch (value) {
+                case GeolocationPending p -> {
+                    // get() never delivers Pending; required for exhaustiveness
+                }
+                case GeolocationPosition pos -> {
+                    result.setText("lat=%.5f, lon=%.5f (±%.0f m)".formatted(
+                            pos.coords().latitude(), pos.coords().longitude(),
+                            pos.coords().accuracy()));
+                    Coordinate c = new Coordinate(pos.coords().longitude(),
+                            pos.coords().latitude());
+                    map.setCenter(c);
+                    if (map.getZoom() < 14) {
+                        map.setZoom(14);
+                    }
+                    map.getFeatureLayer().removeAllFeatures();
+                    map.getFeatureLayer().addFeature(new MarkerFeature(c));
+                }
+                case GeolocationError err -> result
+                        .setText("Error " + err.code() + ": " + err.message());
+                }
+            });
+        });
+
+        add(locate, result, map);
+    }
+}
