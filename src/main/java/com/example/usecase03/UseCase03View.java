@@ -14,7 +14,8 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.slider.Slider;
+import com.vaadin.flow.component.slider.DecimalSlider;
+import com.vaadin.flow.component.slider.IntegerSlider;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -291,11 +292,11 @@ public class UseCase03View extends VerticalLayout {
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-weight", "500");
 
-        Slider xSlider = new Slider("X", 0, 500);
+        IntegerSlider xSlider = new IntegerSlider("X", 0, 500);
         bindSliderToInteger(xSlider, rectXSignal);
         xSlider.setWidthFull();
 
-        Slider ySlider = new Slider("Y", 0, 500);
+        IntegerSlider ySlider = new IntegerSlider("Y", 0, 500);
         bindSliderToInteger(ySlider, rectYSignal);
         ySlider.setWidthFull();
 
@@ -305,15 +306,15 @@ public class UseCase03View extends VerticalLayout {
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-weight", "500").set("margin-top", "8px");
 
-        Slider widthSlider = new Slider("Width", 50, 250);
+        IntegerSlider widthSlider = new IntegerSlider("Width", 50, 250);
         bindSliderToInteger(widthSlider, rectWidthSignal);
         widthSlider.setWidthFull();
 
-        Slider heightSlider = new Slider("Height", 30, 150);
+        IntegerSlider heightSlider = new IntegerSlider("Height", 30, 150);
         bindSliderToInteger(heightSlider, rectHeightSignal);
         heightSlider.setWidthFull();
 
-        Slider cornerRadiusSlider = new Slider("Corner Radius", 0, 50);
+        IntegerSlider cornerRadiusSlider = new IntegerSlider("Corner Radius", 0, 50);
         bindSliderToInteger(cornerRadiusSlider, rectCornerRadiusSignal);
         cornerRadiusSlider.setWidthFull();
 
@@ -331,7 +332,7 @@ public class UseCase03View extends VerticalLayout {
         strokeColorField.bindValue(rectStrokeSignal, rectStrokeSignal::set);
         strokeColorField.setWidthFull();
 
-        Slider opacitySlider = new Slider("Opacity", 0.0, 1.0);
+        DecimalSlider opacitySlider = new DecimalSlider("Opacity", 0.0, 1.0);
         opacitySlider.setStep(0.1);
         opacitySlider.bindValue(rectOpacitySignal, rectOpacitySignal::set);
         opacitySlider.setWidthFull();
@@ -342,7 +343,7 @@ public class UseCase03View extends VerticalLayout {
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-weight", "500").set("margin-top", "8px");
 
-        Slider rotationSlider = new Slider("Rotation", 0, 360);
+        IntegerSlider rotationSlider = new IntegerSlider("Rotation", 0, 360);
         bindSliderToInteger(rotationSlider, rectRotationSignal);
         rotationSlider.setWidthFull();
 
@@ -370,11 +371,11 @@ public class UseCase03View extends VerticalLayout {
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-weight", "500");
 
-        Slider cxSlider = new Slider("Center X", 0, 500);
+        IntegerSlider cxSlider = new IntegerSlider("Center X", 0, 500);
         bindSliderToInteger(cxSlider, starCxSignal);
         cxSlider.setWidthFull();
 
-        Slider cySlider = new Slider("Center Y", 0, 500);
+        IntegerSlider cySlider = new IntegerSlider("Center Y", 0, 500);
         bindSliderToInteger(cySlider, starCySignal);
         cySlider.setWidthFull();
 
@@ -384,11 +385,11 @@ public class UseCase03View extends VerticalLayout {
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-weight", "500").set("margin-top", "8px");
 
-        Slider pointsSlider = new Slider("Points", 3, 10);
+        IntegerSlider pointsSlider = new IntegerSlider("Points", 3, 10);
         bindSliderToInteger(pointsSlider, starPointsSignal);
         pointsSlider.setWidthFull();
 
-        Slider sizeSlider = new Slider("Size", 30, 80);
+        IntegerSlider sizeSlider = new IntegerSlider("Size", 30, 80);
         bindSliderToInteger(sizeSlider, starSizeSignal);
         sizeSlider.setWidthFull();
 
@@ -406,7 +407,7 @@ public class UseCase03View extends VerticalLayout {
         strokeColorField.bindValue(starStrokeSignal, starStrokeSignal::set);
         strokeColorField.setWidthFull();
 
-        Slider opacitySlider = new Slider("Opacity", 0.0, 1.0);
+        DecimalSlider opacitySlider = new DecimalSlider("Opacity", 0.0, 1.0);
         opacitySlider.setStep(0.1);
         opacitySlider.bindValue(starOpacitySignal, starOpacitySignal::set);
         opacitySlider.setWidthFull();
@@ -417,7 +418,7 @@ public class UseCase03View extends VerticalLayout {
                 .set("color", "var(--lumo-secondary-text-color)")
                 .set("font-weight", "500").set("margin-top", "8px");
 
-        Slider rotationSlider = new Slider("Rotation", 0, 360);
+        IntegerSlider rotationSlider = new IntegerSlider("Rotation", 0, 360);
         bindSliderToInteger(rotationSlider, starRotationSignal);
         rotationSlider.setWidthFull();
 
@@ -525,10 +526,9 @@ public class UseCase03View extends VerticalLayout {
         starOpacitySignal.set(1.0);
     }
 
-    private void bindSliderToInteger(Slider slider,
+    private void bindSliderToInteger(IntegerSlider slider,
             ValueSignal<Integer> integerSignal) {
-        slider.bindValue(integerSignal.map(Integer::doubleValue),
-                value -> integerSignal.set(value.intValue()));
+        slider.bindValue(integerSignal, integerSignal::set);
     }
 
 }

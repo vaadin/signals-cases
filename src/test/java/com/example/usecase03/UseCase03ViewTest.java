@@ -8,7 +8,7 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.slider.Slider;
+import com.vaadin.flow.component.slider.IntegerSlider;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 
@@ -32,7 +32,7 @@ class UseCase03ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Rectangle tab is shown by default with its sliders
-        assertTrue($view(Slider.class).all().size() >= 5);
+        assertTrue($view(IntegerSlider.class).all().size() >= 5);
     }
 
     @Test
@@ -59,7 +59,7 @@ class UseCase03ViewTest extends SpringBrowserlessTest {
 
         // Rectangle tab (index 0) is selected by default
         // Rectangle controls should have a "Width" slider visible
-        assertTrue($view(Slider.class).all().stream()
+        assertTrue($view(IntegerSlider.class).all().stream()
                 .anyMatch(s -> "Width".equals(s.getLabel())));
 
         // Switch to Star tab (index 1)
@@ -69,7 +69,7 @@ class UseCase03ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Star controls should now show "Points" slider
-        assertTrue($view(Slider.class).all().stream()
+        assertTrue($view(IntegerSlider.class).all().stream()
                 .anyMatch(s -> "Points".equals(s.getLabel())));
     }
 
@@ -79,12 +79,12 @@ class UseCase03ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Find the Width slider and change its value (default is 150)
-        Slider widthSlider = $view(Slider.class).all().stream()
+        IntegerSlider widthSlider = $view(IntegerSlider.class).all().stream()
                 .filter(s -> "Width".equals(s.getLabel())).findFirst()
                 .orElseThrow();
-        widthSlider.setValue(200.0);
+        widthSlider.setValue(200);
         runPendingSignalsTasks();
-        assertEquals(200.0, widthSlider.getValue());
+        assertEquals(200, widthSlider.getValue());
 
         // Click Reset to Defaults
         Button resetButton = $view(Button.class).all().stream()
@@ -94,7 +94,7 @@ class UseCase03ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Width slider should revert to default value of 150
-        assertEquals(150.0, widthSlider.getValue());
+        assertEquals(150, widthSlider.getValue());
     }
 
     @Test
@@ -103,13 +103,13 @@ class UseCase03ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Find the X position slider and set a value
-        Slider xSlider = $view(Slider.class).all().stream()
+        IntegerSlider xSlider = $view(IntegerSlider.class).all().stream()
                 .filter(s -> "X".equals(s.getLabel())).findFirst()
                 .orElseThrow();
-        xSlider.setValue(250.0);
+        xSlider.setValue(250);
         runPendingSignalsTasks();
 
-        assertEquals(250.0, xSlider.getValue());
+        assertEquals(250, xSlider.getValue());
     }
 
     @Test
@@ -118,9 +118,9 @@ class UseCase03ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Rectangle-specific sliders should be present
-        assertTrue($view(Slider.class).all().stream()
+        assertTrue($view(IntegerSlider.class).all().stream()
                 .anyMatch(s -> "Corner Radius".equals(s.getLabel())));
-        assertTrue($view(Slider.class).all().stream()
+        assertTrue($view(IntegerSlider.class).all().stream()
                 .anyMatch(s -> "Height".equals(s.getLabel())));
     }
 }
