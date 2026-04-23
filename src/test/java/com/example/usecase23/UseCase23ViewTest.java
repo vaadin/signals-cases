@@ -82,7 +82,6 @@ class UseCase23ViewTest extends SpringBrowserlessTest {
         // Second update: double the users (100 → 200 = +100%)
         view.onDataUpdate(createTestData(200, 1000, 2.0, 50));
         runPendingSignalsTasks();
-        runPendingSignalsTasks();
 
         // Should show "+100.0" in the percentage badge
         assertTrue($view(Span.class).all().stream().anyMatch(
