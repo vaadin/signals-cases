@@ -10,6 +10,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -60,6 +61,40 @@ class UseCase19ViewTest extends SpringBrowserlessTest {
         // visible
         assertTrue($view(ProgressBar.class).all().stream()
                 .anyMatch(ProgressBar::isIndeterminate));
+    }
+
+    @Test
+    void cardBorderColorReflectsItemState() {
+        navigate(UseCase19View.class);
+        runPendingSignalsTasks();
+
+        Card card = $view(Card.class).all().getFirst();
+
+        // IDLE state should have contrast border
+        assertTrue(card.getStyle().get("border-left")
+                .contains("var(--lumo-contrast-20pct)"),
+                "IDLE card should have contrast border but was: "
+                        + card.getStyle().get("border-left"));
+    }
+
+    @Test
+    void cardBorderColorUpdatesOnStateChange() {
+        navigate(UseCase19View.class);
+        runPendingSignalsTasks();
+
+        // Click Load All to transition items to LOADING
+        Button loadButton = $view(Button.class).all().stream()
+                .filter(b -> "Load All Items".equals(b.getText())).findFirst()
+                .orElseThrow();
+        test(loadButton).click();
+        runPendingSignalsTasks();
+
+        // Cards in LOADING state should have primary-color border
+        Card card = $view(Card.class).all().getFirst();
+        assertTrue(card.getStyle().get("border-left")
+                .contains("var(--lumo-primary-color)"),
+                "LOADING card should have primary border but was: "
+                        + card.getStyle().get("border-left"));
     }
 
     @Test

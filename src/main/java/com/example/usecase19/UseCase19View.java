@@ -314,21 +314,16 @@ public class UseCase19View extends VerticalLayout {
         // Add all state contents to card
         card.add(idleContent, loadingContent, successContent, errorContent);
 
-        // Card styling based on state
-        Signal<String> borderColorSignal = itemSignal.map(item -> {
-            return switch (item.state()) {
+        // Card styling based on state - use direct style binding
+        card.getStyle().bind("border-left", itemSignal.map(item -> {
+            String color = switch (item.state()) {
             case IDLE -> "var(--lumo-contrast-20pct)";
             case LOADING, GENERATING -> "var(--lumo-primary-color)";
             case SUCCESS -> "var(--lumo-success-color)";
             case ERROR -> "var(--lumo-error-color)";
             };
-        });
-
-        // Apply border color using Signal.effect
-        Signal.effect(card, () -> {
-            String color = borderColorSignal.get();
-            card.getStyle().set("border-left", "4px solid " + color);
-        });
+            return "4px solid " + color;
+        }));
 
         return card;
     }
