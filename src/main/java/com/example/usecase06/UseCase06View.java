@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
-import com.example.MissingAPI;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -52,8 +51,8 @@ public class UseCase06View extends VerticalLayout {
         var shippingOptionSignal = new ValueSignal<>(ShippingOption.STANDARD);
 
         // Computed signal for subtotal
-        var subtotalSignal = Signal.computed(() -> MissingAPI
-                .getValues(cartItemsSignal).map(CartItem::totalPrice)
+        var subtotalSignal = Signal.computed(() -> cartItemsSignal.getValues()
+                .map(CartItem::totalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add));
 
         // Computed signal for discount
