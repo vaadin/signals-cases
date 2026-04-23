@@ -204,7 +204,7 @@ public class UseCase24View extends VerticalLayout {
                 emptyState, infoBox);
     }
 
-    private Div createNotificationCard(Notification notification,
+    Div createNotificationCard(Notification notification,
             ListSignal<Notification> notificationsSignal) {
         var card = new Div();
         card.getStyle().set("display", "flex").set("align-items", "flex-start")
@@ -269,18 +269,18 @@ public class UseCase24View extends VerticalLayout {
 
         var toggleReadButton = new Button(
                 notification.read() ? "Mark Unread" : "Mark Read", e -> {
-                    notificationsSignal.get().stream()
-                            .filter(signal -> signal.get().id()
+                    notificationsSignal.peek().stream()
+                            .filter(signal -> signal.peek().id()
                                     .equals(notification.id()))
                             .findFirst().ifPresent(signal -> signal.set(signal
-                                    .get().withRead(!notification.read())));
+                                    .peek().withRead(!notification.read())));
                 });
         toggleReadButton.addThemeName("small");
         toggleReadButton.addThemeName("tertiary");
 
         var dismissButton = new Button("Dismiss", e -> {
-            notificationsSignal.get().stream().filter(
-                    signal -> signal.get().id().equals(notification.id()))
+            notificationsSignal.peek().stream().filter(
+                    signal -> signal.peek().id().equals(notification.id()))
                     .findFirst().ifPresent(notificationsSignal::remove);
         });
         dismissButton.addThemeName("small");

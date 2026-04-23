@@ -1,5 +1,8 @@
 package com.example.usecase24;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -8,7 +11,10 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.signals.local.ListSignal;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -130,6 +136,71 @@ class UseCase24ViewTest extends SpringBrowserlessTest {
                 .findFirst().orElseThrow();
         assertTrue(countLabel.getText().contains("0 unread"),
                 "Expected 0 unread but got: " + countLabel.getText());
+    }
+
+    @Test
+    void markReadOnSingleNotificationTogglesReadState() {
+        navigate(UseCase24View.class);
+
+        // Create a ListSignal with one unread notification
+        ListSignal<Notification> signal = new ListSignal<>();
+        Notification unread = new Notification(UUID.randomUUID().toString(),
+                "Test", "msg", NotificationType.INFO, false,
+                LocalDateTime.now());
+        signal.insertLast(unread);
+
+        // Render a card and attach it to the view so test framework can click
+        // Before the fix, the click handler used get() outside a reactive
+        // context which throws IllegalStateException
+        UseCase24View view = $view(UseCase24View.class).first();
+        Div card = view.createNotificationCard(unread, signal);
+        view.add(card);
+
+        Button markRead = findButton(card, "Mark Read");
+        test(markRead).click();
+
+        // The notification should now be read
+        ValueSignal<Notification> entry = signal.peek().getFirst();
+        assertTrue(entry.peek().read(),
+                "Notification should be marked as read after clicking Mark Read");
+    }
+
+    @Test
+    void dismissRemovesNotificationFromSignal() {
+        navigate(UseCase24View.class);
+
+        // Create a ListSignal with one notification
+        ListSignal<Notification> signal = new ListSignal<>();
+        Notification n = new Notification(UUID.randomUUID().toString(), "Test",
+                "msg", NotificationType.WARNING, false, LocalDateTime.now());
+        signal.insertLast(n);
+        assertEquals(1, signal.peek().size());
+
+        // Render a card and attach it to the view so test framework can click
+        // Before the fix, the click handler used get() outside a reactive
+        // context which throws IllegalStateException
+        UseCase24View view = $view(UseCase24View.class).first();
+        Div card = view.createNotificationCard(n, signal);
+        view.add(card);
+
+        Button dismiss = findButton(card, "Dismiss");
+        test(dismiss).click();
+
+        // The notification should be removed
+        assertEquals(0, signal.peek().size(),
+                "Notification should be removed after clicking Dismiss");
+    }
+
+    private Button findButton(Div card, String text) {
+        return card.getChildren()
+                .flatMap(c -> c instanceof Div div ? div.getChildren()
+                        : java.util.stream.Stream.of(c))
+                .flatMap(c -> c instanceof Div div ? div.getChildren()
+                        : java.util.stream.Stream.of(c))
+                .filter(Button.class::isInstance).map(Button.class::cast)
+                .filter(b -> text.equals(b.getText())).findFirst()
+                .orElseThrow(() -> new AssertionError(
+                        "Button '" + text + "' not found in card"));
     }
 
     @SuppressWarnings("unchecked")
