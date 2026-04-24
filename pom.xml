@@ -61,7 +61,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>browserless-test-junit6</artifactId>
+            <artifactId>browserless-test-spring</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
