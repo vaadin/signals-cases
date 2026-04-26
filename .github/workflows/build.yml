@@ -9,8 +9,23 @@ on:
       - main
 
 jobs:
+  prime-cache:
+    name: Prime Maven cache
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+          cache: maven
+      - run: ./mvnw -B -DskipTests dependency:go-offline
+        env:
+          VAADIN_PRO_KEY: ${{ secrets.VAADIN_PRO_KEY }}
+
   build:
     name: Build ${{ matrix.module }}
+    needs: prime-cache
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
