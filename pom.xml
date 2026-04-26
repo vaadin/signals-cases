@@ -16,6 +16,7 @@
 
     <modules>
         <module>signals</module>
+        <module>geolocation</module>
     </modules>
 
     <properties>
