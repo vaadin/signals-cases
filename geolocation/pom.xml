@@ -12,10 +12,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <properties>
-        <flow.version>25.2.geo-SNAPSHOT</flow.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
