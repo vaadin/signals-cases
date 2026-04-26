@@ -10,8 +10,12 @@ on:
 
 jobs:
   build:
-    name: Build
+    name: Build ${{ matrix.module }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [signals, geolocation]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -19,6 +23,6 @@ jobs:
           distribution: temurin
           java-version: 25
           cache: maven
-      - run: ./mvnw install
+      - run: ./mvnw -pl ${{ matrix.module }} -am install
         env:
           VAADIN_PRO_KEY: ${{ secrets.VAADIN_PRO_KEY }}
