@@ -52,10 +52,10 @@ public class DenialView extends VerticalLayout {
 
     private static VerticalLayout card() {
         VerticalLayout card = new VerticalLayout();
-        card.getStyle().set("border", "1px solid var(--lumo-contrast-20pct)");
-        card.getStyle().set("border-radius", "var(--lumo-border-radius-l)");
-        card.getStyle().set("padding", "var(--lumo-space-m)");
-        card.getStyle().set("margin-bottom", "var(--lumo-space-m)");
+        card.getStyle().set("border", "1px solid var(--vaadin-border-color-secondary)");
+        card.getStyle().set("border-radius", "var(--vaadin-radius-l)");
+        card.getStyle().set("padding", "var(--vaadin-padding-m)");
+        card.getStyle().set("margin-bottom", "var(--vaadin-gap-m)");
         return card;
     }
 
