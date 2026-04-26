@@ -41,3 +41,13 @@ jobs:
       - run: ./mvnw -pl ${{ matrix.module }} -am install
         env:
           VAADIN_PRO_KEY: ${{ secrets.VAADIN_PRO_KEY }}
+
+  build-result:
+    name: Build result
+    needs: build
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check build matrix status
+        if: needs.build.result != 'success'
+        run: exit 1
