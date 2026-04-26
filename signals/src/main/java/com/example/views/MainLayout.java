@@ -308,7 +308,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
 
         // Construct the correct path based on package structure
         String packagePath = packageName.replace(".", "/");
-        String githubUrl = "https://github.com/vaadin/signals-cases/tree/main/src/main/java/"
+        String githubUrl = "https://github.com/vaadin/use-cases/tree/main/signals/src/main/java/"
                 + packagePath + "/" + className + ".java";
         sourceCodeLink.setHref(githubUrl);
 
