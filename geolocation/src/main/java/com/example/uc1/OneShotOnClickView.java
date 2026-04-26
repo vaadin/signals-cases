@@ -5,7 +5,6 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.geolocation.GeolocationError;
-import com.vaadin.flow.component.geolocation.GeolocationPending;
 import com.vaadin.flow.component.geolocation.GeolocationPosition;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -43,9 +42,6 @@ public class OneShotOnClickView extends VerticalLayout {
         Button locate = new Button("Use my location", e -> {
             UI.getCurrent().getGeolocation().get(value -> {
                 switch (value) {
-                case GeolocationPending p -> {
-                    // get() never delivers Pending; required for exhaustiveness
-                }
                 case GeolocationPosition pos -> {
                     result.setText("lat=%.5f, lon=%.5f (±%.0f m)".formatted(
                             pos.coords().latitude(), pos.coords().longitude(),

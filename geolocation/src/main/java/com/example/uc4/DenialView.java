@@ -259,15 +259,12 @@ public class DenialView extends VerticalLayout {
         protected void onAttach(com.vaadin.flow.component.AttachEvent e) {
             super.onAttach(e);
             availabilityLabel.setText("Current availability: "
-                    + e.getUI().getGeolocation().getAvailability());
+                    + e.getUI().getGeolocation().availabilitySignal().peek());
         }
 
         private void runReal() {
             UI.getCurrent().getGeolocation().get(value -> {
                 switch (value) {
-                case GeolocationPending p -> {
-                    // get() never delivers Pending; required for exhaustiveness
-                }
                 case GeolocationPosition pos ->
                     output.setText("Position: lat=%.5f, lon=%.5f (±%.0f m)"
                             .formatted(pos.coords().latitude(),

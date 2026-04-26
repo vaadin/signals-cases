@@ -11,7 +11,6 @@ import com.vaadin.flow.component.geolocation.Geolocation;
 import com.vaadin.flow.component.geolocation.GeolocationAvailability;
 import com.vaadin.flow.component.geolocation.GeolocationError;
 import com.vaadin.flow.component.geolocation.GeolocationOptions;
-import com.vaadin.flow.component.geolocation.GeolocationPending;
 import com.vaadin.flow.component.geolocation.GeolocationPosition;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -51,7 +50,7 @@ public class AutoFetchView extends VerticalLayout {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         Geolocation geo = attachEvent.getUI().getGeolocation();
-        GeolocationAvailability availability = geo.getAvailability();
+        GeolocationAvailability availability = geo.availabilitySignal().peek();
         permissionHint.setText("Availability on attach: " + availability);
         if (availability == GeolocationAvailability.GRANTED) {
             fetchAndPopulate();
@@ -65,9 +64,6 @@ public class AutoFetchView extends VerticalLayout {
                 .maximumAge(Duration.ofMinutes(5)).build();
         UI.getCurrent().getGeolocation().get(opts, result -> {
             switch (result) {
-            case GeolocationPending p -> {
-                // get() never delivers Pending; required for exhaustiveness
-            }
             case GeolocationPosition pos -> localContent
                     .setText("Local content for lat=%.4f, lon=%.4f".formatted(
                             pos.coords().latitude(), pos.coords().longitude()));

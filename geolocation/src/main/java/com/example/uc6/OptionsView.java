@@ -8,7 +8,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.geolocation.GeolocationError;
 import com.vaadin.flow.component.geolocation.GeolocationOptions;
-import com.vaadin.flow.component.geolocation.GeolocationPending;
 import com.vaadin.flow.component.geolocation.GeolocationPosition;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -62,9 +61,6 @@ public class OptionsView extends VerticalLayout {
             UI.getCurrent().getGeolocation().get(options, value -> {
                 long elapsed = System.currentTimeMillis() - started;
                 switch (value) {
-                case GeolocationPending p -> {
-                    // get() never delivers Pending; required for exhaustiveness
-                }
                 case GeolocationPosition pos ->
                     result.setText("%.5f, %.5f (±%.0f m) — %d ms".formatted(
                             pos.coords().latitude(), pos.coords().longitude(),

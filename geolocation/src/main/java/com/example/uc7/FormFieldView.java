@@ -11,7 +11,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.geolocation.GeolocationError;
 import com.vaadin.flow.component.geolocation.GeolocationOptions;
-import com.vaadin.flow.component.geolocation.GeolocationPending;
 import com.vaadin.flow.component.geolocation.GeolocationPosition;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
@@ -95,9 +94,6 @@ public class FormFieldView extends VerticalLayout {
                 .maximumAge(Duration.ZERO).build();
         UI.getCurrent().getGeolocation().get(opts, value -> {
             switch (value) {
-            case GeolocationPending p -> {
-                // get() never delivers Pending; required for exhaustiveness
-            }
             case GeolocationPosition pos -> {
                 if (pos.coords().accuracy() > MAX_ACCURACY_METRES) {
                     Notification.show(

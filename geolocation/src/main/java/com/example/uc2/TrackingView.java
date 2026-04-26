@@ -40,8 +40,8 @@ import com.vaadin.flow.router.Route;
  * {@link GeolocationTracker#resume()} and {@link GeolocationTracker#stop()}.
  * Two effects subscribe to the tracker's signals: one appends new readings to
  * the grid and extends the path on the map, the other binds the toggle button's
- * label to {@link GeolocationTracker#active()}. Resuming does not clear the
- * history — the grid and the map line keep growing.
+ * label to {@link GeolocationTracker#activeSignal()}. Resuming does not clear
+ * the history — the grid and the map line keep growing.
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @Menu(order = 2, title = "UC2 — Tracking")
@@ -89,7 +89,7 @@ public class TrackingView extends VerticalLayout {
         add(history);
 
         ElementEffect.effect(getElement(), () -> {
-            switch (tracker.value().get()) {
+            switch (tracker.valueSignal().get()) {
             case GeolocationPending p ->
                 status.setText("Waiting for first reading…");
             case GeolocationPosition pos -> appendPosition(pos);
@@ -98,7 +98,7 @@ public class TrackingView extends VerticalLayout {
             }
         });
         ElementEffect.effect(getElement(), () -> {
-            boolean active = tracker.active().get();
+            boolean active = tracker.activeSignal().get();
             toggle.setText(active ? "Stop tracking"
                     : (updateCount > 0 ? "Resume tracking" : "Start tracking"));
             if (!active && updateCount > 0) {
@@ -122,7 +122,7 @@ public class TrackingView extends VerticalLayout {
     }
 
     private void toggleTracking() {
-        if (tracker.active().peek()) {
+        if (tracker.activeSignal().peek()) {
             tracker.stop();
         } else {
             tracker.resume();

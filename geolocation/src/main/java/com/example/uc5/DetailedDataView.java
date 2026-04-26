@@ -9,7 +9,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.geolocation.GeolocationCoordinates;
 import com.vaadin.flow.component.geolocation.GeolocationError;
 import com.vaadin.flow.component.geolocation.GeolocationOptions;
-import com.vaadin.flow.component.geolocation.GeolocationPending;
 import com.vaadin.flow.component.geolocation.GeolocationPosition;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -42,9 +41,6 @@ public class DetailedDataView extends VerticalLayout {
                     .highAccuracy(true).timeout(Duration.ofSeconds(10)).build();
             UI.getCurrent().getGeolocation().get(opts, value -> {
                 switch (value) {
-                case GeolocationPending p -> {
-                    // get() never delivers Pending; required for exhaustiveness
-                }
                 case GeolocationPosition pos -> renderPosition(output, pos);
                 case GeolocationError err ->
                     output.add(new Span("Error: " + err.message()));
