@@ -29,9 +29,9 @@ import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.map.configuration.style.Stroke;
 import com.vaadin.flow.component.map.configuration.style.Style;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.dom.ElementEffect;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * UC2 — Continuous tracking with reactive signal.
@@ -88,7 +88,7 @@ public class TrackingView extends VerticalLayout {
         configureGrid();
         add(history);
 
-        ElementEffect.effect(getElement(), () -> {
+        Signal.effect(this, () -> {
             switch (tracker.valueSignal().get()) {
             case GeolocationPending p ->
                 status.setText("Waiting for first reading…");
@@ -97,7 +97,7 @@ public class TrackingView extends VerticalLayout {
                 status.setText("Error " + err.code() + ": " + err.message());
             }
         });
-        ElementEffect.effect(getElement(), () -> {
+        Signal.effect(this, () -> {
             boolean active = tracker.activeSignal().get();
             toggle.setText(active ? "Stop tracking"
                     : (updateCount > 0 ? "Resume tracking" : "Start tracking"));
