@@ -19,6 +19,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -30,6 +31,7 @@ import com.vaadin.flow.router.Route;
  * the actual API.
  */
 @Route(value = "uc4", layout = MainLayout.class)
+@PageTitle("UC4 — Denial, failure and unavailability")
 @Menu(order = 4, title = "UC4 — Denial & unavailability")
 public class DenialView extends VerticalLayout {
 
@@ -52,7 +54,8 @@ public class DenialView extends VerticalLayout {
 
     private static VerticalLayout card() {
         VerticalLayout card = new VerticalLayout();
-        card.getStyle().set("border", "1px solid var(--vaadin-border-color-secondary)");
+        card.getStyle().set("border",
+                "1px solid var(--vaadin-border-color-secondary)");
         card.getStyle().set("border-radius", "var(--vaadin-radius-l)");
         card.getStyle().set("padding", "var(--vaadin-padding-m)");
         card.getStyle().set("margin-bottom", "var(--vaadin-gap-m)");

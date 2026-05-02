@@ -16,10 +16,12 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 
 @Route(value = "", layout = MainLayout.class)
+@PageTitle("Geolocation API Use Cases")
 @Menu(order = 0, title = "Home")
 public class HomeView extends VerticalLayout {
 
