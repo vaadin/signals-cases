@@ -46,6 +46,7 @@ public class PresenceAvatarsView extends VerticalLayout {
     private final String id = UUID.randomUUID().toString();
     private final String name;
     private final String color;
+    private final Div avatarStrip = new Div();
 
     public PresenceAvatarsView(PresenceRegistry registry) {
         this.registry = registry;
@@ -67,9 +68,7 @@ public class PresenceAvatarsView extends VerticalLayout {
         Div youRow = new Div(youLabel, youName);
 
         H2 strip = new H2("In the room");
-        Div avatarStrip = new Div();
         avatarStrip.addClassName("avatar-strip");
-        avatarStrip.bindChildren(registry.signal(), this::renderAvatar);
 
         add(youHeader, youRow, strip, avatarStrip);
     }
@@ -78,7 +77,10 @@ public class PresenceAvatarsView extends VerticalLayout {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
 
+        // Join *before* binding so the list signal is non-empty when
+        // bindChildren's effect first revalidates.
         registry.join(new Presence(id, name, color, PageVisibility.VISIBLE));
+        avatarStrip.bindChildren(registry.signal(), this::renderAvatar);
 
         Signal.effect(this, () -> {
             PageVisibility state = attachEvent.getUI().getPage()
