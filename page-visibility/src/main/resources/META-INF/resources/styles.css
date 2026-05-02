@@ -1,0 +1,96 @@
+/* Page Visibility API use cases — small visual polish */
+
+.presence-avatar {
+    transition: filter 200ms, opacity 200ms, transform 200ms;
+}
+
+.presence-avatar.presence-visible {
+    filter: none;
+    opacity: 1;
+}
+
+.presence-avatar.presence-blurred {
+    filter: grayscale(60%);
+    opacity: 0.85;
+}
+
+.presence-avatar.presence-hidden {
+    filter: grayscale(100%);
+    opacity: 0.45;
+}
+
+.presence-avatar.presence-unknown {
+    filter: grayscale(100%) blur(0.5px);
+    opacity: 0.5;
+}
+
+.rate-card {
+    border: 1px solid var(--aura-border-color, #e0e0e0);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    background: var(--aura-color-surface, #fff);
+    width: fit-content;
+    min-width: 240px;
+    transition: background-color 600ms ease;
+}
+
+.rate-card.highlight {
+    background: #fff7c2;
+    transition: background-color 80ms ease;
+}
+
+.rate-value {
+    font-size: 2.4rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    background: #e3f2fd;
+    color: #0b3d8c;
+    border: 1px solid #b6d4f4;
+}
+
+.status-badge.paused {
+    background: #fff4e0;
+    color: #6b4500;
+    border-color: #f0d9a4;
+}
+
+.status-badge.hidden {
+    background: #f3e1e3;
+    color: #851b22;
+    border-color: #ecb3b8;
+}
+
+.notification-log {
+    font-family: monospace;
+    font-size: 0.85rem;
+    background: #fafafa;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.notification-log > div {
+    padding: 0.1rem 0;
+    border-bottom: 1px dashed #eee;
+}
+
+.notification-log > div:last-child {
+    border-bottom: none;
+}
+
+.avatar-strip {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 0.5rem 0;
+}
