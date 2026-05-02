@@ -2,7 +2,6 @@ package com.example.uc4;
 
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.geolocation.GeolocationAvailability;
 import com.vaadin.flow.component.geolocation.GeolocationError;
@@ -263,7 +262,7 @@ public class DenialView extends VerticalLayout {
         }
 
         private void runReal() {
-            UI.getCurrent().getGeolocation().get(value -> {
+            getUI().orElseThrow().getGeolocation().get(value -> {
                 switch (value) {
                 case GeolocationPosition pos ->
                     output.setText("Position: lat=%.5f, lon=%.5f (±%.0f m)"
