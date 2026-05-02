@@ -20,17 +20,18 @@ import com.vaadin.flow.component.page.PageVisibility;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
-import com.vaadin.flow.signals.local.ValueSignal;
+import com.vaadin.flow.signals.shared.SharedValueSignal;
 
 /**
  * UC2 — Presence / "away" status.
  * <p>
  * Each browser tab that opens this view registers a presence in
- * {@link PresenceRegistry}. The avatar strip is bound to the registry's shared
- * {@link com.vaadin.flow.signals.local.ListSignal}, so every UI sees the same
- * set of avatars. The visibility signal of each tab drives the styling of its
- * own avatar; the change is broadcast to all other UIs through the registry
- * signal.
+ * {@link PresenceRegistry}. The avatar strip is bound to the registry's
+ * cross-session
+ * {@link com.vaadin.flow.signals.shared.SharedListSignal SharedListSignal},
+ * so every UI in any {@code VaadinSession} sees the same set of avatars.
+ * The visibility signal of each tab drives the styling of its own avatar; the
+ * change is broadcast to all other UIs through the registry signal.
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @Menu(order = 2, title = "UC2 — Presence")
@@ -96,7 +97,7 @@ public class PresenceAvatarsView extends VerticalLayout {
     }
 
     private com.vaadin.flow.component.Component renderAvatar(
-            ValueSignal<Presence> entry) {
+            SharedValueSignal<Presence> entry) {
         Presence p = entry.peek();
         ColoredAvatar avatar = new ColoredAvatar(p.name(), p.color(), 56);
         avatar.withState(p.state());

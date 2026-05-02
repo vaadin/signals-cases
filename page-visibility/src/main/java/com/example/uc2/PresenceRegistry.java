@@ -7,14 +7,15 @@ import java.util.concurrent.ConcurrentMap;
 import org.springframework.stereotype.Component;
 
 import com.vaadin.flow.component.page.PageVisibility;
-import com.vaadin.flow.signals.local.ListSignal;
-import com.vaadin.flow.signals.local.ValueSignal;
+import com.vaadin.flow.signals.shared.SharedListSignal;
+import com.vaadin.flow.signals.shared.SharedValueSignal;
 
 /**
  * Cross-UI registry that tracks every connected presence and its current
- * {@link PageVisibility}. Backed by a {@link ListSignal}, so any UI binding the
- * signal automatically re-renders when participants join, leave or change
- * visibility state.
+ * {@link PageVisibility}. Backed by a {@link SharedListSignal}, so any UI
+ * binding the signal automatically re-renders when participants join, leave or
+ * change visibility state — regardless of which {@code VaadinSession} they
+ * belong to.
  */
 @Component
 public class PresenceRegistry {
@@ -26,27 +27,29 @@ public class PresenceRegistry {
         }
     }
 
-    private final ListSignal<Presence> signal = new ListSignal<>();
-    private final ConcurrentMap<String, ValueSignal<Presence>> entries = new ConcurrentHashMap<>();
+    private final SharedListSignal<Presence> signal = new SharedListSignal<>(
+            Presence.class);
+    private final ConcurrentMap<String, SharedValueSignal<Presence>> entries = new ConcurrentHashMap<>();
 
-    public ListSignal<Presence> signal() {
+    public SharedListSignal<Presence> signal() {
         return signal;
     }
 
     public void join(Presence presence) {
-        ValueSignal<Presence> entry = signal.insertLast(presence);
+        SharedValueSignal<Presence> entry = signal.insertLast(presence)
+                .signal();
         entries.put(presence.id(), entry);
     }
 
     public void leave(String id) {
-        ValueSignal<Presence> entry = entries.remove(id);
+        SharedValueSignal<Presence> entry = entries.remove(id);
         if (entry != null) {
             signal.remove(entry);
         }
     }
 
     public void updateState(String id, PageVisibility state) {
-        ValueSignal<Presence> entry = entries.get(id);
+        SharedValueSignal<Presence> entry = entries.get(id);
         if (entry != null) {
             Presence current = entry.peek();
             if (current != null && current.state() != state) {
