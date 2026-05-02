@@ -1,14 +1,8 @@
 package com.example.home;
 
-import com.example.uc1.OneShotOnClickView;
-import com.example.uc2.TrackingView;
-import com.example.uc3.AutoFetchView;
-import com.example.uc4.DenialView;
-import com.example.uc5.DetailedDataView;
-import com.example.uc6.OptionsView;
-import com.example.uc7.FormFieldView;
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.ListItem;
@@ -18,6 +12,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.server.menu.MenuConfiguration;
+import com.vaadin.flow.server.menu.MenuEntry;
 
 @Route(value = "", layout = MainLayout.class)
 @Menu(order = 0, title = "Home")
@@ -29,27 +25,23 @@ public class HomeView extends VerticalLayout {
                 "Each link below exercises one use case of the Vaadin Flow Geolocation API."));
 
         UnorderedList list = new UnorderedList();
-        list.add(item("UC1", "One-shot request on user click",
-                OneShotOnClickView.class));
-        list.add(item("UC2", "Continuous tracking with reactive signal",
-                TrackingView.class));
-        list.add(item("UC3", "Auto-fetch on view load, gated on permission",
-                AutoFetchView.class));
-        list.add(item("UC4", "Handling denial, failure and unavailability",
-                DenialView.class));
-        list.add(item("UC5", "Reading detailed position data",
-                DetailedDataView.class));
-        list.add(item("UC6", "Tuning precision, freshness and battery",
-                OptionsView.class));
-        list.add(item("UC7", "Capturing a location as part of a form",
-                FormFieldView.class));
+        MenuConfiguration.getMenuEntries().stream()
+                .filter(entry -> !entry.path().isEmpty())
+                .forEach(entry -> list.add(item(entry)));
         add(list);
     }
 
-    private ListItem item(String tag, String description,
-            Class<? extends com.vaadin.flow.component.Component> target) {
+    private ListItem item(MenuEntry entry) {
         ListItem li = new ListItem();
-        li.add(new Div(new RouterLink(tag + " — " + description, target)));
+        li.add(new Div(link(entry)));
         return li;
+    }
+
+    private static com.vaadin.flow.component.Component link(MenuEntry entry) {
+        if (entry.menuClass() != null) {
+            return new RouterLink(entry.title(), entry.menuClass());
+        }
+        // Fallback for Hilla/TS-only entries that have no class reference.
+        return new Anchor(entry.path(), entry.title());
     }
 }
