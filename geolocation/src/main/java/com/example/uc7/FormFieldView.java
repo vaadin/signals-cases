@@ -22,14 +22,15 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
  * UC7 — Capturing a location as part of a form.
  * <p>
- * Vertical pothole-reporting form. "Pin my location" runs a fresh request and
- * stores the result on a bean field; submit is only enabled when both a
- * description and a pinned location are present. Submitted reports appear in
- * the grid below.
+ * Vertical pothole-reporting form. The description and the pinned location live
+ * as signals; the submit button's enabled state and the pin label's text are
+ * bound to those signals so there is no manual refresh logic. Submitted reports
+ * appear in the grid below.
  */
 @Route(value = "uc7", layout = MainLayout.class)
 @PageTitle("UC7 — Capturing a location as part of a form")
@@ -40,14 +41,16 @@ public class FormFieldView extends VerticalLayout {
 
     private final List<PotholeReport> reports = new ArrayList<>();
 
+    private final ValueSignal<String> descriptionSignal = new ValueSignal<>("");
+    private final ValueSignal<@Nullable GeolocationPosition> pinnedSignal = new ValueSignal<@Nullable GeolocationPosition>(
+            null);
+
     private final TextField description = new TextField("Description");
     private final Button pin = new Button("Pin my location");
-    private final Span pinLabel = new Span("No location pinned yet");
+    private final Span pinLabel = new Span();
     private final Button submit = new Button("Report pothole");
     private final Grid<PotholeReport> grid = new Grid<>(PotholeReport.class,
             false);
-
-    private @Nullable GeolocationPosition pinned;
 
     public FormFieldView() {
         add(new H1("UC7 — Location as part of a form"));
@@ -62,10 +65,18 @@ public class FormFieldView extends VerticalLayout {
 
         description.setRequired(true);
         description.setWidthFull();
-        description.addValueChangeListener(e -> refreshSubmitState());
+        description.bindValue(descriptionSignal, descriptionSignal::set);
+
+        pinLabel.bindText(
+                pinnedSignal.map(p -> p == null ? "No location pinned yet"
+                        : "Pinned at %.5f, %.5f (±%.0f m)".formatted(
+                                p.coords().latitude(), p.coords().longitude(),
+                                p.coords().accuracy())));
 
         pin.addClickListener(e -> capture());
-        submit.setEnabled(false);
+
+        submit.bindEnabled(() -> !descriptionSignal.get().isEmpty()
+                && pinnedSignal.get() != null);
         submit.addClickListener(e -> submit());
 
         form.add(description, pin, pinLabel, submit);
@@ -102,11 +113,7 @@ public class FormFieldView extends VerticalLayout {
                                     .formatted(pos.coords().accuracy()));
                     return;
                 }
-                pinned = pos;
-                pinLabel.setText("Pinned at %.5f, %.5f (±%.0f m)".formatted(
-                        pos.coords().latitude(), pos.coords().longitude(),
-                        pos.coords().accuracy()));
-                refreshSubmitState();
+                pinnedSignal.set(pos);
             }
             case GeolocationError err ->
                 Notification.show("Could not pin location: " + err.message());
@@ -115,24 +122,18 @@ public class FormFieldView extends VerticalLayout {
     }
 
     private void submit() {
-        GeolocationPosition p = pinned;
+        GeolocationPosition p = pinnedSignal.peek();
         if (p == null) {
             return;
         }
-        reports.add(
-                new PotholeReport(description.getValue(), p.coords().latitude(),
-                        p.coords().longitude(), p.coords().accuracy()));
+        reports.add(new PotholeReport(descriptionSignal.peek(),
+                p.coords().latitude(), p.coords().longitude(),
+                p.coords().accuracy()));
         grid.getDataProvider().refreshAll();
         Notification.show("Report filed");
 
-        description.clear();
-        pinned = null;
-        pinLabel.setText("No location pinned yet");
-        refreshSubmitState();
-    }
-
-    private void refreshSubmitState() {
-        submit.setEnabled(!description.isEmpty() && pinned != null);
+        descriptionSignal.set("");
+        pinnedSignal.set(null);
     }
 
     private record PotholeReport(String description, double latitude,
