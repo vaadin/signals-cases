@@ -241,8 +241,12 @@ public class DenialView extends VerticalLayout {
         @Override
         protected void onAttach(com.vaadin.flow.component.AttachEvent e) {
             super.onAttach(e);
-            availabilityLabel.setText("Current availability: "
-                    + e.getUI().getGeolocation().availabilitySignal().peek());
+            // Bind to the availability signal so the label tracks browser
+            // permission flips (granted → denied, prompt → granted) instead
+            // of showing a snapshot taken on attach.
+            availabilityLabel
+                    .bindText(e.getUI().getGeolocation().availabilitySignal()
+                            .map(a -> "Current availability: " + a));
         }
 
         private void runReal() {
