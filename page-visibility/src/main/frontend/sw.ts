@@ -180,7 +180,10 @@ async function focusOrOpenWindow() {
   // The default Vaadin handler matches on exact URL only, which means a tab
   // on `/uc3` never gets focused for a notification fired from `/uc3`, and
   // the browser opens a fresh tab at `/` instead. Loosen the match so any
-  // visible window for the app gets focused.
+  // visible window for the app gets focused — note that this also focuses a
+  // tab on a different route (e.g. `/uc1`) when a notification comes from
+  // `/uc3`. That is the desired behaviour for this single-tab demo; in a
+  // multi-route product you'd typically scope the match more tightly.
   const allWindows = await self.clients.matchAll({
     type: 'window',
     includeUncontrolled: true

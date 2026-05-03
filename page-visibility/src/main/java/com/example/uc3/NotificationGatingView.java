@@ -2,14 +2,13 @@ package com.example.uc3;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.example.scheduling.SchedulerService;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -47,18 +46,14 @@ public class NotificationGatingView extends VerticalLayout {
             .ofPattern("HH:mm:ss");
 
     private final WebPush webPush;
-    private final ScheduledExecutorService scheduler = Executors
-            .newSingleThreadScheduledExecutor(r -> {
-                Thread t = new Thread(r, "uc3-delay");
-                t.setDaemon(true);
-                return t;
-            });
+    private final SchedulerService scheduler;
 
     private final Span subscriptionStatus = new Span("Not subscribed");
     private final Div log = new Div();
 
-    public NotificationGatingView(WebPush webPush) {
+    public NotificationGatingView(WebPush webPush, SchedulerService scheduler) {
         this.webPush = webPush;
+        this.scheduler = scheduler;
 
         add(new H1("UC3 — Notification gating with Web Push"));
         add(new Paragraph("Subscribe the browser, then click \"Send in 5 "
@@ -98,12 +93,6 @@ public class NotificationGatingView extends VerticalLayout {
                         exists && hasStoredSubscription())));
     }
 
-    @Override
-    protected void onDetach(DetachEvent detachEvent) {
-        scheduler.shutdownNow();
-        super.onDetach(detachEvent);
-    }
-
     private void subscribe(UI ui) {
         webPush.subscribe(ui, subscription -> ui.access(() -> {
             if (subscription == null) {
@@ -133,11 +122,12 @@ public class NotificationGatingView extends VerticalLayout {
                 "Will fire in 5 seconds — switch tab now if "
                         + "you want to test web push",
                 2500, Position.BOTTOM_START);
-        scheduler.schedule(() -> ui.access(() -> fireNotification(ui)), 5,
-                TimeUnit.SECONDS);
+        scheduler.schedule(ui, () -> fireNotification(ui), 5, TimeUnit.SECONDS);
     }
 
-    private void fireNotification(UI ui) {
+    // Package-private so tests can drive the gating logic without waiting on
+    // the real 5-second scheduler delay.
+    void fireNotification(UI ui) {
         PageVisibility state = ui.getPage().pageVisibilitySignal().peek();
         WebPushSubscription subscription = VaadinSession.getCurrent()
                 .getAttribute(WebPushSubscription.class);
@@ -171,7 +161,7 @@ public class NotificationGatingView extends VerticalLayout {
 
     private void renderSubscribed(boolean subscribed) {
         subscriptionStatus.getElement().getClassList()
-                .removeAll(java.util.List.of("paused", "hidden"));
+                .removeAll(List.of("paused", "hidden"));
         if (subscribed) {
             subscriptionStatus.setText("Subscribed");
         } else {

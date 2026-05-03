@@ -2,12 +2,11 @@ package com.example.uc4;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Random;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
+import com.example.scheduling.SchedulerService;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -39,7 +38,8 @@ public class RefreshStaleDataView extends VerticalLayout {
 
     private static final long REFRESH_THRESHOLD_SECONDS = 5;
 
-    private final Random rng = new Random();
+    private final SchedulerService scheduler;
+
     private double rate = 1.0823;
     private Instant updatedAt = Instant.now();
     private @Nullable Instant hiddenAt;
@@ -49,16 +49,13 @@ public class RefreshStaleDataView extends VerticalLayout {
     private final Span timestampLabel = new Span();
     private final Div card = new Div();
 
-    private final ScheduledExecutorService scheduler = Executors
-            .newSingleThreadScheduledExecutor(r -> {
-                Thread t = new Thread(r, "uc4-tick");
-                t.setDaemon(true);
-                return t;
-            });
+    private @Nullable UI ui;
     private @Nullable ScheduledFuture<?> tickTask;
     private @Nullable ScheduledFuture<?> highlightTask;
 
-    public RefreshStaleDataView() {
+    public RefreshStaleDataView(SchedulerService scheduler) {
+        this.scheduler = scheduler;
+
         add(new H1("UC4 — Refresh stale data on return"));
         add(new Paragraph("The card below shows a fake USD/EUR exchange "
                 + "rate. Switch away for more than 5 seconds and back — "
@@ -67,15 +64,12 @@ public class RefreshStaleDataView extends VerticalLayout {
 
         valueLabel.addClassName("rate-value");
         Span pair = new Span("USD/EUR ");
-        pair.getStyle().set("font-size", "0.9rem").set("color",
-                "var(--lumo-secondary-text-color, #666)");
+        pair.addClassName("rate-pair");
 
         Div pairRow = new Div(pair);
         Div valueRow = new Div(valueLabel);
         Div timestampRow = new Div(timestampLabel);
-        timestampRow.getStyle().set("font-size", "0.85rem")
-                .set("color", "var(--lumo-secondary-text-color, #666)")
-                .set("margin-top", "0.5rem");
+        timestampRow.addClassName("rate-timestamp");
 
         card.addClassName("rate-card");
         card.add(pairRow, valueRow, timestampRow);
@@ -90,14 +84,17 @@ public class RefreshStaleDataView extends VerticalLayout {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        UI ui = attachEvent.getUI();
+        UI attachedUi = attachEvent.getUI();
+        this.ui = attachedUi;
 
         Signal.effect(this, () -> {
-            PageVisibility state = ui.getPage().pageVisibilitySignal().get();
+            PageVisibility state = attachedUi.getPage().pageVisibilitySignal()
+                    .get();
             handleTransition(prevState, state);
             prevState = state;
             if (state == PageVisibility.VISIBLE) {
-                startTimestampTick(ui);
+                renderTimestamp();
+                startTimestampTick();
             } else {
                 stopTimestampTick();
             }
@@ -109,8 +106,9 @@ public class RefreshStaleDataView extends VerticalLayout {
         stopTimestampTick();
         if (highlightTask != null) {
             highlightTask.cancel(false);
+            highlightTask = null;
         }
-        scheduler.shutdownNow();
+        ui = null;
         super.onDetach(detachEvent);
     }
 
@@ -129,8 +127,8 @@ public class RefreshStaleDataView extends VerticalLayout {
     }
 
     private void refresh() {
-        rate = Math.max(0.5,
-                Math.min(2.0, rate + (rng.nextDouble() - 0.5) * 0.01));
+        rate = Math.max(0.5, Math.min(2.0, rate
+                + (ThreadLocalRandom.current().nextDouble() - 0.5) * 0.01));
         updatedAt = Instant.now();
         renderRate();
         renderTimestamp();
@@ -152,18 +150,21 @@ public class RefreshStaleDataView extends VerticalLayout {
         if (highlightTask != null) {
             highlightTask.cancel(false);
         }
-        UI ui = UI.getCurrent();
-        highlightTask = scheduler.schedule(
-                () -> ui.access(() -> card.removeClassName("highlight")), 600,
-                TimeUnit.MILLISECONDS);
+        if (ui != null) {
+            highlightTask = scheduler.schedule(ui,
+                    () -> card.removeClassName("highlight"), 600,
+                    TimeUnit.MILLISECONDS);
+        }
     }
 
-    private void startTimestampTick(UI ui) {
+    private void startTimestampTick() {
         if (tickTask != null && !tickTask.isCancelled()) {
             return;
         }
-        tickTask = scheduler.scheduleAtFixedRate(
-                () -> ui.access(this::renderTimestamp), 1, 1, TimeUnit.SECONDS);
+        if (ui != null) {
+            tickTask = scheduler.scheduleAtFixedRate(ui, this::renderTimestamp,
+                    1, 1, TimeUnit.SECONDS);
+        }
     }
 
     private void stopTimestampTick() {

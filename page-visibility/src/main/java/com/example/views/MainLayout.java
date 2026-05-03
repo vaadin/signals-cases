@@ -15,8 +15,7 @@ public class MainLayout extends AppLayout {
         DrawerToggle toggle = new DrawerToggle();
 
         H1 title = new H1("Page Visibility API Use Cases");
-        title.getStyle().set("font-size", "var(--aura-font-size-l)")
-                .set("margin", "0");
+        title.addClassName("app-title");
 
         addToNavbar(toggle, title);
 

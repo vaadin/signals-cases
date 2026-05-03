@@ -7,7 +7,6 @@ import com.example.uc4.RefreshStaleDataView;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Paragraph;
@@ -45,7 +44,7 @@ public class HomeView extends VerticalLayout {
     private ListItem item(String tag, String description,
             Class<? extends Component> target) {
         ListItem li = new ListItem();
-        li.add(new Div(new RouterLink(tag + " — " + description, target)));
+        li.add(new RouterLink(tag + " — " + description, target));
         return li;
     }
 }

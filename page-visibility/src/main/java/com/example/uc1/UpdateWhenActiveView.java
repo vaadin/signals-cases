@@ -2,11 +2,11 @@ package com.example.uc1;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import com.example.scheduling.SchedulerService;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
@@ -39,30 +39,26 @@ public class UpdateWhenActiveView extends VerticalLayout {
     private static final DateTimeFormatter TIME = DateTimeFormatter
             .ofPattern("HH:mm:ss");
 
+    private final SchedulerService scheduler;
+
     private final Span timeLabel = new Span("--:--:--");
     private final Span counterLabel = new Span("0");
     private final Span statusBadge = new Span();
 
-    private final ScheduledExecutorService scheduler = Executors
-            .newSingleThreadScheduledExecutor(r -> {
-                Thread t = new Thread(r, "uc1-clock");
-                t.setDaemon(true);
-                return t;
-            });
-
     private @Nullable ScheduledFuture<?> tickTask;
     private int updates;
 
-    public UpdateWhenActiveView() {
+    public UpdateWhenActiveView(SchedulerService scheduler) {
+        this.scheduler = scheduler;
+
         add(new H1("UC1 — Update when active"));
         add(new Paragraph("The card below updates the server clock every "
                 + "second only while the tab is visible. Hide the tab "
                 + "for a few seconds, then return — the counter has not "
                 + "advanced and no traffic was sent in the meantime."));
 
-        timeLabel.getStyle().set("font-size", "2rem").set("font-family",
-                "monospace");
-        counterLabel.getStyle().set("font-weight", "600");
+        timeLabel.addClassName("uc1-time");
+        counterLabel.addClassName("uc1-counter");
         statusBadge.addClassName("status-badge");
 
         HorizontalLayout clockRow = new HorizontalLayout(
@@ -94,7 +90,6 @@ public class UpdateWhenActiveView extends VerticalLayout {
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         stopTicking();
-        scheduler.shutdownNow();
         super.onDetach(detachEvent);
     }
 
@@ -102,11 +97,11 @@ public class UpdateWhenActiveView extends VerticalLayout {
         if (tickTask != null && !tickTask.isCancelled()) {
             return;
         }
-        tickTask = scheduler.scheduleAtFixedRate(() -> ui.access(() -> {
+        tickTask = scheduler.scheduleAtFixedRate(ui, () -> {
             updates++;
             timeLabel.setText(LocalTime.now().format(TIME));
             counterLabel.setText(Integer.toString(updates));
-        }), 0, 1, TimeUnit.SECONDS);
+        }, 0, 1, TimeUnit.SECONDS);
     }
 
     private void stopTicking() {
@@ -118,7 +113,7 @@ public class UpdateWhenActiveView extends VerticalLayout {
 
     private void applyState(PageVisibility state) {
         statusBadge.getElement().getClassList()
-                .removeAll(java.util.List.of("paused", "hidden"));
+                .removeAll(List.of("paused", "hidden"));
         switch (state) {
         case VISIBLE -> statusBadge.setText("Updating…");
         case VISIBLE_NOT_FOCUSED -> {

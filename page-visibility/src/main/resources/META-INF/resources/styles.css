@@ -1,7 +1,41 @@
 /* Page Visibility API use cases — small visual polish */
 
+.app-title {
+    font-size: var(--aura-font-size-l);
+    margin: 0;
+}
+
+.uc1-time {
+    font-size: 2rem;
+    font-family: monospace;
+}
+
+.uc1-counter {
+    font-weight: 600;
+}
+
+.presence-you-name {
+    font-weight: 600;
+}
+
 .presence-avatar {
     transition: filter 200ms, opacity 200ms, transform 200ms;
+    width: var(--avatar-size, 56px);
+    height: var(--avatar-size, 56px);
+    border-radius: 50%;
+    border: 3px solid var(--avatar-color, #888);
+    background-color: var(--avatar-color, #888);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+.presence-avatar > .presence-avatar-initial {
+    font-weight: 600;
+    font-size: calc(var(--avatar-size, 56px) / 2.5);
+    color: white;
 }
 
 .presence-avatar.presence-visible {
@@ -39,10 +73,21 @@
     transition: background-color 80ms ease;
 }
 
+.rate-pair {
+    font-size: 0.9rem;
+    color: var(--lumo-secondary-text-color, #666);
+}
+
 .rate-value {
     font-size: 2.4rem;
     font-weight: 600;
     line-height: 1;
+}
+
+.rate-timestamp {
+    font-size: 0.85rem;
+    color: var(--lumo-secondary-text-color, #666);
+    margin-top: 0.5rem;
 }
 
 .status-badge {

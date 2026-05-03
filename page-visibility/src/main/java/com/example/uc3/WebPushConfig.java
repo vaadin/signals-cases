@@ -43,6 +43,8 @@ public class WebPushConfig {
             String[] generated = generateVapidKeys();
             pub = generated[0];
             priv = generated[1];
+            // Demo only: the private key is logged so the operator can copy
+            // it into application.properties. Never do this in production.
             LOG.info("Generated VAPID public key:  {}", pub);
             LOG.info("Generated VAPID private key: {}", priv);
         }

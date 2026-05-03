@@ -1,8 +1,8 @@
 package com.example.uc2;
 
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 import com.example.uc2.PresenceRegistry.Presence;
 import com.example.views.ColoredAvatar;
@@ -27,11 +27,10 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
  * <p>
  * Each browser tab that opens this view registers a presence in
  * {@link PresenceRegistry}. The avatar strip is bound to the registry's
- * cross-session
- * {@link com.vaadin.flow.signals.shared.SharedListSignal SharedListSignal},
- * so every UI in any {@code VaadinSession} sees the same set of avatars.
- * The visibility signal of each tab drives the styling of its own avatar; the
- * change is broadcast to all other UIs through the registry signal.
+ * cross-session {@link com.vaadin.flow.signals.shared.SharedListSignal
+ * SharedListSignal}, so every UI in any {@code VaadinSession} sees the same set
+ * of avatars. The visibility signal of each tab drives the styling of its own
+ * avatar; the change is broadcast to all other UIs through the registry signal.
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @Menu(order = 2, title = "UC2 — Presence")
@@ -51,7 +50,7 @@ public class PresenceAvatarsView extends VerticalLayout {
 
     public PresenceAvatarsView(PresenceRegistry registry) {
         this.registry = registry;
-        Random rnd = new Random();
+        ThreadLocalRandom rnd = ThreadLocalRandom.current();
         this.name = ANIMALS.get(rnd.nextInt(ANIMALS.size())) + "-"
                 + (100 + rnd.nextInt(900));
         this.color = COLORS.get(rnd.nextInt(COLORS.size()));
@@ -65,7 +64,9 @@ public class PresenceAvatarsView extends VerticalLayout {
         H2 youHeader = new H2("You");
         Span youLabel = new Span("Joined as ");
         Span youName = new Span(name);
-        youName.getStyle().set("font-weight", "600").set("color", color);
+        youName.addClassName("presence-you-name");
+        // Dynamic per-instance color is kept as an inline custom property.
+        youName.getStyle().set("color", color);
         Div youRow = new Div(youLabel, youName);
 
         H2 strip = new H2("In the room");
@@ -81,7 +82,7 @@ public class PresenceAvatarsView extends VerticalLayout {
         // Join *before* binding so the list signal is non-empty when
         // bindChildren's effect first revalidates.
         registry.join(new Presence(id, name, color, PageVisibility.VISIBLE));
-        avatarStrip.bindChildren(registry.signal(), this::renderAvatar);
+        registry.bindTo(avatarStrip, this::renderAvatar);
 
         Signal.effect(this, () -> {
             PageVisibility state = attachEvent.getUI().getPage()

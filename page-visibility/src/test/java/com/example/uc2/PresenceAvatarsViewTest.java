@@ -23,10 +23,11 @@ class PresenceAvatarsViewTest extends SpringBrowserlessTest {
         navigate(PresenceAvatarsView.class);
         runPendingSignalsTasks();
 
-        assertEquals(1, registry.signal().peekValues().count(),
+        assertEquals(1, registry.size(),
                 "the visiting user should be the sole presence");
-        assertTrue($view(H2.class).all().stream()
-                .anyMatch(h -> "In the room".equals(h.getText())),
+        assertTrue(
+                $view(H2.class).all().stream()
+                        .anyMatch(h -> "In the room".equals(h.getText())),
                 "view should render the 'In the room' heading");
     }
 
@@ -45,7 +46,7 @@ class PresenceAvatarsViewTest extends SpringBrowserlessTest {
     void secondSessionCanNavigateWithoutCrossSessionException() {
         navigate(PresenceAvatarsView.class);
         runPendingSignalsTasks();
-        assertEquals(1, registry.signal().peekValues().count());
+        assertEquals(1, registry.size());
 
         // Discard the current mock VaadinSession and start a fresh one to
         // simulate a second browser tab in another session. The first
@@ -57,7 +58,7 @@ class PresenceAvatarsViewTest extends SpringBrowserlessTest {
         navigate(PresenceAvatarsView.class);
         runPendingSignalsTasks();
 
-        assertEquals(1, registry.signal().peekValues().count(),
+        assertEquals(1, registry.size(),
                 "second session should have replaced the first presence");
     }
 }

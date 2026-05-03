@@ -6,16 +6,18 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.stereotype.Component;
 
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.page.PageVisibility;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.signals.shared.SharedListSignal;
 import com.vaadin.flow.signals.shared.SharedValueSignal;
 
 /**
  * Cross-UI registry that tracks every connected presence and its current
- * {@link PageVisibility}. Backed by a {@link SharedListSignal}, so any UI
- * binding the signal automatically re-renders when participants join, leave or
- * change visibility state — regardless of which {@code VaadinSession} they
- * belong to.
+ * {@link PageVisibility}. Backed by a {@link SharedListSignal} that is kept
+ * private so callers cannot bypass {@link #join}, {@link #leave} and
+ * {@link #updateState} — they instead bind through {@link #bindTo} or query
+ * with {@link #size}.
  */
 @Component
 public class PresenceRegistry {
@@ -30,10 +32,6 @@ public class PresenceRegistry {
     private final SharedListSignal<Presence> signal = new SharedListSignal<>(
             Presence.class);
     private final ConcurrentMap<String, SharedValueSignal<Presence>> entries = new ConcurrentHashMap<>();
-
-    public SharedListSignal<Presence> signal() {
-        return signal;
-    }
 
     public void join(Presence presence) {
         SharedValueSignal<Presence> entry = signal.insertLast(presence)
@@ -56,5 +54,20 @@ public class PresenceRegistry {
                 entry.set(current.withState(state));
             }
         }
+    }
+
+    /**
+     * Binds the given container's children to this registry, rendering each
+     * presence with the supplied factory. The container re-renders whenever any
+     * UI joins, leaves or changes visibility state.
+     */
+    public void bindTo(Div container,
+            SerializableFunction<SharedValueSignal<Presence>, com.vaadin.flow.component.Component> renderer) {
+        container.bindChildren(signal, renderer);
+    }
+
+    /** Snapshot count of currently registered presences. */
+    public long size() {
+        return signal.peekValues().count();
     }
 }
