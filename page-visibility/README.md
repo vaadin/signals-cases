@@ -18,7 +18,7 @@ cd page-visibility
 mvn spring-boot:run
 ```
 
-Open <http://localhost:8084/>.
+Open <http://localhost:8080/>.
 
 ## VAPID keys (UC3 only)
 
