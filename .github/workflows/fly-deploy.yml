@@ -8,13 +8,17 @@ on:
   workflow_dispatch:
 jobs:
   deploy:
-    name: Deploy app
+    name: Deploy ${{ matrix.module }}
     runs-on: ubuntu-latest
-    concurrency: deploy-group    # optional: ensure only one action runs at a time
+    concurrency: deploy-${{ matrix.module }}
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [signals, geolocation]
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only --build-secret proKey="$VAADIN_PRO_KEY"
+      - run: flyctl deploy . --remote-only --config ${{ matrix.module }}/fly.toml --dockerfile ${{ matrix.module }}/Dockerfile --build-secret proKey="$VAADIN_PRO_KEY"
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
           VAADIN_PRO_KEY: ${{ secrets.VAADIN_PRO_KEY }}

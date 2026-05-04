@@ -1,5 +1,5 @@
 # flyctl launch added from .gitignore
-target
+**/target
 **/.idea
 **/.vscode
 **/.settings
@@ -13,4 +13,4 @@ target
 **/node_modules
 **/src/main/frontend/generated
 **/vite.generated.ts
-fly.toml
+**/fly.toml

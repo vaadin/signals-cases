@@ -1,27 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <!-- Project from https://start.vaadin.com/b8d9c8a8-c724-4fd0-aefa-a563173452fc -->
+
     <groupId>com.example</groupId>
-    <artifactId>signals-cases</artifactId>
+    <artifactId>use-cases-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
-    
-    <properties>
-        <java.version>25</java.version>
-        <vaadin.version>25.1.0</vaadin.version>
-        <spotless.plugin.version>3.1.0</spotless.plugin.version>
-        <jspecify.version>1.0.0</jspecify.version>
-    </properties>
-    
+    <packaging>pom</packaging>
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.4</version>
+        <version>4.0.5</version>
         <relativePath/>
     </parent>
+
+    <modules>
+        <module>signals</module>
+        <module>geolocation</module>
+    </modules>
+
+    <properties>
+        <java.version>25</java.version>
+        <vaadin.version>25.2-SNAPSHOT</vaadin.version>
+        <flow.version>${vaadin.version}</flow.version>
+        <jspecify.version>1.0.0</jspecify.version>
+        <spotless.plugin.version>3.1.0</spotless.plugin.version>
+        <nullability.plugin.version>0.3.0</nullability.plugin.version>
+        <spring-ai.version>2.0.0-M4</spring-ai.version>
+    </properties>
+
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-bom</artifactId>
+                <version>${flow.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-bom</artifactId>
@@ -32,69 +48,43 @@
             <dependency>
                 <groupId>org.springframework.ai</groupId>
                 <artifactId>spring-ai-bom</artifactId>
-                <version>2.0.0-M2</version>
+                <version>${spring-ai.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
-    
+
     <dependencies>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <!-- Replace artifactId with vaadin-core to use only free components -->
-            <artifactId>vaadin</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-dev</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>browserless-test-junit6</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-starter-model-openai</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.jspecify</groupId>
             <artifactId>jspecify</artifactId>
             <version>${jspecify.version}</version>
         </dependency>
     </dependencies>
-    
+
     <build>
-        <defaultGoal>spring-boot:run</defaultGoal>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>flow-maven-plugin</artifactId>
+                    <version>${flow.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>build-frontend</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
             <plugin>
                 <groupId>am.ik.maven</groupId>
                 <artifactId>nullability-maven-plugin</artifactId>
-                <version>0.3.0</version>
+                <version>${nullability.plugin.version}</version>
                 <extensions>true</extensions>
                 <executions>
                     <execution>
@@ -106,34 +96,18 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>com.vaadin</groupId>
-                <artifactId>vaadin-maven-plugin</artifactId>
-                <version>${vaadin.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>build-frontend</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
                 <version>${spotless.plugin.version}</version>
                 <configuration>
                     <java>
                         <eclipse>
-                            <file>${project.basedir}/eclipse/VaadinJavaConventions.xml</file>
+                            <file>${maven.multiModuleProjectDirectory}/eclipse/VaadinJavaConventions.xml</file>
                         </eclipse>
                         <endWithNewline/>
                         <removeUnusedImports/>
                         <importOrder>
-                            <file>${project.basedir}/eclipse/flow.importorder</file>
+                            <file>${maven.multiModuleProjectDirectory}/eclipse/flow.importorder</file>
                         </importOrder>
                         <forbidWildcardImports/>
                     </java>
@@ -141,7 +115,7 @@
             </plugin>
         </plugins>
     </build>
-    
+
     <repositories>
         <repository>
             <id>central</id>
@@ -176,6 +150,7 @@
             </releases>
         </repository>
     </repositories>
+
     <pluginRepositories>
         <pluginRepository>
             <id>vaadin-prereleases</id>
