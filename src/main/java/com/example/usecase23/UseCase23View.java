@@ -385,13 +385,10 @@ public class UseCase23View extends Main {
                     signal.peek().doubleValue(), signal.peek().doubleValue()));
 
             // update previous value when the main signal changes
-            // Uses runWithoutTransaction since we must track previous state
-            // No infinite loop risk: effect depends on signal, not changeSignal
             Signal.effect(this, () -> {
                 double current = signal.get().doubleValue();
                 double previous = changeSignal.peek().current();
-                Signal.runWithoutTransaction(
-                        () -> changeSignal.set(new Change(previous, current)));
+                changeSignal.set(new Change(previous, current));
             });
 
             // Computed signal for percentage change
