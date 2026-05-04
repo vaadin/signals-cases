@@ -2,7 +2,6 @@ package com.example.uc1;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -75,11 +74,17 @@ public class UpdateWhenActiveView extends VerticalLayout {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         UI ui = attachEvent.getUI();
+        Signal<PageVisibility> visibility = ui.getPage().pageVisibilitySignal();
+
+        statusBadge.bindText(visibility.map(UpdateWhenActiveView::statusText));
+        statusBadge.getElement().getClassList().bind("paused",
+                visibility.map(s -> s == PageVisibility.VISIBLE_NOT_FOCUSED
+                        || s == PageVisibility.UNKNOWN));
+        statusBadge.getElement().getClassList().bind("hidden",
+                visibility.map(s -> s == PageVisibility.HIDDEN));
 
         Signal.effect(this, () -> {
-            PageVisibility state = ui.getPage().pageVisibilitySignal().get();
-            applyState(state);
-            if (state == PageVisibility.VISIBLE) {
+            if (visibility.get() == PageVisibility.VISIBLE) {
                 startTicking(ui);
             } else {
                 stopTicking();
@@ -111,23 +116,12 @@ public class UpdateWhenActiveView extends VerticalLayout {
         }
     }
 
-    private void applyState(PageVisibility state) {
-        statusBadge.getElement().getClassList()
-                .removeAll(List.of("paused", "hidden"));
-        switch (state) {
-        case VISIBLE -> statusBadge.setText("Updating…");
-        case VISIBLE_NOT_FOCUSED -> {
-            statusBadge.setText("Paused — window not focused");
-            statusBadge.addClassName("paused");
-        }
-        case HIDDEN -> {
-            statusBadge.setText("Paused — tab hidden");
-            statusBadge.addClassName("hidden");
-        }
-        case UNKNOWN -> {
-            statusBadge.setText("Visibility unknown");
-            statusBadge.addClassName("paused");
-        }
-        }
+    private static String statusText(PageVisibility state) {
+        return switch (state) {
+        case VISIBLE -> "Updating…";
+        case VISIBLE_NOT_FOCUSED -> "Paused — window not focused";
+        case HIDDEN -> "Paused — tab hidden";
+        case UNKNOWN -> "Visibility unknown";
+        };
     }
 }
