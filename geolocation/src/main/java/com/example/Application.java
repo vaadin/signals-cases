@@ -6,14 +6,12 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.page.AppShellConfigurator;
-import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.theme.aura.Aura;
 
 @SpringBootApplication
 @EnableAsync
 @StyleSheet(Aura.STYLESHEET) // Use Lumo.STYLESHEET to use Lumo instead
 @StyleSheet("styles.css") // Your custom styles
-@Push
 public class Application implements AppShellConfigurator {
 
     public static void main(String[] args) {

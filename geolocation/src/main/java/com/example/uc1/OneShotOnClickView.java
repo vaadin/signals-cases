@@ -2,7 +2,6 @@ package com.example.uc1;
 
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.geolocation.GeolocationError;
 import com.vaadin.flow.component.geolocation.GeolocationPosition;
@@ -14,6 +13,7 @@ import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -25,6 +25,7 @@ import com.vaadin.flow.router.Route;
  * below is centered on the result and a marker is dropped.
  */
 @Route(value = "uc1", layout = MainLayout.class)
+@PageTitle("UC1 — One-shot request on user click")
 @Menu(order = 1, title = "UC1 — One-shot request")
 public class OneShotOnClickView extends VerticalLayout {
 
@@ -40,7 +41,7 @@ public class OneShotOnClickView extends VerticalLayout {
         map.setWidthFull();
 
         Button locate = new Button("Use my location", e -> {
-            UI.getCurrent().getGeolocation().get(value -> {
+            getUI().orElseThrow().getGeolocation().get(value -> {
                 switch (value) {
                 case GeolocationPosition pos -> {
                     result.setText("lat=%.5f, lon=%.5f (±%.0f m)".formatted(

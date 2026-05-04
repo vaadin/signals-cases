@@ -5,7 +5,6 @@ import java.time.Duration;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.geolocation.Geolocation;
 import com.vaadin.flow.component.geolocation.GeolocationAvailability;
@@ -17,6 +16,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -28,6 +28,7 @@ import com.vaadin.flow.router.Route;
  * prompt — they trigger the request by clicking the explicit button.
  */
 @Route(value = "uc3", layout = MainLayout.class)
+@PageTitle("UC3 — Auto-fetch on view load, gated on permission")
 @Menu(order = 3, title = "UC3 — Auto-fetch on attach")
 public class AutoFetchView extends VerticalLayout {
 
@@ -51,18 +52,29 @@ public class AutoFetchView extends VerticalLayout {
         super.onAttach(attachEvent);
         Geolocation geo = attachEvent.getUI().getGeolocation();
         GeolocationAvailability availability = geo.availabilitySignal().peek();
-        permissionHint.setText("Availability on attach: " + availability);
+        permissionHint.setText(hintFor(availability));
         if (availability == GeolocationAvailability.GRANTED) {
             fetchAndPopulate();
         }
         // PROMPT / DENIED / UNKNOWN / UNSUPPORTED: do nothing automatic.
     }
 
+    private static String hintFor(GeolocationAvailability availability) {
+        return switch (availability) {
+        case GRANTED -> "Location permission already granted.";
+        case PROMPT -> "Location permission has not been asked for yet.";
+        case DENIED -> "Location permission was denied for this site.";
+        case UNSUPPORTED ->
+            "Location is not available in this browser context.";
+        case UNKNOWN -> "Location permission state is not known.";
+        };
+    }
+
     private void fetchAndPopulate() {
         GeolocationOptions opts = GeolocationOptions.builder()
                 .timeout(Duration.ofSeconds(5))
                 .maximumAge(Duration.ofMinutes(5)).build();
-        UI.getCurrent().getGeolocation().get(opts, result -> {
+        getUI().orElseThrow().getGeolocation().get(opts, result -> {
             switch (result) {
             case GeolocationPosition pos -> localContent
                     .setText("Local content for lat=%.4f, lon=%.4f".formatted(

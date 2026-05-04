@@ -1,34 +1,54 @@
-# My Application README
+# Vaadin Geolocation API Use Cases
 
-- [ ] TODO Replace or update this README with instructions relevant to your application
+This module contains a collection of Vaadin Flow views demonstrating the
+browser Geolocation API exposed via `UI.getGeolocation()`.
 
-To start the application in development mode, import it into your IDE and run the `Application` class. 
-You can also start the application from the command line by running: 
+## Use Cases
 
-```bash
-./mvnw
-```
+1. **UC1 — One-shot request on user click** — classic "Use my location"
+   button that calls `Geolocation.get(...)` and renders the result on a
+   `Map`.
+2. **UC2 — Continuous tracking with reactive signal** — a single
+   `GeolocationTracker` driven by a Start/Stop toggle, with `Signal.effect`
+   subscriptions appending readings to a grid and extending a path on the
+   map.
+3. **UC3 — Auto-fetch on view load, gated on permission** — silently
+   fetches the location on attach when permission has previously been
+   granted, and reacts to permission flips while the view is open.
+4. **UC4 — Handling denial, failure and unavailability** — three cards
+   covering availability-driven rendering, error handling for each
+   `GeolocationErrorCode`, and a real-browser request.
+5. **UC5 — Reading detailed position data** — dumps every field reported
+   by the browser (lat/lon/accuracy/altitude/heading/speed/timestamp).
+6. **UC6 — Tuning precision, freshness and battery** — four common
+   `GeolocationOptions` profiles run against the same entry point so you
+   can compare response time and accuracy.
+7. **UC7 — Capturing a location as part of a form** — a pothole-reporting
+   form where "Pin my location" stores the result on a signal and the
+   submit button stays disabled until a description and a recent enough
+   pin are present.
 
-To build the application in production mode, run:
+## Running the Application
 
-```bash
-./mvnw package
-```
+1. **Prerequisites**: Java 25+, Maven 3.9+
+2. **Run**: `./mvnw` (defaults to `spring-boot:run`)
+3. **Access**: <http://localhost:8080>
 
-To build a Docker image, run:
+For production builds, use `./mvnw package`.
 
-```bash
-docker build -t my-application:latest .
-```
+## Technical Stack
 
-If you use commercial components, pass the license key as a build secret:
+- **Vaadin 25.2-SNAPSHOT** — Flow with the Geolocation API
+- **Spring Boot 4.0.5**
+- **Java 25**
+- **Maven**
 
-```bash
-docker build --secret id=proKey,src=$HOME/.vaadin/proKey .
-```
+## Browser Notes
 
-## Getting Started
-
-The [Quick Start](https://vaadin.com/docs/v25/getting-started/quick-start) tutorial helps you get started with Vaadin in 
-around 10 minutes. This tutorial walks you through building a simple application, introducing the core concepts along 
-the way.
+- The browser shows its own permission dialog on the first request; Flow
+  cannot style or suppress it.
+- Safari never reports permission state — `availabilitySignal()` surfaces
+  `UNKNOWN` for granted/denied/prompt; only `UNSUPPORTED` is reliable.
+- Firefox does not always propagate browser-settings changes back to the
+  page — the cached availability can be stale until the next `get`/`track`
+  call.

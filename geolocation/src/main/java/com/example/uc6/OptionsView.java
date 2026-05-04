@@ -4,7 +4,6 @@ import java.time.Duration;
 
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.geolocation.GeolocationError;
 import com.vaadin.flow.component.geolocation.GeolocationOptions;
@@ -17,6 +16,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -27,6 +27,7 @@ import com.vaadin.flow.router.Route;
  * accuracy will differ between profiles.
  */
 @Route(value = "uc6", layout = MainLayout.class)
+@PageTitle("UC6 — Tuning precision, freshness and battery")
 @Menu(order = 6, title = "UC6 — Tuning options")
 public class OptionsView extends VerticalLayout {
 
@@ -58,7 +59,7 @@ public class OptionsView extends VerticalLayout {
         Span result = new Span("(not fetched yet)");
         Button run = new Button("Run", e -> {
             long started = System.currentTimeMillis();
-            UI.getCurrent().getGeolocation().get(options, value -> {
+            getUI().orElseThrow().getGeolocation().get(options, value -> {
                 long elapsed = System.currentTimeMillis() - started;
                 switch (value) {
                 case GeolocationPosition pos ->
