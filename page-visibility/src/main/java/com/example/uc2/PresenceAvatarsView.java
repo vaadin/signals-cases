@@ -101,8 +101,7 @@ public class PresenceAvatarsView extends VerticalLayout {
             SharedValueSignal<Presence> entry) {
         Presence p = entry.peek();
         ColoredAvatar avatar = new ColoredAvatar(p.name(), p.color(), 56);
-        avatar.withState(p.state());
-        Signal.effect(avatar, () -> avatar.withState(entry.get().state()));
+        avatar.bindState(entry.map(Presence::state));
         return avatar;
     }
 }

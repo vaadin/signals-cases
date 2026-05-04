@@ -1,11 +1,11 @@
 package com.example.views;
 
-import java.util.List;
 import java.util.Locale;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.page.PageVisibility;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Colored circular avatar showing the initial of a participant's name. The
@@ -14,10 +14,6 @@ import com.vaadin.flow.component.page.PageVisibility;
  * avatar.
  */
 public class ColoredAvatar extends Div {
-
-    private static final List<String> STATE_CLASSES = List.of(
-            "presence-visible", "presence-blurred", "presence-hidden",
-            "presence-unknown");
 
     private final String name;
 
@@ -30,23 +26,23 @@ public class ColoredAvatar extends Div {
         initial.addClassName("presence-avatar-initial");
         add(initial);
 
-        getElement().setAttribute("title", name);
         // Per-instance color and size are dynamic, so they're set as CSS
         // custom properties consumed by the .presence-avatar rules.
         getStyle().set("--avatar-color", color);
         getStyle().set("--avatar-size", sizePx + "px");
     }
 
-    public ColoredAvatar withState(PageVisibility state) {
-        getElement().getClassList().removeAll(STATE_CLASSES);
-        switch (state) {
-        case VISIBLE -> addClassName("presence-visible");
-        case VISIBLE_NOT_FOCUSED -> addClassName("presence-blurred");
-        case HIDDEN -> addClassName("presence-hidden");
-        case UNKNOWN -> addClassName("presence-unknown");
-        }
-        getElement().setAttribute("title", name + " — "
-                + state.name().toLowerCase(Locale.ROOT).replace('_', ' '));
+    public ColoredAvatar bindState(Signal<PageVisibility> state) {
+        getElement().getClassList().bind("presence-visible",
+                state.map(s -> s == PageVisibility.VISIBLE));
+        getElement().getClassList().bind("presence-blurred",
+                state.map(s -> s == PageVisibility.VISIBLE_NOT_FOCUSED));
+        getElement().getClassList().bind("presence-hidden",
+                state.map(s -> s == PageVisibility.HIDDEN));
+        getElement().getClassList().bind("presence-unknown",
+                state.map(s -> s == PageVisibility.UNKNOWN));
+        getElement().bindAttribute("title", state.map(s -> name + " — "
+                + s.name().toLowerCase(Locale.ROOT).replace('_', ' ')));
         return this;
     }
 }
