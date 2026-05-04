@@ -52,11 +52,22 @@ public class AutoFetchView extends VerticalLayout {
         super.onAttach(attachEvent);
         Geolocation geo = attachEvent.getUI().getGeolocation();
         GeolocationAvailability availability = geo.availabilitySignal().peek();
-        permissionHint.setText("Availability on attach: " + availability);
+        permissionHint.setText(hintFor(availability));
         if (availability == GeolocationAvailability.GRANTED) {
             fetchAndPopulate();
         }
         // PROMPT / DENIED / UNKNOWN / UNSUPPORTED: do nothing automatic.
+    }
+
+    private static String hintFor(GeolocationAvailability availability) {
+        return switch (availability) {
+        case GRANTED -> "Location permission already granted.";
+        case PROMPT -> "Location permission has not been asked for yet.";
+        case DENIED -> "Location permission was denied for this site.";
+        case UNSUPPORTED ->
+            "Location is not available in this browser context.";
+        case UNKNOWN -> "Location permission state is not known.";
+        };
     }
 
     private void fetchAndPopulate() {
