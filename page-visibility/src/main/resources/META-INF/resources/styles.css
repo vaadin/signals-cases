@@ -59,10 +59,10 @@
 }
 
 .rate-card {
-    border: 1px solid var(--aura-border-color, #e0e0e0);
-    border-radius: 8px;
+    border: 1px solid var(--vaadin-border-color);
+    border-radius: var(--vaadin-radius-m);
     padding: 1rem 1.25rem;
-    background: var(--aura-color-surface, #fff);
+    background: var(--vaadin-background-container);
     width: fit-content;
     min-width: 240px;
     transition: background-color 600ms ease;
@@ -75,7 +75,7 @@
 
 .rate-pair {
     font-size: 0.9rem;
-    color: var(--lumo-secondary-text-color, #666);
+    color: var(--vaadin-text-color-secondary);
 }
 
 .rate-value {
@@ -86,7 +86,7 @@
 
 .rate-timestamp {
     font-size: 0.85rem;
-    color: var(--lumo-secondary-text-color, #666);
+    color: var(--vaadin-text-color-secondary);
     margin-top: 0.5rem;
 }
 
