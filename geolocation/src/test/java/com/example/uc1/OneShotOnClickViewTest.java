@@ -2,10 +2,8 @@ package com.example.uc1;
 
 import com.vaadin.browserless.BrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
-import com.vaadin.flow.component.geolocation.GeolocationSimulator;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.geolocation.GeolocationErrorCode;
+import com.vaadin.flow.component.geolocation.GeolocationSimulator;
 import com.vaadin.flow.component.html.Span;
 import org.junit.jupiter.api.Test;
 
@@ -16,14 +14,13 @@ class OneShotOnClickViewTest extends BrowserlessTest {
 
     @Test
     void clickingLocate_resolvesPosition_updatesResultSpan() {
-        GeolocationSimulator controller = GeolocationSimulator
-                .of(UI.getCurrent());
+        GeolocationSimulator geolocation = GeolocationSimulator.current();
+        geolocation.grantPermission();
+        geolocation.setLocation(60.1699, 24.9384, 25.0);
         navigate(OneShotOnClickView.class);
 
         Button locate = $(Button.class).withText("Use my location").single();
         test(locate).click();
-
-        controller.respondWithPosition(60.1699, 24.9384, 25.0);
 
         Span result = $(Span.class).withTextContaining("lat=").single();
         assertTrue(result.getText().contains("60.16990"),
@@ -33,23 +30,17 @@ class OneShotOnClickViewTest extends BrowserlessTest {
     }
 
     @Test
-    void clickingLocate_simulateError_showsErrorMessage() {
-        GeolocationSimulator controller = GeolocationSimulator
-                .of(UI.getCurrent());
+    void clickingLocate_permissionDenied_showsErrorMessage() {
+        GeolocationSimulator geolocation = GeolocationSimulator.current();
+        geolocation.denyPermission();
         navigate(OneShotOnClickView.class);
 
         Button locate = $(Button.class).withText("Use my location").single();
         test(locate).click();
 
-        controller.respondWithError(GeolocationErrorCode.PERMISSION_DENIED,
-                "User denied geolocation");
-
         Span result = $(Span.class).withTextContaining("Error").single();
         assertTrue(result.getText().contains("1"),
                 "Result span should show error code 1, was: "
-                        + result.getText());
-        assertTrue(result.getText().contains("User denied geolocation"),
-                "Result span should show error message, was: "
                         + result.getText());
     }
 }
