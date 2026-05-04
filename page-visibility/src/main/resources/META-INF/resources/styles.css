@@ -59,18 +59,12 @@
 }
 
 .rate-card {
-    border: 1px solid var(--vaadin-border-color);
-    border-radius: var(--vaadin-radius-m);
-    padding: 1rem 1.25rem;
-    background: var(--vaadin-background-container);
     width: fit-content;
     min-width: 240px;
-    transition: background-color 600ms ease;
 }
 
 .rate-card.highlight {
-    background: #fff7c2;
-    transition: background-color 80ms ease;
+    --vaadin-card-background: #fff7c2;
 }
 
 .rate-pair {

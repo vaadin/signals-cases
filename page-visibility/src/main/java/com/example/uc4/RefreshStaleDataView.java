@@ -14,7 +14,8 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.card.Card;
+import com.vaadin.flow.component.card.CardVariant;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
@@ -47,7 +48,7 @@ public class RefreshStaleDataView extends VerticalLayout {
 
     private final Span valueLabel = new Span();
     private final Span timestampLabel = new Span();
-    private final Div card = new Div();
+    private final Card card = new Card();
 
     private @Nullable UI ui;
     private @Nullable ScheduledFuture<?> tickTask;
@@ -63,16 +64,15 @@ public class RefreshStaleDataView extends VerticalLayout {
                 + "Quick glances away (under 5 s) are ignored."));
 
         valueLabel.addClassName("rate-value");
-        Span pair = new Span("USD/EUR ");
+        Span pair = new Span("USD/EUR");
         pair.addClassName("rate-pair");
-
-        Div pairRow = new Div(pair);
-        Div valueRow = new Div(valueLabel);
-        Div timestampRow = new Div(timestampLabel);
-        timestampRow.addClassName("rate-timestamp");
+        timestampLabel.addClassName("rate-timestamp");
 
         card.addClassName("rate-card");
-        card.add(pairRow, valueRow, timestampRow);
+        card.addThemeVariants(CardVariant.OUTLINED);
+        card.setHeader(pair);
+        card.add(valueLabel);
+        card.addToFooter(timestampLabel);
 
         Button manual = new Button("Refresh now", e -> refresh());
         add(card, manual);
