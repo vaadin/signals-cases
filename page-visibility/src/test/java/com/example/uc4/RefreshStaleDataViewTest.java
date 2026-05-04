@@ -1,13 +1,20 @@
 package com.example.uc4;
 
+import java.lang.reflect.Field;
+import java.time.Instant;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.example.PageVisibilityTestSupport;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.page.PageVisibility;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -58,5 +65,51 @@ class RefreshStaleDataViewTest extends SpringBrowserlessTest {
                 .findFirst().orElseThrow();
         assertTrue(!beforeRate.equals(after.getText()),
                 "rate should change after several manual refreshes");
+    }
+
+    @Test
+    void hiddenForLongerThanThresholdRefreshesOnReturn() throws Exception {
+        RefreshStaleDataView view = navigate(RefreshStaleDataView.class);
+        runPendingSignalsTasks();
+        double before = readRate(view);
+
+        PageVisibilityTestSupport.setPageVisibility(PageVisibility.HIDDEN);
+        runPendingSignalsTasks();
+        backdateHiddenAt(view, 10);
+
+        PageVisibilityTestSupport.setPageVisibility(PageVisibility.VISIBLE);
+        runPendingSignalsTasks();
+
+        assertNotEquals(before, readRate(view),
+                "rate should auto-refresh after returning from a long hide");
+    }
+
+    @Test
+    void shortHideDoesNotRefreshOnReturn() throws Exception {
+        RefreshStaleDataView view = navigate(RefreshStaleDataView.class);
+        runPendingSignalsTasks();
+        double before = readRate(view);
+
+        PageVisibilityTestSupport.setPageVisibility(PageVisibility.HIDDEN);
+        runPendingSignalsTasks();
+        // Leave hiddenAt at "just now" — far below the 5-second threshold.
+        PageVisibilityTestSupport.setPageVisibility(PageVisibility.VISIBLE);
+        runPendingSignalsTasks();
+
+        assertEquals(before, readRate(view),
+                "quick alt-tab should not trigger a refresh");
+    }
+
+    private static double readRate(RefreshStaleDataView view) throws Exception {
+        Field f = RefreshStaleDataView.class.getDeclaredField("rate");
+        f.setAccessible(true);
+        return (double) f.get(view);
+    }
+
+    private static void backdateHiddenAt(RefreshStaleDataView view,
+            long secondsAgo) throws Exception {
+        Field f = RefreshStaleDataView.class.getDeclaredField("hiddenAt");
+        f.setAccessible(true);
+        f.set(view, Instant.now().minusSeconds(secondsAgo));
     }
 }

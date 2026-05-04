@@ -1,17 +1,14 @@
 package com.example.uc1;
 
-import java.lang.reflect.Method;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.example.PageVisibilityTestSupport;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.component.page.PageVisibility;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,11 +28,11 @@ class UpdateWhenActiveViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void statusBadgeReflectsPageVisibilityChanges() throws Exception {
+    void statusBadgeReflectsPageVisibilityChanges() {
         navigate(UpdateWhenActiveView.class);
         runPendingSignalsTasks();
 
-        // Mock UI starts at UNKNOWN; the effect renders the matching label.
+        // Mock UI starts at UNKNOWN; the binding renders the matching label.
         assertBadgeContains("Visibility unknown");
 
         setPageVisibility(PageVisibility.VISIBLE);
@@ -56,17 +53,8 @@ class UpdateWhenActiveViewTest extends SpringBrowserlessTest {
                 "expected status badge to contain \"" + fragment + "\"");
     }
 
-    /**
-     * The Page-side setter is package-private (only the JS bridge calls it).
-     * Reflection lets the test simulate browser-driven transitions without
-     * standing up a real DOM.
-     */
-    private void setPageVisibility(PageVisibility state) throws Exception {
-        Page page = UI.getCurrent().getPage();
-        Method setter = Page.class.getDeclaredMethod("setPageVisibility",
-                String.class);
-        setter.setAccessible(true);
-        setter.invoke(page, state.name());
+    private void setPageVisibility(PageVisibility state) {
+        PageVisibilityTestSupport.setPageVisibility(state);
         runPendingSignalsTasks();
     }
 }

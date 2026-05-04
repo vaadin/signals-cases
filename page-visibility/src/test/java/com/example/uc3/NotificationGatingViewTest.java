@@ -1,16 +1,14 @@
 package com.example.uc3;
 
-import java.lang.reflect.Method;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.example.PageVisibilityTestSupport;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.component.page.PageVisibility;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,7 +29,7 @@ class NotificationGatingViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void fireNotificationLogsChannelBasedOnPageVisibility() throws Exception {
+    void fireNotificationLogsChannelBasedOnPageVisibility() {
         NotificationGatingView view = navigate(NotificationGatingView.class);
         runPendingSignalsTasks();
 
@@ -56,12 +54,8 @@ class NotificationGatingViewTest extends SpringBrowserlessTest {
                 "expected delivery log to contain \"" + fragment + "\"");
     }
 
-    private void setPageVisibility(PageVisibility state) throws Exception {
-        Page page = UI.getCurrent().getPage();
-        Method setter = Page.class.getDeclaredMethod("setPageVisibility",
-                String.class);
-        setter.setAccessible(true);
-        setter.invoke(page, state.name());
+    private void setPageVisibility(PageVisibility state) {
+        PageVisibilityTestSupport.setPageVisibility(state);
         runPendingSignalsTasks();
     }
 }
