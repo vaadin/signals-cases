@@ -4,7 +4,6 @@ import java.time.Duration;
 
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.geolocation.GeolocationCoordinates;
 import com.vaadin.flow.component.geolocation.GeolocationError;
@@ -41,7 +40,7 @@ public class DetailedDataView extends VerticalLayout {
             output.removeAll();
             GeolocationOptions opts = GeolocationOptions.builder()
                     .highAccuracy(true).timeout(Duration.ofSeconds(10)).build();
-            UI.getCurrent().getGeolocation().get(opts, value -> {
+            getUI().orElseThrow().getGeolocation().get(opts, value -> {
                 switch (value) {
                 case GeolocationPosition pos -> renderPosition(output, pos);
                 case GeolocationError err ->

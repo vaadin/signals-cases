@@ -7,7 +7,6 @@ import java.util.List;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.geolocation.GeolocationError;
 import com.vaadin.flow.component.geolocation.GeolocationOptions;
@@ -94,7 +93,7 @@ public class FormFieldView extends VerticalLayout {
         GeolocationOptions opts = GeolocationOptions.builder()
                 .highAccuracy(true).timeout(Duration.ofSeconds(10))
                 .maximumAge(Duration.ZERO).build();
-        UI.getCurrent().getGeolocation().get(opts, value -> {
+        getUI().orElseThrow().getGeolocation().get(opts, value -> {
             switch (value) {
             case GeolocationPosition pos -> {
                 if (pos.coords().accuracy() > MAX_ACCURACY_METRES) {

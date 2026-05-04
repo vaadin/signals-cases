@@ -4,7 +4,6 @@ import java.time.Duration;
 
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.geolocation.GeolocationError;
 import com.vaadin.flow.component.geolocation.GeolocationOptions;
@@ -60,7 +59,7 @@ public class OptionsView extends VerticalLayout {
         Span result = new Span("(not fetched yet)");
         Button run = new Button("Run", e -> {
             long started = System.currentTimeMillis();
-            UI.getCurrent().getGeolocation().get(options, value -> {
+            getUI().orElseThrow().getGeolocation().get(options, value -> {
                 long elapsed = System.currentTimeMillis() - started;
                 switch (value) {
                 case GeolocationPosition pos ->

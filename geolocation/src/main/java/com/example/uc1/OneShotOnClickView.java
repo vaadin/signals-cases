@@ -2,7 +2,6 @@ package com.example.uc1;
 
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.geolocation.GeolocationError;
 import com.vaadin.flow.component.geolocation.GeolocationPosition;
@@ -42,7 +41,7 @@ public class OneShotOnClickView extends VerticalLayout {
         map.setWidthFull();
 
         Button locate = new Button("Use my location", e -> {
-            UI.getCurrent().getGeolocation().get(value -> {
+            getUI().orElseThrow().getGeolocation().get(value -> {
                 switch (value) {
                 case GeolocationPosition pos -> {
                     result.setText("lat=%.5f, lon=%.5f (±%.0f m)".formatted(

@@ -5,7 +5,6 @@ import java.time.Duration;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.geolocation.Geolocation;
 import com.vaadin.flow.component.geolocation.GeolocationAvailability;
@@ -64,7 +63,7 @@ public class AutoFetchView extends VerticalLayout {
         GeolocationOptions opts = GeolocationOptions.builder()
                 .timeout(Duration.ofSeconds(5))
                 .maximumAge(Duration.ofMinutes(5)).build();
-        UI.getCurrent().getGeolocation().get(opts, result -> {
+        getUI().orElseThrow().getGeolocation().get(opts, result -> {
             switch (result) {
             case GeolocationPosition pos -> localContent
                     .setText("Local content for lat=%.4f, lon=%.4f".formatted(
