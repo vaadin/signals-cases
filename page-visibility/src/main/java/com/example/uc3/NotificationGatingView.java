@@ -87,10 +87,10 @@ public class NotificationGatingView extends VerticalLayout {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
+        UI ui = attachEvent.getUI();
         // Refresh subscription status from the browser when the view loads.
-        webPush.subscriptionExists(attachEvent.getUI(),
-                exists -> attachEvent.getUI().access(() -> renderSubscribed(
-                        exists && hasStoredSubscription())));
+        webPush.subscriptionExists(ui, exists -> ui.access(
+                () -> renderSubscribed(exists && hasStoredSubscription())));
     }
 
     private void subscribe(UI ui) {

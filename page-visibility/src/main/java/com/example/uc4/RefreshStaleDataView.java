@@ -92,11 +92,11 @@ public class RefreshStaleDataView extends VerticalLayout {
                     .get();
             handleTransition(prevState, state);
             prevState = state;
-            if (state == PageVisibility.VISIBLE) {
+            if (state == PageVisibility.HIDDEN) {
+                stopTimestampTick();
+            } else {
                 renderTimestamp();
                 startTimestampTick();
-            } else {
-                stopTimestampTick();
             }
         });
     }
