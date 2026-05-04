@@ -17,6 +17,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -28,6 +29,7 @@ import com.vaadin.flow.router.Route;
  * prompt — they trigger the request by clicking the explicit button.
  */
 @Route(value = "uc3", layout = MainLayout.class)
+@PageTitle("UC3 — Auto-fetch on view load, gated on permission")
 @Menu(order = 3, title = "UC3 — Auto-fetch on attach")
 public class AutoFetchView extends VerticalLayout {
 

@@ -30,6 +30,7 @@ import com.vaadin.flow.component.map.configuration.style.Stroke;
 import com.vaadin.flow.component.map.configuration.style.Style;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 
@@ -44,6 +45,7 @@ import com.vaadin.flow.signals.Signal;
  * the history — the grid and the map line keep growing.
  */
 @Route(value = "uc2", layout = MainLayout.class)
+@PageTitle("UC2 — Continuous tracking with reactive signal")
 @Menu(order = 2, title = "UC2 — Tracking")
 public class TrackingView extends VerticalLayout {
 

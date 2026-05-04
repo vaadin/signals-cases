@@ -17,6 +17,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -27,6 +28,7 @@ import com.vaadin.flow.router.Route;
  * accuracy will differ between profiles.
  */
 @Route(value = "uc6", layout = MainLayout.class)
+@PageTitle("UC6 — Tuning precision, freshness and battery")
 @Menu(order = 6, title = "UC6 — Tuning options")
 public class OptionsView extends VerticalLayout {
 

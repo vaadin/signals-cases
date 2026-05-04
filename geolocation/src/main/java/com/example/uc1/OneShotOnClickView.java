@@ -14,6 +14,7 @@ import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -25,6 +26,7 @@ import com.vaadin.flow.router.Route;
  * below is centered on the result and a marker is dropped.
  */
 @Route(value = "uc1", layout = MainLayout.class)
+@PageTitle("UC1 — One-shot request on user click")
 @Menu(order = 1, title = "UC1 — One-shot request")
 public class OneShotOnClickView extends VerticalLayout {
 

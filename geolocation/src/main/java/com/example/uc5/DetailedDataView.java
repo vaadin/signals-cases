@@ -16,6 +16,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -26,6 +27,7 @@ import com.vaadin.flow.router.Route;
  * {@code null} and are shown as "—".
  */
 @Route(value = "uc5", layout = MainLayout.class)
+@PageTitle("UC5 — Reading detailed position data")
 @Menu(order = 5, title = "UC5 — Detailed data")
 public class DetailedDataView extends VerticalLayout {
 
