@@ -3,15 +3,16 @@ package com.example.uc4;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.card.Card;
+import com.vaadin.flow.component.card.CardVariant;
 import com.vaadin.flow.component.geolocation.GeolocationAvailability;
 import com.vaadin.flow.component.geolocation.GeolocationError;
 import com.vaadin.flow.component.geolocation.GeolocationErrorCode;
 import com.vaadin.flow.component.geolocation.GeolocationPending;
 import com.vaadin.flow.component.geolocation.GeolocationPosition;
 import com.vaadin.flow.component.geolocation.GeolocationResult;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -48,20 +49,6 @@ public class DenialView extends VerticalLayout {
     }
 
     // ------------------------------------------------------------------
-    // Shared styling
-    // ------------------------------------------------------------------
-
-    private static VerticalLayout card() {
-        VerticalLayout card = new VerticalLayout();
-        card.getStyle().set("border",
-                "1px solid var(--vaadin-border-color-secondary)");
-        card.getStyle().set("border-radius", "var(--vaadin-radius-l)");
-        card.getStyle().set("padding", "var(--vaadin-padding-m)");
-        card.getStyle().set("margin-bottom", "var(--vaadin-gap-m)");
-        return card;
-    }
-
-    // ------------------------------------------------------------------
     // Card 1 — availability-driven rendering
     // ------------------------------------------------------------------
 
@@ -69,16 +56,17 @@ public class DenialView extends VerticalLayout {
      * Demonstrates how the app renders based on the current
      * {@link GeolocationAvailability} reported by the browser.
      */
-    private static class AvailabilityCard extends VerticalLayout {
+    private static class AvailabilityCard extends Card {
 
         private final Button locate = new Button("Find stores near me");
         private final TextField postcode = new TextField("Postcode");
         private final Span hint = new Span();
 
         AvailabilityCard() {
-            VerticalLayout card = card();
-            card.add(new H2("Availability → rendering"));
-            card.add(new Paragraph("Pick what the browser reports as the "
+            addThemeVariants(CardVariant.OUTLINED);
+            setTitle("Availability → rendering");
+
+            add(new Paragraph("Pick what the browser reports as the "
                     + "current availability. The preview below shows how "
                     + "the store-finder view would render in that case."));
 
@@ -86,16 +74,14 @@ public class DenialView extends VerticalLayout {
             choose.setLabel("Browser-reported availability");
             choose.setItems(GeolocationAvailability.values());
             choose.addValueChangeListener(e -> applyAvailability(e.getValue()));
-            card.add(choose);
+            add(choose);
 
-            card.add(new H2("Preview"));
+            add(new H3("Preview"));
             postcode.setVisible(false);
-            card.add(hint, locate, postcode);
+            add(hint, locate, postcode);
 
             // Default to PROMPT so the preview shows the "normal" branch.
             choose.setValue(GeolocationAvailability.PROMPT);
-
-            add(card);
         }
 
         private void applyAvailability(GeolocationAvailability a) {
@@ -135,7 +121,7 @@ public class DenialView extends VerticalLayout {
      * {@code get()} request. The selector picks what the client would return;
      * the button runs the handler.
      */
-    private static class RequestOutcomeCard extends VerticalLayout {
+    private static class RequestOutcomeCard extends Card {
 
         private enum Outcome {
             SUCCESS("A position (59.437, 24.7535)"),
@@ -159,9 +145,10 @@ public class DenialView extends VerticalLayout {
         private final Span output = new Span();
 
         RequestOutcomeCard() {
-            VerticalLayout card = card();
-            card.add(new H2("Request outcome → rendering"));
-            card.add(new Paragraph(
+            addThemeVariants(CardVariant.OUTLINED);
+            setTitle("Request outcome → rendering");
+
+            add(new Paragraph(
                     "Pick the result the browser should return, then click "
                             + "Run request. The handler writes the "
                             + "user-facing message below."));
@@ -170,16 +157,14 @@ public class DenialView extends VerticalLayout {
             choose.setLabel("What the request returns");
             choose.setItems(Outcome.values());
             choose.setValue(Outcome.PERMISSION_DENIED);
-            card.add(choose);
+            add(choose);
 
             Button run = new Button("Run request",
                     e -> handle(synthesize(choose.getValue())));
-            card.add(run);
+            add(run);
 
-            card.add(new H2("Message shown to the user"));
-            card.add(output);
-
-            add(card);
+            add(new H3("Message shown to the user"));
+            add(output);
         }
 
         private GeolocationResult synthesize(Outcome outcome) {
@@ -232,29 +217,25 @@ public class DenialView extends VerticalLayout {
      * Runs the real {@code Geolocation.get()} against the real browser so you
      * can verify end-to-end behaviour once the simulations look right.
      */
-    private static class RealBrowserCard extends VerticalLayout {
+    private static class RealBrowserCard extends Card {
 
         private final Span availabilityLabel = new Span();
         private final Span output = new Span("(no request run yet)");
 
         RealBrowserCard() {
-            VerticalLayout card = card();
-            card.add(new H2("Real browser request"));
-            card.add(new Paragraph(
-                    "Calls the real API. The outcome depends on your "
-                            + "browser's current permission state."));
+            addThemeVariants(CardVariant.OUTLINED);
+            setTitle("Real browser request");
 
-            Div row = new Div();
-            row.add(availabilityLabel);
-            card.add(row);
+            add(new Paragraph("Calls the real API. The outcome depends on your "
+                    + "browser's current permission state."));
+
+            add(availabilityLabel);
 
             Button locate = new Button("Use my location", e -> runReal());
-            card.add(locate);
+            add(locate);
 
-            card.add(new H2("Response"));
-            card.add(output);
-
-            add(card);
+            add(new H3("Response"));
+            add(output);
         }
 
         @Override
