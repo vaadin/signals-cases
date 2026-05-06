@@ -27,6 +27,10 @@ browser Geolocation API exposed via `UI.getGeolocation()`.
    form where "Pin my location" stores the result on a signal and the
    submit button stays disabled until a description and a recent enough
    pin are present.
+8. **UC8 — DB-backed tracking** — like UC2, but each reading is first
+   persisted via Spring Data JPA and the grid and map line are then
+   refreshed by re-reading the rows for this view's session from the
+   database. The database is the source of truth for the rendered data.
 
 ## Running the Application
 
