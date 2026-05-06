@@ -79,8 +79,6 @@ public class PresenceAvatarsView extends VerticalLayout {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
 
-        // Join *before* binding so the list signal is non-empty when
-        // bindChildren's effect first revalidates.
         registry.join(new Presence(id, name, color, PageVisibility.VISIBLE));
         registry.bindTo(avatarStrip, this::renderAvatar);
 
