@@ -5,9 +5,8 @@ import java.time.Duration;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.geolocation.GeolocationError;
+import com.vaadin.flow.component.geolocation.Geolocation;
 import com.vaadin.flow.component.geolocation.GeolocationOptions;
-import com.vaadin.flow.component.geolocation.GeolocationPosition;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -59,17 +58,16 @@ public class OptionsView extends VerticalLayout {
         Span result = new Span("(not fetched yet)");
         Button run = new Button("Run", e -> {
             long started = System.currentTimeMillis();
-            getUI().orElseThrow().getGeolocation().get(options, value -> {
+            Geolocation.getPosition(pos -> {
                 long elapsed = System.currentTimeMillis() - started;
-                switch (value) {
-                case GeolocationPosition pos ->
-                    result.setText("%.5f, %.5f (±%.0f m) — %d ms".formatted(
-                            pos.coords().latitude(), pos.coords().longitude(),
-                            pos.coords().accuracy(), elapsed));
-                case GeolocationError err -> result.setText(
+                result.setText("%.5f, %.5f (±%.0f m) — %d ms".formatted(
+                        pos.coords().latitude(), pos.coords().longitude(),
+                        pos.coords().accuracy(), elapsed));
+            }, err -> {
+                long elapsed = System.currentTimeMillis() - started;
+                result.setText(
                         "Error: " + err.message() + " (" + elapsed + " ms)");
-                }
-            });
+            }, options);
         });
         wrapper.add(new HorizontalLayout(run, result));
         return wrapper;

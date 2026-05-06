@@ -3,6 +3,7 @@ package com.example.uc1;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.geolocation.Geolocation;
 import com.vaadin.flow.component.geolocation.GeolocationError;
 import com.vaadin.flow.component.geolocation.GeolocationPosition;
 import com.vaadin.flow.component.html.H1;
@@ -20,7 +21,7 @@ import com.vaadin.flow.router.Route;
  * UC1 — One-shot request on user click.
  * <p>
  * Classic "Use my location" button. The click handler calls
- * {@code Geolocation.get(...)} and reacts to either the returned
+ * {@code Geolocation.getPosition(...)} and reacts to either the returned
  * {@link GeolocationPosition} or a {@link GeolocationError}. On success the map
  * below is centered on the result and a marker is dropped.
  */
@@ -41,25 +42,20 @@ public class OneShotOnClickView extends VerticalLayout {
         map.setWidthFull();
 
         Button locate = new Button("Use my location", e -> {
-            getUI().orElseThrow().getGeolocation().get(value -> {
-                switch (value) {
-                case GeolocationPosition pos -> {
-                    result.setText("lat=%.5f, lon=%.5f (±%.0f m)".formatted(
-                            pos.coords().latitude(), pos.coords().longitude(),
-                            pos.coords().accuracy()));
-                    Coordinate c = new Coordinate(pos.coords().longitude(),
-                            pos.coords().latitude());
-                    map.setCenter(c);
-                    if (map.getZoom() < 14) {
-                        map.setZoom(14);
-                    }
-                    map.getFeatureLayer().removeAllFeatures();
-                    map.getFeatureLayer().addFeature(new MarkerFeature(c));
+            Geolocation.getPosition(pos -> {
+                result.setText("lat=%.5f, lon=%.5f (±%.0f m)".formatted(
+                        pos.coords().latitude(), pos.coords().longitude(),
+                        pos.coords().accuracy()));
+                Coordinate c = new Coordinate(pos.coords().longitude(),
+                        pos.coords().latitude());
+                map.setCenter(c);
+                if (map.getZoom() < 14) {
+                    map.setZoom(14);
                 }
-                case GeolocationError err -> result
-                        .setText("Error " + err.code() + ": " + err.message());
-                }
-            });
+                map.getFeatureLayer().removeAllFeatures();
+                map.getFeatureLayer().addFeature(new MarkerFeature(c));
+            }, err -> result
+                    .setText("Error " + err.code() + ": " + err.message()));
         });
 
         add(locate, result, map);
