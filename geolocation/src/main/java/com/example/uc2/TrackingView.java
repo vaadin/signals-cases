@@ -39,12 +39,12 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * <p>
  * A Start/Stop toggle drives a single {@link GeolocationTracker}. The tracker
  * is created lazily on the first click so a fresh page load does not start —
- * and immediately stop — a browser watch. Once created, two effects subscribe
- * to the tracker's signals: one appends new readings to the grid and extends
- * the path on the map, the other reports a "stopped after N updates" status.
- * The toggle's label is bound via {@code bindText} to a computed signal of the
- * tracker's active state combined with whether any readings have arrived yet.
- * Resuming does not clear the history — the grid and the map line keep growing.
+ * and immediately stop — a browser watch. Once created, the status text and
+ * the toggle's label are both bound via {@code bindText} to computed signals
+ * over the tracker's active and value signals plus an update counter. A single
+ * effect handles the imperative side that bindings can't express: appending
+ * each new reading to the grid and extending the path on the map. Resuming
+ * does not clear the history — the grid and the map line keep growing.
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Continuous tracking with reactive signal")
@@ -68,7 +68,7 @@ public class TrackingView extends VerticalLayout {
     private @Nullable GeolocationTracker tracker;
     private final ValueSignal<Boolean> hasUpdates = new ValueSignal<>(
             Boolean.FALSE);
-    private int updateCount;
+    private final ValueSignal<Integer> updateCount = new ValueSignal<>(0);
 
     public TrackingView() {
         add(new H1("UC2 — Continuous tracking with reactive signal"));
@@ -123,13 +123,21 @@ public class TrackingView extends VerticalLayout {
                 .track(this, options);
         tracker = t;
 
-        Signal.effect(this, () -> {
-            switch (t.valueSignal().get()) {
-            case GeolocationPending p ->
-                status.setText("Waiting for first reading…");
-            case GeolocationPosition pos -> appendPosition(pos);
+        status.bindText(Signal.computed(() -> {
+            if (!t.activeSignal().get() && hasUpdates.get()) {
+                return "Stopped after " + updateCount.get() + " updates";
+            }
+            return switch (t.valueSignal().get()) {
+            case GeolocationPending p -> "Waiting for first reading…";
+            case GeolocationPosition pos -> "Update #" + updateCount.get();
             case GeolocationError err ->
-                status.setText("Error " + err.code() + ": " + err.message());
+                "Error " + err.code() + ": " + err.message();
+            };
+        }));
+
+        Signal.effect(this, () -> {
+            if (t.valueSignal().get() instanceof GeolocationPosition pos) {
+                appendPosition(pos);
             }
         });
 
@@ -140,19 +148,13 @@ public class TrackingView extends VerticalLayout {
             }
             return hasUpdates.get() ? "Resume tracking" : "Start tracking";
         }));
-
-        Signal.effect(this, () -> {
-            if (!t.activeSignal().get() && hasUpdates.get()) {
-                status.setText("Stopped after " + updateCount + " updates");
-            }
-        });
     }
 
     private void appendPosition(GeolocationPosition pos) {
-        updateCount++;
+        int next = updateCount.peek() + 1;
+        updateCount.set(next);
         hasUpdates.set(Boolean.TRUE);
-        status.setText("Update #" + updateCount);
-        points.add(new TrackPoint(updateCount, pos.timestamp(),
+        points.add(new TrackPoint(next, pos.timestamp(),
                 pos.coords().latitude(), pos.coords().longitude(),
                 pos.coords().accuracy()));
         history.getDataProvider().refreshAll();
