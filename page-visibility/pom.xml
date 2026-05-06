@@ -12,8 +12,6 @@
     </parent>
 
     <properties>
-        <!-- The Page#pageVisibilitySignal() API ships in this branch build -->
-        <flow.version>25.2.page-visibility-SNAPSHOT</flow.version>
     </properties>
 
     <dependencies>
