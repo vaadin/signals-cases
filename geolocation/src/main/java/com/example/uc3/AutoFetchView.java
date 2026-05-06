@@ -51,9 +51,9 @@ public class AutoFetchView extends VerticalLayout {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         Geolocation geo = attachEvent.getUI().getGeolocation();
-        GeolocationAvailability availability = geo.availabilitySignal().peek();
-        permissionHint.setText(hintFor(availability));
-        if (availability == GeolocationAvailability.GRANTED) {
+        permissionHint
+                .bindText(geo.availabilitySignal().map(AutoFetchView::hintFor));
+        if (geo.availabilitySignal().peek() == GeolocationAvailability.GRANTED) {
             fetchAndPopulate();
         }
         // PROMPT / DENIED / UNKNOWN / UNSUPPORTED: do nothing automatic.
