@@ -4,7 +4,6 @@ import java.time.Duration;
 
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.geolocation.GeolocationCoordinates;
 import com.vaadin.flow.component.geolocation.GeolocationError;
@@ -16,6 +15,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -26,6 +26,7 @@ import com.vaadin.flow.router.Route;
  * {@code null} and are shown as "—".
  */
 @Route(value = "uc5", layout = MainLayout.class)
+@PageTitle("UC5 — Reading detailed position data")
 @Menu(order = 5, title = "UC5 — Detailed data")
 public class DetailedDataView extends VerticalLayout {
 
@@ -39,7 +40,7 @@ public class DetailedDataView extends VerticalLayout {
             output.removeAll();
             GeolocationOptions opts = GeolocationOptions.builder()
                     .highAccuracy(true).timeout(Duration.ofSeconds(10)).build();
-            UI.getCurrent().getGeolocation().get(opts, value -> {
+            getUI().orElseThrow().getGeolocation().get(opts, value -> {
                 switch (value) {
                 case GeolocationPosition pos -> renderPosition(output, pos);
                 case GeolocationError err ->

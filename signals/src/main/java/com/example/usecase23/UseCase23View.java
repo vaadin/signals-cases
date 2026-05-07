@@ -139,8 +139,8 @@ public class UseCase23View extends Main {
         bindData(chart, newYorkSeries, newYorkTimelineSignal);
         bindData(chart, tokyoSeries, tokyoTimelineSignal);
 
-        Signal.effect(chart, () -> xAxis.setCategories(timelineCategoriesSignal
-                .get().stream().map(Signal::get).toArray(String[]::new)));
+        Signal.effect(chart, () -> xAxis.setCategories(
+                timelineCategoriesSignal.getValues().toArray(String[]::new)));
 
         conf.addSeries(berlinSeries);
         conf.addSeries(londonSeries);
@@ -165,12 +165,8 @@ public class UseCase23View extends Main {
 
     private static void bindData(Chart chart, ListSeries series,
             ListSignal<Number> signal) {
-        Signal.effect(chart, () -> {
-            series.setData(signal.get().stream().map(Signal::get)
-                    .toArray(Number[]::new));
-            // TODO issue of getting the values from ListSignal instead of
-            // Signal<Number>
-        });
+        Signal.effect(chart,
+                () -> series.setData(signal.getValues().toArray(Number[]::new)));
     }
 
     private Component createServiceHealth() {
@@ -309,7 +305,7 @@ public class UseCase23View extends Main {
      * Callback invoked by the scheduler service with new dashboard data. This
      * method only updates signals - no UI access or chart drawing.
      */
-    private void onDataUpdate(DashboardData data) {
+    void onDataUpdate(DashboardData data) {
         // Update highlight card signals
         currentUsersSignal.set(data.currentUsers());
         viewEventsSignal.set(data.viewEvents());
@@ -415,8 +411,8 @@ public class UseCase23View extends Main {
             valueSpan.bindText(signal.map(format::apply));
 
             Span percentageSpan = new Span();
-            percentageSpan.bindText(prefixSignal
-                    .map(prefix -> prefix + percentageSignal.get()));
+            percentageSpan.bindText(Signal.computed(
+                    () -> prefixSignal.get() + percentageSignal.get()));
 
             Icon icon = new Icon(iconSignal);
             icon.setSize("10px");
