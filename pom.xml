@@ -18,6 +18,7 @@
         <module>signals</module>
         <module>geolocation</module>
         <module>clipboard</module>
+        <module>page-visibility</module>
     </modules>
 
     <properties>
