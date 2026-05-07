@@ -49,10 +49,11 @@ public class PresenceRegistry {
     public void updateState(String id, PageVisibility state) {
         SharedValueSignal<Presence> entry = entries.get(id);
         if (entry != null) {
-            Presence current = entry.peek();
-            if (current != null && current.state() != state) {
-                entry.set(current.withState(state));
-            }
+            // update() applies the transition atomically; returning the same
+            // reference when the state hasn't changed is a no-op.
+            entry.update(current -> current == null
+                    || current.state() == state ? current
+                            : current.withState(state));
         }
     }
 

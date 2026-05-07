@@ -60,7 +60,7 @@ class RefreshStaleDataViewTest extends SpringBrowserlessTest {
                 .filter(s -> s.getText() != null
                         && s.getText().matches("\\d+\\.\\d{4}"))
                 .findFirst().orElseThrow();
-        assertTrue(!beforeRate.equals(after.getText()),
+        assertNotEquals(beforeRate, after.getText(),
                 "rate should change after several manual refreshes");
     }
 

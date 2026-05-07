@@ -66,26 +66,26 @@
 }
 
 .presence-avatar.presence-hidden {
-    background-color: #c4c4c4;
-    border-color: #9a9a9a;
+    background-color: var(--aura-neutral);
+    border-color: var(--aura-neutral);
     opacity: 0.5;
     transform: scale(0.88);
 }
 
 .presence-avatar.presence-hidden > .presence-avatar-initial {
-    color: #6a6a6a;
+    color: var(--vaadin-text-color);
 }
 
 .presence-avatar.presence-unknown {
-    background-color: #d6d6d6;
-    border-color: #b0b0b0;
+    background-color: var(--vaadin-background-container);
+    border-color: var(--vaadin-border-color);
     border-style: dashed;
     opacity: 0.55;
     filter: blur(0.5px);
 }
 
 .presence-avatar.presence-unknown > .presence-avatar-initial {
-    color: #7a7a7a;
+    color: var(--vaadin-text-color-secondary);
 }
 
 .rate-card {
@@ -94,7 +94,8 @@
 }
 
 .rate-card.highlight {
-    --vaadin-card-background: #fff7c2;
+    --vaadin-card-background: color-mix(in srgb, var(--aura-yellow) 25%,
+            transparent);
 }
 
 .rate-pair {
@@ -119,29 +120,29 @@
     padding: 0.15rem 0.6rem;
     border-radius: 999px;
     font-size: 0.85rem;
-    background: #e3f2fd;
-    color: #0b3d8c;
-    border: 1px solid #b6d4f4;
+    background: color-mix(in srgb, var(--aura-blue) 15%, transparent);
+    color: var(--aura-blue-text);
+    border: 1px solid color-mix(in srgb, var(--aura-blue) 35%, transparent);
 }
 
 .status-badge.paused {
-    background: #fff4e0;
-    color: #6b4500;
-    border-color: #f0d9a4;
+    background: color-mix(in srgb, var(--aura-orange) 18%, transparent);
+    color: var(--aura-orange-text);
+    border-color: color-mix(in srgb, var(--aura-orange) 35%, transparent);
 }
 
 .status-badge.hidden {
-    background: #f3e1e3;
-    color: #851b22;
-    border-color: #ecb3b8;
+    background: color-mix(in srgb, var(--aura-red) 15%, transparent);
+    color: var(--aura-red-text);
+    border-color: color-mix(in srgb, var(--aura-red) 35%, transparent);
 }
 
 .notification-log {
     font-family: monospace;
     font-size: 0.85rem;
-    background: #fafafa;
-    border: 1px solid #eee;
-    border-radius: 6px;
+    background: var(--vaadin-background-container);
+    border: 1px solid var(--vaadin-border-color);
+    border-radius: var(--vaadin-radius-m);
     padding: 0.5rem 0.75rem;
     max-height: 220px;
     overflow-y: auto;
@@ -149,7 +150,7 @@
 
 .notification-log > div {
     padding: 0.1rem 0;
-    border-bottom: 1px dashed #eee;
+    border-bottom: 1px dashed var(--vaadin-border-color);
 }
 
 .notification-log > div:last-child {
