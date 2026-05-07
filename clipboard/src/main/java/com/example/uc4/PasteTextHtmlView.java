@@ -2,9 +2,8 @@ package com.example.uc4;
 
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.Html;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.IFrame;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -41,27 +40,34 @@ public class PasteTextHtmlView extends VerticalLayout {
         editor.setPlaceholder("Try Ctrl+V / Cmd+V");
 
         Span textOut = monospaceBlock("Plain text will appear here…");
-        Div htmlPreview = new Div();
+        Span htmlSource = monospaceBlock("HTML source will appear here…");
+
+        IFrame htmlPreview = new IFrame();
+        htmlPreview.setSandbox(IFrame.SandboxType.RESTRICT_ALL);
+        htmlPreview.setWidthFull();
+        htmlPreview.setHeight("150px");
         htmlPreview.getStyle()
                 .set("border", "1px solid var(--aura-contrast-20pct)")
-                .set("padding", "var(--aura-space-m)").set("min-height", "60px")
-                .set("border-radius", "var(--aura-border-radius-m)");
-        htmlPreview.setText("HTML preview will appear here…");
+                .set("border-radius", "var(--aura-border-radius-m)")
+                .set("background", "var(--aura-base-color)");
 
         Clipboard.addPasteListener(editor, event -> {
             if (event.hasText()) {
                 textOut.setText("Pasted text:\n" + event.getText());
             }
             if (event.hasHtml()) {
-                htmlPreview.removeAll();
-                htmlPreview.add(new Html("<div>" + event.getHtml() + "</div>"));
+                htmlSource.setText(event.getHtml());
+                htmlPreview.getElement().setAttribute("srcdoc",
+                        event.getHtml());
             } else if (event.hasText()) {
-                htmlPreview.setText("(no HTML branch — plain text only)");
+                htmlSource.setText("(no HTML branch — plain text only)");
+                htmlPreview.getElement().setAttribute("srcdoc", "");
             }
         });
 
         add(editor, new Paragraph("Plain text:"), textOut,
-                new Paragraph("HTML preview:"), htmlPreview);
+                new Paragraph("HTML source:"), htmlSource,
+                new Paragraph("HTML preview (sandboxed):"), htmlPreview);
     }
 
     private static Span monospaceBlock(String initial) {
