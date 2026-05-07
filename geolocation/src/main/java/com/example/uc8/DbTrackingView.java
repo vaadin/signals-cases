@@ -27,6 +27,8 @@ import com.vaadin.flow.component.map.configuration.feature.LineStringFeature;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.map.configuration.style.Stroke;
 import com.vaadin.flow.component.map.configuration.style.Style;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
@@ -149,14 +151,21 @@ public class DbTrackingView extends VerticalLayout {
             };
         }));
 
-        t.addPositionListener(this::persistAndRefresh, error -> {
-        });
+        t.addPositionListener(this::persistAndRefresh,
+                this::showErrorNotification);
 
         start.bindVisible(Signal
                 .computed(() -> Boolean.valueOf(!t.activeSignal().get())));
         stop.bindVisible(t.activeSignal());
         start.bindText(Signal.computed(
                 () -> hasUpdates.get() ? "Resume tracking" : "Start tracking"));
+    }
+
+    private void showErrorNotification(GeolocationError error) {
+        Notification n = Notification.show(
+                "Error " + error.code() + ": " + error.message(), 5000,
+                Notification.Position.MIDDLE);
+        n.addThemeVariants(NotificationVariant.ERROR);
     }
 
     private void persistAndRefresh(GeolocationPosition pos) {
