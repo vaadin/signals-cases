@@ -4,11 +4,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.example.PageVisibilityTestSupport;
+import com.example.views.ColoredAvatar;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.page.PageVisibility;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -42,6 +46,32 @@ class PresenceAvatarsViewTest extends SpringBrowserlessTest {
      * {@code IllegalStateException: This ListSignal instance was created in
      * one VaadinSession but is being accessed from another}.
      */
+    @Test
+    void avatarReflectsVisibilityStateClasses() {
+        navigate(PresenceAvatarsView.class);
+        runPendingSignalsTasks();
+
+        PageVisibilityTestSupport.setPageVisibility(PageVisibility.VISIBLE);
+        runPendingSignalsTasks();
+
+        ColoredAvatar avatar = $view(ColoredAvatar.class).all().stream()
+                .findFirst().orElseThrow(
+                        () -> new AssertionError("no avatar rendered"));
+        assertTrue(avatar.getElement().getClassList().contains(
+                "presence-visible"),
+                "avatar should carry the presence-visible class while VISIBLE");
+
+        PageVisibilityTestSupport.setPageVisibility(PageVisibility.HIDDEN);
+        runPendingSignalsTasks();
+
+        assertTrue(avatar.getElement().getClassList().contains(
+                "presence-hidden"),
+                "avatar should carry the presence-hidden class while HIDDEN");
+        assertFalse(avatar.getElement().getClassList().contains(
+                "presence-visible"),
+                "presence-visible should be cleared when state flips to HIDDEN");
+    }
+
     @Test
     void secondSessionCanNavigateWithoutCrossSessionException() {
         navigate(PresenceAvatarsView.class);

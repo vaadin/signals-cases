@@ -9,6 +9,7 @@ import com.example.views.ColoredAvatar;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -95,8 +96,7 @@ public class PresenceAvatarsView extends VerticalLayout {
         super.onDetach(detachEvent);
     }
 
-    private com.vaadin.flow.component.Component renderAvatar(
-            SharedValueSignal<Presence> entry) {
+    private Component renderAvatar(SharedValueSignal<Presence> entry) {
         Presence p = entry.peek();
         ColoredAvatar avatar = new ColoredAvatar(p.name(), p.color(), 56);
         avatar.bindState(entry.map(Presence::state));

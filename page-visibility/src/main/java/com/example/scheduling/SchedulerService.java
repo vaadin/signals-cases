@@ -20,7 +20,7 @@ import com.vaadin.flow.component.UI;
 public class SchedulerService {
 
     private final ScheduledExecutorService scheduler = Executors
-            .newScheduledThreadPool(2, r -> {
+            .newScheduledThreadPool(4, r -> {
                 Thread t = new Thread(r, "page-visibility-scheduler");
                 t.setDaemon(true);
                 return t;

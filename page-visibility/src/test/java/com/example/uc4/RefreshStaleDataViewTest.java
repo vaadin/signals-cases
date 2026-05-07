@@ -1,8 +1,5 @@
 package com.example.uc4;
 
-import java.lang.reflect.Field;
-import java.time.Instant;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -68,27 +65,27 @@ class RefreshStaleDataViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void hiddenForLongerThanThresholdRefreshesOnReturn() throws Exception {
+    void hiddenForLongerThanThresholdRefreshesOnReturn() {
         RefreshStaleDataView view = navigate(RefreshStaleDataView.class);
         runPendingSignalsTasks();
-        double before = readRate(view);
+        double before = view.currentRate();
 
         PageVisibilityTestSupport.setPageVisibility(PageVisibility.HIDDEN);
         runPendingSignalsTasks();
-        backdateHiddenAt(view, 10);
+        view.backdateHiddenAt(10);
 
         PageVisibilityTestSupport.setPageVisibility(PageVisibility.VISIBLE);
         runPendingSignalsTasks();
 
-        assertNotEquals(before, readRate(view),
+        assertNotEquals(before, view.currentRate(),
                 "rate should auto-refresh after returning from a long hide");
     }
 
     @Test
-    void shortHideDoesNotRefreshOnReturn() throws Exception {
+    void shortHideDoesNotRefreshOnReturn() {
         RefreshStaleDataView view = navigate(RefreshStaleDataView.class);
         runPendingSignalsTasks();
-        double before = readRate(view);
+        double before = view.currentRate();
 
         PageVisibilityTestSupport.setPageVisibility(PageVisibility.HIDDEN);
         runPendingSignalsTasks();
@@ -96,20 +93,7 @@ class RefreshStaleDataViewTest extends SpringBrowserlessTest {
         PageVisibilityTestSupport.setPageVisibility(PageVisibility.VISIBLE);
         runPendingSignalsTasks();
 
-        assertEquals(before, readRate(view),
+        assertEquals(before, view.currentRate(),
                 "quick alt-tab should not trigger a refresh");
-    }
-
-    private static double readRate(RefreshStaleDataView view) throws Exception {
-        Field f = RefreshStaleDataView.class.getDeclaredField("rate");
-        f.setAccessible(true);
-        return (double) f.get(view);
-    }
-
-    private static void backdateHiddenAt(RefreshStaleDataView view,
-            long secondsAgo) throws Exception {
-        Field f = RefreshStaleDataView.class.getDeclaredField("hiddenAt");
-        f.setAccessible(true);
-        f.set(view, Instant.now().minusSeconds(secondsAgo));
     }
 }

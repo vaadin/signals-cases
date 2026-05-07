@@ -1,8 +1,8 @@
 # Page Visibility API — use cases
 
 A standalone Spring Boot demo of the new `Page#pageVisibilitySignal()` API in
-Vaadin Flow (`25.2.page-visibility-SNAPSHOT`). Each view exercises a single
-realistic scenario.
+Vaadin Flow (resolved from the parent pom's `vaadin.version` property). Each
+view exercises a single realistic scenario.
 
 | # | View | What it shows |
 | - | ---- | ------------- |
@@ -23,8 +23,10 @@ Open <http://localhost:8080/>.
 ## VAPID keys (UC3 only)
 
 Web Push requires a VAPID key pair. The `application.properties` ships with
-placeholder values; on first start an ephemeral pair is generated and logged
-at INFO level. Copy the printed values into `application.properties` to keep
+the literal marker `__GENERATE__`; on first start an ephemeral pair is
+generated, the public key is logged at INFO level, and the private key is
+logged only at DEBUG. Copy the printed public key (and the DEBUG-level
+private key, if you've enabled it) into `application.properties` to keep
 subscriptions across restarts, or generate your own:
 
 ```

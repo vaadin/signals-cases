@@ -173,4 +173,14 @@ public class RefreshStaleDataView extends VerticalLayout {
             tickTask = null;
         }
     }
+
+    // Package-private test seams: avoid reflection in
+    // RefreshStaleDataViewTest while keeping the fields encapsulated.
+    double currentRate() {
+        return rate;
+    }
+
+    void backdateHiddenAt(long secondsAgo) {
+        this.hiddenAt = Instant.now().minusSeconds(secondsAgo);
+    }
 }
