@@ -1,11 +1,11 @@
 package com.example.uc3;
 
+import java.time.Instant;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.TimeUnit;
 
-import com.example.scheduling.SchedulerService;
 import com.example.views.MainLayout;
+import org.springframework.scheduling.TaskScheduler;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.UI;
@@ -45,14 +45,14 @@ public class NotificationGatingView extends VerticalLayout {
             .ofPattern("HH:mm:ss");
 
     private final WebPush webPush;
-    private final SchedulerService scheduler;
+    private final TaskScheduler taskScheduler;
 
     private final Span subscriptionStatus = new Span("Not subscribed");
     private final Div log = new Div();
 
-    public NotificationGatingView(WebPush webPush, SchedulerService scheduler) {
+    public NotificationGatingView(WebPush webPush, TaskScheduler taskScheduler) {
         this.webPush = webPush;
-        this.scheduler = scheduler;
+        this.taskScheduler = taskScheduler;
 
         add(new H1("UC3 — Notification gating with Web Push"));
         add(new Paragraph("Subscribe the browser, then click \"Send in 5 "
@@ -121,7 +121,8 @@ public class NotificationGatingView extends VerticalLayout {
                 "Will fire in 5 seconds — switch tab now if "
                         + "you want to test web push",
                 2500, Position.BOTTOM_START);
-        scheduler.schedule(ui, () -> fireNotification(ui), 5, TimeUnit.SECONDS);
+        taskScheduler.schedule(ui.accessLater(() -> fireNotification(ui), null),
+                Instant.now().plusSeconds(5));
     }
 
     // Package-private so tests can drive the gating logic without waiting on

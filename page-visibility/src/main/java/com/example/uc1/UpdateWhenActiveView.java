@@ -1,13 +1,13 @@
 package com.example.uc1;
 
+import java.time.Duration;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
-import com.example.scheduling.SchedulerService;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
+import org.springframework.scheduling.TaskScheduler;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -38,7 +38,7 @@ public class UpdateWhenActiveView extends VerticalLayout {
     private static final DateTimeFormatter TIME = DateTimeFormatter
             .ofPattern("HH:mm:ss");
 
-    private final SchedulerService scheduler;
+    private final TaskScheduler taskScheduler;
 
     private final Span timeLabel = new Span("--:--:--");
     private final Span counterLabel = new Span("0");
@@ -47,8 +47,8 @@ public class UpdateWhenActiveView extends VerticalLayout {
     private @Nullable ScheduledFuture<?> tickTask;
     private int updates;
 
-    public UpdateWhenActiveView(SchedulerService scheduler) {
-        this.scheduler = scheduler;
+    public UpdateWhenActiveView(TaskScheduler taskScheduler) {
+        this.taskScheduler = taskScheduler;
 
         add(new H1("UC1 — Update when active"));
         add(new Paragraph("The card below updates the server clock every "
@@ -102,11 +102,11 @@ public class UpdateWhenActiveView extends VerticalLayout {
         if (tickTask != null && !tickTask.isCancelled()) {
             return;
         }
-        tickTask = scheduler.scheduleAtFixedRate(ui, () -> {
+        tickTask = taskScheduler.scheduleAtFixedRate(ui.accessLater(() -> {
             updates++;
             timeLabel.setText(LocalTime.now().format(TIME));
             counterLabel.setText(Integer.toString(updates));
-        }, 0, 1, TimeUnit.SECONDS);
+        }, null), Duration.ofSeconds(1));
     }
 
     private void stopTicking() {

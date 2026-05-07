@@ -4,11 +4,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 
-import com.example.scheduling.SchedulerService;
 import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
+import org.springframework.scheduling.TaskScheduler;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
@@ -39,7 +38,7 @@ public class RefreshStaleDataView extends VerticalLayout {
 
     private static final long REFRESH_THRESHOLD_SECONDS = 5;
 
-    private final SchedulerService scheduler;
+    private final TaskScheduler taskScheduler;
 
     private double rate = 1.0823;
     private Instant updatedAt = Instant.now();
@@ -54,8 +53,8 @@ public class RefreshStaleDataView extends VerticalLayout {
     private @Nullable ScheduledFuture<?> tickTask;
     private @Nullable ScheduledFuture<?> highlightTask;
 
-    public RefreshStaleDataView(SchedulerService scheduler) {
-        this.scheduler = scheduler;
+    public RefreshStaleDataView(TaskScheduler taskScheduler) {
+        this.taskScheduler = taskScheduler;
 
         add(new H1("UC4 — Refresh stale data on return"));
         add(new Paragraph("The card below shows a fake USD/EUR exchange "
@@ -151,9 +150,10 @@ public class RefreshStaleDataView extends VerticalLayout {
             highlightTask.cancel(false);
         }
         if (ui != null) {
-            highlightTask = scheduler.schedule(ui,
-                    () -> card.removeClassName("highlight"), 600,
-                    TimeUnit.MILLISECONDS);
+            highlightTask = taskScheduler.schedule(
+                    ui.accessLater(() -> card.removeClassName("highlight"),
+                            null),
+                    Instant.now().plusMillis(600));
         }
     }
 
@@ -162,8 +162,10 @@ public class RefreshStaleDataView extends VerticalLayout {
             return;
         }
         if (ui != null) {
-            tickTask = scheduler.scheduleAtFixedRate(ui, this::renderTimestamp,
-                    1, 1, TimeUnit.SECONDS);
+            tickTask = taskScheduler.scheduleAtFixedRate(
+                    ui.accessLater(this::renderTimestamp, null),
+                    Instant.now().plus(Duration.ofSeconds(1)),
+                    Duration.ofSeconds(1));
         }
     }
 
