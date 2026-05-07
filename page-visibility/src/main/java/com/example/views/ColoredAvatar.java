@@ -33,14 +33,16 @@ public class ColoredAvatar extends Div {
     }
 
     public ColoredAvatar bindState(Signal<PageVisibility> state) {
-        getElement().getClassList().bind("presence-visible",
+        bindClassName("presence-visible",
                 state.map(s -> s == PageVisibility.VISIBLE));
-        getElement().getClassList().bind("presence-blurred",
+        bindClassName("presence-blurred",
                 state.map(s -> s == PageVisibility.VISIBLE_NOT_FOCUSED));
-        getElement().getClassList().bind("presence-hidden",
+        bindClassName("presence-hidden",
                 state.map(s -> s == PageVisibility.HIDDEN));
-        getElement().getClassList().bind("presence-unknown",
+        bindClassName("presence-unknown",
                 state.map(s -> s == PageVisibility.UNKNOWN));
+        // No higher-level Component API for the native title attribute, so
+        // this stays at the Element level.
         getElement().bindAttribute("title", state.map(s -> name + " — "
                 + s.name().toLowerCase(Locale.ROOT).replace('_', ' ')));
         return this;

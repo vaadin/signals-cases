@@ -2,7 +2,6 @@ package com.example.uc3;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.example.scheduling.SchedulerService;
@@ -160,8 +159,7 @@ public class NotificationGatingView extends VerticalLayout {
     }
 
     private void renderSubscribed(boolean subscribed) {
-        subscriptionStatus.getElement().getClassList()
-                .removeAll(List.of("paused", "hidden"));
+        subscriptionStatus.removeClassNames("paused", "hidden");
         if (subscribed) {
             subscriptionStatus.setText("Subscribed");
         } else {

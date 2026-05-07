@@ -77,10 +77,10 @@ public class UpdateWhenActiveView extends VerticalLayout {
         Signal<PageVisibility> visibility = ui.getPage().pageVisibilitySignal();
 
         statusBadge.bindText(visibility.map(UpdateWhenActiveView::statusText));
-        statusBadge.getElement().getClassList().bind("paused",
+        statusBadge.bindClassName("paused",
                 visibility.map(s -> s == PageVisibility.VISIBLE_NOT_FOCUSED
                         || s == PageVisibility.UNKNOWN));
-        statusBadge.getElement().getClassList().bind("hidden",
+        statusBadge.bindClassName("hidden",
                 visibility.map(s -> s == PageVisibility.HIDDEN));
 
         Signal.effect(this, () -> {
