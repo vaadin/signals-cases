@@ -12,6 +12,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.Clipboard;
 import com.vaadin.flow.component.page.ClipboardFile;
+import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -57,11 +58,35 @@ public class PasteFilesView extends VerticalLayout {
                 .set("display", "block")
                 .set("border-radius", "var(--aura-border-radius-m)");
 
+        ProgressBar uploadProgress = new ProgressBar();
+        uploadProgress.setIndeterminate(true);
+        uploadProgress.getStyle().set("visibility", "hidden");
+        Span uploadLabel = new Span("Uploading pasted file…");
+        uploadLabel.getStyle().set("visibility", "hidden");
+
         VerticalLayout previews = new VerticalLayout();
         previews.setPadding(false);
         previews.setSpacing(true);
 
+        // The framework's paste handler uploads files before firing the
+        // server-side listener, so a server-driven spinner would only
+        // appear after the upload finishes. Toggle visibility from a
+        // capture-phase JS listener that runs the moment the paste fires.
+        dropZone.getElement().executeJs(
+                "this.addEventListener('paste', e => {"
+                        + "  for (const item of e.clipboardData.items) {"
+                        + "    if (item.kind === 'file') {"
+                        + "      $0.style.visibility = 'visible';"
+                        + "      $1.style.visibility = 'visible';"
+                        + "      return;"
+                        + "    }"
+                        + "  }"
+                        + "}, true);",
+                uploadProgress.getElement(), uploadLabel.getElement());
+
         Clipboard.addPasteListener(dropZone, event -> {
+            uploadProgress.getStyle().set("visibility", "hidden");
+            uploadLabel.getStyle().set("visibility", "hidden");
             if (!event.hasFiles()) {
                 log.setText("Paste contained no files.");
                 return;
@@ -79,7 +104,7 @@ public class PasteFilesView extends VerticalLayout {
             log.setText(sb.toString());
         });
 
-        add(dropZone, log, previews);
+        add(dropZone, uploadLabel, uploadProgress, log, previews);
     }
 
     private static Image imagePreview(ClipboardFile file) {
