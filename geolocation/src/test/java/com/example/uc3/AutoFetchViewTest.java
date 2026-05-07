@@ -43,7 +43,8 @@ class AutoFetchViewTest extends BrowserlessTest {
                 "The explicit locate button should be visible for DENIED");
 
         Span hint = $(Span.class)
-                .withTextContaining("Availability on attach: DENIED").single();
-        assertEquals("Availability on attach: DENIED", hint.getText());
+                .withTextContaining("Location permission was denied").single();
+        assertEquals("Location permission was denied for this site.",
+                hint.getText());
     }
 }
