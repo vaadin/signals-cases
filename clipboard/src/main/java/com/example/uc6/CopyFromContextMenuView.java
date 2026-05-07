@@ -1,0 +1,53 @@
+package com.example.uc6;
+
+import com.example.views.MainLayout;
+
+import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Pre;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Clipboard;
+import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
+
+/**
+ * UC6 — Copy via a context-menu item.
+ * <p>
+ * The PRD lists context-menu selection alongside button click as a primary
+ * trigger for "Copy to clipboard". Any {@link com.vaadin.flow.component.Component}
+ * can be passed to {@link Clipboard#copyOnClick}, including a {@link MenuItem},
+ * so the same client-side gesture-safe path applies.
+ */
+@Route(value = "uc6", layout = MainLayout.class)
+@PageTitle("UC6 — Copy via context menu")
+@Menu(order = 6, title = "UC6 — Context menu")
+public class CopyFromContextMenuView extends VerticalLayout {
+
+    public CopyFromContextMenuView() {
+        add(new H1("UC6 — Copy via a context-menu item"));
+        add(new Paragraph(
+                "Right-click (or long-press) the box below and pick \"Copy "
+                        + "value\". The same copyOnClick API works on a menu "
+                        + "item — no JavaScript needed."));
+
+        String value = "secret-token-9f8e7a6b";
+
+        Pre target = new Pre(value);
+        target.getStyle().set("padding", "var(--aura-space-m)")
+                .set("background", "var(--aura-contrast-5pct)")
+                .set("border-radius", "var(--aura-border-radius-m)")
+                .set("cursor", "context-menu");
+
+        ContextMenu menu = new ContextMenu(target);
+        MenuItem copyItem = menu.addItem("Copy value");
+        Clipboard.copyOnClick(copyItem, value,
+                () -> Notification.show("Token copied"),
+                () -> Notification.show("Copy failed"));
+
+        add(target);
+    }
+}

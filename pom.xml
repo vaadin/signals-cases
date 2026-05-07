@@ -17,6 +17,7 @@
     <modules>
         <module>signals</module>
         <module>geolocation</module>
+        <module>clipboard</module>
     </modules>
 
     <properties>
