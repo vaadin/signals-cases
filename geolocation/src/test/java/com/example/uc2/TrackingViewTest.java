@@ -1,0 +1,54 @@
+package com.example.uc2;
+
+import com.vaadin.browserless.BrowserlessTest;
+import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.geolocation.GeolocationErrorCode;
+import com.vaadin.flow.component.geolocation.GeolocationSimulator;
+import com.vaadin.flow.component.html.Span;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+@ViewPackages(classes = TrackingView.class)
+class TrackingViewTest extends BrowserlessTest {
+
+    @Test
+    void startTracking_userMoves_growsHistoryAndUpdatesStatus() {
+        GeolocationSimulator geolocation = GeolocationSimulator.current();
+        geolocation.grantPermission();
+        navigate(TrackingView.class);
+
+        Button toggle = $(Button.class).withText("Start tracking").single();
+        test(toggle).click();
+
+        assertEquals(1, geolocation.activeTrackers().size(),
+                "Exactly one tracker session should be active after starting");
+
+        geolocation.setLocation(60.1699, 24.9384, 15.0);
+        Span status = $(Span.class).withText("Update #1").single();
+        assertEquals("Update #1", status.getText());
+
+        geolocation.setLocation(60.1700, 24.9385, 12.0);
+        status = $(Span.class).withText("Update #2").single();
+        assertEquals("Update #2", status.getText());
+    }
+
+    @Test
+    void positionUnavailableMidTrack_displaysErrorStatus() {
+        GeolocationSimulator geolocation = GeolocationSimulator.current();
+        geolocation.grantPermission();
+        navigate(TrackingView.class);
+
+        Button toggle = $(Button.class).withText("Start tracking").single();
+        test(toggle).click();
+
+        geolocation.setUnavailable(GeolocationErrorCode.POSITION_UNAVAILABLE,
+                "position unavailable");
+
+        Span status = $(Span.class).withTextContaining("Error").single();
+        assertTrue(status.getText().contains("2"),
+                "Status should show error code 2, was: " + status.getText());
+    }
+}
