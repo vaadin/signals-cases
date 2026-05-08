@@ -8,7 +8,7 @@ import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.geolocation.GeolocationError;
+import com.vaadin.flow.component.geolocation.Geolocation;
 import com.vaadin.flow.component.geolocation.GeolocationOptions;
 import com.vaadin.flow.component.geolocation.GeolocationPosition;
 import com.vaadin.flow.component.grid.Grid;
@@ -104,21 +104,16 @@ public class FormFieldView extends VerticalLayout {
         GeolocationOptions opts = GeolocationOptions.builder()
                 .highAccuracy(true).timeout(Duration.ofSeconds(10))
                 .maximumAge(Duration.ZERO).build();
-        getUI().orElseThrow().getGeolocation().get(opts, value -> {
-            switch (value) {
-            case GeolocationPosition pos -> {
-                if (pos.coords().accuracy() > MAX_ACCURACY_METRES) {
-                    Notification.show(
-                            "Location too imprecise (±%.0f m), please try again."
-                                    .formatted(pos.coords().accuracy()));
-                    return;
-                }
-                pinnedSignal.set(pos);
+        Geolocation.getPosition(pos -> {
+            if (pos.coords().accuracy() > MAX_ACCURACY_METRES) {
+                Notification.show(
+                        "Location too imprecise (±%.0f m), please try again."
+                                .formatted(pos.coords().accuracy()));
+                return;
             }
-            case GeolocationError err ->
-                Notification.show("Could not pin location: " + err.message());
-            }
-        });
+            pinnedSignal.set(pos);
+        }, err -> Notification
+                .show("Could not pin location: " + err.message()), opts);
     }
 
     private void submit() {
