@@ -3,11 +3,12 @@ package com.example.uc2;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.clipboard.Clipboard;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Clipboard;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -37,7 +38,9 @@ public class CopyComponentValueView extends VerticalLayout {
         linkField.setWidthFull();
 
         Button copyButton = new Button("Copy");
-        Clipboard.copyOnClick(copyButton, linkField);
+        Clipboard.copyOnClick(copyButton, linkField,
+                () -> Notification.show("Link copied"),
+                () -> Notification.show("Copy failed"));
 
         HorizontalLayout row = new HorizontalLayout(linkField, copyButton);
         row.setAlignItems(Alignment.END);

@@ -1,7 +1,7 @@
 # Vaadin Clipboard API Use Cases
 
 This module contains a collection of Vaadin Flow views demonstrating the
-browser Clipboard API exposed via `com.vaadin.flow.component.page.Clipboard`.
+browser Clipboard API exposed via `com.vaadin.flow.component.clipboard.Clipboard`.
 
 The use cases were derived from the Clipboard PRD on
 [vaadin/platform#8759](https://github.com/vaadin/platform/issues/8759) and
@@ -25,11 +25,10 @@ the draft Flow PR
 6. **UC6 — Copy via context menu** — `Clipboard.copyOnClick(menuItem, "...")`
    on a `ContextMenu` item, demonstrating that the same gesture-safe path
    works for non-button triggers.
-7. **UC7 — Detect availability and degrade gracefully** — query
-   `Clipboard.isAvailable()` up front and disable copy controls when
-   the API can't be used (HTTP, restrictive iframe, denied permission).
-   The availability method itself is not in the draft PR yet; the view
-   anticipates the eventual signature.
+7. **UC7 — Detect availability and degrade gracefully** — observe
+   `Clipboard.availabilityHintSignal()` (a `Signal<ClipboardAvailability>`)
+   to enable or disable copy controls based on whether the API can be
+   used (HTTP, restrictive iframe, denied permission).
 
 ## Running the Application
 
@@ -61,6 +60,3 @@ For production builds, use `./mvnw package`.
 - `Clipboard.readText` (programmatic read) is unreliable in Firefox.
   Paste-event-based reading (UC4, UC5) works everywhere and is the
   recommended way to receive clipboard content.
-- UC7 calls a hypothetical `Clipboard.isAvailable()` that does not exist
-  in the draft PR. Once the real availability API lands, swap the call
-  site in `AvailabilityView`.

@@ -4,14 +4,15 @@ import java.util.Base64;
 
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.clipboard.Clipboard;
+import com.vaadin.flow.component.clipboard.ClipboardFile;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Clipboard;
-import com.vaadin.flow.component.page.ClipboardFile;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -24,6 +25,11 @@ import com.vaadin.flow.router.Route;
  * screenshot copied from another app) are transferred via the standard upload
  * mechanism, so the bytes arrive on the server and are rendered as an
  * inline preview when the file is an image.
+ * <p>
+ * The progress bar is driven by {@link Clipboard#addPasteStartListener} (which
+ * fires the moment the browser paste is observed, before any upload begins)
+ * and hidden by {@link Clipboard#addPasteListener} on success or
+ * {@link Clipboard#addPasteFailedListener} on failure.
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Paste files")
@@ -60,33 +66,28 @@ public class PasteFilesView extends VerticalLayout {
 
         ProgressBar uploadProgress = new ProgressBar();
         uploadProgress.setIndeterminate(true);
-        uploadProgress.getStyle().set("visibility", "hidden");
-        Span uploadLabel = new Span("Uploading pasted file…");
-        uploadLabel.getStyle().set("visibility", "hidden");
+        uploadProgress.setVisible(false);
+        Span uploadLabel = new Span();
+        uploadLabel.setVisible(false);
 
         VerticalLayout previews = new VerticalLayout();
         previews.setPadding(false);
         previews.setSpacing(true);
 
-        // The framework's paste handler uploads files before firing the
-        // server-side listener, so a server-driven spinner would only
-        // appear after the upload finishes. Toggle visibility from a
-        // capture-phase JS listener that runs the moment the paste fires.
-        dropZone.getElement().executeJs(
-                "this.addEventListener('paste', e => {"
-                        + "  for (const item of e.clipboardData.items) {"
-                        + "    if (item.kind === 'file') {"
-                        + "      $0.style.visibility = 'visible';"
-                        + "      $1.style.visibility = 'visible';"
-                        + "      return;"
-                        + "    }"
-                        + "  }"
-                        + "}, true);",
-                uploadProgress.getElement(), uploadLabel.getElement());
+        Clipboard.addPasteStartListener(dropZone, event -> {
+            if (event.getFiles().isEmpty()) {
+                return;
+            }
+            int count = event.getFiles().size();
+            uploadLabel.setText("Uploading "
+                    + (count == 1 ? "pasted file…" : count + " pasted files…"));
+            uploadLabel.setVisible(true);
+            uploadProgress.setVisible(true);
+        });
 
         Clipboard.addPasteListener(dropZone, event -> {
-            uploadProgress.getStyle().set("visibility", "hidden");
-            uploadLabel.getStyle().set("visibility", "hidden");
+            uploadProgress.setVisible(false);
+            uploadLabel.setVisible(false);
             if (!event.hasFiles()) {
                 log.setText("Paste contained no files.");
                 return;
@@ -102,6 +103,13 @@ public class PasteFilesView extends VerticalLayout {
                 }
             }
             log.setText(sb.toString());
+        });
+
+        Clipboard.addPasteFailedListener(dropZone, event -> {
+            uploadProgress.setVisible(false);
+            uploadLabel.setVisible(false);
+            Notification.show("Upload failed for " + event.file().name()
+                    + ": " + event.reason());
         });
 
         add(dropZone, uploadLabel, uploadProgress, log, previews);

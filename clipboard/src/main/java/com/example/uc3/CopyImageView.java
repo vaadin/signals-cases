@@ -6,12 +6,13 @@ import java.nio.charset.StandardCharsets;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.clipboard.Clipboard;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Clipboard;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -60,7 +61,9 @@ public class CopyImageView extends VerticalLayout {
         preview.setWidth("300px");
 
         Button copyBtn = new Button("Copy chart");
-        Clipboard.copyImageOnClick(copyBtn, preview);
+        Clipboard.copyImageOnClick(copyBtn, preview,
+                () -> Notification.show("Chart copied"),
+                () -> Notification.show("Copy failed"));
 
         HorizontalLayout row = new HorizontalLayout(preview, copyBtn);
         row.setAlignItems(Alignment.START);

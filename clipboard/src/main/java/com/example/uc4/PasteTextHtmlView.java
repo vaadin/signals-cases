@@ -7,7 +7,7 @@ import com.vaadin.flow.component.html.IFrame;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Clipboard;
+import com.vaadin.flow.component.clipboard.Clipboard;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -18,7 +18,7 @@ import com.vaadin.flow.router.Route;
  * <p>
  * Listens for paste (Ctrl/Cmd-V) on a text area and shows both the plain-text
  * and HTML payloads. When something is pasted from a rich source (a web page,
- * a document) {@link com.vaadin.flow.component.page.ClipboardEvent#hasHtml}
+ * a document) {@link com.vaadin.flow.component.clipboard.ClipboardEvent#hasHtml}
  * returns {@code true} and the HTML preview lights up; plain pastes only
  * update the text view.
  */

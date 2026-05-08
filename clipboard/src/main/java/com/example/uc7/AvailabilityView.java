@@ -3,15 +3,17 @@ package com.example.uc7;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.clipboard.Clipboard;
+import com.vaadin.flow.component.clipboard.ClipboardAvailability;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Clipboard;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * UC7 — Detect availability and degrade gracefully.
@@ -21,10 +23,11 @@ import com.vaadin.flow.router.Route;
  * application can hide or disable controls proactively rather than letting
  * a copy attempt silently fail.
  * <p>
- * The {@code 25.2.clipboard-SNAPSHOT} build does not yet expose an
- * availability API. {@link #isClipboardAvailable()} is a stub that always
- * reports {@code true} so the rest of this view compiles; replace its body
- * with the real call once the method lands.
+ * {@link Clipboard#availabilityHintSignal()} returns a {@link Signal} of
+ * {@link ClipboardAvailability} that starts as {@link
+ * ClipboardAvailability#UNKNOWN} and resolves to {@code AVAILABLE} or
+ * {@code UNSUPPORTED} once the client probes the API. The button and status
+ * banner update reactively via {@link Signal#effect}.
  */
 @Route(value = "uc7", layout = MainLayout.class)
 @PageTitle("UC7 — Detect availability")
@@ -39,32 +42,42 @@ public class AvailabilityView extends VerticalLayout {
                         + "Query availability up front and disable controls "
                         + "instead of letting a copy fail silently."));
 
-        boolean available = isClipboardAvailable();
-
-        Span status = new Span(
-                available ? "Clipboard is available."
-                        : "Clipboard is unavailable in this context — "
-                                + "the copy button is disabled.");
+        Span status = new Span();
         status.getStyle().set("padding", "var(--aura-space-s)")
                 .set("border-radius", "var(--aura-border-radius-m)")
-                .set("background",
-                        available ? "var(--aura-success-color-10pct)"
-                                : "var(--aura-error-color-10pct)")
                 .set("display", "block");
 
         Button copyButton = new Button("Copy");
-        copyButton.setEnabled(available);
-        if (available) {
-            Clipboard.copyOnClick(copyButton, "https://example.com/share/abc123",
-                    () -> Notification.show("Copied"),
-                    () -> Notification.show("Copy failed"));
-        }
+        Clipboard.copyOnClick(copyButton, "https://example.com/share/abc123",
+                () -> Notification.show("Copied"),
+                () -> Notification.show("Copy failed"));
+
+        Signal<ClipboardAvailability> availability = Clipboard
+                .availabilityHintSignal();
+        Signal.effect(this, () -> {
+            switch (availability.get()) {
+                case AVAILABLE -> {
+                    status.setText("Clipboard is available.");
+                    status.getStyle().set("background",
+                            "var(--aura-success-color-10pct)");
+                    copyButton.setEnabled(true);
+                }
+                case UNSUPPORTED -> {
+                    status.setText("Clipboard is unavailable in this context "
+                            + "— the copy button is disabled.");
+                    status.getStyle().set("background",
+                            "var(--aura-error-color-10pct)");
+                    copyButton.setEnabled(false);
+                }
+                case UNKNOWN -> {
+                    status.setText("Checking clipboard availability…");
+                    status.getStyle().set("background",
+                            "var(--aura-contrast-5pct)");
+                    copyButton.setEnabled(false);
+                }
+            }
+        });
 
         add(status, copyButton);
-    }
-
-    private static boolean isClipboardAvailable() {
-        // Stub: Clipboard.isAvailable() is not yet in the snapshot API.
-        return true;
     }
 }
