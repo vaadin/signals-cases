@@ -8,7 +8,6 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.SelectionRange;
 import com.vaadin.flow.component.textfield.TextArea;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,7 +26,7 @@ class InsertTemplateViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void greetingInsertsAtCursorAndSelectsPlaceholder() {
+    void greetingInsertsAtCurrentCursor() {
         navigate(InsertTemplateView.class);
         TextArea editor = $(TextArea.class).single();
         // Position the cursor at offset 4 ("Hi,\n" + here)
@@ -42,26 +41,24 @@ class InsertTemplateViewTest extends SpringBrowserlessTest {
         String expected = original.substring(0, 4) + "Hello {name}!"
                 + original.substring(4);
         assertEquals(expected, editor.getValue());
-
-        SelectionRange sel = editor.selectionSignal().peek();
-        assertEquals("{name}",
-                editor.getValue().substring(sel.start(), sel.end()));
     }
 
     @Test
-    void signatureInsertsAndMovesCursorToEndOfSnippet() {
+    void signatureInsertsAtStart() {
         navigate(InsertTemplateView.class);
         TextArea editor = $(TextArea.class).single();
         TextSelectionTestSupport.setSelection(editor, 0, 0);
         runPendingSignalsTasks();
 
+        String original = editor.getValue();
         Button signature = $(Button.class).withText("Signature").single();
         test(signature).click();
         runPendingSignalsTasks();
 
-        SelectionRange sel = editor.selectionSignal().peek();
-        assertTrue(sel.isEmpty(),
-                "Signature has no placeholder, cursor should collapse");
-        assertEquals("Best regards,\nJamie".length(), sel.start());
+        assertTrue(editor.getValue().startsWith("Best regards,\nJamie"),
+                "value should start with the inserted signature, was: "
+                        + editor.getValue());
+        assertEquals("Best regards,\nJamie".length() + original.length(),
+                editor.getValue().length());
     }
 }

@@ -5,6 +5,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.BlurNotifier.BlurEvent;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.FocusNotifier.FocusEvent;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;
@@ -32,12 +35,12 @@ class SelectAllOnFocusViewTest extends SpringBrowserlessTest {
         TextField quantity = $(TextField.class).single();
         Span counter = $view(Span.class).withText("0").single();
 
-        test(quantity).focus();
+        ComponentUtil.fireEvent(quantity, new FocusEvent<>(quantity, true));
         runPendingSignalsTasks();
         assertEquals("1", counter.getText());
 
-        test(quantity).blur();
-        test(quantity).focus();
+        ComponentUtil.fireEvent(quantity, new BlurEvent<>(quantity, true));
+        ComponentUtil.fireEvent(quantity, new FocusEvent<>(quantity, true));
         runPendingSignalsTasks();
         assertEquals("2", counter.getText());
     }

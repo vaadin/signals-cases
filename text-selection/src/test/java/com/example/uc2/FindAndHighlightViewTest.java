@@ -9,7 +9,6 @@ import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.SelectionRange;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 
@@ -31,7 +30,7 @@ class FindAndHighlightViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void findNextSelectsFirstAndSecondMatchThenWraps() {
+    void findNextReportsTheNextMatchOffsetAndWraps() {
         navigate(FindAndHighlightView.class);
         runPendingSignalsTasks();
 
@@ -43,22 +42,29 @@ class FindAndHighlightViewTest extends SpringBrowserlessTest {
 
         test(findNext).click();
         runPendingSignalsTasks();
-        SelectionRange first = content.selectionSignal().peek();
-        assertEquals("dolor", content.getValue()
-                .substring(first.start(), first.end()));
+        int firstOffset = readMatchOffset();
+        assertEquals("dolor",
+                content.getValue().substring(firstOffset, firstOffset + 5));
 
         test(findNext).click();
         runPendingSignalsTasks();
-        SelectionRange second = content.selectionSignal().peek();
-        assertTrue(second.start() > first.start(),
-                "second match should be after the first");
-        assertEquals("dolor", content.getValue()
-                .substring(second.start(), second.end()));
+        int secondOffset = readMatchOffset();
+        assertTrue(secondOffset > firstOffset,
+                "second match should be past the first");
+        assertEquals("dolor",
+                content.getValue().substring(secondOffset, secondOffset + 5));
+    }
 
-        // Status span carries the match offset for the user
-        assertTrue($view(Span.class).all().stream()
-                .anyMatch(s -> s.getText() != null
-                        && s.getText().contains("Match at ")));
+    private int readMatchOffset() {
+        String status = $view(Span.class).all().stream()
+                .map(Span::getText)
+                .filter(t -> t != null && t.contains("Match at "))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError(
+                        "Expected a 'Match at N' status span"));
+        // status is "Match at <N>" or "Wrapped to start — match at <N>"
+        int idx = status.lastIndexOf(' ');
+        return Integer.parseInt(status.substring(idx + 1));
     }
 
     @Test

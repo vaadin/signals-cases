@@ -7,7 +7,7 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.SelectionRange;
+import com.vaadin.flow.component.shared.SelectionRange;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -44,7 +44,7 @@ public class InsertTemplateView extends VerticalLayout {
         Button greeting = new Button("Greeting",
                 e -> insert(editor, "Hello {name}!", "{name}"));
         Button signature = new Button("Signature",
-                e -> insert(editor, "Best regards,\nJamie", null));
+                e -> insert(editor, "Best regards,\nJamie", ""));
         Button placeholder = new Button("Placeholder",
                 e -> insert(editor, "{TODO}", "{TODO}"));
 
@@ -64,7 +64,7 @@ public class InsertTemplateView extends VerticalLayout {
                 + value.substring(pos);
         editor.setValue(newValue);
 
-        if (placeholder != null) {
+        if (!placeholder.isEmpty()) {
             int phStart = snippet.indexOf(placeholder);
             if (phStart >= 0) {
                 editor.setSelectionRange(pos + phStart,

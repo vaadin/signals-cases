@@ -1,17 +1,21 @@
 package com.example;
 
-import java.lang.reflect.Method;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.shared.HasSelection;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 
-import com.vaadin.flow.component.HasSelection;
-import com.vaadin.flow.component.SelectionRange;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Shared helper for browserless tests that need to drive the
  * {@code selectionSignal()} of a TextField/TextArea without a real browser.
- * The setter that the JS bridge normally invokes on the server is
- * package-private, so tests reach through reflection — mirrors
- * {@code PageVisibilityTestSupport} in the page-visibility module. Content
- * is derived from the field's current value the same way the client does.
+ * The signal is filled by a {@code vaadin-selection-change} DOM event
+ * dispatched from the client; tests fire the same event directly through
+ * {@link ElementListenerMap}, mirroring flow-components' own
+ * {@code SelectionSignalTest}.
  */
 public final class TextSelectionTestSupport {
 
@@ -19,22 +23,24 @@ public final class TextSelectionTestSupport {
     }
 
     public static void setSelection(HasSelection field, int start, int end) {
+        // Ensure the signal — and therefore its DOM listener — is created
+        // before we fire the event. selectionSignal() is lazy.
+        field.selectionSignal();
+
         String value = readValue(field);
         int safeStart = Math.max(0, Math.min(start, value.length()));
         int safeEnd = Math.max(safeStart, Math.min(end, value.length()));
         String content = value.substring(safeStart, safeEnd);
 
-        try {
-            Method setter = field.getClass().getDeclaredMethod(
-                    "setSelectionFromClient", SelectionRange.class);
-            setter.setAccessible(true);
-            setter.invoke(field,
-                    new SelectionRange(safeStart, safeEnd, content));
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalStateException(
-                    "Failed to invoke setSelectionFromClient reflectively",
-                    e);
-        }
+        ObjectNode data = JacksonUtils.createObjectNode();
+        data.put("event.detail.start", safeStart);
+        data.put("event.detail.end", safeEnd);
+        data.put("event.detail.content", content);
+
+        Element element = ((Component) field).getElement();
+        DomEvent event = new DomEvent(element, "vaadin-selection-change",
+                data);
+        element.getNode().getFeature(ElementListenerMap.class).fireEvent(event);
     }
 
     private static String readValue(HasSelection field) {
