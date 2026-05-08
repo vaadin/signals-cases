@@ -11,11 +11,12 @@ import com.example.views.MainLayout;
 import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.geolocation.Geolocation;
 import com.vaadin.flow.component.geolocation.GeolocationError;
 import com.vaadin.flow.component.geolocation.GeolocationOptions;
 import com.vaadin.flow.component.geolocation.GeolocationPending;
 import com.vaadin.flow.component.geolocation.GeolocationPosition;
-import com.vaadin.flow.component.geolocation.GeolocationTracker;
+import com.vaadin.flow.component.geolocation.GeolocationWatcher;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -42,7 +43,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * <p>
  * Like UC2 but the database is the source of truth for the rendered data. A
  * position listener registered via
- * {@code GeolocationTracker.addPositionListener} persists each new
+ * {@code GeolocationWatcher.addPositionListener} persists each new
  * {@link GeolocationPosition} via {@link TrackedPositionService}, and only then
  * is the grid and the map line refreshed by re-reading the rows for this view's
  * session id from the database. A "Clear history" button deletes the session's
@@ -71,7 +72,7 @@ public class DbTrackingView extends VerticalLayout {
     private @Nullable LineStringFeature pathLine;
     private @Nullable MarkerFeature startMarker;
 
-    private @Nullable GeolocationTracker tracker;
+    private @Nullable GeolocationWatcher tracker;
     private final ValueSignal<Boolean> hasUpdates = new ValueSignal<>(
             Boolean.FALSE);
     private final ValueSignal<Integer> updateCount = new ValueSignal<>(0);
@@ -134,15 +135,14 @@ public class DbTrackingView extends VerticalLayout {
     private void ensureTracker() {
         GeolocationOptions options = GeolocationOptions.builder()
                 .highAccuracy(true).maximumAge(Duration.ZERO).build();
-        GeolocationTracker t = getUI().orElseThrow().getGeolocation()
-                .track(this, options);
+        GeolocationWatcher t = Geolocation.watchPosition(this, options);
         tracker = t;
 
         status.bindText(Signal.computed(() -> {
             if (!t.activeSignal().get() && hasUpdates.get()) {
                 return "Stopped after " + updateCount.get() + " updates";
             }
-            return switch (t.valueSignal().get()) {
+            return switch (t.positionSignal().get()) {
             case GeolocationPending p -> "Waiting for first reading…";
             case GeolocationPosition pos ->
                 "Saved update #" + updateCount.get() + " to DB";
