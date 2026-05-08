@@ -1,0 +1,53 @@
+package com.example.uc5;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import com.example.TextSelectionTestSupport;
+import com.vaadin.browserless.SpringBrowserlessTest;
+import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.TextArea;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+@SpringBootTest
+@ViewPackages(classes = LiveSelectionInfoView.class)
+class LiveSelectionInfoViewTest extends SpringBrowserlessTest {
+
+    @Test
+    void viewRenders() {
+        navigate(LiveSelectionInfoView.class);
+
+        assertTrue($view(H1.class).all().stream().anyMatch(
+                h -> "UC5 — Live selection info".equals(h.getText())));
+    }
+
+    @Test
+    void selectingTextUpdatesBoundLabelsReactively() {
+        navigate(LiveSelectionInfoView.class);
+        runPendingSignalsTasks();
+
+        // Initially nothing selected
+        assertTrue($view(Span.class).all().stream()
+                .anyMatch(s -> "0 chars".equals(s.getText())));
+        assertTrue($view(Span.class).all().stream()
+                .anyMatch(s -> "0 words".equals(s.getText())));
+
+        TextArea text = $(TextArea.class).single();
+        // "The quick brown fox" — 19 chars, 4 words
+        TextSelectionTestSupport.setSelection(text, 0, 19);
+        runPendingSignalsTasks();
+
+        assertTrue($view(Span.class).all().stream()
+                .anyMatch(s -> "19 chars".equals(s.getText())),
+                "expected selection length to update");
+        assertTrue($view(Span.class).all().stream()
+                .anyMatch(s -> "4 words".equals(s.getText())),
+                "expected word count to update");
+        assertTrue($view(Span.class).all().stream()
+                .anyMatch(s -> "0 – 19".equals(s.getText())),
+                "expected range to update");
+    }
+}

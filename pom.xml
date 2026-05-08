@@ -19,6 +19,7 @@
         <module>geolocation</module>
         <module>clipboard</module>
         <module>page-visibility</module>
+        <module>text-selection</module>
     </modules>
 
     <properties>

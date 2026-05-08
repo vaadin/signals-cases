@@ -1,0 +1,77 @@
+package com.example.uc4;
+
+import com.example.views.MainLayout;
+
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.SelectionRange;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
+
+/**
+ * UC4 — Insert template at cursor.
+ * <p>
+ * The classic snippet-insert pattern: read the cursor position from the
+ * selection signal, splice the snippet into the value, then either move the
+ * cursor past the snippet or select a placeholder substring so the user can
+ * type to overwrite it.
+ */
+@Route(value = "uc4", layout = MainLayout.class)
+@PageTitle("UC4 — Insert template at cursor")
+@Menu(order = 4, title = "UC4 — Insert template at cursor")
+public class InsertTemplateView extends VerticalLayout {
+
+    public InsertTemplateView() {
+        add(new H1("UC4 — Insert template at cursor"));
+        add(new Paragraph(
+                "Click somewhere in the message body, then press a snippet "
+                        + "button. The snippet is inserted at the cursor. If "
+                        + "the snippet contains a placeholder (e.g. {name}), "
+                        + "that placeholder is left selected so the next "
+                        + "keystroke replaces it."));
+
+        TextArea editor = new TextArea("Message");
+        editor.setWidthFull();
+        editor.setHeight("220px");
+        editor.setValue("Hi,\n\n\n\nThanks,\n");
+        editor.addClassName("uc-fixed-textarea");
+
+        Button greeting = new Button("Greeting",
+                e -> insert(editor, "Hello {name}!", "{name}"));
+        Button signature = new Button("Signature",
+                e -> insert(editor, "Best regards,\nJamie", null));
+        Button placeholder = new Button("Placeholder",
+                e -> insert(editor, "{TODO}", "{TODO}"));
+
+        HorizontalLayout toolbar = new HorizontalLayout(greeting, signature,
+                placeholder);
+        toolbar.addClassName("uc-toolbar");
+
+        add(toolbar, editor);
+    }
+
+    private static void insert(TextArea editor, String snippet,
+            String placeholder) {
+        SelectionRange sel = editor.selectionSignal().peek();
+        String value = editor.getValue() == null ? "" : editor.getValue();
+        int pos = Math.min(sel.start(), value.length());
+        String newValue = value.substring(0, pos) + snippet
+                + value.substring(pos);
+        editor.setValue(newValue);
+
+        if (placeholder != null) {
+            int phStart = snippet.indexOf(placeholder);
+            if (phStart >= 0) {
+                editor.setSelectionRange(pos + phStart,
+                        pos + phStart + placeholder.length());
+                return;
+            }
+        }
+        editor.setCursorPosition(pos + snippet.length());
+    }
+}
