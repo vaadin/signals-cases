@@ -5,8 +5,8 @@ import java.time.Duration;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.geolocation.Geolocation;
 import com.vaadin.flow.component.geolocation.GeolocationCoordinates;
-import com.vaadin.flow.component.geolocation.GeolocationError;
 import com.vaadin.flow.component.geolocation.GeolocationOptions;
 import com.vaadin.flow.component.geolocation.GeolocationPosition;
 import com.vaadin.flow.component.html.Div;
@@ -40,13 +40,9 @@ public class DetailedDataView extends VerticalLayout {
             output.removeAll();
             GeolocationOptions opts = GeolocationOptions.builder()
                     .highAccuracy(true).timeout(Duration.ofSeconds(10)).build();
-            getUI().orElseThrow().getGeolocation().get(opts, value -> {
-                switch (value) {
-                case GeolocationPosition pos -> renderPosition(output, pos);
-                case GeolocationError err ->
-                    output.add(new Span("Error: " + err.message()));
-                }
-            });
+            Geolocation.getPosition(pos -> renderPosition(output, pos),
+                    err -> output.add(new Span("Error: " + err.message())),
+                    opts);
         });
         add(fetch, output);
     }

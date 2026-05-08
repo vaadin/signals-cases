@@ -5,6 +5,7 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.card.CardVariant;
+import com.vaadin.flow.component.geolocation.Geolocation;
 import com.vaadin.flow.component.geolocation.GeolocationAvailability;
 import com.vaadin.flow.component.geolocation.GeolocationError;
 import com.vaadin.flow.component.geolocation.GeolocationErrorCode;
@@ -214,8 +215,8 @@ public class DenialView extends VerticalLayout {
     // ------------------------------------------------------------------
 
     /**
-     * Runs the real {@code Geolocation.get()} against the real browser so you
-     * can verify end-to-end behaviour once the simulations look right.
+     * Runs the real {@code Geolocation.getPosition()} against the real browser
+     * so you can verify end-to-end behaviour once the simulations look right.
      */
     private static class RealBrowserCard extends Card {
 
@@ -244,23 +245,20 @@ public class DenialView extends VerticalLayout {
             // Bind to the availability signal so the label tracks browser
             // permission flips (granted → denied, prompt → granted) instead
             // of showing a snapshot taken on attach.
-            availabilityLabel
-                    .bindText(e.getUI().getGeolocation().availabilitySignal()
-                            .map(a -> "Current availability: " + a));
+            availabilityLabel.bindText(Geolocation
+                    .availabilityHintSignal(e.getUI())
+                    .map(a -> "Current availability: " + a));
         }
 
         private void runReal() {
-            getUI().orElseThrow().getGeolocation().get(value -> {
-                switch (value) {
-                case GeolocationPosition pos ->
-                    output.setText("Position: lat=%.5f, lon=%.5f (±%.0f m)"
-                            .formatted(pos.coords().latitude(),
+            Geolocation.getPosition(
+                    pos -> output.setText(
+                            "Position: lat=%.5f, lon=%.5f (±%.0f m)".formatted(
+                                    pos.coords().latitude(),
                                     pos.coords().longitude(),
-                                    pos.coords().accuracy()));
-                case GeolocationError err -> output.setText(
-                        "Error (" + err.errorCode() + "): " + err.message());
-                }
-            });
+                                    pos.coords().accuracy())),
+                    err -> output.setText(
+                            "Error (" + err.errorCode() + "): " + err.message()));
         }
 
     }
