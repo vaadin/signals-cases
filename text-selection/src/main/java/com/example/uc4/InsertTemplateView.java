@@ -12,6 +12,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * UC4 — Insert template at cursor.
@@ -41,12 +42,17 @@ public class InsertTemplateView extends VerticalLayout {
         editor.setValue("Hi,\n\n\n\nThanks,\n");
         editor.addClassName("uc-fixed-textarea");
 
+        // Subscribe to the selection signal at construction so the install
+        // JS runs on attach. Without this, the very first click into the
+        // textarea is missed and the first snippet insert lands at offset 0.
+        Signal<SelectionRange> selection = editor.selectionSignal();
+
         Button greeting = new Button("Greeting",
-                e -> insert(editor, "Hello {name}!", "{name}"));
+                e -> insert(editor, selection, "Hello {name}!", "{name}"));
         Button signature = new Button("Signature",
-                e -> insert(editor, "Best regards,\nJamie", ""));
+                e -> insert(editor, selection, "Best regards,\nJamie", ""));
         Button placeholder = new Button("Placeholder",
-                e -> insert(editor, "{TODO}", "{TODO}"));
+                e -> insert(editor, selection, "{TODO}", "{TODO}"));
 
         HorizontalLayout toolbar = new HorizontalLayout(greeting, signature,
                 placeholder);
@@ -55,9 +61,9 @@ public class InsertTemplateView extends VerticalLayout {
         add(toolbar, editor);
     }
 
-    private static void insert(TextArea editor, String snippet,
-            String placeholder) {
-        SelectionRange sel = editor.selectionSignal().peek();
+    private static void insert(TextArea editor, Signal<SelectionRange> selection,
+            String snippet, String placeholder) {
+        SelectionRange sel = selection.peek();
         String value = editor.getValue() == null ? "" : editor.getValue();
         int pos = Math.min(sel.start(), value.length());
         String newValue = value.substring(0, pos) + snippet
