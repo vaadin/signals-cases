@@ -1,0 +1,30 @@
+# Per-Dockerfile dockerignore for Dockerfile.local. BuildKit picks this up
+# in preference to the repo-root .dockerignore when building this Dockerfile.
+# We need text-selection/target/*.jar to ship in the build context, so we
+# narrow the global "**/target" exclude.
+
+**/.idea
+**/.vscode
+**/.settings
+**/.project
+**/.classpath
+
+**/*.iml
+**/.DS_Store
+
+**/node_modules
+**/src/main/frontend/generated
+**/vite.generated.ts
+**/fly.toml
+
+# Keep target excluded everywhere except the module we're shipping.
+signals/target
+geolocation/target
+page-visibility/target
+text-selection/target/classes
+text-selection/target/generated-sources
+text-selection/target/maven-archiver
+text-selection/target/maven-status
+text-selection/target/surefire-reports
+text-selection/target/test-classes
+text-selection/target/flow-frontend
