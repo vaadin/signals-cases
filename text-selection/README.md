@@ -21,16 +21,20 @@ for years). Build that branch into the local Maven repo to run this module.
 
 ## API surface
 
-`TextField`, `TextArea`, and the other `TextFieldBase` subclasses (Email,
-Password, Integer/Number/BigDecimalField) implement
-`com.vaadin.flow.component.shared.HasSelection`:
+`TextField`, `TextArea`, `PasswordField`, and `BigDecimalField` implement
+`com.vaadin.flow.component.shared.HasSelection`. Number-input-backed
+fields (Integer/Number) opt out — `<input type="number">` doesn't support
+`setSelectionRange` in the browser.
 
 ```java
 public interface HasSelection extends HasElement {
-    void selectAll();
-    void deselect(); // collapse to selectionEnd, leaving the cursor there
-    void setSelectionRange(int selectionStart, int selectionEnd);
-    void setCursorPosition(int position);
+    void selectAll();                                       // focuses
+    void selectAll(boolean focus);
+    void deselect();                                        // never focuses
+    void setSelectionRange(int start, int end);             // focuses
+    void setSelectionRange(int start, int end, boolean focus);
+    void setCursorPosition(int position);                   // focuses
+    void setCursorPosition(int position, boolean focus);
     Signal<SelectionRange> selectionSignal();
 }
 
@@ -42,8 +46,14 @@ public record SelectionRange(int start, int end, String content) {
 ```
 
 Names mirror `HTMLInputElement.setSelectionRange()` / `selectionStart` /
-`selectionEnd`. The reactive `selectionSignal()` replaces the original
-async `getSelectionRange(callback)` from PR #3194: now that the Vaadin
+`selectionEnd`. The selection-mutating methods focus the field by default
+(browsers don't paint a selection on a non-focused input) — pass
+`focus = false` to keep focus where it is. All calls are deferred via
+`setTimeout(0)` on the client so a click-induced focus change can't race
+with the selection.
+
+The reactive `selectionSignal()` replaces the original async
+`getSelectionRange(callback)` from PR #3194: now that the Vaadin
 event-ordering bug is fixed, the client pushes the current selection on
 every change rather than the server pulling on demand. The signal value
 carries `content` so views don't have to slice the field's value manually.
