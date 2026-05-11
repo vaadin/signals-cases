@@ -22,9 +22,9 @@ import com.vaadin.flow.server.StreamResource;
  * UC3 — Copy image data.
  * <p>
  * {@link Clipboard#copyImageOnClick} registers a client-side handler that
- * fetches the image from the source component's {@code src} when the trigger
- * is clicked, preserving the user gesture. The {@link Image} here is backed by
- * a {@link StreamResource} that produces a small SVG so the example doesn't
+ * fetches the image from the source component's {@code src} when the trigger is
+ * clicked, preserving the user gesture. The {@link Image} here is backed by a
+ * {@link StreamResource} that produces a small SVG so the example doesn't
  * depend on any external assets.
  */
 @Route(value = "uc3", layout = MainLayout.class)

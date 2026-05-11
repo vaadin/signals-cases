@@ -2,12 +2,12 @@ package com.example.uc4;
 
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.clipboard.Clipboard;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.IFrame;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.clipboard.Clipboard;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -17,10 +17,10 @@ import com.vaadin.flow.router.Route;
  * UC4 — Paste text and HTML.
  * <p>
  * Listens for paste (Ctrl/Cmd-V) on a text area and shows both the plain-text
- * and HTML payloads. When something is pasted from a rich source (a web page,
- * a document) {@link com.vaadin.flow.component.clipboard.ClipboardEvent#hasHtml}
- * returns {@code true} and the HTML preview lights up; plain pastes only
- * update the text view.
+ * and HTML payloads. When something is pasted from a rich source (a web page, a
+ * document) {@link com.vaadin.flow.component.clipboard.ClipboardEvent#hasHtml}
+ * returns {@code true} and the HTML preview lights up; plain pastes only update
+ * the text view.
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Paste text and HTML")

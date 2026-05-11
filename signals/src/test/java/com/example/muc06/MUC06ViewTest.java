@@ -130,13 +130,15 @@ class MUC06ViewTest extends SpringBrowserlessTest {
         navigate(MUC06View.class);
         runPendingSignalsTasks();
 
-        // Find the first unchecked checkbox (corresponds to first incomplete task)
+        // Find the first unchecked checkbox (corresponds to first incomplete
+        // task)
         Checkbox firstCheckbox = $view(Checkbox.class).all().stream()
                 .filter(cb -> !cb.getValue()).findFirst().orElseThrow();
         assertFalse(firstCheckbox.getValue(),
                 "Checkbox should initially be unchecked");
 
-        // Simulate User B completing the first incomplete task via the shared signal
+        // Simulate User B completing the first incomplete task via the shared
+        // signal
         var tasks = muc06Signals.getTasksSignal().peek();
         for (var taskSignal : tasks) {
             MUC06Signals.Task task = taskSignal.peek();

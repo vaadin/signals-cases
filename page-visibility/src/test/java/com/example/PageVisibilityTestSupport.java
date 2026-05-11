@@ -26,8 +26,7 @@ public final class PageVisibilityTestSupport {
             setter.invoke(page, state.name());
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException(
-                    "Failed to invoke Page#setPageVisibility reflectively",
-                    e);
+                    "Failed to invoke Page#setPageVisibility reflectively", e);
         }
     }
 }

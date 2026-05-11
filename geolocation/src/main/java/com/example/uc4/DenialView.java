@@ -245,20 +245,18 @@ public class DenialView extends VerticalLayout {
             // Bind to the availability signal so the label tracks browser
             // permission flips (granted → denied, prompt → granted) instead
             // of showing a snapshot taken on attach.
-            availabilityLabel.bindText(Geolocation
-                    .availabilityHintSignal(e.getUI())
-                    .map(a -> "Current availability: " + a));
+            availabilityLabel
+                    .bindText(Geolocation.availabilityHintSignal(e.getUI())
+                            .map(a -> "Current availability: " + a));
         }
 
         private void runReal() {
-            Geolocation.getPosition(
-                    pos -> output.setText(
-                            "Position: lat=%.5f, lon=%.5f (±%.0f m)".formatted(
-                                    pos.coords().latitude(),
-                                    pos.coords().longitude(),
-                                    pos.coords().accuracy())),
-                    err -> output.setText(
-                            "Error (" + err.errorCode() + "): " + err.message()));
+            Geolocation.getPosition(pos -> output
+                    .setText("Position: lat=%.5f, lon=%.5f (±%.0f m)".formatted(
+                            pos.coords().latitude(), pos.coords().longitude(),
+                            pos.coords().accuracy())),
+                    err -> output.setText("Error (" + err.errorCode() + "): "
+                            + err.message()));
         }
 
     }

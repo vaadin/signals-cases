@@ -51,9 +51,9 @@ public class UseCase06View extends VerticalLayout {
         var shippingOptionSignal = new ValueSignal<>(ShippingOption.STANDARD);
 
         // Computed signal for subtotal
-        var subtotalSignal = Signal.computed(() -> cartItemsSignal.getValues()
-                .map(CartItem::totalPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add));
+        var subtotalSignal = Signal.computed(
+                () -> cartItemsSignal.getValues().map(CartItem::totalPrice)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add));
 
         // Computed signal for discount
         var discountSignal = Signal.computed(() -> {

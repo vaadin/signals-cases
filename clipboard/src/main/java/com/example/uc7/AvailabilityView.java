@@ -20,12 +20,12 @@ import com.vaadin.flow.signals.Signal;
  * <p>
  * The PRD requires a way to detect whether clipboard read/write is available
  * (e.g. HTTPS context, no restrictive iframe, no denied permission) so the
- * application can hide or disable controls proactively rather than letting
- * a copy attempt silently fail.
+ * application can hide or disable controls proactively rather than letting a
+ * copy attempt silently fail.
  * <p>
  * {@link Clipboard#availabilityHintSignal()} returns a {@link Signal} of
- * {@link ClipboardAvailability} that starts as {@link
- * ClipboardAvailability#UNKNOWN} and resolves to {@code AVAILABLE} or
+ * {@link ClipboardAvailability} that starts as
+ * {@link ClipboardAvailability#UNKNOWN} and resolves to {@code AVAILABLE} or
  * {@code UNSUPPORTED} once the client probes the API. The button and status
  * banner update reactively via {@link Signal#effect}.
  */
@@ -56,25 +56,25 @@ public class AvailabilityView extends VerticalLayout {
                 .availabilityHintSignal();
         Signal.effect(this, () -> {
             switch (availability.get()) {
-                case AVAILABLE -> {
-                    status.setText("Clipboard is available.");
-                    status.getStyle().set("background",
-                            "var(--aura-success-color-10pct)");
-                    copyButton.setEnabled(true);
-                }
-                case UNSUPPORTED -> {
-                    status.setText("Clipboard is unavailable in this context "
-                            + "— the copy button is disabled.");
-                    status.getStyle().set("background",
-                            "var(--aura-error-color-10pct)");
-                    copyButton.setEnabled(false);
-                }
-                case UNKNOWN -> {
-                    status.setText("Checking clipboard availability…");
-                    status.getStyle().set("background",
-                            "var(--aura-contrast-5pct)");
-                    copyButton.setEnabled(false);
-                }
+            case AVAILABLE -> {
+                status.setText("Clipboard is available.");
+                status.getStyle().set("background",
+                        "var(--aura-success-color-10pct)");
+                copyButton.setEnabled(true);
+            }
+            case UNSUPPORTED -> {
+                status.setText("Clipboard is unavailable in this context "
+                        + "— the copy button is disabled.");
+                status.getStyle().set("background",
+                        "var(--aura-error-color-10pct)");
+                copyButton.setEnabled(false);
+            }
+            case UNKNOWN -> {
+                status.setText("Checking clipboard availability…");
+                status.getStyle().set("background",
+                        "var(--aura-contrast-5pct)");
+                copyButton.setEnabled(false);
+            }
             }
         });
 

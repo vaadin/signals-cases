@@ -2,6 +2,7 @@ package com.example.uc6;
 
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.clipboard.Clipboard;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.H1;
@@ -9,7 +10,6 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.clipboard.Clipboard;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -18,9 +18,10 @@ import com.vaadin.flow.router.Route;
  * UC6 — Copy via a context-menu item.
  * <p>
  * The PRD lists context-menu selection alongside button click as a primary
- * trigger for "Copy to clipboard". Any {@link com.vaadin.flow.component.Component}
- * can be passed to {@link Clipboard#copyOnClick}, including a {@link MenuItem},
- * so the same client-side gesture-safe path applies.
+ * trigger for "Copy to clipboard". Any
+ * {@link com.vaadin.flow.component.Component} can be passed to
+ * {@link Clipboard#copyOnClick}, including a {@link MenuItem}, so the same
+ * client-side gesture-safe path applies.
  */
 @Route(value = "uc6", layout = MainLayout.class)
 @PageTitle("UC6 — Copy via context menu")

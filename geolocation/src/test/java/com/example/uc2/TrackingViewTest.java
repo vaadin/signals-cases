@@ -1,12 +1,13 @@
 package com.example.uc2;
 
+import org.junit.jupiter.api.Test;
+
 import com.vaadin.browserless.BrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.geolocation.GeolocationErrorCode;
 import com.vaadin.flow.component.geolocation.GeolocationSimulator;
 import com.vaadin.flow.component.html.Span;
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;

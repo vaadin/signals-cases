@@ -1,11 +1,11 @@
 package com.example.uc2;
 
+import com.example.PageVisibilityTestSupport;
+import com.example.views.ColoredAvatar;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.example.PageVisibilityTestSupport;
-import com.example.views.ColoredAvatar;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.html.H2;
@@ -55,20 +55,20 @@ class PresenceAvatarsViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         ColoredAvatar avatar = $view(ColoredAvatar.class).all().stream()
-                .findFirst().orElseThrow(
-                        () -> new AssertionError("no avatar rendered"));
-        assertTrue(avatar.getElement().getClassList().contains(
-                "presence-visible"),
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("no avatar rendered"));
+        assertTrue(
+                avatar.getElement().getClassList().contains("presence-visible"),
                 "avatar should carry the presence-visible class while VISIBLE");
 
         PageVisibilityTestSupport.setPageVisibility(PageVisibility.HIDDEN);
         runPendingSignalsTasks();
 
-        assertTrue(avatar.getElement().getClassList().contains(
-                "presence-hidden"),
+        assertTrue(
+                avatar.getElement().getClassList().contains("presence-hidden"),
                 "avatar should carry the presence-hidden class while HIDDEN");
-        assertFalse(avatar.getElement().getClassList().contains(
-                "presence-visible"),
+        assertFalse(
+                avatar.getElement().getClassList().contains("presence-visible"),
                 "presence-visible should be cleared when state flips to HIDDEN");
     }
 

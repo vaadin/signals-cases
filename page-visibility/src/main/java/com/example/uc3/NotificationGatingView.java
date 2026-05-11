@@ -50,7 +50,8 @@ public class NotificationGatingView extends VerticalLayout {
     private final Span subscriptionStatus = new Span("Not subscribed");
     private final Div log = new Div();
 
-    public NotificationGatingView(WebPush webPush, TaskScheduler taskScheduler) {
+    public NotificationGatingView(WebPush webPush,
+            TaskScheduler taskScheduler) {
         this.webPush = webPush;
         this.taskScheduler = taskScheduler;
 

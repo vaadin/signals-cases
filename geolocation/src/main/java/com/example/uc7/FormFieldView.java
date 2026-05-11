@@ -112,8 +112,8 @@ public class FormFieldView extends VerticalLayout {
                 return;
             }
             pinnedSignal.set(pos);
-        }, err -> Notification
-                .show("Could not pin location: " + err.message()), opts);
+        }, err -> Notification.show("Could not pin location: " + err.message()),
+                opts);
     }
 
     private void submit() {
