@@ -21,14 +21,14 @@ import com.vaadin.flow.router.Route;
 /**
  * UC5 — Paste images and files.
  * <p>
- * Listens for paste on a drop-zone {@code Div}. Pasted files (e.g. a
- * screenshot copied from another app) are transferred via the standard upload
- * mechanism, so the bytes arrive on the server and are rendered as an
- * inline preview when the file is an image.
+ * Listens for paste on a drop-zone {@code Div}. Pasted files (e.g. a screenshot
+ * copied from another app) are transferred via the standard upload mechanism,
+ * so the bytes arrive on the server and are rendered as an inline preview when
+ * the file is an image.
  * <p>
  * The progress bar is driven by {@link Clipboard#addPasteStartListener} (which
- * fires the moment the browser paste is observed, before any upload begins)
- * and hidden by {@link Clipboard#addPasteListener} on success or
+ * fires the moment the browser paste is observed, before any upload begins) and
+ * hidden by {@link Clipboard#addPasteListener} on success or
  * {@link Clipboard#addPasteFailedListener} on failure.
  */
 @Route(value = "uc5", layout = MainLayout.class)
@@ -53,8 +53,7 @@ public class PasteFilesView extends VerticalLayout {
                 .set("text-align", "center")
                 .set("border-radius", "var(--aura-border-radius-l)")
                 .set("min-height", "150px").set("display", "flex")
-                .set("align-items", "center")
-                .set("justify-content", "center");
+                .set("align-items", "center").set("justify-content", "center");
 
         Span log = new Span("File log will appear here…");
         log.getStyle().set("font-family", "monospace")
@@ -108,8 +107,8 @@ public class PasteFilesView extends VerticalLayout {
         Clipboard.addPasteFailedListener(dropZone, event -> {
             uploadProgress.setVisible(false);
             uploadLabel.setVisible(false);
-            Notification.show("Upload failed for " + event.file().name()
-                    + ": " + event.reason());
+            Notification.show("Upload failed for " + event.file().name() + ": "
+                    + event.reason());
         });
 
         add(dropZone, uploadLabel, uploadProgress, log, previews);

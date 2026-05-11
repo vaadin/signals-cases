@@ -63,8 +63,9 @@ class UseCase23ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // "Current users" card should show "42"
-        assertTrue($view(Span.class).all().stream()
-                .anyMatch(s -> "42".equals(s.getText())),
+        assertTrue(
+                $view(Span.class).all().stream()
+                        .anyMatch(s -> "42".equals(s.getText())),
                 "Expected a Span with text '42' for current users");
     }
 
@@ -84,8 +85,10 @@ class UseCase23ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Should show "+100.0" in the percentage badge
-        assertTrue($view(Span.class).all().stream().anyMatch(
-                s -> s.getText() != null && s.getText().contains("+100.0")),
+        assertTrue(
+                $view(Span.class).all().stream()
+                        .anyMatch(s -> s.getText() != null
+                                && s.getText().contains("+100.0")),
                 "Expected percentage badge showing +100.0");
     }
 
@@ -93,8 +96,8 @@ class UseCase23ViewTest extends SpringBrowserlessTest {
             double conversion, double custom) {
         return new DashboardData(users, views, conversion, custom,
                 new DashboardData.TimelineData("12:00", 10, 20, 30, 40),
-                List.of(new ServiceHealth(ServiceHealth.Status.OK,
-                        "Münster", 100, 200),
+                List.of(new ServiceHealth(ServiceHealth.Status.OK, "Münster",
+                        100, 200),
                         new ServiceHealth(ServiceHealth.Status.EXCELLENT,
                                 "Cluj-Napoca", 150, 250),
                         new ServiceHealth(ServiceHealth.Status.FAILING,

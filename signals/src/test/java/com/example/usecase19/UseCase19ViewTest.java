@@ -10,7 +10,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.signals.local.ValueSignal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -71,8 +70,9 @@ class UseCase19ViewTest extends SpringBrowserlessTest {
         Card card = $view(Card.class).all().getFirst();
 
         // IDLE state should have contrast border
-        assertTrue(card.getStyle().get("border-left")
-                .contains("var(--lumo-contrast-20pct)"),
+        assertTrue(
+                card.getStyle().get("border-left")
+                        .contains("var(--lumo-contrast-20pct)"),
                 "IDLE card should have contrast border but was: "
                         + card.getStyle().get("border-left"));
     }
@@ -91,8 +91,9 @@ class UseCase19ViewTest extends SpringBrowserlessTest {
 
         // Cards in LOADING state should have primary-color border
         Card card = $view(Card.class).all().getFirst();
-        assertTrue(card.getStyle().get("border-left")
-                .contains("var(--lumo-primary-color)"),
+        assertTrue(
+                card.getStyle().get("border-left")
+                        .contains("var(--lumo-primary-color)"),
                 "LOADING card should have primary border but was: "
                         + card.getStyle().get("border-left"));
     }

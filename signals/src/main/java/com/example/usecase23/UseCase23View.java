@@ -165,8 +165,8 @@ public class UseCase23View extends Main {
 
     private static void bindData(Chart chart, ListSeries series,
             ListSignal<Number> signal) {
-        Signal.effect(chart,
-                () -> series.setData(signal.getValues().toArray(Number[]::new)));
+        Signal.effect(chart, () -> series
+                .setData(signal.getValues().toArray(Number[]::new)));
     }
 
     private Component createServiceHealth() {

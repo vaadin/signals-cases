@@ -72,11 +72,9 @@ public class AutoFetchView extends VerticalLayout {
         GeolocationOptions opts = GeolocationOptions.builder()
                 .timeout(Duration.ofSeconds(5))
                 .maximumAge(Duration.ofMinutes(5)).build();
-        Geolocation.getPosition(
-                pos -> localContent.setText(
-                        "Local content for lat=%.4f, lon=%.4f".formatted(
-                                pos.coords().latitude(),
-                                pos.coords().longitude())),
+        Geolocation.getPosition(pos -> localContent
+                .setText("Local content for lat=%.4f, lon=%.4f".formatted(
+                        pos.coords().latitude(), pos.coords().longitude())),
                 err -> localContent
                         .setText("Could not auto-fetch: " + err.message()),
                 opts);
