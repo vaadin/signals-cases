@@ -8,9 +8,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.geolocation.Geolocation;
 import com.vaadin.flow.component.geolocation.GeolocationAvailability;
-import com.vaadin.flow.component.geolocation.GeolocationError;
 import com.vaadin.flow.component.geolocation.GeolocationOptions;
-import com.vaadin.flow.component.geolocation.GeolocationPosition;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
@@ -50,10 +48,10 @@ public class AutoFetchView extends VerticalLayout {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        Geolocation geo = attachEvent.getUI().getGeolocation();
-        GeolocationAvailability availability = geo.availabilitySignal().peek();
-        permissionHint.setText(hintFor(availability));
-        if (availability == GeolocationAvailability.GRANTED) {
+        var availability = Geolocation
+                .availabilityHintSignal(attachEvent.getUI());
+        permissionHint.bindText(availability.map(AutoFetchView::hintFor));
+        if (availability.peek() == GeolocationAvailability.GRANTED) {
             fetchAndPopulate();
         }
         // PROMPT / DENIED / UNKNOWN / UNSUPPORTED: do nothing automatic.
@@ -74,14 +72,13 @@ public class AutoFetchView extends VerticalLayout {
         GeolocationOptions opts = GeolocationOptions.builder()
                 .timeout(Duration.ofSeconds(5))
                 .maximumAge(Duration.ofMinutes(5)).build();
-        getUI().orElseThrow().getGeolocation().get(opts, result -> {
-            switch (result) {
-            case GeolocationPosition pos -> localContent
-                    .setText("Local content for lat=%.4f, lon=%.4f".formatted(
-                            pos.coords().latitude(), pos.coords().longitude()));
-            case GeolocationError err ->
-                localContent.setText("Could not auto-fetch: " + err.message());
-            }
-        });
+        Geolocation.getPosition(
+                pos -> localContent.setText(
+                        "Local content for lat=%.4f, lon=%.4f".formatted(
+                                pos.coords().latitude(),
+                                pos.coords().longitude())),
+                err -> localContent
+                        .setText("Could not auto-fetch: " + err.message()),
+                opts);
     }
 }
