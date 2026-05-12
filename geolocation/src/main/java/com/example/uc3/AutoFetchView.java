@@ -82,7 +82,6 @@ public class AutoFetchView extends VerticalLayout {
                     "Could not auto-fetch: location unavailable.";
                 case TIMEOUT -> "Could not auto-fetch: request timed out.";
                 case UNKNOWN -> "Could not auto-fetch your location.";
-                }),
-                opts);
+                }), opts);
     }
 }

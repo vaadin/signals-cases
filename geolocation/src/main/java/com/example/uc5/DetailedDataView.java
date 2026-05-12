@@ -42,14 +42,12 @@ public class DetailedDataView extends VerticalLayout {
                     .highAccuracy(true).timeout(Duration.ofSeconds(10)).build();
             Geolocation.getPosition(pos -> renderPosition(output, pos),
                     err -> output.add(new Span(switch (err.errorCode()) {
-                    case PERMISSION_DENIED ->
-                        "Location permission was denied.";
+                    case PERMISSION_DENIED -> "Location permission was denied.";
                     case POSITION_UNAVAILABLE ->
                         "Could not determine your location.";
                     case TIMEOUT -> "Location request timed out.";
                     case UNKNOWN -> "Could not get your location.";
-                    })),
-                    opts);
+                    })), opts);
         });
         add(fetch, output);
     }
