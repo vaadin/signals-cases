@@ -39,9 +39,9 @@ class OneShotOnClickViewTest extends BrowserlessTest {
         Button locate = $(Button.class).withText("Use my location").single();
         test(locate).click();
 
-        Span result = $(Span.class).withTextContaining("Error").single();
-        assertTrue(result.getText().contains("1"),
-                "Result span should show error code 1, was: "
+        Span result = $(Span.class).withTextContaining("permission").single();
+        assertTrue(result.getText().contains("denied"),
+                "Result span should explain that permission was denied, was: "
                         + result.getText());
     }
 }
