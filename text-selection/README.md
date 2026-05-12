@@ -18,6 +18,7 @@ for years). Build that branch into the local Maven repo to run this module.
 | UC4 | Insert template at cursor | Snippet buttons insert at the current cursor position; if the snippet has a placeholder it is left selected for the user to type over. |
 | UC5 | Live selection info | Side panel reactively shows range, length, word count and a preview of the current selection — bindings are computed from `selectionSignal()`. |
 | UC6 | Selection-driven transform toolbar | Toolbar of UPPERCASE / lowercase / "Quote" / Trim, enabled only when there is a selection; transforms replace in place and re-select the result so actions chain. |
+| UC7 | Post-transform select-all | A Format button slugifies the value and calls `selectAll()` so the user can Tab to accept, type to replace, or click to position the cursor for a one-character fix — a UX that `setAutoselect(true)` cannot deliver because it would re-select on every subsequent focus. |
 
 ## API surface
 
