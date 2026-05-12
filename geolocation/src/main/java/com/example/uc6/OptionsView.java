@@ -65,8 +65,14 @@ public class OptionsView extends VerticalLayout {
                         pos.coords().accuracy(), elapsed));
             }, err -> {
                 long elapsed = System.currentTimeMillis() - started;
-                result.setText(
-                        "Error: " + err.message() + " (" + elapsed + " ms)");
+                String description = switch (err.errorCode()) {
+                case PERMISSION_DENIED -> "Location permission was denied.";
+                case POSITION_UNAVAILABLE ->
+                    "Could not determine your location.";
+                case TIMEOUT -> "Location request timed out.";
+                case UNKNOWN -> "Could not get your location.";
+                };
+                result.setText(description + " (" + elapsed + " ms)");
             }, options);
         });
         wrapper.add(new HorizontalLayout(run, result));

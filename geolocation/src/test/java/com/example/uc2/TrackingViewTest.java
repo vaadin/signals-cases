@@ -48,8 +48,10 @@ class TrackingViewTest extends BrowserlessTest {
         geolocation.setUnavailable(GeolocationErrorCode.POSITION_UNAVAILABLE,
                 "position unavailable");
 
-        Span status = $(Span.class).withTextContaining("Error").single();
-        assertTrue(status.getText().contains("2"),
-                "Status should show error code 2, was: " + status.getText());
+        Span status = $(Span.class).withTextContaining("Could not determine")
+                .single();
+        assertTrue(status.getText().contains("location"),
+                "Status should describe the location failure, was: "
+                        + status.getText());
     }
 }

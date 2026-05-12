@@ -75,8 +75,14 @@ public class AutoFetchView extends VerticalLayout {
         Geolocation.getPosition(pos -> localContent
                 .setText("Local content for lat=%.4f, lon=%.4f".formatted(
                         pos.coords().latitude(), pos.coords().longitude())),
-                err -> localContent
-                        .setText("Could not auto-fetch: " + err.message()),
+                err -> localContent.setText(switch (err.errorCode()) {
+                case PERMISSION_DENIED ->
+                    "Could not auto-fetch: location permission denied.";
+                case POSITION_UNAVAILABLE ->
+                    "Could not auto-fetch: location unavailable.";
+                case TIMEOUT -> "Could not auto-fetch: request timed out.";
+                case UNKNOWN -> "Could not auto-fetch your location.";
+                }),
                 opts);
     }
 }

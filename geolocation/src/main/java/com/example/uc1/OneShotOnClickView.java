@@ -54,8 +54,12 @@ public class OneShotOnClickView extends VerticalLayout {
                 }
                 map.getFeatureLayer().removeAllFeatures();
                 map.getFeatureLayer().addFeature(new MarkerFeature(c));
-            }, err -> result
-                    .setText("Error " + err.code() + ": " + err.message()));
+            }, err -> result.setText(switch (err.errorCode()) {
+            case PERMISSION_DENIED -> "Location permission was denied.";
+            case POSITION_UNAVAILABLE -> "Could not determine your location.";
+            case TIMEOUT -> "Location request timed out.";
+            case UNKNOWN -> "Could not get your location.";
+            }));
         });
 
         add(locate, result, map);

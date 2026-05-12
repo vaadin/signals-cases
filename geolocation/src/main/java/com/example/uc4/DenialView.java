@@ -203,7 +203,7 @@ public class DenialView extends VerticalLayout {
                 case POSITION_UNAVAILABLE ->
                     "We couldn't determine your location.";
                 case TIMEOUT -> "Location request timed out. Please try again.";
-                case UNKNOWN -> err.message();
+                case UNKNOWN -> "Could not get your location.";
                 });
             }
         }
@@ -255,8 +255,14 @@ public class DenialView extends VerticalLayout {
                     .setText("Position: lat=%.5f, lon=%.5f (±%.0f m)".formatted(
                             pos.coords().latitude(), pos.coords().longitude(),
                             pos.coords().accuracy())),
-                    err -> output.setText("Error (" + err.errorCode() + "): "
-                            + err.message()));
+                    err -> output.setText(switch (err.errorCode()) {
+                    case PERMISSION_DENIED ->
+                        "Location permission was denied.";
+                    case POSITION_UNAVAILABLE ->
+                        "Could not determine your location.";
+                    case TIMEOUT -> "Location request timed out.";
+                    case UNKNOWN -> "Could not get your location.";
+                    }));
         }
 
     }

@@ -130,8 +130,12 @@ public class TrackingView extends VerticalLayout {
             return switch (w.positionSignal().get()) {
             case GeolocationPending p -> "Waiting for first reading…";
             case GeolocationPosition pos -> "Update #" + updateCount.get();
-            case GeolocationError err ->
-                "Error " + err.code() + ": " + err.message();
+            case GeolocationError err -> switch (err.errorCode()) {
+            case PERMISSION_DENIED -> "Location permission was denied.";
+            case POSITION_UNAVAILABLE -> "Could not determine your location.";
+            case TIMEOUT -> "Location request timed out.";
+            case UNKNOWN -> "Could not get your location.";
+            };
             };
         }));
 
