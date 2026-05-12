@@ -1,4 +1,4 @@
-package com.example.uc4;
+package com.example.uc5;
 
 import com.example.views.MainLayout;
 
@@ -15,7 +15,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 
 /**
- * UC4 — Insert template at cursor (or replace selection).
+ * UC5 — Insert template at cursor (or replace selection).
  * <p>
  * The classic snippet-insert pattern: read the current selection range, splice
  * the snippet in — replacing any selected text — then either move the cursor
@@ -23,13 +23,13 @@ import com.vaadin.flow.signals.Signal;
  * overwrite it. Demonstrates reading both {@code start()} and {@code end()}
  * off the signal in one peek.
  */
-@Route(value = "uc4", layout = MainLayout.class)
-@PageTitle("UC4 — Insert template at cursor")
-@Menu(order = 4, title = "UC4 — Insert template at cursor")
+@Route(value = "uc5", layout = MainLayout.class)
+@PageTitle("UC5 — Insert template at cursor")
+@Menu(order = 5, title = "UC5 — Insert template at cursor")
 public class InsertTemplateView extends VerticalLayout {
 
     public InsertTemplateView() {
-        add(new H1("UC4 — Insert template at cursor"));
+        add(new H1("UC5 — Insert template at cursor"));
         add(new Paragraph(
                 "Click somewhere in the message body — or select a run of "
                         + "text to replace — then press a snippet button. The "

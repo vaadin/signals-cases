@@ -1,4 +1,4 @@
-package com.example.uc6;
+package com.example.uc7;
 
 import java.util.function.UnaryOperator;
 
@@ -17,20 +17,20 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 
 /**
- * UC6 — Selection-driven transform toolbar.
+ * UC7 — Selection-driven transform toolbar.
  * <p>
  * The toolbar buttons combine the read and write sides of the API: enabled
  * state is bound to a signal derived from {@code selectionSignal()}, and each
  * action replaces the current selection in the value, then re-selects the
  * result so transforms can chain (UPPERCASE → "Quote" with one click each).
  */
-@Route(value = "uc6", layout = MainLayout.class)
-@PageTitle("UC6 — Selection-driven transform toolbar")
-@Menu(order = 6, title = "UC6 — Selection toolbar")
+@Route(value = "uc7", layout = MainLayout.class)
+@PageTitle("UC7 — Selection-driven transform toolbar")
+@Menu(order = 7, title = "UC7 — Selection toolbar")
 public class SelectionToolbarView extends VerticalLayout {
 
     public SelectionToolbarView() {
-        add(new H1("UC6 — Selection-driven transform toolbar"));
+        add(new H1("UC7 — Selection-driven transform toolbar"));
         add(new Paragraph(
                 "Select some text in the editor below. The toolbar buttons "
                         + "are enabled only while a selection exists, and "

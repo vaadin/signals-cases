@@ -1,4 +1,4 @@
-package com.example.uc4;
+package com.example.uc5;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,7 +22,7 @@ class InsertTemplateViewTest extends SpringBrowserlessTest {
         navigate(InsertTemplateView.class);
 
         assertTrue($view(H1.class).all().stream().anyMatch(
-                h -> "UC4 — Insert template at cursor".equals(h.getText())));
+                h -> "UC5 — Insert template at cursor".equals(h.getText())));
     }
 
     @Test

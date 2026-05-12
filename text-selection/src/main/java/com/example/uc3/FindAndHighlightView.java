@@ -1,4 +1,4 @@
-package com.example.uc2;
+package com.example.uc3;
 
 import com.example.views.MainLayout;
 
@@ -15,7 +15,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC2 — Find and highlight in a textarea.
+ * UC3 — Find and highlight in a textarea.
  * <p>
  * Server-driven {@code setSelectionRange(start, end)} drives the user's view through
  * matches one at a time. The textarea is focused on each step so the
@@ -23,9 +23,9 @@ import com.vaadin.flow.router.Route;
  * faded color, so focusing matters). Wraps to the start of the document when
  * past the last match.
  */
-@Route(value = "uc2", layout = MainLayout.class)
-@PageTitle("UC2 — Find and highlight in textarea")
-@Menu(order = 2, title = "UC2 — Find & highlight")
+@Route(value = "uc3", layout = MainLayout.class)
+@PageTitle("UC3 — Find and highlight in textarea")
+@Menu(order = 3, title = "UC3 — Find & highlight")
 public class FindAndHighlightView extends VerticalLayout {
 
     private static final String SAMPLE = """
@@ -38,7 +38,7 @@ public class FindAndHighlightView extends VerticalLayout {
             sunt in culpa qui officia deserunt mollit anim id est laborum.""";
 
     public FindAndHighlightView() {
-        add(new H1("UC2 — Find and highlight in textarea"));
+        add(new H1("UC3 — Find and highlight in textarea"));
         add(new Paragraph(
                 "Type a search term and press \"Find next\" repeatedly. The "
                         + "next occurrence is selected in place. Past the "

@@ -1,4 +1,4 @@
-package com.example.uc7;
+package com.example.uc2;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,7 +21,7 @@ class FormatAndSelectViewTest extends SpringBrowserlessTest {
         navigate(FormatAndSelectView.class);
 
         assertTrue($view(H1.class).all().stream().anyMatch(
-                h -> "UC7 — Post-transform select-all".equals(h.getText())));
+                h -> "UC2 — Post-transform select-all".equals(h.getText())));
         assertEquals("Hello, Awesome World!",
                 $(TextField.class).single().getValue());
     }

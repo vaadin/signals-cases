@@ -1,4 +1,4 @@
-package com.example.uc5;
+package com.example.uc6;
 
 import com.example.views.MainLayout;
 
@@ -17,7 +17,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 
 /**
- * UC5 — Live selection info (reactive).
+ * UC6 — Live selection info (reactive).
  * <p>
  * As the user selects text in the textarea, a side panel reactively shows the
  * selection range, length, word count, and a clipped preview of the selected
@@ -25,9 +25,9 @@ import com.vaadin.flow.signals.Signal;
  * {@code selectionSignal()} — no event listener boilerplate, no manual
  * push.
  */
-@Route(value = "uc5", layout = MainLayout.class)
-@PageTitle("UC5 — Live selection info")
-@Menu(order = 5, title = "UC5 — Live selection info")
+@Route(value = "uc6", layout = MainLayout.class)
+@PageTitle("UC6 — Live selection info")
+@Menu(order = 6, title = "UC6 — Live selection info")
 public class LiveSelectionInfoView extends VerticalLayout {
 
     private static final String SAMPLE = """
@@ -37,7 +37,7 @@ public class LiveSelectionInfoView extends VerticalLayout {
             zebras jump!""";
 
     public LiveSelectionInfoView() {
-        add(new H1("UC5 — Live selection info"));
+        add(new H1("UC6 — Live selection info"));
         add(new Paragraph(
                 "Drag to select text in the textarea below. The right panel "
                         + "is bound to the selection signal — it updates "

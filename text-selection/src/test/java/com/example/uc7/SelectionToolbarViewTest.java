@@ -1,4 +1,4 @@
-package com.example.uc6;
+package com.example.uc7;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,7 +22,7 @@ class SelectionToolbarViewTest extends SpringBrowserlessTest {
         navigate(SelectionToolbarView.class);
 
         assertTrue($view(H1.class).all().stream().anyMatch(h -> h.getText()
-                .equals("UC6 — Selection-driven transform toolbar")));
+                .equals("UC7 — Selection-driven transform toolbar")));
     }
 
     @Test

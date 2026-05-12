@@ -1,4 +1,4 @@
-package com.example.uc3;
+package com.example.uc4;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,7 +21,7 @@ class ValidationJumpViewTest extends SpringBrowserlessTest {
         navigate(ValidationJumpView.class);
 
         assertTrue($view(H1.class).all().stream().anyMatch(
-                h -> "UC3 — Jump to validation error".equals(h.getText())));
+                h -> "UC4 — Jump to validation error".equals(h.getText())));
     }
 
     @Test

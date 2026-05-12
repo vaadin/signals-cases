@@ -1,4 +1,4 @@
-package com.example.uc2;
+package com.example.uc3;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,7 +24,7 @@ class FindAndHighlightViewTest extends SpringBrowserlessTest {
         navigate(FindAndHighlightView.class);
 
         assertTrue($view(H1.class).all().stream().anyMatch(h -> h.getText()
-                .equals("UC2 — Find and highlight in textarea")));
+                .equals("UC3 — Find and highlight in textarea")));
         TextArea content = $(TextArea.class).single();
         assertTrue(content.getValue().contains("Lorem ipsum"));
     }

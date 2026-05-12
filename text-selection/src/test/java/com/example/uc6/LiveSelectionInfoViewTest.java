@@ -1,4 +1,4 @@
-package com.example.uc5;
+package com.example.uc6;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,7 +21,7 @@ class LiveSelectionInfoViewTest extends SpringBrowserlessTest {
         navigate(LiveSelectionInfoView.class);
 
         assertTrue($view(H1.class).all().stream().anyMatch(
-                h -> "UC5 — Live selection info".equals(h.getText())));
+                h -> "UC6 — Live selection info".equals(h.getText())));
     }
 
     @Test

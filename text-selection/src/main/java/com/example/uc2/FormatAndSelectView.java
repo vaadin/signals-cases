@@ -1,4 +1,4 @@
-package com.example.uc7;
+package com.example.uc2;
 
 import java.util.regex.Pattern;
 
@@ -15,7 +15,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC7 — Post-transform select-all.
+ * UC2 — Post-transform select-all.
  * <p>
  * A one-shot, server-driven {@code selectAll()} after a server-side value
  * transform. The Format button steals focus, the server rewrites the value,
@@ -25,15 +25,15 @@ import com.vaadin.flow.router.Route;
  * {@code setAutoselect(true)} cannot deliver because it would re-select on
  * every subsequent focus.
  */
-@Route(value = "uc7", layout = MainLayout.class)
-@PageTitle("UC7 — Post-transform select-all")
-@Menu(order = 7, title = "UC7 — Post-transform select-all")
+@Route(value = "uc2", layout = MainLayout.class)
+@PageTitle("UC2 — Post-transform select-all")
+@Menu(order = 2, title = "UC2 — Post-transform select-all")
 public class FormatAndSelectView extends VerticalLayout {
 
     private static final Pattern NON_SLUG = Pattern.compile("[^a-z0-9]+");
 
     public FormatAndSelectView() {
-        add(new H1("UC7 — Post-transform select-all"));
+        add(new H1("UC2 — Post-transform select-all"));
         add(new Paragraph(
                 "Type a title and press \"Format\". The server slugifies the "
                         + "value and calls selectAll() so you can Tab to "
