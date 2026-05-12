@@ -44,6 +44,23 @@ class InsertTemplateViewTest extends SpringBrowserlessTest {
     }
 
     @Test
+    void snippetReplacesNonEmptySelection() {
+        navigate(InsertTemplateView.class);
+        TextArea editor = $(TextArea.class).single();
+        // Default value is "Hi,\n\n\n\nThanks,\n". Select "Hi," (offsets 0..3).
+        TextSelectionTestSupport.setSelection(editor, 0, 3);
+        runPendingSignalsTasks();
+
+        String original = editor.getValue();
+        Button greeting = $(Button.class).withText("Greeting").single();
+        test(greeting).click();
+        runPendingSignalsTasks();
+
+        assertEquals("Hello {name}!" + original.substring(3), editor.getValue(),
+                "selected run should have been replaced by the snippet");
+    }
+
+    @Test
     void signatureInsertsAtStart() {
         navigate(InsertTemplateView.class);
         TextArea editor = $(TextArea.class).single();

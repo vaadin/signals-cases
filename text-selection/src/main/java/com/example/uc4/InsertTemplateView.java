@@ -15,12 +15,13 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 
 /**
- * UC4 — Insert template at cursor.
+ * UC4 — Insert template at cursor (or replace selection).
  * <p>
- * The classic snippet-insert pattern: read the cursor position from the
- * selection signal, splice the snippet into the value, then either move the
- * cursor past the snippet or select a placeholder substring so the user can
- * type to overwrite it.
+ * The classic snippet-insert pattern: read the current selection range, splice
+ * the snippet in — replacing any selected text — then either move the cursor
+ * past the snippet or select a placeholder substring so the user can type to
+ * overwrite it. Demonstrates reading both {@code start()} and {@code end()}
+ * off the signal in one peek.
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Insert template at cursor")
@@ -30,11 +31,12 @@ public class InsertTemplateView extends VerticalLayout {
     public InsertTemplateView() {
         add(new H1("UC4 — Insert template at cursor"));
         add(new Paragraph(
-                "Click somewhere in the message body, then press a snippet "
-                        + "button. The snippet is inserted at the cursor. If "
-                        + "the snippet contains a placeholder (e.g. {name}), "
-                        + "that placeholder is left selected so the next "
-                        + "keystroke replaces it."));
+                "Click somewhere in the message body — or select a run of "
+                        + "text to replace — then press a snippet button. The "
+                        + "snippet is inserted at the cursor, or replaces the "
+                        + "selection. If the snippet contains a placeholder "
+                        + "(e.g. {name}), that placeholder is left selected "
+                        + "so the next keystroke replaces it."));
 
         TextArea editor = new TextArea("Message");
         editor.setWidthFull();
@@ -65,19 +67,20 @@ public class InsertTemplateView extends VerticalLayout {
             String snippet, String placeholder) {
         SelectionRange sel = selection.peek();
         String value = editor.getValue() == null ? "" : editor.getValue();
-        int pos = Math.min(sel.start(), value.length());
-        String newValue = value.substring(0, pos) + snippet
-                + value.substring(pos);
+        int start = Math.min(sel.start(), value.length());
+        int end = Math.min(sel.end(), value.length());
+        String newValue = value.substring(0, start) + snippet
+                + value.substring(end);
         editor.setValue(newValue);
 
         if (!placeholder.isEmpty()) {
             int phStart = snippet.indexOf(placeholder);
             if (phStart >= 0) {
-                editor.setSelectionRange(pos + phStart,
-                        pos + phStart + placeholder.length());
+                editor.setSelectionRange(start + phStart,
+                        start + phStart + placeholder.length());
                 return;
             }
         }
-        editor.setCursorPosition(pos + snippet.length());
+        editor.setCursorPosition(start + snippet.length());
     }
 }
