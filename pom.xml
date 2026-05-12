@@ -25,7 +25,8 @@
     <properties>
         <java.version>25</java.version>
         <vaadin.version>25.2-SNAPSHOT</vaadin.version>
-        <flow.version>25.2-SNAPSHOT</flow.version>
+        <flow.version>${vaadin.version}</flow.version>
+        <flow-components.version>${vaadin.version}</flow-components.version>
         <jspecify.version>1.0.0</jspecify.version>
         <spotless.plugin.version>3.1.0</spotless.plugin.version>
         <nullability.plugin.version>0.3.0</nullability.plugin.version>
@@ -34,6 +35,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-components-bom</artifactId>
+                <version>${flow-components.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-bom</artifactId>
