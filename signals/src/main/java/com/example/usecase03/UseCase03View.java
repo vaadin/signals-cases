@@ -314,7 +314,8 @@ public class UseCase03View extends VerticalLayout {
         bindSliderToInteger(heightSlider, rectHeightSignal);
         heightSlider.setWidthFull();
 
-        IntegerSlider cornerRadiusSlider = new IntegerSlider("Corner Radius", 0, 50);
+        IntegerSlider cornerRadiusSlider = new IntegerSlider("Corner Radius", 0,
+                50);
         bindSliderToInteger(cornerRadiusSlider, rectCornerRadiusSignal);
         cornerRadiusSlider.setWidthFull();
 

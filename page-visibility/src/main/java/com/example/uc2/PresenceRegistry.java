@@ -51,9 +51,9 @@ public class PresenceRegistry {
         if (entry != null) {
             // update() applies the transition atomically; returning the same
             // reference when the state hasn't changed is a no-op.
-            entry.update(current -> current == null
-                    || current.state() == state ? current
-                            : current.withState(state));
+            entry.update(current -> current == null || current.state() == state
+                    ? current
+                    : current.withState(state));
         }
     }
 

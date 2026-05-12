@@ -17,13 +17,16 @@
     <modules>
         <module>signals</module>
         <module>geolocation</module>
+        <module>clipboard</module>
         <module>page-visibility</module>
+        <module>text-selection</module>
     </modules>
 
     <properties>
         <java.version>25</java.version>
         <vaadin.version>25.2-SNAPSHOT</vaadin.version>
-        <flow.version>25.2.geo-api-update-SNAPSHOT</flow.version>
+        <flow.version>${vaadin.version}</flow.version>
+        <flow-components.version>${vaadin.version}</flow-components.version>
         <jspecify.version>1.0.0</jspecify.version>
         <spotless.plugin.version>3.1.0</spotless.plugin.version>
         <nullability.plugin.version>0.3.0</nullability.plugin.version>
@@ -36,6 +39,13 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-bom</artifactId>
                 <version>${flow.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-components-bom</artifactId>
+                <version>${flow-components.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -110,12 +120,12 @@
                 <configuration>
                     <java>
                         <eclipse>
-                            <file>${maven.multiModuleProjectDirectory}/eclipse/VaadinJavaConventions.xml</file>
+                            <file>${maven.multiModuleProjectDirectory}/.eclipse/VaadinJavaConventions.xml</file>
                         </eclipse>
                         <endWithNewline/>
                         <removeUnusedImports/>
                         <importOrder>
-                            <file>${maven.multiModuleProjectDirectory}/eclipse/flow.importorder</file>
+                            <file>${maven.multiModuleProjectDirectory}/.eclipse/flow.importorder</file>
                         </importOrder>
                         <forbidWildcardImports/>
                     </java>

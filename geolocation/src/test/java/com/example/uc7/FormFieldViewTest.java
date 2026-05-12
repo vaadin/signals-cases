@@ -1,16 +1,16 @@
 package com.example.uc7;
 
+import org.junit.jupiter.api.Test;
+
 import com.vaadin.browserless.BrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.geolocation.GeolocationSimulator;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 
 @ViewPackages(classes = FormFieldView.class)
 class FormFieldViewTest extends BrowserlessTest {
@@ -26,8 +26,8 @@ class FormFieldViewTest extends BrowserlessTest {
         assertFalse(submit.isEnabled(),
                 "Submit should be disabled before description and location are set");
 
-        TextField description = $(TextField.class)
-                .withCaption("Description").single();
+        TextField description = $(TextField.class).withCaption("Description")
+                .single();
         test(description).setValue("Cracked pavement near bus stop");
 
         Button pin = $(Button.class).withText("Pin my location").single();
@@ -42,8 +42,8 @@ class FormFieldViewTest extends BrowserlessTest {
 
         test(submit).click();
 
-        Span resetLabel = $(Span.class)
-                .withText("No location pinned yet").single();
+        Span resetLabel = $(Span.class).withText("No location pinned yet")
+                .single();
         assertTrue(resetLabel.isVisible(),
                 "Pin label should reset to default after submission");
 
@@ -58,8 +58,8 @@ class FormFieldViewTest extends BrowserlessTest {
         geolocation.setLocation(51.5074, -0.1278, 100.0);
         navigate(FormFieldView.class);
 
-        TextField description = $(TextField.class)
-                .withCaption("Description").single();
+        TextField description = $(TextField.class).withCaption("Description")
+                .single();
         test(description).setValue("Pothole on main road");
 
         Button pin = $(Button.class).withText("Pin my location").single();
@@ -69,7 +69,8 @@ class FormFieldViewTest extends BrowserlessTest {
         assertFalse(submit.isEnabled(),
                 "Submit should remain disabled when accuracy exceeds the threshold");
 
-        Span pinLabel = $(Span.class).withText("No location pinned yet").single();
+        Span pinLabel = $(Span.class).withText("No location pinned yet")
+                .single();
         assertTrue(pinLabel.isVisible(),
                 "Pin label should stay at default when accuracy is too poor");
     }

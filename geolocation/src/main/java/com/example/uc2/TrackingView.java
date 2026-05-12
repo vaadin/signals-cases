@@ -40,13 +40,12 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * <p>
  * A Start/Stop toggle drives a single {@link GeolocationWatcher}. The watcher
  * is created lazily on the first click so a fresh page load does not start —
- * and immediately stop — a browser watch. Once created, the status text and
- * the toggle's label are both bound via {@code bindText} to computed signals
- * over the watcher's active and position signals plus an update counter. A
- * single effect handles the imperative side that bindings can't express:
- * appending each new reading to the grid and extending the path on the map.
- * Resuming does not clear the history — the grid and the map line keep
- * growing.
+ * and immediately stop — a browser watch. Once created, the status text and the
+ * toggle's label are both bound via {@code bindText} to computed signals over
+ * the watcher's active and position signals plus an update counter. A single
+ * effect handles the imperative side that bindings can't express: appending
+ * each new reading to the grid and extending the path on the map. Resuming does
+ * not clear the history — the grid and the map line keep growing.
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Continuous tracking with reactive signal")
@@ -131,8 +130,12 @@ public class TrackingView extends VerticalLayout {
             return switch (w.positionSignal().get()) {
             case GeolocationPending p -> "Waiting for first reading…";
             case GeolocationPosition pos -> "Update #" + updateCount.get();
-            case GeolocationError err ->
-                "Error " + err.code() + ": " + err.message();
+            case GeolocationError err -> switch (err.errorCode()) {
+            case PERMISSION_DENIED -> "Location permission was denied.";
+            case POSITION_UNAVAILABLE -> "Could not determine your location.";
+            case TIMEOUT -> "Location request timed out.";
+            case UNKNOWN -> "Could not get your location.";
+            };
             };
         }));
 
@@ -155,9 +158,9 @@ public class TrackingView extends VerticalLayout {
         int next = updateCount.peek() + 1;
         updateCount.set(next);
         hasUpdates.set(Boolean.TRUE);
-        points.add(new TrackPoint(next, pos.timestamp(),
-                pos.coords().latitude(), pos.coords().longitude(),
-                pos.coords().accuracy()));
+        points.add(
+                new TrackPoint(next, pos.timestamp(), pos.coords().latitude(),
+                        pos.coords().longitude(), pos.coords().accuracy()));
         history.getDataProvider().refreshAll();
 
         Coordinate c = new Coordinate(pos.coords().longitude(),

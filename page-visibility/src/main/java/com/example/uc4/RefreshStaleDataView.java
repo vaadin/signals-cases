@@ -150,9 +150,8 @@ public class RefreshStaleDataView extends VerticalLayout {
             highlightTask.cancel(false);
         }
         if (ui != null) {
-            highlightTask = taskScheduler.schedule(
-                    ui.accessLater(() -> card.removeClassName("highlight"),
-                            null),
+            highlightTask = taskScheduler.schedule(ui
+                    .accessLater(() -> card.removeClassName("highlight"), null),
                     Instant.now().plusMillis(600));
         }
     }

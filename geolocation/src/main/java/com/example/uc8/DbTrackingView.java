@@ -146,8 +146,12 @@ public class DbTrackingView extends VerticalLayout {
             case GeolocationPending p -> "Waiting for first reading…";
             case GeolocationPosition pos ->
                 "Saved update #" + updateCount.get() + " to DB";
-            case GeolocationError err ->
-                "Error " + err.code() + ": " + err.message();
+            case GeolocationError err -> switch (err.errorCode()) {
+            case PERMISSION_DENIED -> "Location permission was denied.";
+            case POSITION_UNAVAILABLE -> "Could not determine your location.";
+            case TIMEOUT -> "Location request timed out.";
+            case UNKNOWN -> "Could not get your location.";
+            };
             };
         }));
 
@@ -162,8 +166,13 @@ public class DbTrackingView extends VerticalLayout {
     }
 
     private void showErrorNotification(GeolocationError error) {
-        Notification n = Notification.show(
-                "Error " + error.code() + ": " + error.message(), 5000,
+        String description = switch (error.errorCode()) {
+        case PERMISSION_DENIED -> "Location permission was denied.";
+        case POSITION_UNAVAILABLE -> "Could not determine your location.";
+        case TIMEOUT -> "Location request timed out.";
+        case UNKNOWN -> "Could not get your location.";
+        };
+        Notification n = Notification.show(description, 5000,
                 Notification.Position.MIDDLE);
         n.addThemeVariants(NotificationVariant.ERROR);
     }

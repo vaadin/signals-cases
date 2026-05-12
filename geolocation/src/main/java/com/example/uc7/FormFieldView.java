@@ -112,8 +112,13 @@ public class FormFieldView extends VerticalLayout {
                 return;
             }
             pinnedSignal.set(pos);
-        }, err -> Notification
-                .show("Could not pin location: " + err.message()), opts);
+        }, err -> Notification.show(switch (err.errorCode()) {
+        case PERMISSION_DENIED -> "Could not pin location: permission denied.";
+        case POSITION_UNAVAILABLE ->
+            "Could not pin location: location unavailable.";
+        case TIMEOUT -> "Could not pin location: request timed out.";
+        case UNKNOWN -> "Could not pin your location.";
+        }), opts);
     }
 
     private void submit() {

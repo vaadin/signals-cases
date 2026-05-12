@@ -1,5 +1,8 @@
 package com.example.uc8;
 
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -7,8 +10,6 @@ import com.vaadin.flow.component.geolocation.GeolocationErrorCode;
 import com.vaadin.flow.component.geolocation.GeolocationSimulator;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -76,12 +77,14 @@ class DbTrackingViewTest extends SpringBrowserlessTest {
 
         test($(Button.class).withText("Stop tracking").single()).click();
 
-        Span status = $(Span.class).withTextContaining("Stopped after").single();
+        Span status = $(Span.class).withTextContaining("Stopped after")
+                .single();
         assertTrue(status.getText().contains("1"),
                 "Stopped status should reflect one update, was: "
                         + status.getText());
         assertTrue(
-                $(Button.class).withText("Resume tracking").single().isVisible(),
+                $(Button.class).withText("Resume tracking").single()
+                        .isVisible(),
                 "Start button should be re-labelled to Resume after stop");
     }
 
@@ -96,8 +99,10 @@ class DbTrackingViewTest extends SpringBrowserlessTest {
         geolocation.setUnavailable(GeolocationErrorCode.POSITION_UNAVAILABLE,
                 "position unavailable");
 
-        Span status = $(Span.class).withTextContaining("Error").single();
-        assertTrue(status.getText().contains("2"),
-                "Status should show error code 2, was: " + status.getText());
+        Span status = $(Span.class).withTextContaining("Could not determine")
+                .single();
+        assertTrue(status.getText().contains("location"),
+                "Status should describe the location failure, was: "
+                        + status.getText());
     }
 }
