@@ -38,20 +38,21 @@ class ValidationJumpViewTest extends SpringBrowserlessTest {
 
         // Status text reports the offending range; that range, applied to the
         // current value, must contain at least one non-[a-z0-9_] character.
-        String status = $view(Span.class).all().stream()
-                .map(Span::getText)
-                .filter(t -> t != null && t.startsWith("Invalid characters at "))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError(
+        String status = $view(Span.class).all().stream().map(Span::getText)
+                .filter(t -> t != null
+                        && t.startsWith("Invalid characters at "))
+                .findFirst().orElseThrow(() -> new AssertionError(
                         "Expected status to start with 'Invalid characters at '"));
         int dash = status.indexOf('–');
         int start = Integer.parseInt(
                 status.substring("Invalid characters at ".length(), dash));
-        int end = Integer.parseInt(
-                status.substring(dash + 1, status.indexOf('.')));
+        int end = Integer
+                .parseInt(status.substring(dash + 1, status.indexOf('.')));
         String run = username.getValue().substring(start, end);
-        assertTrue(run.chars().anyMatch(c -> !Character.isDigit(c)
-                && (c < 'a' || c > 'z') && c != '_'),
+        assertTrue(
+                run.chars()
+                        .anyMatch(c -> !Character.isDigit(c)
+                                && (c < 'a' || c > 'z') && c != '_'),
                 "offending run should contain a non-[a-z0-9_] char, was: \""
                         + run + "\"");
     }
@@ -66,8 +67,9 @@ class ValidationJumpViewTest extends SpringBrowserlessTest {
         test(submit).click();
         runPendingSignalsTasks();
 
-        assertTrue($view(Span.class).all().stream().anyMatch(s -> s.getText() != null
-                && s.getText().contains("at least 3 characters")));
+        assertTrue($view(Span.class).all().stream()
+                .anyMatch(s -> s.getText() != null
+                        && s.getText().contains("at least 3 characters")));
     }
 
     @Test
@@ -81,7 +83,7 @@ class ValidationJumpViewTest extends SpringBrowserlessTest {
         test(submit).click();
         runPendingSignalsTasks();
 
-        assertTrue($view(Span.class).all().stream().anyMatch(s -> s.getText() != null
-                && s.getText().contains("is valid")));
+        assertTrue($view(Span.class).all().stream().anyMatch(
+                s -> s.getText() != null && s.getText().contains("is valid")));
     }
 }

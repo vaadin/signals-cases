@@ -54,8 +54,7 @@ public class SelectionToolbarView extends VerticalLayout {
                 e -> transform(editor, String::toLowerCase));
         Button quote = new Button("\"Quote\"",
                 e -> transform(editor, s -> "\"" + s + "\""));
-        Button trim = new Button("Trim",
-                e -> transform(editor, String::strip));
+        Button trim = new Button("Trim", e -> transform(editor, String::strip));
 
         Signal.effect(this, () -> {
             boolean enabled = hasSelection.get();
@@ -72,8 +71,7 @@ public class SelectionToolbarView extends VerticalLayout {
         add(toolbar, editor);
     }
 
-    private static void transform(TextArea editor,
-            UnaryOperator<String> fn) {
+    private static void transform(TextArea editor, UnaryOperator<String> fn) {
         SelectionRange sel = editor.selectionSignal().peek();
         if (sel.isEmpty()) {
             return;

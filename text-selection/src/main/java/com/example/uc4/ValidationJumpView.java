@@ -21,16 +21,15 @@ import com.vaadin.flow.router.Route;
  * <p>
  * On submit the server validates the username and, on failure, selects the
  * exact substring that caused the failure so the user can immediately retype
- * it. This is one of the most user-respecting things selection control
- * unlocks: the user does not have to re-locate their mistake.
+ * it. This is one of the most user-respecting things selection control unlocks:
+ * the user does not have to re-locate their mistake.
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Jump to validation error")
 @Menu(order = 4, title = "UC4 — Jump to validation error")
 public class ValidationJumpView extends VerticalLayout {
 
-    private static final Pattern INVALID_CHAR = Pattern
-            .compile("[^a-z0-9_]+");
+    private static final Pattern INVALID_CHAR = Pattern.compile("[^a-z0-9_]+");
 
     public ValidationJumpView() {
         add(new H1("UC4 — Jump to validation error"));
@@ -55,9 +54,8 @@ public class ValidationJumpView extends VerticalLayout {
             Matcher bad = INVALID_CHAR.matcher(value);
             if (bad.find()) {
                 username.setSelectionRange(bad.start(), bad.end());
-                status.setText("Invalid characters at "
-                        + bad.start() + "–" + bad.end()
-                        + ". Retype to fix.");
+                status.setText("Invalid characters at " + bad.start() + "–"
+                        + bad.end() + ". Retype to fix.");
                 status.removeClassName("success");
                 status.addClassName("error");
                 return;

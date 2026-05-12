@@ -22,8 +22,7 @@ import com.vaadin.flow.signals.Signal;
  * As the user selects text in the textarea, a side panel reactively shows the
  * selection range, length, word count, and a clipped preview of the selected
  * substring. All four labels are bound to {@code Signal}s computed from
- * {@code selectionSignal()} — no event listener boilerplate, no manual
- * push.
+ * {@code selectionSignal()} — no event listener boilerplate, no manual push.
  */
 @Route(value = "uc6", layout = MainLayout.class)
 @PageTitle("UC6 — Live selection info")

@@ -1,9 +1,9 @@
 package com.example.uc3;
 
+import com.example.TextSelectionTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.example.TextSelectionTestSupport;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -56,10 +56,8 @@ class FindAndHighlightViewTest extends SpringBrowserlessTest {
     }
 
     private int readMatchOffset() {
-        String status = $view(Span.class).all().stream()
-                .map(Span::getText)
-                .filter(t -> t != null && t.contains("Match at "))
-                .findFirst()
+        String status = $view(Span.class).all().stream().map(Span::getText)
+                .filter(t -> t != null && t.contains("Match at ")).findFirst()
                 .orElseThrow(() -> new AssertionError(
                         "Expected a 'Match at N' status span"));
         // status is "Match at <N>" or "Wrapped to start — match at <N>"
@@ -80,7 +78,7 @@ class FindAndHighlightViewTest extends SpringBrowserlessTest {
         test(findNext).click();
         runPendingSignalsTasks();
 
-        assertTrue($view(Span.class).all().stream()
-                .anyMatch(s -> "Enter a search term first".equals(s.getText())));
+        assertTrue($view(Span.class).all().stream().anyMatch(
+                s -> "Enter a search term first".equals(s.getText())));
     }
 }

@@ -113,8 +113,7 @@ public class FormFieldView extends VerticalLayout {
             }
             pinnedSignal.set(pos);
         }, err -> Notification.show(switch (err.errorCode()) {
-        case PERMISSION_DENIED ->
-            "Could not pin location: permission denied.";
+        case PERMISSION_DENIED -> "Could not pin location: permission denied.";
         case POSITION_UNAVAILABLE ->
             "Could not pin location: location unavailable.";
         case TIMEOUT -> "Could not pin location: request timed out.";

@@ -18,12 +18,11 @@ import com.vaadin.flow.router.Route;
  * UC2 — Post-transform select-all.
  * <p>
  * A one-shot, server-driven {@code selectAll()} after a server-side value
- * transform. The Format button steals focus, the server rewrites the value,
- * and {@code selectAll()} atomically returns focus and selects the new value.
- * The user can Tab to accept, type to replace, or click into the field to
- * position the cursor for a single-character fix — a UX that
- * {@code setAutoselect(true)} cannot deliver because it would re-select on
- * every subsequent focus.
+ * transform. The Format button steals focus, the server rewrites the value, and
+ * {@code selectAll()} atomically returns focus and selects the new value. The
+ * user can Tab to accept, type to replace, or click into the field to position
+ * the cursor for a single-character fix — a UX that {@code setAutoselect(true)}
+ * cannot deliver because it would re-select on every subsequent focus.
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Post-transform select-all")
@@ -53,8 +52,8 @@ public class FormatAndSelectView extends VerticalLayout {
 
         Button format = new Button("Format", e -> {
             String value = title.getValue() == null ? "" : title.getValue();
-            String slug = NON_SLUG.matcher(value.toLowerCase())
-                    .replaceAll("-").replaceAll("^-|-$", "");
+            String slug = NON_SLUG.matcher(value.toLowerCase()).replaceAll("-")
+                    .replaceAll("^-|-$", "");
             title.setValue(slug);
             title.selectAll();
         });

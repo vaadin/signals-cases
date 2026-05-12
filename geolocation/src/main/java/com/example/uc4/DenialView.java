@@ -256,8 +256,7 @@ public class DenialView extends VerticalLayout {
                             pos.coords().latitude(), pos.coords().longitude(),
                             pos.coords().accuracy())),
                     err -> output.setText(switch (err.errorCode()) {
-                    case PERMISSION_DENIED ->
-                        "Location permission was denied.";
+                    case PERMISSION_DENIED -> "Location permission was denied.";
                     case POSITION_UNAVAILABLE ->
                         "Could not determine your location.";
                     case TIMEOUT -> "Location request timed out.";

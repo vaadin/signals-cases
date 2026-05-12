@@ -1,5 +1,7 @@
 package com.example;
 
+import tools.jackson.databind.node.ObjectNode;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.shared.HasSelection;
 import com.vaadin.flow.dom.DomEvent;
@@ -7,13 +9,11 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 
-import tools.jackson.databind.node.ObjectNode;
-
 /**
  * Shared helper for browserless tests that need to drive the
- * {@code selectionSignal()} of a TextField/TextArea without a real browser.
- * The signal is filled by a {@code vaadin-selection-change} DOM event
- * dispatched from the client; tests fire the same event directly through
+ * {@code selectionSignal()} of a TextField/TextArea without a real browser. The
+ * signal is filled by a {@code vaadin-selection-change} DOM event dispatched
+ * from the client; tests fire the same event directly through
  * {@link ElementListenerMap}, mirroring flow-components' own
  * {@code SelectionSignalTest}.
  */
@@ -38,8 +38,7 @@ public final class TextSelectionTestSupport {
         data.put("event.detail.content", content);
 
         Element element = ((Component) field).getElement();
-        DomEvent event = new DomEvent(element, "vaadin-selection-change",
-                data);
+        DomEvent event = new DomEvent(element, "vaadin-selection-change", data);
         element.getNode().getFeature(ElementListenerMap.class).fireEvent(event);
     }
 

@@ -17,8 +17,8 @@ import com.vaadin.flow.router.Route;
 /**
  * UC3 — Find and highlight in a textarea.
  * <p>
- * Server-driven {@code setSelectionRange(start, end)} drives the user's view through
- * matches one at a time. The textarea is focused on each step so the
+ * Server-driven {@code setSelectionRange(start, end)} drives the user's view
+ * through matches one at a time. The textarea is focused on each step so the
  * selection is rendered visibly (browsers paint inactive selections with a
  * faded color, so focusing matters). Wraps to the start of the document when
  * past the last match.

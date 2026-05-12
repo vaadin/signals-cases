@@ -1,9 +1,9 @@
 package com.example.uc6;
 
+import com.example.TextSelectionTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.example.TextSelectionTestSupport;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.html.H1;
@@ -40,14 +40,17 @@ class LiveSelectionInfoViewTest extends SpringBrowserlessTest {
         TextSelectionTestSupport.setSelection(text, 0, 19);
         runPendingSignalsTasks();
 
-        assertTrue($view(Span.class).all().stream()
-                .anyMatch(s -> "19 chars".equals(s.getText())),
+        assertTrue(
+                $view(Span.class).all().stream()
+                        .anyMatch(s -> "19 chars".equals(s.getText())),
                 "expected selection length to update");
-        assertTrue($view(Span.class).all().stream()
-                .anyMatch(s -> "4 words".equals(s.getText())),
+        assertTrue(
+                $view(Span.class).all().stream()
+                        .anyMatch(s -> "4 words".equals(s.getText())),
                 "expected word count to update");
-        assertTrue($view(Span.class).all().stream()
-                .anyMatch(s -> "0 – 19".equals(s.getText())),
+        assertTrue(
+                $view(Span.class).all().stream()
+                        .anyMatch(s -> "0 – 19".equals(s.getText())),
                 "expected range to update");
     }
 }

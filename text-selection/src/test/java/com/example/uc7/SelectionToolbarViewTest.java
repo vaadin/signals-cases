@@ -1,9 +1,9 @@
 package com.example.uc7;
 
+import com.example.TextSelectionTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.example.TextSelectionTestSupport;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -32,14 +32,16 @@ class SelectionToolbarViewTest extends SpringBrowserlessTest {
 
         Button upper = $(Button.class).withText("UPPERCASE").single();
         Button lower = $(Button.class).withText("lowercase").single();
-        assertFalse(upper.isEnabled(), "no selection: button should be disabled");
+        assertFalse(upper.isEnabled(),
+                "no selection: button should be disabled");
         assertFalse(lower.isEnabled());
 
         TextArea editor = $(TextArea.class).single();
         TextSelectionTestSupport.setSelection(editor, 0, 5);
         runPendingSignalsTasks();
 
-        assertTrue(upper.isEnabled(), "with selection: button should be enabled");
+        assertTrue(upper.isEnabled(),
+                "with selection: button should be enabled");
         assertTrue(lower.isEnabled());
     }
 

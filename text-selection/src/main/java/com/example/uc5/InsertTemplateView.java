@@ -20,8 +20,8 @@ import com.vaadin.flow.signals.Signal;
  * The classic snippet-insert pattern: read the current selection range, splice
  * the snippet in — replacing any selected text — then either move the cursor
  * past the snippet or select a placeholder substring so the user can type to
- * overwrite it. Demonstrates reading both {@code start()} and {@code end()}
- * off the signal in one peek.
+ * overwrite it. Demonstrates reading both {@code start()} and {@code end()} off
+ * the signal in one peek.
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Insert template at cursor")
@@ -63,8 +63,9 @@ public class InsertTemplateView extends VerticalLayout {
         add(toolbar, editor);
     }
 
-    private static void insert(TextArea editor, Signal<SelectionRange> selection,
-            String snippet, String placeholder) {
+    private static void insert(TextArea editor,
+            Signal<SelectionRange> selection, String snippet,
+            String placeholder) {
         SelectionRange sel = selection.peek();
         String value = editor.getValue() == null ? "" : editor.getValue();
         int start = Math.min(sel.start(), value.length());
