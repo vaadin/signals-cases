@@ -7,14 +7,30 @@ on:
       - main
   workflow_dispatch:
 jobs:
+  discover:
+    name: Discover modules
+    runs-on: ubuntu-latest
+    outputs:
+      modules: ${{ steps.find.outputs.modules }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: find
+        run: |
+          modules=$(find . -mindepth 2 -maxdepth 2 -name fly.toml -printf '%h\n' \
+            | sed 's|^\./||' \
+            | sort \
+            | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "modules=$modules" >> "$GITHUB_OUTPUT"
+          echo "Discovered modules: $modules"
   deploy:
+    needs: discover
     name: Deploy ${{ matrix.module }}
     runs-on: ubuntu-latest
     concurrency: deploy-${{ matrix.module }}
     strategy:
       fail-fast: false
       matrix:
-        module: [signals, geolocation, page-visibility]
+        module: ${{ fromJson(needs.discover.outputs.modules) }}
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
