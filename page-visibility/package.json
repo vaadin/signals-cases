@@ -13,7 +13,7 @@
     "@vaadin/vaadin-usage-statistics": "2.1.3",
     "date-fns": "4.1.0",
     "lit": "3.3.2",
-    "ol": "10.6.1",
+    "ol": "10.6.0",
     "proj4": "2.17.0",
     "react": "19.2.6",
     "react-dom": "19.2.6",
@@ -23,6 +23,7 @@
     "@babel/core": "7.29.0",
     "@babel/plugin-transform-react-jsx-development": "7.27.1",
     "@babel/preset-react": "7.28.5",
+    "@babel/types": "7.29.0",
     "@preact/signals-react-transform": "0.8.1",
     "@rolldown/plugin-babel": "0.2.3",
     "@rollup/plugin-replace": "6.0.3",
@@ -37,7 +38,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "6.0.3",
-    "vite": "8.0.11",
+    "vite": "8.0.12",
     "vite-plugin-checker": "0.13.0",
     "workbox-build": "7.4.1",
     "workbox-core": "7.4.1",
@@ -57,7 +58,7 @@
       "@vaadin/vaadin-usage-statistics": "2.1.3",
       "date-fns": "4.1.0",
       "lit": "3.3.2",
-      "ol": "10.6.1",
+      "ol": "10.6.0",
       "proj4": "2.17.0",
       "react": "19.2.6",
       "react-dom": "19.2.6",
@@ -67,6 +68,7 @@
       "@babel/core": "7.29.0",
       "@babel/plugin-transform-react-jsx-development": "7.27.1",
       "@babel/preset-react": "7.28.5",
+      "@babel/types": "7.29.0",
       "@preact/signals-react-transform": "0.8.1",
       "@rolldown/plugin-babel": "0.2.3",
       "@rollup/plugin-replace": "6.0.3",
@@ -81,7 +83,7 @@
       "strip-css-comments": "5.0.0",
       "transform-ast": "2.4.4",
       "typescript": "6.0.3",
-      "vite": "8.0.11",
+      "vite": "8.0.12",
       "vite-plugin-checker": "0.13.0",
       "workbox-build": "7.4.1",
       "workbox-core": "7.4.1",
@@ -89,7 +91,7 @@
       "workbox-routing": "7.4.1",
       "workbox-strategies": "7.4.1"
     },
-    "hash": "2dac5b8d41e580f940cbda6577fe1246e56ea8d8d3546736674f0379025943c8",
+    "hash": "737b9d6f0926ee3e21a71766e8e51d421881e7eebbdc08d8330fbc98817f1632",
     "overrides": {
       "@vaadin/a11y-base": "25.2.0-alpha10",
       "@vaadin/accordion": "25.2.0-alpha10",
@@ -175,9 +177,7 @@
       "react-dom": "$react-dom",
       "react-router": "$react-router",
       "workbox-build": {
-        "@rollup/plugin-terser": "1.0.0",
-        "glob": "13.0.6",
-        "serialize-javascript": "7.0.5"
+        "glob": "13.0.6"
       }
     }
   },
@@ -266,8 +266,6 @@
     "@vaadin/email-field": "25.2.0-alpha10",
     "@vaadin/message-input": "25.2.0-alpha10",
     "workbox-build": {
-      "serialize-javascript": "7.0.5",
-      "@rollup/plugin-terser": "1.0.0",
       "glob": "13.0.6"
     }
   }
