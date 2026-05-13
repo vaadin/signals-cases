@@ -19,8 +19,9 @@ class ShareFeedbackViewTest extends SpringBrowserlessTest {
     void viewRendersHeadingAndButtons() {
         navigate(ShareFeedbackView.class);
 
-        assertTrue($view(H1.class).all().stream().anyMatch(h -> "UC5 — Share "
-                + "with completion feedback".equals(h.getText())));
+        assertTrue($view(H1.class).all().stream().anyMatch(
+                h -> "UC5 — Share with completion feedback"
+                        .equals(h.getText())));
         assertTrue($view(Button.class).all().stream()
                 .anyMatch(b -> "Share with feedback".equals(b.getText())));
         assertTrue($view(Button.class).all().stream()
