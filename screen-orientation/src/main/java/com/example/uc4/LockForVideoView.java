@@ -1,0 +1,115 @@
+package com.example.uc4;
+
+import com.example.MissingAPI;
+import com.example.views.MainLayout;
+
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.ScreenOrientation;
+import com.vaadin.flow.component.page.ScreenOrientationData;
+import com.vaadin.flow.router.Menu;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.signals.Signal;
+import com.vaadin.flow.signals.local.ValueSignal;
+
+/**
+ * UC4 — Lock landscape for fullscreen video playback.
+ * <p>
+ * Classic media app pattern: when the user hits "Play", the player goes
+ * fullscreen and the screen is locked to landscape. Closing the player
+ * releases the lock. The lock request goes through
+ * {@link com.vaadin.flow.component.page.Page#lockOrientation(ScreenOrientation,
+ * com.vaadin.flow.function.SerializableRunnable,
+ * com.vaadin.flow.function.SerializableConsumer)
+ * Page#lockOrientation(...)} so success and failure are surfaced reactively;
+ * fullscreen is requested through {@link MissingAPI#requestFullscreen(
+ * com.vaadin.flow.component.Component)} because Flow has no first-class
+ * fullscreen API yet (see {@code API-GAPS.md}).
+ */
+@Route(value = "uc4", layout = MainLayout.class)
+@PageTitle("UC4 — Lock landscape for video")
+@Menu(order = 4, title = "UC4 — Lock for video")
+public class LockForVideoView extends VerticalLayout {
+
+    private final Div stage = new Div();
+    private final Span playingLabel = new Span();
+    private final Span lockBadge = new Span();
+    private final ValueSignal<Boolean> locked = new ValueSignal<>(false);
+    private final ValueSignal<String> lockMessage = new ValueSignal<>("Idle");
+    private final ValueSignal<String> lockBadgeMod = new ValueSignal<>("");
+
+    public LockForVideoView() {
+        add(new H1("UC4 — Lock landscape for video"));
+        add(new Paragraph("Click \"Play\" to enter fullscreen and lock the "
+                + "screen to landscape. The lock typically only succeeds on "
+                + "mobile/tablet devices and in fullscreen mode — desktop "
+                + "browsers will report a SecurityError or NotSupportedError, "
+                + "and the badge will reflect that. Click \"Stop\" to "
+                + "release the lock."));
+
+        stage.addClassName("uc4-stage");
+        stage.setId("video-stage");
+        Span bigIcon = new Span("🎬");
+        bigIcon.addClassName("big-icon");
+        playingLabel.setText("Press Play to start");
+        stage.add(bigIcon, playingLabel);
+        add(stage);
+
+        Button play = new Button("Play (lock landscape)", e -> startPlayback());
+        Button stop = new Button("Stop (unlock)", e -> stopPlayback());
+        HorizontalLayout actions = new HorizontalLayout(play, stop);
+        add(actions);
+
+        HorizontalLayout status = new HorizontalLayout();
+        lockBadge.addClassName("status-badge");
+        status.add(new Span("Lock state:"), lockBadge);
+        status.setAlignItems(Alignment.BASELINE);
+        status.setSpacing(true);
+        add(status);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        Signal<ScreenOrientationData> orientation = attachEvent.getUI()
+                .getPage().screenOrientationSignal();
+
+        playingLabel.bindText(Signal.computed(() -> locked.get()
+                ? "Playing — orientation locked to "
+                        + orientation.get().type().getClientValue()
+                : "Press Play to start"));
+        lockBadge.bindText(lockMessage);
+        lockBadge.bindClassName("error",
+                lockBadgeMod.map(s -> s.equals("error")));
+    }
+
+    private void startPlayback() {
+        MissingAPI.requestFullscreen(stage);
+        getUI().ifPresent(ui -> ui.getPage().lockOrientation(
+                ScreenOrientation.LANDSCAPE_PRIMARY, () -> {
+                    locked.set(true);
+                    lockMessage.set("Locked to landscape");
+                    lockBadgeMod.set("");
+                }, error -> {
+                    locked.set(false);
+                    lockMessage.set("Lock failed: " + error.name() + " — "
+                            + error.message());
+                    lockBadgeMod.set("error");
+                }));
+    }
+
+    private void stopPlayback() {
+        getUI().ifPresent(ui -> ui.getPage().unlockOrientation());
+        MissingAPI.exitFullscreen(this);
+        locked.set(false);
+        lockMessage.set("Idle");
+        lockBadgeMod.set("");
+    }
+}
