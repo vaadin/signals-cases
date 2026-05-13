@@ -37,8 +37,18 @@ class MUC03NicknameUpdateTest extends SpringBrowserlessTest {
         userSessionRegistry.registerUser("userB", "sessionB", "muc-03");
         muc03Signals.initializePlayerScore("userB", "sessionB");
         muc03Signals.startNewRound(100, 100);
-        muc03Signals.awardPoint("userB", "sessionB");
+        boolean awarded = muc03Signals.awardPoint("userB", "sessionB");
         runPendingSignalsTasks();
+
+        // Verify the score actually got awarded (rules out leaderboard
+        // signal short-circuit due to leaked state from a previous test).
+        assertTrue(awarded, () -> "awardPoint returned false; "
+                + diagnostics("after awardPoint"));
+        Integer userBScore = muc03Signals.getLeaderboardSignal().peek()
+                .get("userB:sessionB").peek();
+        assertEquals(Integer.valueOf(1), userBScore,
+                () -> "userB score should be 1 after awardPoint; "
+                        + diagnostics("after awardPoint"));
 
         // Verify userB's name appears in the leaderboard
         assertTrue(
@@ -46,7 +56,8 @@ class MUC03NicknameUpdateTest extends SpringBrowserlessTest {
                         .anyMatch(s -> s.getText() != null
                                 && s.getText().contains("userB")
                                 && s.getText().contains("1 points")),
-                "Leaderboard should show userB with 1 point");
+                () -> "Leaderboard should show userB with 1 point; "
+                        + diagnostics("before setting nickname"));
 
         // Now change userB's nickname
         userSessionRegistry.setNickname("userB", "sessionB", "CoolPlayer");
@@ -58,7 +69,8 @@ class MUC03NicknameUpdateTest extends SpringBrowserlessTest {
                         .anyMatch(s -> s.getText() != null
                                 && s.getText().contains("CoolPlayer")
                                 && s.getText().contains("1 points")),
-                "Leaderboard should update to show nickname 'CoolPlayer'");
+                () -> "Leaderboard should update to show nickname 'CoolPlayer'; "
+                        + diagnostics("after setting nickname"));
 
         // The old username should no longer appear in the score label
         assertTrue(
@@ -66,7 +78,8 @@ class MUC03NicknameUpdateTest extends SpringBrowserlessTest {
                         .noneMatch(s -> s.getText() != null
                                 && s.getText().contains("userB")
                                 && s.getText().contains("1 points")),
-                "Leaderboard should no longer show 'userB' in score label");
+                () -> "Leaderboard should no longer show 'userB' in score label; "
+                        + diagnostics("after setting nickname"));
     }
 
     @Test
