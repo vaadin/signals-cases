@@ -1,0 +1,297 @@
+/* Fullscreen API use cases — small visual polish */
+
+.app-title {
+    font-size: var(--aura-font-size-l);
+    margin: 0;
+}
+
+.home-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    max-width: 960px;
+}
+
+.home-card .home-card-tag {
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    color: var(--vaadin-text-color-secondary);
+    letter-spacing: 0.05em;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    background: color-mix(in srgb, var(--aura-blue) 15%, transparent);
+    color: var(--aura-blue-text);
+    border: 1px solid color-mix(in srgb, var(--aura-blue) 35%, transparent);
+}
+
+.status-badge.fullscreen {
+    background: color-mix(in srgb, var(--aura-green) 18%, transparent);
+    color: var(--aura-green-text);
+    border-color: color-mix(in srgb, var(--aura-green) 35%, transparent);
+}
+
+.status-badge.unsupported {
+    background: color-mix(in srgb, var(--aura-red) 15%, transparent);
+    color: var(--aura-red-text);
+    border-color: color-mix(in srgb, var(--aura-red) 35%, transparent);
+}
+
+/* UC1 — Image lightbox */
+
+.lightbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+    max-width: 960px;
+}
+
+.lightbox-thumb {
+    aspect-ratio: 4 / 3;
+    border-radius: var(--vaadin-radius-m);
+    background-size: cover;
+    background-position: center;
+    cursor: zoom-in;
+    border: 1px solid var(--vaadin-border-color);
+    transition: transform 200ms;
+    display: flex;
+    align-items: flex-end;
+    padding: 0.5rem 0.75rem;
+    color: white;
+    font-size: 0.85rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.lightbox-thumb:hover {
+    transform: scale(1.02);
+}
+
+.lightbox-stage {
+    background: black;
+    width: 100%;
+    height: 100%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.lightbox-stage.active {
+    display: flex;
+}
+
+.lightbox-stage > .lightbox-image {
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* UC2 — Slideshow */
+
+.slideshow {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: linear-gradient(135deg, #1d2030 0%, #2a3052 100%);
+    border-radius: var(--vaadin-radius-l);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.25rem;
+    text-align: center;
+    padding: 2rem;
+    box-sizing: border-box;
+    max-width: 960px;
+}
+
+.slideshow.live {
+    aspect-ratio: auto;
+    height: 100vh;
+    max-width: none;
+    border-radius: 0;
+    font-size: 4rem;
+}
+
+.slideshow-footer {
+    text-align: center;
+    margin-top: 1rem;
+    color: var(--vaadin-text-color-secondary);
+    font-size: 0.85rem;
+}
+
+/* UC3 — Distraction-free editor */
+
+.editor-area {
+    width: 100%;
+    max-width: 720px;
+    min-height: 220px;
+    transition: max-width 200ms, min-height 200ms;
+}
+
+.editor-area.fullscreen {
+    max-width: 960px;
+    min-height: 80vh;
+    font-size: 1.15rem;
+}
+
+.editor-toolbar {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.editor-stats {
+    margin-left: auto;
+    color: var(--vaadin-text-color-secondary);
+    font-size: 0.85rem;
+}
+
+/* UC4 — Reactive layout */
+
+.dashboard {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    max-width: 960px;
+}
+
+.dashboard.compact {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.dashboard.spacious {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.metric-card {
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--vaadin-border-color);
+    border-radius: var(--vaadin-radius-m);
+    background: var(--vaadin-background-container);
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.metric-label {
+    color: var(--vaadin-text-color-secondary);
+    font-size: 0.85rem;
+}
+
+.density-aside {
+    color: var(--vaadin-text-color-secondary);
+    font-size: 0.85rem;
+}
+
+/* UC5 — Kiosk exit detection */
+
+.kiosk-stage {
+    width: 100%;
+    height: 320px;
+    border-radius: var(--vaadin-radius-m);
+    background: linear-gradient(135deg, #0e1a2b 0%, #1a3358 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    text-align: center;
+    transition: background 300ms;
+    max-width: 960px;
+}
+
+.kiosk-stage.live {
+    height: 100vh;
+    background: linear-gradient(135deg, #02141a 0%, #053b48 100%);
+    max-width: none;
+    border-radius: 0;
+    font-size: 3rem;
+}
+
+.kiosk-log {
+    font-family: monospace;
+    font-size: 0.85rem;
+    background: var(--vaadin-background-container);
+    border: 1px solid var(--vaadin-border-color);
+    border-radius: var(--vaadin-radius-m);
+    padding: 0.5rem 0.75rem;
+    max-height: 220px;
+    max-width: 720px;
+    overflow-y: auto;
+}
+
+.kiosk-log > div {
+    padding: 0.1rem 0;
+    border-bottom: 1px dashed var(--vaadin-border-color);
+}
+
+.kiosk-log > div:last-child {
+    border-bottom: none;
+}
+
+.unexpected-warning {
+    color: var(--aura-red-text);
+    font-weight: 600;
+}
+
+/* UC6 — Chart expand */
+
+.chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    max-width: 960px;
+}
+
+.chart-card {
+    border: 1px solid var(--vaadin-border-color);
+    border-radius: var(--vaadin-radius-m);
+    background: var(--vaadin-background-container);
+    padding: 0.75rem 1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.chart-card.expanded {
+    width: 100%;
+    height: 100vh;
+    box-sizing: border-box;
+    background: var(--vaadin-background-base);
+}
+
+.chart-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+}
+
+.chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.4rem;
+    height: 140px;
+    transition: height 200ms;
+}
+
+.chart-card.expanded .chart-bars {
+    height: 70vh;
+}
+
+.chart-bar {
+    flex: 1;
+    background: linear-gradient(180deg, var(--aura-blue) 0%,
+            color-mix(in srgb, var(--aura-blue) 60%, transparent) 100%);
+    border-radius: var(--vaadin-radius-s);
+}
