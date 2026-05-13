@@ -32,15 +32,14 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.menu.MenuConfiguration;
+import com.vaadin.flow.signals.Signal;
 
 @PageTitle("Signal API Use Cases")
 @PermitAll
-public class MainLayout extends AppLayout implements BeforeEnterObserver {
+public class MainLayout extends AppLayout {
 
     private final CurrentUserSignal currentUserSignal;
     private final UserSessionRegistry userSessionRegistry;
@@ -232,6 +231,20 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         // Apply session-scoped background color reactively to the whole layout
         getStyle().bind("background-color",
                 userPreferences.backgroundColorSignal());
+
+        Signal.effect(this, () -> {
+            var state = UI.getCurrent().routerStateSignal().get();
+            Class<? extends com.vaadin.flow.component.Component> target = state
+                    .navigationTarget();
+            if (target == null) {
+                return;
+            }
+            if (currentUser != null && sessionId != null) {
+                userSessionRegistry.registerUser(currentUser, sessionId,
+                        state.location().getPath());
+            }
+            updateSourceCodeLink(target);
+        });
     }
 
     @Override
@@ -278,24 +291,6 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
             userSessionRegistry.updateTabActivity(currentUser, sessionId,
                     isVisible);
         }
-    }
-
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        // Get sessionId if not already set (beforeEnter fires before onAttach)
-        if (sessionId == null) {
-            sessionId = SessionIdHelper.getCurrentSessionId();
-        }
-
-        // Register user with current route (or update route if already
-        // registered)
-        if (currentUser != null && sessionId != null) {
-            String viewRoute = event.getLocation().getPath();
-            userSessionRegistry.registerUser(currentUser, sessionId, viewRoute);
-        }
-
-        // Update source code link for current view
-        updateSourceCodeLink(event.getNavigationTarget());
     }
 
     private void updateSourceCodeLink(Class<?> viewClass) {
