@@ -15,11 +15,12 @@
     </parent>
 
     <modules>
-        <module>signals</module>
+        <module>fullscreen</module>
         <module>geolocation</module>
         <module>clipboard</module>
         <module>page-visibility</module>
         <module>text-selection</module>
+        <module>signals</module>
         <module>wake-lock</module>
     </modules>
 
