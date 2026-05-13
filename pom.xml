@@ -21,6 +21,7 @@
         <module>page-visibility</module>
         <module>text-selection</module>
         <module>signals</module>
+        <module>wake-lock</module>
     </modules>
 
     <properties>
