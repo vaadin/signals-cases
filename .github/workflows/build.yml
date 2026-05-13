@@ -12,6 +12,8 @@ jobs:
   prime-cache:
     name: Prime Maven cache
     runs-on: ubuntu-latest
+    outputs:
+      modules: ${{ steps.find.outputs.modules }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -22,6 +24,14 @@ jobs:
       - run: ./mvnw -B -DskipTests dependency:go-offline
         env:
           VAADIN_PRO_KEY: ${{ secrets.VAADIN_PRO_KEY }}
+      - id: find
+        run: |
+          modules=$(find . -mindepth 2 -maxdepth 2 -name pom.xml -printf '%h\n' \
+            | sed 's|^\./||' \
+            | sort \
+            | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "modules=$modules" >> "$GITHUB_OUTPUT"
+          echo "Discovered modules: $modules"
 
   build:
     name: Build ${{ matrix.module }}
@@ -30,7 +40,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        module: [signals, geolocation]
+        module: ${{ fromJson(needs.prime-cache.outputs.modules) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
