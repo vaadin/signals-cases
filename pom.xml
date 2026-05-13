@@ -20,6 +20,7 @@
         <module>clipboard</module>
         <module>page-visibility</module>
         <module>text-selection</module>
+        <module>wake-lock</module>
     </modules>
 
     <properties>
