@@ -20,6 +20,7 @@
         <module>clipboard</module>
         <module>page-visibility</module>
         <module>text-selection</module>
+        <module>web-share</module>
     </modules>
 
     <properties>
