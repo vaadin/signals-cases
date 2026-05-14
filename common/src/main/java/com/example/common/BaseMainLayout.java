@@ -59,7 +59,7 @@ public abstract class BaseMainLayout extends AppLayout
 
         Icon codeIcon = VaadinIcon.CODE.create();
         codeIcon.setSize("16px");
-        codeIcon.getStyle().set("color", "var(--lumo-secondary-text-color)")
+        codeIcon.getStyle().set("color", "var(--vaadin-text-color-secondary)")
                 .set("margin-right", "0.5em");
 
         link.setTarget("_blank");
@@ -68,9 +68,9 @@ public abstract class BaseMainLayout extends AppLayout
                 .set("background-color", "rgba(255, 255, 255, 0.95)")
                 .set("padding", "0.5em 0.75em").set("border-radius", "4px")
                 .set("box-shadow", "0 2px 4px rgba(0, 0, 0, 0.1)")
-                .set("color", "var(--lumo-primary-text-color)")
+                .set("color", "var(--aura-accent-text-color)")
                 .set("text-decoration", "none")
-                .set("font-size", "var(--lumo-font-size-s)")
+                .set("font-size", "var(--aura-font-size-s)")
                 .set("transition", "box-shadow 0.2s");
 
         link.getElement()

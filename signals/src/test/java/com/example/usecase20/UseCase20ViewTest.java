@@ -30,7 +30,7 @@ class UseCase20ViewTest extends SpringBrowserlessTest {
 
         RadioButtonGroup<String> colorPicker = $view(RadioButtonGroup.class)
                 .single();
-        assertEquals("var(--lumo-base-color)", colorPicker.getValue());
+        assertEquals("var(--aura-background-color)", colorPicker.getValue());
     }
 
     @SuppressWarnings("unchecked")

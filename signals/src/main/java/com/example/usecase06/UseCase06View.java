@@ -116,7 +116,7 @@ public class UseCase06View extends VerticalLayout {
 
         var emptyCart = new Paragraph("Empty cart");
         emptyCart.getStyle().set("margin", "0").set("font-style", "italic")
-                .set("color", "var(--lumo-secondary-text-color)");
+                .set("color", "var(--vaadin-text-color-secondary)");
         emptyCart.bindVisible(cartItemsSignal.map(List::isEmpty));
         cartItemsContainer.add(emptyCart, cartItemsList);
 
@@ -157,7 +157,7 @@ public class UseCase06View extends VerticalLayout {
                 () -> discountSignal.get().compareTo(BigDecimal.ZERO) > 0);
         discountLabel.getStyle().set("display", "block")
                 .set("margin-bottom", "0.5em")
-                .set("color", "var(--lumo-success-color)");
+                .set("color", "var(--aura-green)");
 
         var shippingLabel = new Span(formatter("Shipping: $", shippingSignal));
         shippingLabel.getStyle().set("display", "block").set("margin-bottom",
@@ -168,14 +168,14 @@ public class UseCase06View extends VerticalLayout {
                 "0.5em");
 
         var divider = new Div();
-        divider.getStyle()
-                .set("border-top", "2px solid var(--lumo-contrast-20pct)")
+        divider.getStyle().set("border-top",
+                "2px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent)")
                 .set("margin", "0.75em 0");
 
         var totalLabel = new Span(formatter("Total: $", totalSignal));
         totalLabel.getStyle().set("display", "block").set("font-weight", "bold")
                 .set("font-size", "1.5em")
-                .set("color", "var(--lumo-primary-color)");
+                .set("color", "var(--aura-accent-color)");
 
         totalsBox.add(summaryTitle, subtotalLabel, discountLabel, shippingLabel,
                 taxLabel, divider, totalLabel);
@@ -257,7 +257,7 @@ public class UseCase06View extends VerticalLayout {
         itemTotalLabel.setWidth("100px");
         itemTotalLabel.getStyle().set("text-align", "right")
                 .set("font-weight", "bold")
-                .set("color", "var(--lumo-primary-color)");
+                .set("color", "var(--aura-accent-color)");
 
         var removeButton = new Button("Remove", e -> {
             cartItemsSignal.remove(itemSignal);

@@ -153,15 +153,16 @@ public class UseCase24View extends VerticalLayout {
         // Header row with count and unread badge
         var countLabel = new Span();
         countLabel.bindText(countLabelSignal);
-        countLabel.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        countLabel.getStyle().set("color",
+                "var(--vaadin-text-color-secondary)");
 
         var unreadBadge = new Span();
         unreadBadge.bindText(unreadCountSignal.map(c -> c + " unread"));
         unreadBadge.getStyle()
-                .set("background-color", "var(--lumo-primary-color)")
+                .set("background-color", "var(--aura-accent-color)")
                 .set("color", "white").set("padding", "0.25em 0.75em")
                 .set("border-radius", "1em")
-                .set("font-size", "var(--lumo-font-size-s)")
+                .set("font-size", "var(--aura-font-size-s)")
                 .set("font-weight", "bold");
         unreadBadge.bindVisible(unreadCountSignal.map(c -> c > 0));
 
@@ -184,7 +185,7 @@ public class UseCase24View extends VerticalLayout {
         var emptyState = new Paragraph(
                 "No notifications to display. Try adjusting your filters or adding new notifications.");
         emptyState.getStyle().set("text-align", "center").set("padding", "2em")
-                .set("color", "var(--lumo-secondary-text-color)")
+                .set("color", "var(--vaadin-text-color-secondary)")
                 .set("font-style", "italic");
         emptyState.bindVisible(filteredSignal.map(List::isEmpty));
 
@@ -239,7 +240,7 @@ public class UseCase24View extends VerticalLayout {
                 .set("background-color", getTypeColor(notification.type()))
                 .set("color", "white").set("padding", "0.1em 0.5em")
                 .set("border-radius", "0.75em")
-                .set("font-size", "var(--lumo-font-size-xs)")
+                .set("font-size", "var(--aura-font-size-xs)")
                 .set("margin-left", "0.5em");
 
         var titleRow = new Div(titleSpan, typeBadge);
@@ -248,15 +249,17 @@ public class UseCase24View extends VerticalLayout {
 
         // Message
         var messageSpan = new Span(notification.message());
-        messageSpan.getStyle().set("color", "var(--lumo-secondary-text-color)")
-                .set("font-size", "var(--lumo-font-size-s)")
+        messageSpan.getStyle()
+                .set("color", "var(--vaadin-text-color-secondary)")
+                .set("font-size", "var(--aura-font-size-s)")
                 .set("display", "block").set("margin-bottom", "0.5em");
 
         // Timestamp
         var timestampSpan = new Span(
                 notification.timestamp().format(TIME_FORMAT));
-        timestampSpan.getStyle().set("color", "var(--lumo-tertiary-text-color)")
-                .set("font-size", "var(--lumo-font-size-xs)")
+        timestampSpan.getStyle()
+                .set("color", "var(--vaadin-text-color-secondary)")
+                .set("font-size", "var(--aura-font-size-xs)")
                 .set("display", "block");
 
         content.add(titleRow, messageSpan, timestampSpan);

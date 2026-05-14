@@ -206,10 +206,11 @@ public class UseCase19View extends VerticalLayout {
         idleContent.getStyle().set("display", "flex")
                 .set("flex-direction", "column").set("align-items", "center")
                 .set("gap", "0.5em").set("padding", "2em")
-                .set("color", "var(--lumo-secondary-text-color)");
+                .set("color", "var(--vaadin-text-color-secondary)");
 
         Icon idleIcon = new Icon(VaadinIcon.CIRCLE);
-        idleIcon.setColor("var(--lumo-contrast-30pct)");
+        idleIcon.setColor(
+                "color-mix(in srgb, var(--vaadin-text-color) 30%, transparent)");
         idleIcon.setSize("2em");
 
         Span idleText = new Span("Ready to load");
@@ -231,7 +232,7 @@ public class UseCase19View extends VerticalLayout {
         progressBar.setWidth("80%");
 
         Span loadingText = new Span("Loading...");
-        loadingText.getStyle().set("color", "var(--lumo-primary-color)");
+        loadingText.getStyle().set("color", "var(--aura-accent-color)");
 
         loadingContent.add(progressBar, loadingText);
         Signal<Boolean> isLoadingSignal = itemSignal
@@ -248,17 +249,17 @@ public class UseCase19View extends VerticalLayout {
                 .set("margin-bottom", "1em");
 
         Icon successIcon = new Icon(VaadinIcon.CHECK_CIRCLE);
-        successIcon.setColor("var(--lumo-success-color)");
+        successIcon.setColor("var(--aura-green)");
 
         Span successLabel = new Span("Loaded successfully");
-        successLabel.getStyle().set("color", "var(--lumo-success-color)")
+        successLabel.getStyle().set("color", "var(--aura-green)")
                 .set("font-weight", "500");
 
         successHeader.add(successIcon, successLabel);
 
         Div dataContent = new Div();
-        dataContent.getStyle()
-                .set("background-color", "var(--lumo-contrast-5pct)")
+        dataContent.getStyle().set("background-color",
+                "color-mix(in srgb, var(--vaadin-text-color) 5%, transparent)")
                 .set("padding", "1em").set("border-radius", "4px")
                 .set("white-space", "pre-line").set("font-family", "monospace")
                 .set("font-size", "0.875em");
@@ -283,11 +284,11 @@ public class UseCase19View extends VerticalLayout {
                 .set("margin-bottom", "1em");
 
         Icon errorIcon = new Icon(VaadinIcon.CLOSE_CIRCLE);
-        errorIcon.setColor("var(--lumo-error-color)");
+        errorIcon.setColor("var(--aura-red)");
 
         Span errorLabel = new Span("Failed to load");
-        errorLabel.getStyle().set("color", "var(--lumo-error-color)")
-                .set("font-weight", "500");
+        errorLabel.getStyle().set("color", "var(--aura-red)").set("font-weight",
+                "500");
 
         errorHeader.add(errorIcon, errorLabel);
 
@@ -295,7 +296,7 @@ public class UseCase19View extends VerticalLayout {
         errorMessage.getStyle().set("background-color", "#ffebee")
                 .set("padding", "1em").set("border-radius", "4px")
                 .set("margin-bottom", "1em")
-                .set("color", "var(--lumo-error-text-color)");
+                .set("color", "var(--aura-red-text)");
 
         Span errorText = new Span();
         errorText.bindText(itemSignal.map(
@@ -317,10 +318,11 @@ public class UseCase19View extends VerticalLayout {
         // Card styling based on state - use direct style binding
         card.getStyle().bind("border-left", itemSignal.map(item -> {
             String color = switch (item.state()) {
-            case IDLE -> "var(--lumo-contrast-20pct)";
-            case LOADING, GENERATING -> "var(--lumo-primary-color)";
-            case SUCCESS -> "var(--lumo-success-color)";
-            case ERROR -> "var(--lumo-error-color)";
+            case IDLE ->
+                "color-mix(in srgb, var(--vaadin-text-color) 20%, transparent)";
+            case LOADING, GENERATING -> "var(--aura-accent-color)";
+            case SUCCESS -> "var(--aura-green)";
+            case ERROR -> "var(--aura-red)";
             };
             return "4px solid " + color;
         }));

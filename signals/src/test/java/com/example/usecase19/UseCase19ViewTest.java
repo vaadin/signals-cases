@@ -70,9 +70,8 @@ class UseCase19ViewTest extends SpringBrowserlessTest {
         Card card = $view(Card.class).all().getFirst();
 
         // IDLE state should have contrast border
-        assertTrue(
-                card.getStyle().get("border-left")
-                        .contains("var(--lumo-contrast-20pct)"),
+        assertTrue(card.getStyle().get("border-left").contains(
+                "color-mix(in srgb, var(--vaadin-text-color) 20%, transparent)"),
                 "IDLE card should have contrast border but was: "
                         + card.getStyle().get("border-left"));
     }
@@ -93,7 +92,7 @@ class UseCase19ViewTest extends SpringBrowserlessTest {
         Card card = $view(Card.class).all().getFirst();
         assertTrue(
                 card.getStyle().get("border-left")
-                        .contains("var(--lumo-primary-color)"),
+                        .contains("var(--aura-accent-color)"),
                 "LOADING card should have primary border but was: "
                         + card.getStyle().get("border-left"));
     }

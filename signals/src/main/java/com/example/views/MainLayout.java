@@ -67,7 +67,7 @@ public class MainLayout extends AppLayout {
         DrawerToggle toggle = new DrawerToggle();
 
         H1 title = new H1("Signal API Use Cases");
-        title.getStyle().set("font-size", "var(--lumo-font-size-l)")
+        title.getStyle().set("font-size", "var(--aura-font-size-l)")
                 .set("margin", "0");
 
         // Active users display with avatars
@@ -83,8 +83,8 @@ public class MainLayout extends AppLayout {
                         .map(displayNames -> displayNames.isEmpty() ? ""
                                 : "👥 " + displayNames.size() + " online:"));
         activeUsersLabel.getStyle()
-                .set("color", "var(--lumo-secondary-text-color)")
-                .set("font-size", "var(--lumo-font-size-s)");
+                .set("color", "var(--vaadin-text-color-secondary)")
+                .set("font-size", "var(--aura-font-size-s)");
 
         com.vaadin.flow.component.html.Div avatarsContainer = new com.vaadin.flow.component.html.Div();
         avatarsContainer.getStyle().set("display", "flex").set("gap", "0.25em");
@@ -162,8 +162,8 @@ public class MainLayout extends AppLayout {
 
         Span userName = new Span(currentUserSignal.getUserSignal()
                 .map(user -> user.isAuthenticated() ? user.getUsername() : ""));
-        userName.getStyle().set("color", "var(--lumo-secondary-text-color)")
-                .set("font-size", "var(--lumo-font-size-s)");
+        userName.getStyle().set("color", "var(--vaadin-text-color-secondary)")
+                .set("font-size", "var(--aura-font-size-s)");
 
         userDisplay.add(userAvatar, userName);
 
@@ -190,7 +190,7 @@ public class MainLayout extends AppLayout {
 
         Icon codeIcon = VaadinIcon.CODE.create();
         codeIcon.setSize("16px");
-        codeIcon.getStyle().set("color", "var(--lumo-secondary-text-color)")
+        codeIcon.getStyle().set("color", "var(--vaadin-text-color-secondary)")
                 .set("margin-right", "0.5em");
 
         sourceCodeLink = new Anchor("", "View source");
@@ -200,9 +200,9 @@ public class MainLayout extends AppLayout {
                 .set("background-color", "rgba(255, 255, 255, 0.95)")
                 .set("padding", "0.5em 0.75em").set("border-radius", "4px")
                 .set("box-shadow", "0 2px 4px rgba(0, 0, 0, 0.1)")
-                .set("color", "var(--lumo-primary-text-color)")
+                .set("color", "var(--aura-accent-text-color)")
                 .set("text-decoration", "none")
-                .set("font-size", "var(--lumo-font-size-s)")
+                .set("font-size", "var(--aura-font-size-s)")
                 .set("transition", "box-shadow 0.2s");
 
         sourceCodeLink.getElement().addEventListener("mouseenter", e -> {

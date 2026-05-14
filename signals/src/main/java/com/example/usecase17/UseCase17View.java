@@ -668,7 +668,7 @@ public class UseCase17View extends VerticalLayout {
 
         Span perfRating = new Span(performanceRatingSignal);
         perfRating.getStyle().set("display", "block").set("font-size", "1.2em")
-                .set("color", "var(--lumo-primary-color)");
+                .set("color", "var(--aura-accent-color)");
 
         Span perfGaming = new Span(
                 gamingScoreSignal.map(s -> "Gaming: " + s + "/100"));
@@ -785,7 +785,7 @@ public class UseCase17View extends VerticalLayout {
         Span price = new Span(() -> "$" + compSignal.get().getPrice()
                 .setScale(0, RoundingMode.HALF_UP));
         price.getStyle().set("font-weight", "bold").set("color",
-                "var(--lumo-primary-color)");
+                "var(--aura-accent-color)");
 
         item.add(name, price);
         return item;
@@ -801,8 +801,7 @@ public class UseCase17View extends VerticalLayout {
 
     private String formatCheck(String label, boolean passes) {
         String icon = passes ? "✓" : "✗";
-        String color = passes ? "var(--lumo-success-color)"
-                : "var(--lumo-error-color)";
+        String color = passes ? "var(--aura-green)" : "var(--aura-red)";
         return "<span style='color: " + color + "; font-weight: bold;'>" + icon
                 + "</span> " + label;
     }

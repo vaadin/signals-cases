@@ -65,7 +65,8 @@ public class UseCase20View extends VerticalLayout {
             tile.getStyle().set("background-color", item)
                     .set("padding", "0.5rem 0.75rem")
                     .set("border-radius", "8px")
-                    .set("border", "1px solid var(--lumo-contrast-20pct)")
+                    .set("border",
+                            "1px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent)")
                     .set("min-width", "180px").set("min-height", "40px")
                     .set("display", "flex").set("align-items", "center")
                     .set("justify-content", "center")
@@ -84,12 +85,12 @@ public class UseCase20View extends VerticalLayout {
 
     private static String chooseTextColor(String background) {
         if (background == null) {
-            return "var(--lumo-body-text-color)";
+            return "var(--vaadin-text-color)";
         }
         String bg = background.trim().toLowerCase();
         // If CSS var, use default text color
         if (bg.startsWith("var(")) {
-            return "var(--lumo-body-text-color)";
+            return "var(--vaadin-text-color)";
         }
         // Expect #rrggbb
         if (bg.startsWith("#") && (bg.length() == 7)) {
@@ -108,6 +109,6 @@ public class UseCase20View extends VerticalLayout {
                 // fall through
             }
         }
-        return "var(--lumo-body-text-color)";
+        return "var(--vaadin-text-color)";
     }
 }

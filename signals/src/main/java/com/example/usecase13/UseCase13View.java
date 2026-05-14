@@ -65,10 +65,10 @@ public class UseCase13View extends VerticalLayout {
                         + "Try opening multiple browser tabs with different users to see live synchronization!");
 
         Div counterBox = new Div();
-        counterBox.getStyle()
-                .set("background", "var(--lumo-primary-color-10pct)")
+        counterBox.getStyle().set("background",
+                "color-mix(in srgb, var(--aura-accent-color) 10%, transparent)")
                 .set("padding", "1em").set("border-radius", "8px")
-                .set("border-left", "4px solid var(--lumo-primary-color)")
+                .set("border-left", "4px solid var(--aura-accent-color)")
                 .set("margin", "1em 0");
 
         H3 counterTitle = new H3(() -> "👥 Currently Online: "
@@ -138,8 +138,9 @@ public class UseCase13View extends VerticalLayout {
 
         // Highlight current user's session
         if (isCurrentSession) {
-            card.getStyle().set("border", "2px solid var(--lumo-primary-color)")
-                    .set("background", "var(--lumo-primary-color-10pct)");
+            card.getStyle().set("border", "2px solid var(--aura-accent-color)")
+                    .set("background",
+                            "color-mix(in srgb, var(--aura-accent-color) 10%, transparent)");
         }
 
         // Dim inactive tabs
@@ -226,7 +227,7 @@ public class UseCase13View extends VerticalLayout {
         Span viewText = new Span(() -> "Viewing: "
                 + (currentView.get() != null ? formatViewName(currentView.get())
                         : "Unknown"));
-        viewText.getStyle().set("font-size", "var(--lumo-font-size-s)");
+        viewText.getStyle().set("font-size", "var(--aura-font-size-s)");
 
         viewRow.add(viewIcon, viewText);
 
@@ -240,8 +241,8 @@ public class UseCase13View extends VerticalLayout {
         Span durationTextSpan = new Span(
                 () -> "Online for " + formatDuration(System.currentTimeMillis()
                         - userSignal.get().sessionStartTime()));
-        durationTextSpan.getStyle().set("font-size", "var(--lumo-font-size-s)")
-                .set("color", "var(--lumo-secondary-text-color)");
+        durationTextSpan.getStyle().set("font-size", "var(--aura-font-size-s)")
+                .set("color", "var(--vaadin-text-color-secondary)");
 
         durationRow.add(durationIcon, durationTextSpan);
 
@@ -261,8 +262,8 @@ public class UseCase13View extends VerticalLayout {
             return interactionText;
         });
         interactionTextSpan.getStyle()
-                .set("font-size", "var(--lumo-font-size-s)")
-                .set("color", "var(--lumo-secondary-text-color)");
+                .set("font-size", "var(--aura-font-size-s)")
+                .set("color", "var(--vaadin-text-color-secondary)");
 
         interactionRow.add(interactionIcon, interactionTextSpan);
 
@@ -294,7 +295,7 @@ public class UseCase13View extends VerticalLayout {
         Span badge = new Span("[" + badgeLabel + "]");
         badge.getStyle().set("padding", "2px 6px").set("border-radius", "4px")
                 .set("background", badgeColor).set("color", "white")
-                .set("font-size", "var(--lumo-font-size-xs)")
+                .set("font-size", "var(--aura-font-size-xs)")
                 .set("font-weight", "bold").set("flex-shrink", "0");
 
         return badge;

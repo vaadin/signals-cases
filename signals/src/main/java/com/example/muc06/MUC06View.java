@@ -109,12 +109,12 @@ public class MUC06View extends VerticalLayout {
 
         Span completedLabel = new Span();
         completedLabel.bindText(completedSignal.map(n -> "Completed: " + n));
-        completedLabel.getStyle().set("color", "var(--lumo-success-color)")
+        completedLabel.getStyle().set("color", "var(--aura-green)")
                 .set("font-weight", "500");
 
         Span pendingLabel = new Span();
         pendingLabel.bindText(pendingSignal.map(n -> "Pending: " + n));
-        pendingLabel.getStyle().set("color", "var(--lumo-primary-color)")
+        pendingLabel.getStyle().set("color", "var(--aura-accent-color)")
                 .set("font-weight", "500");
 
         statsBox.add(totalLabel, completedLabel, pendingLabel);
@@ -203,8 +203,8 @@ public class MUC06View extends VerticalLayout {
         row.setDefaultVerticalComponentAlignment(Alignment.CENTER);
         row.setWidthFull();
         row.setPadding(true);
-        row.getStyle().set("background-color", "#ffffff")
-                .set("border", "1px solid var(--lumo-contrast-20pct)")
+        row.getStyle().set("background-color", "#ffffff").set("border",
+                "1px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent)")
                 .set("border-radius", "4px");
 
         return row;

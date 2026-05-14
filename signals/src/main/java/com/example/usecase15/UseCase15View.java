@@ -148,7 +148,7 @@ public class UseCase15View extends VerticalLayout {
         Div instantQueryDiv = new Div();
         Span instantLabel = new Span("Instant value: ");
         instantLabel.getStyle().set("color",
-                "var(--lumo-secondary-text-color)");
+                "var(--vaadin-text-color-secondary)");
         Span instantValue = new Span(instantQuerySignal
                 .map(q -> q.isEmpty() ? "(empty)" : "\"" + q + "\""));
         instantValue.getStyle().set("font-family", "monospace")
@@ -158,18 +158,18 @@ public class UseCase15View extends VerticalLayout {
         Div debouncedQueryDiv = new Div();
         Span debouncedLabel = new Span("Debounced value (1000ms): ");
         debouncedLabel.getStyle().set("color",
-                "var(--lumo-secondary-text-color)");
+                "var(--vaadin-text-color-secondary)");
         Span debouncedValue = new Span(searchQuerySignal
                 .map(q -> q.isEmpty() ? "(empty)" : "\"" + q + "\""));
         debouncedValue.getStyle().set("font-family", "monospace")
                 .set("font-weight", "bold")
-                .set("color", "var(--lumo-primary-color)");
+                .set("color", "var(--aura-accent-color)");
         debouncedQueryDiv.add(debouncedLabel, debouncedValue);
 
         Div keystrokeCountDiv = new Div();
         Span keystrokeLabel = new Span("Keystrokes: ");
         keystrokeLabel.getStyle().set("color",
-                "var(--lumo-secondary-text-color)");
+                "var(--vaadin-text-color-secondary)");
         Span keystrokeValue = new Span(
                 keystrokeCountSignal.map(String::valueOf));
         keystrokeValue.getStyle().set("font-weight", "bold");
@@ -177,10 +177,11 @@ public class UseCase15View extends VerticalLayout {
 
         Div searchCountDiv = new Div();
         Span countLabel = new Span("Searches performed: ");
-        countLabel.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        countLabel.getStyle().set("color",
+                "var(--vaadin-text-color-secondary)");
         Span countValue = new Span(searchCountSignal.map(String::valueOf));
         countValue.getStyle().set("font-weight", "bold").set("color",
-                "var(--lumo-success-color)");
+                "var(--aura-green)");
         searchCountDiv.add(countLabel, countValue);
 
         statsBox.add(instantQueryDiv, debouncedQueryDiv, keystrokeCountDiv,
@@ -197,7 +198,7 @@ public class UseCase15View extends VerticalLayout {
 
         Span statusText = new Span(isSearchingSignal
                 .map(searching -> searching ? "Searching..." : ""));
-        statusText.getStyle().set("color", "var(--lumo-primary-color)");
+        statusText.getStyle().set("color", "var(--aura-accent-color)");
 
         statusBox.add(searchingIcon, statusText);
 
@@ -317,8 +318,8 @@ public class UseCase15View extends VerticalLayout {
 
     private Div createProductCard(Product product) {
         Div card = new Div();
-        card.getStyle().set("background-color", "#ffffff")
-                .set("border", "1px solid var(--lumo-contrast-20pct)")
+        card.getStyle().set("background-color", "#ffffff").set("border",
+                "1px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent)")
                 .set("border-radius", "4px").set("padding", "1em")
                 .set("display", "flex").set("justify-content", "space-between")
                 .set("align-items", "center");
@@ -334,14 +335,14 @@ public class UseCase15View extends VerticalLayout {
 
         Div categoryDiv = new Div(product.category());
         categoryDiv.getStyle().set("font-size", "0.9em").set("color",
-                "var(--lumo-secondary-text-color)");
+                "var(--vaadin-text-color-secondary)");
 
         leftSide.add(nameDiv, categoryDiv);
 
         Div priceDiv = new Div(
                 "$" + product.price().setScale(2, RoundingMode.HALF_UP));
         priceDiv.getStyle().set("font-weight", "bold").set("color",
-                "var(--lumo-primary-color)");
+                "var(--aura-accent-color)");
 
         card.add(leftSide, priceDiv);
         return card;

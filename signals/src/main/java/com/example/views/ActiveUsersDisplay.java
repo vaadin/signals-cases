@@ -81,8 +81,7 @@ public class ActiveUsersDisplay extends Div {
                 .set("gap", "0.5em");
 
         if (showAccentBorder) {
-            getStyle().set("border-left",
-                    "4px solid var(--lumo-warning-color)");
+            getStyle().set("border-left", "4px solid var(--aura-orange)");
         }
 
         // Users container with avatars
@@ -134,7 +133,7 @@ public class ActiveUsersDisplay extends Div {
 
         Span nameLabel = new Span();
         nameLabel.bindText(displayNameSignal);
-        nameLabel.getStyle().set("font-size", "var(--lumo-font-size-s)");
+        nameLabel.getStyle().set("font-size", "var(--aura-font-size-s)");
 
         userItem.add(avatar, nameLabel);
         return userItem;

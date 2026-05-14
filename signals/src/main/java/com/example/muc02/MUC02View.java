@@ -206,7 +206,7 @@ public class MUC02View extends VerticalLayout {
         Div positionLabel = new Div(
                 positionSignal.map(MUC02Signals.CursorPosition::toString));
         positionLabel.getStyle().set("font-family", "monospace")
-                .set("color", "var(--lumo-secondary-text-color)")
+                .set("color", "var(--vaadin-text-color-secondary)")
                 .set("margin-left", "auto");
 
         userItem.add(colorDot, avatar, userLabel, positionLabel);
