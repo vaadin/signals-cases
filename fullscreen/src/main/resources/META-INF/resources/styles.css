@@ -304,21 +304,12 @@
     font-weight: 600;
 }
 
-.chart-bars {
-    display: flex;
-    align-items: flex-end;
-    gap: 0.4rem;
-    height: 140px;
-    transition: height 200ms;
+.chart-card-chart {
+    width: 100%;
+    height: 200px;
 }
 
-.chart-card.expanded .chart-bars {
-    height: 70vh;
-}
-
-.chart-bar {
+.chart-card.expanded .chart-card-chart {
     flex: 1;
-    background: linear-gradient(180deg, var(--aura-blue) 0%,
-            color-mix(in srgb, var(--aura-blue) 60%, transparent) 100%);
-    border-radius: var(--vaadin-radius-s);
+    height: auto;
 }

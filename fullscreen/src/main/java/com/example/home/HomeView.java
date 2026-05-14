@@ -47,7 +47,7 @@ public class HomeView extends BaseHomeView {
                 "React when the user presses Escape to leave fullscreen.",
                 KioskExitDetectionView.class));
         cards.add(homeCard("UC6", "Chart expand",
-                "Per-card expand buttons fullscreen a single chart.",
+                "Per-card expand buttons fullscreen a single Vaadin Chart.",
                 ChartExpandView.class));
         add(cards);
     }
