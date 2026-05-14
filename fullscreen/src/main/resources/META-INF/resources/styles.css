@@ -113,14 +113,11 @@
 
 .slideshow.live {
     aspect-ratio: auto;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     max-width: none;
     border-radius: 0;
     font-size: 4rem;
-}
-
-.hidden-while-presenting {
-    display: none;
 }
 
 .slideshow-footer {

@@ -34,8 +34,8 @@ public class HomeView extends BaseHomeView {
                 "Click an image to fullscreen it without losing overlays.",
                 ImageLightboxView.class));
         cards.add(homeCard("UC2", "Slideshow / presentation",
-                "Page#requestFullscreen() projects the whole document; the "
-                        + "view's chrome hides while presenting.",
+                "Component#requestFullscreen() fullscreens just the slide; "
+                        + "arrows navigate, Escape exits.",
                 SlideshowView.class));
         cards.add(homeCard("UC3", "Distraction-free editor",
                 "Expand a text area to fullscreen for focused writing.",
@@ -44,7 +44,8 @@ public class HomeView extends BaseHomeView {
                 "fullscreenSignal() drives density and visible widgets.",
                 ReactiveLayoutView.class));
         cards.add(homeCard("UC5", "Kiosk: detect exit",
-                "React when the user presses Escape to leave fullscreen.",
+                "Page#requestFullscreen() locks the whole document; reacts "
+                        + "when the user presses Escape to leave kiosk mode.",
                 KioskExitDetectionView.class));
         cards.add(homeCard("UC6", "Chart expand",
                 "Per-card expand buttons fullscreen a single Vaadin Chart.",
