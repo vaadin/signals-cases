@@ -28,6 +28,7 @@ jobs:
         run: |
           modules=$(find . -mindepth 2 -maxdepth 2 -name pom.xml -printf '%h\n' \
             | sed 's|^\./||' \
+            | grep -v '^common$' \
             | sort \
             | jq -R -s -c 'split("\n") | map(select(length > 0))')
           echo "modules=$modules" >> "$GITHUB_OUTPUT"
