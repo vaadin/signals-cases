@@ -86,6 +86,11 @@ public class KioskExitDetectionView extends VerticalLayout {
     private final Select<Integer> partySizeField = new Select<>();
     private final Select<String> purposeField = new Select<>();
     private final PasswordField pinField = new PasswordField("Enter staff PIN");
+    private final Button staffButton = new Button("Staff", e -> {
+        staffError.set("");
+        pinField.clear();
+        staffPromptOpen.set(true);
+    });
 
     {
         // Tell the browser this is an ephemeral code, not a saved credential,
@@ -133,13 +138,8 @@ public class KioskExitDetectionView extends VerticalLayout {
 
         Span title = new Span("Acme HQ Visitor Sign-In");
         title.addClassName("kiosk-title");
-        Button staff = new Button("Staff", e -> {
-            staffError.set("");
-            pinField.clear();
-            staffPromptOpen.set(true);
-        });
-        staff.addClassName("kiosk-staff-btn");
-        HorizontalLayout header = new HorizontalLayout(title, staff);
+        staffButton.addClassName("kiosk-staff-btn");
+        HorizontalLayout header = new HorizontalLayout(title, staffButton);
         header.addClassName("kiosk-header");
         header.setWidthFull();
         header.setJustifyContentMode(JustifyContentMode.BETWEEN);
@@ -299,6 +299,9 @@ public class KioskExitDetectionView extends VerticalLayout {
         stateBadge.bindClassName("unsupported",
                 fs.map(s -> s == FullscreenState.UNSUPPORTED));
         stage.bindClassName("live", isFullscreen);
+        // Staff exit only makes sense once the kiosk is locked; outside
+        // fullscreen the small kiosk preview shouldn't expose the button.
+        staffButton.bindVisible(isFullscreen);
         // The Component#requestFullscreen() wrapper visually hides the rest
         // of the document, so we don't need to bindVisible developer chrome
         // ourselves — heading, intro, controls row and log are simply not

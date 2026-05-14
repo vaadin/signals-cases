@@ -128,9 +128,12 @@ class KioskExitDetectionViewTest extends SpringBrowserlessTest {
         navigate(KioskExitDetectionView.class);
         runPendingSignalsTasks();
 
-        // Don't simulate FULLSCREEN — a wrong PIN never calls session.exit()
-        // so we don't need a live session, and keeping NOT_FULLSCREEN keeps
-        // the (bindVisible) log Div in the tree for the final assertion.
+        // Staff button is bindVisible(isFullscreen), so enter fullscreen
+        // before clicking it.
+        clickButton("Enter kiosk");
+        FullscreenTestSupport.setFullscreenState(FullscreenState.FULLSCREEN);
+        runPendingSignalsTasks();
+
         clickButton("Staff");
         runPendingSignalsTasks();
 
