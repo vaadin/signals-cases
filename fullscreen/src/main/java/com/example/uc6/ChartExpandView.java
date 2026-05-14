@@ -90,8 +90,6 @@ public class ChartExpandView extends VerticalLayout {
         Signal<FullscreenState> fs = attachEvent.getUI().getPage()
                 .fullscreenSignal();
         stateBadge.bindText(fs.map(ChartExpandView::badgeText));
-        stateBadge.bindClassName("fullscreen",
-                fs.map(s -> s == FullscreenState.FULLSCREEN));
         stateBadge.bindClassName("unsupported",
                 fs.map(s -> s == FullscreenState.UNSUPPORTED));
 
@@ -157,9 +155,10 @@ public class ChartExpandView extends VerticalLayout {
     }
 
     private static String badgeText(FullscreenState state) {
+        // FULLSCREEN: only the expanded card is visible, the badge is hidden.
+        // Keep the idle text rather than flipping to a message no one sees.
         return switch (state) {
-        case FULLSCREEN -> "Expanded — Escape to return";
-        case NOT_FULLSCREEN -> "Click Expand on any card";
+        case FULLSCREEN, NOT_FULLSCREEN -> "Click Expand on any card";
         case UNSUPPORTED -> "Fullscreen unsupported in this browser";
         case UNKNOWN -> "Detecting…";
         };

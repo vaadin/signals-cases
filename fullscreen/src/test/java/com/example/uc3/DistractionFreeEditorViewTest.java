@@ -53,7 +53,9 @@ class DistractionFreeEditorViewTest extends SpringBrowserlessTest {
 
         FullscreenTestSupport.setFullscreenState(FullscreenState.FULLSCREEN);
         runPendingSignalsTasks();
-        assertBadgeContains("Focused");
+        // Badge is hidden by the fullscreen wrapper, so it intentionally
+        // stays on the idle copy rather than flipping to a hidden message.
+        assertBadgeContains("Click Expand");
 
         FullscreenTestSupport.setFullscreenState(FullscreenState.UNSUPPORTED);
         runPendingSignalsTasks();

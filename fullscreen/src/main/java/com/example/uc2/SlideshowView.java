@@ -102,7 +102,6 @@ public class SlideshowView extends VerticalLayout {
                 .map(s -> s == FullscreenState.FULLSCREEN);
 
         stateBadge.bindText(fs.map(SlideshowView::badgeText));
-        stateBadge.bindClassName("fullscreen", live);
         stateBadge.bindClassName("unsupported",
                 fs.map(s -> s == FullscreenState.UNSUPPORTED));
         stage.bindClassName("live", live);
@@ -123,9 +122,11 @@ public class SlideshowView extends VerticalLayout {
     }
 
     private static String badgeText(FullscreenState state) {
+        // FULLSCREEN: the badge is hidden while presenting (see
+        // hidden-while-presenting binding), so the text never changes from
+        // the user's point of view.
         return switch (state) {
-        case FULLSCREEN -> "Presenting — Escape to return";
-        case NOT_FULLSCREEN -> "Press Present to start the slideshow";
+        case FULLSCREEN, NOT_FULLSCREEN -> "Press Present to start the slideshow";
         case UNSUPPORTED -> "Fullscreen is not supported in this browser";
         case UNKNOWN -> "Detecting fullscreen support…";
         };

@@ -88,7 +88,6 @@ public class DistractionFreeEditorView extends VerticalLayout {
         Signal<Boolean> fullscreen = fs
                 .map(s -> s == FullscreenState.FULLSCREEN);
         stateBadge.bindText(fs.map(DistractionFreeEditorView::badgeText));
-        stateBadge.bindClassName("fullscreen", fullscreen);
         stateBadge.bindClassName("unsupported",
                 fs.map(s -> s == FullscreenState.UNSUPPORTED));
         editorPane.bindClassName("fullscreen", fullscreen);
@@ -102,9 +101,11 @@ public class DistractionFreeEditorView extends VerticalLayout {
     }
 
     private static String badgeText(FullscreenState state) {
+        // FULLSCREEN: the badge sits outside the fullscreened pane, so it's
+        // invisible while fullscreen — keep the idle text instead of
+        // flipping to a message no one sees.
         return switch (state) {
-        case FULLSCREEN -> "Focused — Escape to return";
-        case NOT_FULLSCREEN -> "Click Expand to write distraction-free";
+        case FULLSCREEN, NOT_FULLSCREEN -> "Click Expand to write distraction-free";
         case UNSUPPORTED -> "Fullscreen is not supported in this browser";
         case UNKNOWN -> "Detecting fullscreen support…";
         };
