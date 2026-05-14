@@ -11,6 +11,11 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.model.ChartType;
+import com.vaadin.flow.component.charts.model.Configuration;
+import com.vaadin.flow.component.charts.model.ListSeries;
+import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -28,7 +33,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 /**
  * UC6 — Chart expand-to-fullscreen.
  * <p>
- * A dashboard with several chart cards, each with its own Expand button.
+ * A dashboard with several {@link Chart} cards, each with its own Expand button.
  * Clicking Expand calls
  * {@link com.vaadin.flow.component.Component#requestFullscreen()} on that card,
  * which returns a {@link FullscreenSession} whose
@@ -38,6 +43,10 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * though the wrapper hides the rest of the dashboard during fullscreen, this
  * keeps the binding semantically correct (and lets devtools/tests inspect
  * which card is active).
+ * <p>
+ * Highcharts animations are disabled on the column series so the chart neither
+ * morphs on initial render nor on exit-fullscreen resize — the user only sees
+ * the card shrink, not a separate bar re-tween.
  */
 @Route(value = "uc6", layout = MainLayout.class)
 @Menu(order = 6, title = "UC6 — Chart expand")
@@ -56,7 +65,8 @@ public class ChartExpandView extends VerticalLayout {
         add(new Paragraph(
                 "Click Expand on any card to fill the screen with that chart "
                         + "alone. Press Escape to return to the dashboard. "
-                        + "Each request returns a FullscreenSession; we read "
+                        + "Each card hosts a Vaadin Chart and each request "
+                        + "returns a FullscreenSession; we read "
                         + "session.owner() to remember which card is the "
                         + "active one and only that card gets the expanded "
                         + "CSS class."));
@@ -80,8 +90,6 @@ public class ChartExpandView extends VerticalLayout {
         Signal<FullscreenState> fs = attachEvent.getUI().getPage()
                 .fullscreenSignal();
         stateBadge.bindText(fs.map(ChartExpandView::badgeText));
-        stateBadge.bindClassName("fullscreen",
-                fs.map(s -> s == FullscreenState.FULLSCREEN));
         stateBadge.bindClassName("unsupported",
                 fs.map(s -> s == FullscreenState.UNSUPPORTED));
 
@@ -103,16 +111,28 @@ public class ChartExpandView extends VerticalLayout {
         header.setWidthFull();
         card.add(header);
 
-        Div bars = new Div();
-        bars.addClassName("chart-bars");
-        for (int i = 0; i < 12; i++) {
-            Div bar = new Div();
-            bar.addClassName("chart-bar");
-            int height = 25 + ThreadLocalRandom.current().nextInt(75);
-            bar.getStyle().set("height", height + "%");
-            bars.add(bar);
+        Chart chart = new Chart(ChartType.COLUMN);
+        chart.addClassName("chart-card-chart");
+        Configuration conf = chart.getConfiguration();
+        conf.setTitle((String) null);
+        conf.getLegend().setEnabled(false);
+        conf.getxAxis().setVisible(false);
+        conf.getyAxis().setVisible(false);
+        conf.getChart().setStyledMode(true);
+
+        PlotOptionsColumn columnOptions = new PlotOptionsColumn();
+        // No tweened bar animation on initial render or container resize —
+        // the card itself snaps between sizes, no separate bar animation.
+        columnOptions.setAnimation(false);
+        conf.addPlotOptions(columnOptions);
+
+        Number[] data = new Number[12];
+        for (int i = 0; i < data.length; i++) {
+            data[i] = 25 + ThreadLocalRandom.current().nextInt(75);
         }
-        card.add(bars);
+        conf.addSeries(new ListSeries(title, data));
+
+        card.add(chart);
         return card;
     }
 
@@ -135,9 +155,10 @@ public class ChartExpandView extends VerticalLayout {
     }
 
     private static String badgeText(FullscreenState state) {
+        // FULLSCREEN: only the expanded card is visible, the badge is hidden.
+        // Keep the idle text rather than flipping to a message no one sees.
         return switch (state) {
-        case FULLSCREEN -> "Expanded — Escape to return";
-        case NOT_FULLSCREEN -> "Click Expand on any card";
+        case FULLSCREEN, NOT_FULLSCREEN -> "Click Expand on any card";
         case UNSUPPORTED -> "Fullscreen unsupported in this browser";
         case UNKNOWN -> "Detecting…";
         };

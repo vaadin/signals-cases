@@ -31,10 +31,12 @@ public class HomeView extends BaseHomeView {
         Div cards = new Div();
         cards.addClassName("home-cards");
         cards.add(homeCard("UC1", "Image lightbox",
-                "Click an image to fullscreen it without losing overlays.",
+                "Click a thumbnail to fullscreen the preview pane; Escape "
+                        + "returns to the gallery.",
                 ImageLightboxView.class));
         cards.add(homeCard("UC2", "Slideshow / presentation",
-                "Page-level fullscreen with keyboard navigation.",
+                "Component#requestFullscreen() fullscreens just the slide; "
+                        + "arrows navigate, Escape exits.",
                 SlideshowView.class));
         cards.add(homeCard("UC3", "Distraction-free editor",
                 "Expand a text area to fullscreen for focused writing.",
@@ -42,11 +44,13 @@ public class HomeView extends BaseHomeView {
         cards.add(homeCard("UC4", "Reactive layout",
                 "fullscreenSignal() drives density and visible widgets.",
                 ReactiveLayoutView.class));
-        cards.add(homeCard("UC5", "Kiosk: detect exit",
-                "React when the user presses Escape to leave fullscreen.",
+        cards.add(homeCard("UC5", "Kiosk: visitor sign-in",
+                "Component#requestFullscreen() locks just the kiosk UI; "
+                        + "visitors sign in, staff exits with a PIN, Escape "
+                        + "is flagged.",
                 KioskExitDetectionView.class));
         cards.add(homeCard("UC6", "Chart expand",
-                "Per-card expand buttons fullscreen a single chart.",
+                "Per-card expand buttons fullscreen a single Vaadin Chart.",
                 ChartExpandView.class));
         add(cards);
     }

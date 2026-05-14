@@ -4,9 +4,11 @@ import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.FullscreenState;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -18,13 +20,15 @@ import com.vaadin.flow.signals.Signal;
 /**
  * UC3 — Distraction-free editor.
  * <p>
- * A single text area that can be enlarged to fullscreen with
- * {@link com.vaadin.flow.component.Component#requestFullscreen()}. The
- * surrounding view (heading, intro text, navigation drawer) is hidden by the
- * wrapper, so the writer only sees the text area and a live word counter.
- * Exit with Escape or the “Done” button — which calls
- * {@link com.vaadin.flow.component.Component#exitFullscreen()} on the editor
- * directly, with no need to thread the UI through to {@code Page.exitFullscreen()}.
+ * A pane that wraps the text area together with a Done button and live word
+ * counter is enlarged via
+ * {@link com.vaadin.flow.component.Component#requestFullscreen()}. The rest of
+ * the view (heading, intro, navigation drawer) is hidden by the wrapper, so the
+ * writer sees only the editor, the word counter, and the Done button. Exit with
+ * Escape or by clicking Done — which calls
+ * {@link com.vaadin.flow.component.Component#exitFullscreen()} on the pane
+ * directly, with no need to thread the UI through to
+ * {@code Page.exitFullscreen()}.
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @Menu(order = 3, title = "UC3 — Distraction-free editor")
@@ -33,6 +37,9 @@ public class DistractionFreeEditorView extends VerticalLayout {
     private final TextArea editor = new TextArea();
     private final Span wordCount = new Span("0 words");
     private final Span stateBadge = new Span();
+    private final Div editorPane = new Div();
+    private final Button done = new Button("Done",
+            e -> editorPane.exitFullscreen());
 
     public DistractionFreeEditorView() {
         add(new H1("UC3 — Distraction-free editor"));
@@ -40,8 +47,9 @@ public class DistractionFreeEditorView extends VerticalLayout {
                 "Click “Expand to fullscreen” to focus only on the text. The "
                         + "rest of the app — navigation, header, this "
                         + "paragraph — is hidden by the fullscreen wrapper. "
-                        + "Word count and the exit button stay attached to the "
-                        + "editor so they survive the move."));
+                        + "A Done button appears inside the pane only while "
+                        + "fullscreen so it can be clicked to exit; Escape "
+                        + "exits too."));
 
         stateBadge.addClassName("status-badge");
         add(stateBadge);
@@ -53,18 +61,23 @@ public class DistractionFreeEditorView extends VerticalLayout {
         editor.addValueChangeListener(e -> updateWordCount(e.getValue()));
 
         Button expand = new Button("Expand to fullscreen",
-                e -> editor.requestFullscreen());
-        Button done = new Button("Done", e -> editor.exitFullscreen());
+                e -> editorPane.requestFullscreen());
         wordCount.addClassName("editor-stats");
 
-        com.vaadin.flow.component.orderedlayout.HorizontalLayout toolbar =
-                new com.vaadin.flow.component.orderedlayout.HorizontalLayout(
-                        expand, done, wordCount);
+        HorizontalLayout paneFooter = new HorizontalLayout(done, wordCount);
+        paneFooter.addClassName("editor-pane-footer");
+        paneFooter.setAlignItems(Alignment.CENTER);
+        paneFooter.setWidthFull();
+
+        editorPane.addClassName("editor-pane");
+        editorPane.add(editor, paneFooter);
+
+        HorizontalLayout toolbar = new HorizontalLayout(expand);
         toolbar.addClassName("editor-toolbar");
         toolbar.setAlignItems(Alignment.CENTER);
         add(toolbar);
 
-        add(editor);
+        add(editorPane);
     }
 
     @Override
@@ -73,13 +86,15 @@ public class DistractionFreeEditorView extends VerticalLayout {
         Signal<FullscreenState> fs = attachEvent.getUI().getPage()
                 .fullscreenSignal();
 
+        Signal<Boolean> fullscreen = fs
+                .map(s -> s == FullscreenState.FULLSCREEN);
         stateBadge.bindText(fs.map(DistractionFreeEditorView::badgeText));
-        stateBadge.bindClassName("fullscreen",
-                fs.map(s -> s == FullscreenState.FULLSCREEN));
         stateBadge.bindClassName("unsupported",
                 fs.map(s -> s == FullscreenState.UNSUPPORTED));
-        editor.bindClassName("fullscreen",
-                fs.map(s -> s == FullscreenState.FULLSCREEN));
+        editorPane.bindClassName("fullscreen", fullscreen);
+        editor.bindClassName("fullscreen", fullscreen);
+        // Done only makes sense while fullscreen — it exits the pane.
+        done.bindVisible(fullscreen);
     }
 
     private void updateWordCount(String value) {
@@ -89,9 +104,11 @@ public class DistractionFreeEditorView extends VerticalLayout {
     }
 
     private static String badgeText(FullscreenState state) {
+        // FULLSCREEN: the badge sits outside the fullscreened pane, so it's
+        // invisible while fullscreen — keep the idle text instead of
+        // flipping to a message no one sees.
         return switch (state) {
-        case FULLSCREEN -> "Focused — Escape to return";
-        case NOT_FULLSCREEN -> "Click Expand to write distraction-free";
+        case FULLSCREEN, NOT_FULLSCREEN -> "Click Expand to write distraction-free";
         case UNSUPPORTED -> "Fullscreen is not supported in this browser";
         case UNKNOWN -> "Detecting fullscreen support…";
         };

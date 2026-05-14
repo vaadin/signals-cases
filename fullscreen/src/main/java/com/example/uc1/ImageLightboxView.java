@@ -20,11 +20,8 @@ import com.vaadin.flow.signals.Signal;
  * <p>
  * A grid of image thumbnails. Clicking one swaps it into the preview pane
  * below and immediately fullscreens that pane via
- * {@link com.vaadin.flow.component.Component#requestFullscreen()}. Because the
- * Flow API fullscreens the whole document and just hides the rest of the view
- * around the wrapped element, Vaadin theming and any overlay components keep
- * working — e.g. a Notification fired from the click handler still appears on
- * top of the lightbox.
+ * {@link com.vaadin.flow.component.Component#requestFullscreen()}. The browser
+ * renders only the wrapped stage; pressing Escape returns to the gallery.
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @Menu(order = 1, title = "UC1 — Image lightbox")
@@ -90,8 +87,6 @@ public class ImageLightboxView extends VerticalLayout {
                 .fullscreenSignal();
 
         stateBadge.bindText(fs.map(ImageLightboxView::badgeText));
-        stateBadge.bindClassName("fullscreen",
-                fs.map(s -> s == FullscreenState.FULLSCREEN));
         stateBadge.bindClassName("unsupported",
                 fs.map(s -> s == FullscreenState.UNSUPPORTED));
         stage.bindClassName("active",
@@ -116,9 +111,10 @@ public class ImageLightboxView extends VerticalLayout {
     }
 
     private static String badgeText(FullscreenState state) {
+        // FULLSCREEN: the badge sits outside the fullscreened stage, so the
+        // user can't see it while fullscreen — no point switching the text.
         return switch (state) {
-        case FULLSCREEN -> "Fullscreen — press Escape to exit";
-        case NOT_FULLSCREEN -> "Click a thumbnail to enlarge";
+        case FULLSCREEN, NOT_FULLSCREEN -> "Click a thumbnail to enlarge";
         case UNSUPPORTED -> "Fullscreen is not supported in this browser";
         case UNKNOWN -> "Detecting fullscreen support…";
         };

@@ -22,20 +22,26 @@ import com.vaadin.flow.signals.Signal;
 /**
  * UC2 — Slideshow / presentation mode.
  * <p>
- * A small carousel of slides that can be projected with
- * {@link com.vaadin.flow.component.page.Page#requestFullscreen()}. Page-level
- * fullscreen (rather than {@link
- * com.vaadin.flow.component.Component#requestFullscreen()}) is the right choice
- * here: it keeps the full document tree mounted, so application shortcuts —
- * Left/Right for navigation — keep working without any wrapper-aware glue.
+ * A small carousel of slides projected with
+ * {@link com.vaadin.flow.component.Component#requestFullscreen()} on the slide
+ * stage itself. Component-level fullscreen is the right tool for a slideshow:
+ * only the slide is shown, no app chrome, no view controls — that matches how
+ * native presentation tools behave. Left/Right arrows still navigate via
+ * {@code addClickShortcut} (those listen at the UI level so keydown events
+ * keep reaching the server). Escape exits, so there is no need for an in-view
+ * exit button.
+ * <p>
+ * Page-level fullscreen — where the whole document is fullscreened, app
+ * chrome included — is demonstrated separately in
+ * {@link com.example.uc5.KioskExitDetectionView UC5}.
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @Menu(order = 2, title = "UC2 — Slideshow")
 public class SlideshowView extends VerticalLayout {
 
     private static final List<String> SLIDES = List.of(
-            "Welcome to Fullscreen 101",
-            "The page enters fullscreen via Page#requestFullscreen()",
+            "Welcome to Fullscreen 101 — use ← / → to navigate, Escape to exit",
+            "The slide enters fullscreen via Component#requestFullscreen()",
             "Keyboard shortcuts still reach the server",
             "fullscreenSignal() reactively reports the current state",
             "Press Escape to return to the editor");
@@ -50,11 +56,12 @@ public class SlideshowView extends VerticalLayout {
     public SlideshowView() {
         add(new H1("UC2 — Slideshow / presentation mode"));
         add(new Paragraph(
-                "Click “Present” to project this deck fullscreen. "
-                        + "Use ← / → to navigate — the "
-                        + "shortcuts reach the server even while the page is "
-                        + "fullscreen because Page#requestFullscreen() does "
-                        + "not unmount any DOM."));
+                "Click “Present” to fullscreen the slide. Only the slide is "
+                        + "visible — Component#requestFullscreen() wraps the "
+                        + "stage and the browser hides everything outside it. "
+                        + "Left/Right arrows navigate, Escape exits; no on-"
+                        + "screen exit button is needed because the audience "
+                        + "would not see one anyway."));
 
         stateBadge.addClassName("status-badge");
         add(stateBadge);
@@ -72,12 +79,9 @@ public class SlideshowView extends VerticalLayout {
         prev.addClickShortcut(Key.ARROW_LEFT);
         Button next = new Button("Next", e -> show(index + 1));
         next.addClickShortcut(Key.ARROW_RIGHT);
-        Button present = new Button("Present",
-                e -> getUI().ifPresent(ui -> ui.getPage().requestFullscreen()));
+        Button present = new Button("Present", e -> stage.requestFullscreen());
         present.addThemeVariants(ButtonVariant.PRIMARY);
-        Button exit = new Button("Exit fullscreen",
-                e -> getUI().ifPresent(ui -> ui.getPage().exitFullscreen()));
-        add(new HorizontalLayout(prev, next, present, exit));
+        add(new HorizontalLayout(prev, next, present));
 
         show(0);
     }
@@ -89,8 +93,6 @@ public class SlideshowView extends VerticalLayout {
                 .fullscreenSignal();
 
         stateBadge.bindText(fs.map(SlideshowView::badgeText));
-        stateBadge.bindClassName("fullscreen",
-                fs.map(s -> s == FullscreenState.FULLSCREEN));
         stateBadge.bindClassName("unsupported",
                 fs.map(s -> s == FullscreenState.UNSUPPORTED));
         stage.bindClassName("live",
@@ -104,9 +106,10 @@ public class SlideshowView extends VerticalLayout {
     }
 
     private static String badgeText(FullscreenState state) {
+        // FULLSCREEN: only the slide is visible (Component wrapper), the
+        // badge is hidden — keep the idle text either way.
         return switch (state) {
-        case FULLSCREEN -> "Presenting — Escape to return";
-        case NOT_FULLSCREEN -> "Press Present to start the slideshow";
+        case FULLSCREEN, NOT_FULLSCREEN -> "Press Present to start the slideshow";
         case UNSUPPORTED -> "Fullscreen is not supported in this browser";
         case UNKNOWN -> "Detecting fullscreen support…";
         };

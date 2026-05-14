@@ -11,6 +11,9 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.page.FullscreenState;
+import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.TextField;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -19,15 +22,52 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class KioskExitDetectionViewTest extends SpringBrowserlessTest {
 
     @Test
-    void viewRendersWithKioskControls() {
+    void viewRendersWithKioskControlsAndLandingScreen() {
         navigate(KioskExitDetectionView.class);
 
         assertTrue($view(H1.class).all().stream().anyMatch(h -> h.getText()
-                .equals("UC5 — Kiosk: detect unexpected exit")));
+                .equals("UC5 — Kiosk: visitor sign-in")));
         assertTrue($view(Button.class).all().stream()
                 .anyMatch(b -> "Enter kiosk".equals(b.getText())));
         assertTrue($view(Button.class).all().stream()
-                .anyMatch(b -> "Exit kiosk".equals(b.getText())));
+                .anyMatch(b -> "Start sign-in".equals(b.getText())),
+                "landing screen should expose Start sign-in");
+    }
+
+    @Test
+    void signInFlowAdvancesThroughScreensAndLogs() {
+        navigate(KioskExitDetectionView.class);
+        runPendingSignalsTasks();
+
+        // The sign-in flow is driven by screenSignal alone, not by the
+        // fullscreen state — exercise it without entering fullscreen so the
+        // (bindVisible) log Div stays in the tree for the final assertion.
+        clickButton("Start sign-in");
+        runPendingSignalsTasks();
+
+        TextField name = $view(TextField.class).all().stream()
+                .filter(f -> "Your name".equals(f.getLabel())).findFirst()
+                .orElseThrow();
+        test(name).setValue("Ada Lovelace");
+
+        @SuppressWarnings("unchecked")
+        Select<String> purpose = $view(Select.class).all().stream()
+                .filter(s -> "Purpose of visit".equals(s.getLabel()))
+                .findFirst().orElseThrow();
+        purpose.setValue("Meeting");
+        runPendingSignalsTasks();
+
+        clickButton("Submit");
+        runPendingSignalsTasks();
+
+        // Confirmation screen now visible, log records the sign-in.
+        assertTrue($view(Button.class).all().stream()
+                .anyMatch(b -> "New visitor".equals(b.getText())),
+                "confirmation screen should expose New visitor");
+        assertTrue($view(Div.class).all().stream()
+                .anyMatch(d -> d.getText() != null
+                        && d.getText().contains("Signed in: Ada Lovelace")),
+                "log should record the sign-in");
     }
 
     @Test
@@ -35,63 +75,89 @@ class KioskExitDetectionViewTest extends SpringBrowserlessTest {
         navigate(KioskExitDetectionView.class);
         runPendingSignalsTasks();
 
-        // Click Enter to reset the expectingExit flag, then simulate the
-        // browser entering and exiting fullscreen via the user (Escape).
-        Button enter = $view(Button.class).all().stream()
-                .filter(b -> "Enter kiosk".equals(b.getText())).findFirst()
-                .orElseThrow();
-        test(enter).click();
+        clickButton("Enter kiosk");
         runPendingSignalsTasks();
-
         FullscreenTestSupport.setFullscreenState(FullscreenState.FULLSCREEN);
         runPendingSignalsTasks();
-
-        // User presses Escape — we never called exitFullscreen() server-side.
         FullscreenTestSupport.setFullscreenState(FullscreenState.NOT_FULLSCREEN);
         runPendingSignalsTasks();
 
-        assertTrue(
-                $view(Div.class).all().stream()
-                        .anyMatch(d -> d.getText() != null
-                                && d.getText().contains("UNEXPECTED")),
+        assertTrue($view(Div.class).all().stream()
+                .anyMatch(d -> d.getText() != null
+                        && d.getText().contains("UNEXPECTED")),
                 "log should contain an unexpected-exit entry");
-        assertTrue(
-                $view(Span.class).all().stream()
-                        .anyMatch(s -> s.getClassNames()
-                                .contains("unexpected-warning")
-                                && s.getText() != null
-                                && !s.getText().isEmpty()),
+        assertTrue($view(Span.class).all().stream()
+                .anyMatch(s -> s.getClassNames().contains("unexpected-warning")
+                        && s.getText() != null && !s.getText().isEmpty()),
                 "warning span should be visible after an unexpected exit");
     }
 
     @Test
-    void programmaticExitLogsExpected() {
+    void staffPinExitLogsExpected() {
         navigate(KioskExitDetectionView.class);
         runPendingSignalsTasks();
 
-        Button enter = $view(Button.class).all().stream()
-                .filter(b -> "Enter kiosk".equals(b.getText())).findFirst()
-                .orElseThrow();
-        test(enter).click();
-        runPendingSignalsTasks();
-
+        clickButton("Enter kiosk");
         FullscreenTestSupport.setFullscreenState(FullscreenState.FULLSCREEN);
         runPendingSignalsTasks();
 
-        // Click Exit (sets expectingExit=true and calls page.exitFullscreen()).
-        Button exit = $view(Button.class).all().stream()
-                .filter(b -> "Exit kiosk".equals(b.getText())).findFirst()
-                .orElseThrow();
-        test(exit).click();
+        clickButton("Staff");
+        runPendingSignalsTasks();
+
+        PasswordField pin = $view(PasswordField.class).all().stream()
+                .findFirst().orElseThrow();
+        test(pin).setValue(KioskExitDetectionView.STAFF_PIN);
+        clickButton("Confirm");
         runPendingSignalsTasks();
         FullscreenTestSupport.setFullscreenState(FullscreenState.NOT_FULLSCREEN);
         runPendingSignalsTasks();
 
-        assertTrue(
-                $view(Div.class).all().stream()
-                        .anyMatch(d -> d.getText() != null
-                                && d.getText().contains("expected")
-                                && !d.getText().contains("UNEXPECTED")),
-                "log should contain an expected-exit entry after programmatic exit");
+        assertTrue($view(Div.class).all().stream()
+                .anyMatch(d -> d.getText() != null
+                        && d.getText().contains("Staff exit confirmed")),
+                "log should record the staff exit");
+        assertTrue($view(Div.class).all().stream()
+                .anyMatch(d -> d.getText() != null
+                        && d.getText().contains("expected")
+                        && !d.getText().contains("UNEXPECTED")),
+                "log should record the session as exited-by-code");
+    }
+
+    @Test
+    void wrongStaffPinIsLoggedAndDoesNotExit() {
+        navigate(KioskExitDetectionView.class);
+        runPendingSignalsTasks();
+
+        // Staff button is bindVisible(isFullscreen), so enter fullscreen
+        // before clicking it.
+        clickButton("Enter kiosk");
+        FullscreenTestSupport.setFullscreenState(FullscreenState.FULLSCREEN);
+        runPendingSignalsTasks();
+
+        clickButton("Staff");
+        runPendingSignalsTasks();
+
+        PasswordField pin = $view(PasswordField.class).all().stream()
+                .findFirst().orElseThrow();
+        test(pin).setValue("0000");
+        clickButton("Confirm");
+        runPendingSignalsTasks();
+
+        assertTrue($view(Div.class).all().stream()
+                .anyMatch(d -> d.getText() != null
+                        && d.getText().contains("Failed staff exit attempt")),
+                "log should record the failed staff attempt");
+        // The dialog is still open (still rendering its Cancel button).
+        assertTrue($view(Button.class).all().stream()
+                .anyMatch(b -> "Cancel".equals(b.getText())),
+                "staff prompt should still be open after a wrong PIN");
+    }
+
+    private void clickButton(String text) {
+        Button button = $view(Button.class).all().stream()
+                .filter(b -> text.equals(b.getText())).findFirst()
+                .orElseThrow(() -> new AssertionError(
+                        "button \"" + text + "\" not found"));
+        test(button).click();
     }
 }

@@ -12,6 +12,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.page.FullscreenState;
 import com.vaadin.flow.component.textfield.TextArea;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -19,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class DistractionFreeEditorViewTest extends SpringBrowserlessTest {
 
     @Test
-    void viewRendersWithEditorAndButtons() {
+    void viewRendersWithEditorAndExpandButton() {
         navigate(DistractionFreeEditorView.class);
 
         assertTrue($view(H1.class).all().stream().anyMatch(h -> h.getText()
@@ -27,8 +28,28 @@ class DistractionFreeEditorViewTest extends SpringBrowserlessTest {
         assertTrue(!$view(TextArea.class).all().isEmpty());
         assertTrue($view(Button.class).all().stream()
                 .anyMatch(b -> "Expand to fullscreen".equals(b.getText())));
-        assertTrue($view(Button.class).all().stream()
+        // Done is bindVisible(fullscreen), so it is hidden (and not surfaced
+        // by $view) while the page is not fullscreen.
+        assertFalse($view(Button.class).all().stream()
                 .anyMatch(b -> "Done".equals(b.getText())));
+    }
+
+    @Test
+    void doneButtonAppearsOnlyWhileFullscreen() {
+        navigate(DistractionFreeEditorView.class);
+        runPendingSignalsTasks();
+
+        FullscreenTestSupport.setFullscreenState(FullscreenState.FULLSCREEN);
+        runPendingSignalsTasks();
+        assertTrue($view(Button.class).all().stream()
+                .anyMatch(b -> "Done".equals(b.getText())),
+                "Done button should be visible while fullscreen");
+
+        FullscreenTestSupport.setFullscreenState(FullscreenState.NOT_FULLSCREEN);
+        runPendingSignalsTasks();
+        assertFalse($view(Button.class).all().stream()
+                .anyMatch(b -> "Done".equals(b.getText())),
+                "Done button should hide again when leaving fullscreen");
     }
 
     @Test
@@ -53,7 +74,9 @@ class DistractionFreeEditorViewTest extends SpringBrowserlessTest {
 
         FullscreenTestSupport.setFullscreenState(FullscreenState.FULLSCREEN);
         runPendingSignalsTasks();
-        assertBadgeContains("Focused");
+        // Badge is hidden by the fullscreen wrapper, so it intentionally
+        // stays on the idle copy rather than flipping to a hidden message.
+        assertBadgeContains("Click Expand");
 
         FullscreenTestSupport.setFullscreenState(FullscreenState.UNSUPPORTED);
         runPendingSignalsTasks();
