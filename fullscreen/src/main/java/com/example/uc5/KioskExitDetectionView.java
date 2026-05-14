@@ -87,6 +87,13 @@ public class KioskExitDetectionView extends VerticalLayout {
     private final Select<String> purposeField = new Select<>();
     private final PasswordField pinField = new PasswordField("Enter staff PIN");
 
+    {
+        // Tell the browser this is an ephemeral code, not a saved credential,
+        // so it won't prompt to save the PIN. Vaadin's Autocomplete enum
+        // doesn't include ONE_TIME_CODE, so set the attribute directly.
+        pinField.getElement().setAttribute("autocomplete", "one-time-code");
+    }
+
     private @Nullable FullscreenSession session;
 
     public KioskExitDetectionView() {
