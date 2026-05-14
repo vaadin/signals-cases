@@ -70,6 +70,8 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver {
         sourceCodeContainer.add(sourceCodeLink);
         getElement().appendChild(sourceCodeContainer.getElement());
 
+        addToDrawer(AppCatalog.createSelector("web-share"));
+
         SideNav nav = new SideNav();
         MenuConfiguration.getMenuEntries().forEach(entry -> nav
                 .addItem(new SideNavItem(entry.title(), entry.path())));

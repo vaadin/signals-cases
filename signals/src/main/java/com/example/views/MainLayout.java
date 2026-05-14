@@ -222,6 +222,8 @@ public class MainLayout extends AppLayout {
         sourceCodeContainer.add(sourceCodeLink);
         getElement().appendChild(sourceCodeContainer.getElement());
 
+        addToDrawer(AppCatalog.createSelector("signals"));
+
         // Add auto-menu from @Menu annotations
         SideNav nav = new SideNav();
         MenuConfiguration.getMenuEntries().forEach(entry -> nav

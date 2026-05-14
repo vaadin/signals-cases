@@ -19,6 +19,8 @@ public class MainLayout extends AppLayout {
 
         addToNavbar(toggle, title);
 
+        addToDrawer(AppCatalog.createSelector("fullscreen"));
+
         SideNav nav = new SideNav();
         MenuConfiguration.getMenuEntries().forEach(entry -> nav
                 .addItem(new SideNavItem(entry.title(), entry.path())));
