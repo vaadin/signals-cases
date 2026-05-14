@@ -38,6 +38,8 @@ public class DistractionFreeEditorView extends VerticalLayout {
     private final Span wordCount = new Span("0 words");
     private final Span stateBadge = new Span();
     private final Div editorPane = new Div();
+    private final Button done = new Button("Done",
+            e -> editorPane.exitFullscreen());
 
     public DistractionFreeEditorView() {
         add(new H1("UC3 — Distraction-free editor"));
@@ -45,9 +47,9 @@ public class DistractionFreeEditorView extends VerticalLayout {
                 "Click “Expand to fullscreen” to focus only on the text. The "
                         + "rest of the app — navigation, header, this "
                         + "paragraph — is hidden by the fullscreen wrapper. "
-                        + "The Done button and word counter live inside the "
-                        + "same pane as the editor, so they stay visible while "
-                        + "fullscreen and Done can exit fullscreen on click."));
+                        + "A Done button appears inside the pane only while "
+                        + "fullscreen so it can be clicked to exit; Escape "
+                        + "exits too."));
 
         stateBadge.addClassName("status-badge");
         add(stateBadge);
@@ -60,7 +62,6 @@ public class DistractionFreeEditorView extends VerticalLayout {
 
         Button expand = new Button("Expand to fullscreen",
                 e -> editorPane.requestFullscreen());
-        Button done = new Button("Done", e -> editorPane.exitFullscreen());
         wordCount.addClassName("editor-stats");
 
         HorizontalLayout paneFooter = new HorizontalLayout(done, wordCount);
@@ -92,6 +93,8 @@ public class DistractionFreeEditorView extends VerticalLayout {
                 fs.map(s -> s == FullscreenState.UNSUPPORTED));
         editorPane.bindClassName("fullscreen", fullscreen);
         editor.bindClassName("fullscreen", fullscreen);
+        // Done only makes sense while fullscreen — it exits the pane.
+        done.bindVisible(fullscreen);
     }
 
     private void updateWordCount(String value) {
