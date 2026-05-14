@@ -1,4 +1,4 @@
-package com.example.views;
+package com.example.common;
 
 import java.util.List;
 
@@ -22,8 +22,7 @@ public final class AppCatalog {
                     "https://page-visibility-cases.fly.dev/"),
             new App("screen-orientation", "Screen Orientation API",
                     "https://screen-orientation-cases.fly.dev/"),
-            new App("signals", "Signal API",
-                    "https://signals-cases.fly.dev/"),
+            new App("signals", "Signal API", "https://signals-cases.fly.dev/"),
             new App("text-selection", "Text Selection API",
                     "https://text-selection-cases.fly.dev/"),
             new App("wake-lock", "Screen Wake Lock API",
