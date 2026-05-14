@@ -287,8 +287,16 @@
     max-width: 480px;
 }
 
-.kiosk-panel h2 {
+/* Headings inherit a dark color from the platform theme; force them to be
+   readable on the kiosk's dark gradient. */
+.kiosk-panel h2,
+.kiosk-panel h3,
+.kiosk-panel p {
     margin: 0;
+    color: white;
+}
+
+.kiosk-panel h2 {
     font-size: 1.75rem;
 }
 
@@ -296,10 +304,29 @@
     font-size: 2.5rem;
 }
 
+/* Lighten Vaadin input field labels and helpers so they stay legible
+   against the dark kiosk surface. The field's own input area keeps its
+   light background and dark value text — only the surrounding labels need
+   to flip. */
+.kiosk-panel vaadin-text-field,
+.kiosk-panel vaadin-password-field,
+.kiosk-panel vaadin-select {
+    --vaadin-input-field-label-color: rgba(255, 255, 255, 0.92);
+    --vaadin-input-field-helper-color: rgba(255, 255, 255, 0.7);
+    --vaadin-input-field-required-indicator-color:
+        rgba(255, 255, 255, 0.85);
+}
+
 .kiosk-staff-panel {
     background: rgba(0, 0, 0, 0.35);
     padding: 1.5rem;
     border-radius: var(--vaadin-radius-m);
+}
+
+.kiosk-staff-hint {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.85rem;
+    font-style: italic;
 }
 
 .kiosk-log {

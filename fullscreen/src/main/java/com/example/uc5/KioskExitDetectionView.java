@@ -33,20 +33,17 @@ import com.vaadin.flow.signals.local.ValueSignal;
 /**
  * UC5 — Kiosk: visitor sign-in with PIN-protected staff exit.
  * <p>
- * A realistic kiosk: the page is fullscreened with
- * {@link com.vaadin.flow.component.page.Page#requestFullscreen()} (the
- * canonical use case for whole-document fullscreen — locking out browser
- * chrome on dedicated kiosk hardware). Inside, visitors sign in via a small
+ * A realistic kiosk: the kiosk stage is fullscreened with
+ * {@link com.vaadin.flow.component.Component#requestFullscreen() Component#requestFullscreen()},
+ * so only the kiosk UI fills the viewport — the app's heading, navigation,
+ * intro paragraph and activity log are naturally hidden by the fullscreen
+ * wrapper, just like a dedicated terminal. Visitors sign in via a small
  * three-screen flow (landing → form → confirmation). A "Staff" button in the
  * kiosk header opens an inline PIN prompt; the correct PIN ({@value #STAFF_PIN})
  * calls {@link FullscreenSession#exit()} for an expected exit
  * ({@link FullscreenSessionState#EXITED_BY_CODE EXITED_BY_CODE}); pressing
  * Escape leaves unexpectedly ({@link FullscreenSessionState#EXITED_BY_USER
  * EXITED_BY_USER}) and surfaces a warning.
- * <p>
- * Developer chrome (heading, intro, control row, activity log) is hidden via
- * {@code bindVisible} while the page is fullscreen so the kiosk UI fills the
- * viewport like a real kiosk.
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @Menu(order = 5, title = "UC5 — Kiosk")
@@ -69,12 +66,14 @@ public class KioskExitDetectionView extends VerticalLayout {
 
     private final H1 heading = new H1("UC5 — Kiosk: visitor sign-in");
     private final Paragraph intro = new Paragraph(
-            "Click ‘Enter kiosk’ to lock the page into a visitor sign-in "
-                    + "flow with Page#requestFullscreen(). Inside, the Staff "
-                    + "button opens a PIN prompt (PIN: " + STAFF_PIN + ") that "
-                    + "calls FullscreenSession#exit() — an expected exit. "
-                    + "Pressing Escape leaves unexpectedly and is recorded "
-                    + "with a warning in the activity log.");
+            "Click ‘Enter kiosk’ to fullscreen the kiosk stage with "
+                    + "Component#requestFullscreen() — only the kiosk UI is "
+                    + "shown, the surrounding app chrome is hidden by the "
+                    + "wrapper. Inside, the Staff button opens a PIN prompt "
+                    + "(hint shown in the dialog) that calls "
+                    + "FullscreenSession#exit() — an expected exit. Pressing "
+                    + "Escape leaves unexpectedly and is recorded with a "
+                    + "warning in the activity log.");
     private final HorizontalLayout controlsRow = new HorizontalLayout();
     private final Paragraph logHeading = new Paragraph("Activity log:");
     private final Div log = new Div();
@@ -96,15 +95,15 @@ public class KioskExitDetectionView extends VerticalLayout {
         stateBadge.addClassName("status-badge");
         unexpectedWarning.addClassName("unexpected-warning");
 
-        Button enter = new Button("Enter kiosk", e -> getUI().ifPresent(ui -> {
+        Button enter = new Button("Enter kiosk", e -> {
             unexpectedWarning.setText("");
             staffPromptOpen.set(false);
             staffError.set("");
             screenSignal.set(Screen.LANDING);
-            FullscreenSession s = ui.getPage().requestFullscreen();
+            FullscreenSession s = stage.requestFullscreen();
             session = s;
             bindSession(s);
-        }));
+        });
         enter.addThemeVariants(ButtonVariant.PRIMARY);
 
         Button clear = new Button("Clear log", e -> log.removeAll());
@@ -223,6 +222,9 @@ public class KioskExitDetectionView extends VerticalLayout {
         panel.addClassName("kiosk-panel");
         panel.addClassName("kiosk-staff-panel");
         H2 title = new H2("Staff exit");
+        Paragraph hint = new Paragraph(
+                "Demo hint: the staff PIN is " + STAFF_PIN + ".");
+        hint.addClassName("kiosk-staff-hint");
         Span error = new Span();
         error.addClassName("unexpected-warning");
         error.bindText(staffError);
@@ -236,7 +238,7 @@ public class KioskExitDetectionView extends VerticalLayout {
         HorizontalLayout actions = new HorizontalLayout(cancel, confirm);
         actions.setJustifyContentMode(JustifyContentMode.END);
 
-        panel.add(title, pinField, error, actions);
+        panel.add(title, hint, pinField, error, actions);
         return panel;
     }
 
@@ -285,20 +287,15 @@ public class KioskExitDetectionView extends VerticalLayout {
         Signal<FullscreenState> fs = ui.getPage().fullscreenSignal();
         Signal<Boolean> isFullscreen = fs
                 .map(s -> s == FullscreenState.FULLSCREEN);
-        Signal<Boolean> notFullscreen = isFullscreen.map(b -> !b);
 
         stateBadge.bindText(fs.map(KioskExitDetectionView::badgeText));
         stateBadge.bindClassName("unsupported",
                 fs.map(s -> s == FullscreenState.UNSUPPORTED));
         stage.bindClassName("live", isFullscreen);
-
-        // Hide developer chrome while the kiosk is live so the kiosk UI
-        // dominates the viewport like a real dedicated terminal.
-        heading.bindVisible(notFullscreen);
-        intro.bindVisible(notFullscreen);
-        controlsRow.bindVisible(notFullscreen);
-        logHeading.bindVisible(notFullscreen);
-        log.bindVisible(notFullscreen);
+        // The Component#requestFullscreen() wrapper visually hides the rest
+        // of the document, so we don't need to bindVisible developer chrome
+        // ourselves — heading, intro, controls row and log are simply not
+        // rendered while the kiosk stage is fullscreen.
     }
 
     private void bindSession(FullscreenSession s) {

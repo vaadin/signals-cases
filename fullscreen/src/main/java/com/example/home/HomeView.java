@@ -44,8 +44,9 @@ public class HomeView extends BaseHomeView {
                 "fullscreenSignal() drives density and visible widgets.",
                 ReactiveLayoutView.class));
         cards.add(homeCard("UC5", "Kiosk: visitor sign-in",
-                "Page#requestFullscreen() locks the page; visitors sign in, "
-                        + "staff exits with a PIN, Escape is flagged.",
+                "Component#requestFullscreen() locks just the kiosk UI; "
+                        + "visitors sign in, staff exits with a PIN, Escape "
+                        + "is flagged.",
                 KioskExitDetectionView.class));
         cards.add(homeCard("UC6", "Chart expand",
                 "Per-card expand buttons fullscreen a single Vaadin Chart.",
