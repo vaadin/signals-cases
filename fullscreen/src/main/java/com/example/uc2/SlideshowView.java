@@ -40,7 +40,7 @@ import com.vaadin.flow.signals.Signal;
 public class SlideshowView extends VerticalLayout {
 
     private static final List<String> SLIDES = List.of(
-            "Welcome to Fullscreen 101",
+            "Welcome to Fullscreen 101 — use ← / → to navigate, Escape to exit",
             "The slide enters fullscreen via Component#requestFullscreen()",
             "Keyboard shortcuts still reach the server",
             "fullscreenSignal() reactively reports the current state",
