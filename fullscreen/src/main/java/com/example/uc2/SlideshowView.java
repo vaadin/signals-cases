@@ -28,6 +28,11 @@ import com.vaadin.flow.signals.Signal;
  * com.vaadin.flow.component.Component#requestFullscreen()}) is the right choice
  * here: it keeps the full document tree mounted, so application shortcuts —
  * Left/Right for navigation — keep working without any wrapper-aware glue.
+ * <p>
+ * The browser fullscreens the entire document, but the view chrome (heading,
+ * intro paragraph, footer, button bar) is hidden while presenting via
+ * {@link com.vaadin.flow.component.HasElement#bindClassName} so the audience
+ * only sees the slide.
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @Menu(order = 2, title = "UC2 — Slideshow")
@@ -44,17 +49,22 @@ public class SlideshowView extends VerticalLayout {
     private final Span counter = new Span();
     private final Span stateBadge = new Span();
     private final Div stage = new Div();
+    private final H1 heading = new H1("UC2 — Slideshow / presentation mode");
+    private final Paragraph intro = new Paragraph(
+            "Click “Present” to project this deck fullscreen. "
+                    + "Page#requestFullscreen() puts the whole document in "
+                    + "fullscreen — Left/Right shortcuts still reach the "
+                    + "server because no DOM is unmounted. The view's own "
+                    + "chrome is hidden while presenting so the audience "
+                    + "sees just the slide.");
+    private final Div footer = new Div();
+    private final HorizontalLayout buttons = new HorizontalLayout();
 
     private int index;
 
     public SlideshowView() {
-        add(new H1("UC2 — Slideshow / presentation mode"));
-        add(new Paragraph(
-                "Click “Present” to project this deck fullscreen. "
-                        + "Use ← / → to navigate — the "
-                        + "shortcuts reach the server even while the page is "
-                        + "fullscreen because Page#requestFullscreen() does "
-                        + "not unmount any DOM."));
+        add(heading);
+        add(intro);
 
         stateBadge.addClassName("status-badge");
         add(stateBadge);
@@ -63,7 +73,6 @@ public class SlideshowView extends VerticalLayout {
         stage.add(slideContent);
         add(stage);
 
-        Div footer = new Div();
         footer.addClassName("slideshow-footer");
         footer.add(counter);
         add(footer);
@@ -77,7 +86,8 @@ public class SlideshowView extends VerticalLayout {
         present.addThemeVariants(ButtonVariant.PRIMARY);
         Button exit = new Button("Exit fullscreen",
                 e -> getUI().ifPresent(ui -> ui.getPage().exitFullscreen()));
-        add(new HorizontalLayout(prev, next, present, exit));
+        buttons.add(prev, next, present, exit);
+        add(buttons);
 
         show(0);
     }
@@ -88,13 +98,22 @@ public class SlideshowView extends VerticalLayout {
         Signal<FullscreenState> fs = attachEvent.getUI().getPage()
                 .fullscreenSignal();
 
+        Signal<Boolean> live = fs
+                .map(s -> s == FullscreenState.FULLSCREEN);
+
         stateBadge.bindText(fs.map(SlideshowView::badgeText));
-        stateBadge.bindClassName("fullscreen",
-                fs.map(s -> s == FullscreenState.FULLSCREEN));
+        stateBadge.bindClassName("fullscreen", live);
         stateBadge.bindClassName("unsupported",
                 fs.map(s -> s == FullscreenState.UNSUPPORTED));
-        stage.bindClassName("live",
-                fs.map(s -> s == FullscreenState.FULLSCREEN));
+        stage.bindClassName("live", live);
+
+        // Hide everything except the slide while presenting, so Page-level
+        // fullscreen looks like a slideshow rather than a fullscreened app.
+        heading.bindClassName("hidden-while-presenting", live);
+        intro.bindClassName("hidden-while-presenting", live);
+        stateBadge.bindClassName("hidden-while-presenting", live);
+        footer.bindClassName("hidden-while-presenting", live);
+        buttons.bindClassName("hidden-while-presenting", live);
     }
 
     private void show(int target) {

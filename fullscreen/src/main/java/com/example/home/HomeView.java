@@ -34,7 +34,8 @@ public class HomeView extends BaseHomeView {
                 "Click an image to fullscreen it without losing overlays.",
                 ImageLightboxView.class));
         cards.add(homeCard("UC2", "Slideshow / presentation",
-                "Page-level fullscreen with keyboard navigation.",
+                "Page#requestFullscreen() projects the whole document; the "
+                        + "view's chrome hides while presenting.",
                 SlideshowView.class));
         cards.add(homeCard("UC3", "Distraction-free editor",
                 "Expand a text area to fullscreen for focused writing.",
