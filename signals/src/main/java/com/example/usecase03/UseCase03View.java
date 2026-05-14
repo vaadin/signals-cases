@@ -136,8 +136,8 @@ public class UseCase03View extends VerticalLayout {
 
     private Div createSvgCanvas() {
         Div container = new Div();
-        container.getStyle()
-                .set("border", "2px solid var(--lumo-contrast-10pct)")
+        container.getStyle().set("border",
+                "2px solid color-mix(in srgb, var(--vaadin-text-color) 10%, transparent)")
                 .set("padding", "20px").set("background", "white")
                 .set("border-radius", "8px")
                 .set("box-shadow", "0 2px 8px rgba(0,0,0,0.1)");
@@ -288,8 +288,8 @@ public class UseCase03View extends VerticalLayout {
 
         // Position section
         Span positionLabel = new Span("Position");
-        positionLabel.getStyle().set("font-size", "var(--lumo-font-size-s)")
-                .set("color", "var(--lumo-secondary-text-color)")
+        positionLabel.getStyle().set("font-size", "var(--aura-font-size-s)")
+                .set("color", "var(--vaadin-text-color-secondary)")
                 .set("font-weight", "500");
 
         IntegerSlider xSlider = new IntegerSlider("X", 0, 500);
@@ -302,8 +302,8 @@ public class UseCase03View extends VerticalLayout {
 
         // Size section
         Span sizeLabel = new Span("Size");
-        sizeLabel.getStyle().set("font-size", "var(--lumo-font-size-s)")
-                .set("color", "var(--lumo-secondary-text-color)")
+        sizeLabel.getStyle().set("font-size", "var(--aura-font-size-s)")
+                .set("color", "var(--vaadin-text-color-secondary)")
                 .set("font-weight", "500").set("margin-top", "8px");
 
         IntegerSlider widthSlider = new IntegerSlider("Width", 50, 250);
@@ -321,8 +321,8 @@ public class UseCase03View extends VerticalLayout {
 
         // Appearance section
         Span appearanceLabel = new Span("Appearance");
-        appearanceLabel.getStyle().set("font-size", "var(--lumo-font-size-s)")
-                .set("color", "var(--lumo-secondary-text-color)")
+        appearanceLabel.getStyle().set("font-size", "var(--aura-font-size-s)")
+                .set("color", "var(--vaadin-text-color-secondary)")
                 .set("font-weight", "500").set("margin-top", "8px");
 
         ComboBox<String> fillColorField = createColorPicker("Fill");
@@ -340,8 +340,8 @@ public class UseCase03View extends VerticalLayout {
 
         // Transform section
         Span transformLabel = new Span("Transform");
-        transformLabel.getStyle().set("font-size", "var(--lumo-font-size-s)")
-                .set("color", "var(--lumo-secondary-text-color)")
+        transformLabel.getStyle().set("font-size", "var(--aura-font-size-s)")
+                .set("color", "var(--vaadin-text-color-secondary)")
                 .set("font-weight", "500").set("margin-top", "8px");
 
         IntegerSlider rotationSlider = new IntegerSlider("Rotation", 0, 360);
@@ -368,8 +368,8 @@ public class UseCase03View extends VerticalLayout {
 
         // Position section
         Span positionLabel = new Span("Position");
-        positionLabel.getStyle().set("font-size", "var(--lumo-font-size-s)")
-                .set("color", "var(--lumo-secondary-text-color)")
+        positionLabel.getStyle().set("font-size", "var(--aura-font-size-s)")
+                .set("color", "var(--vaadin-text-color-secondary)")
                 .set("font-weight", "500");
 
         IntegerSlider cxSlider = new IntegerSlider("Center X", 0, 500);
@@ -382,8 +382,8 @@ public class UseCase03View extends VerticalLayout {
 
         // Shape section
         Span shapeLabel = new Span("Shape");
-        shapeLabel.getStyle().set("font-size", "var(--lumo-font-size-s)")
-                .set("color", "var(--lumo-secondary-text-color)")
+        shapeLabel.getStyle().set("font-size", "var(--aura-font-size-s)")
+                .set("color", "var(--vaadin-text-color-secondary)")
                 .set("font-weight", "500").set("margin-top", "8px");
 
         IntegerSlider pointsSlider = new IntegerSlider("Points", 3, 10);
@@ -396,8 +396,8 @@ public class UseCase03View extends VerticalLayout {
 
         // Appearance section
         Span appearanceLabel = new Span("Appearance");
-        appearanceLabel.getStyle().set("font-size", "var(--lumo-font-size-s)")
-                .set("color", "var(--lumo-secondary-text-color)")
+        appearanceLabel.getStyle().set("font-size", "var(--aura-font-size-s)")
+                .set("color", "var(--vaadin-text-color-secondary)")
                 .set("font-weight", "500").set("margin-top", "8px");
 
         ComboBox<String> fillColorField = createColorPicker("Fill");
@@ -415,8 +415,8 @@ public class UseCase03View extends VerticalLayout {
 
         // Transform section
         Span transformLabel = new Span("Transform");
-        transformLabel.getStyle().set("font-size", "var(--lumo-font-size-s)")
-                .set("color", "var(--lumo-secondary-text-color)")
+        transformLabel.getStyle().set("font-size", "var(--aura-font-size-s)")
+                .set("color", "var(--vaadin-text-color-secondary)")
                 .set("font-weight", "500").set("margin-top", "8px");
 
         IntegerSlider rotationSlider = new IntegerSlider("Rotation", 0, 360);
@@ -457,11 +457,12 @@ public class UseCase03View extends VerticalLayout {
             Div swatch = new Div();
             swatch.getStyle().set("width", "20px").set("height", "20px")
                     .set("background-color", color)
-                    .set("border", "1px solid var(--lumo-contrast-20pct)")
+                    .set("border",
+                            "1px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent)")
                     .set("border-radius", "4px");
 
             Span text = new Span(color);
-            text.getStyle().set("font-size", "var(--lumo-font-size-s)");
+            text.getStyle().set("font-size", "var(--aura-font-size-s)");
 
             layout.add(swatch, text);
             return layout;

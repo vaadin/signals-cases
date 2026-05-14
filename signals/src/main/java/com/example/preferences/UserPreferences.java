@@ -15,9 +15,9 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @SessionScope
 public class UserPreferences {
 
-    public static final String DEFAULT_COLOR = "var(--lumo-base-color)"; // uses
-                                                                         // theme
-                                                                         // default
+    public static final String DEFAULT_COLOR = "var(--aura-background-color)"; // uses
+    // theme
+    // default
 
     private final ValueSignal<String> backgroundColorSignal;
 

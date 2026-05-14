@@ -83,7 +83,7 @@ public class MUC03View extends VerticalLayout {
 
         Div clicksStatus = new Div();
         clicksStatus.getStyle().set("font-size", "1em").set("color",
-                "var(--lumo-secondary-text-color)");
+                "var(--vaadin-text-color-secondary)");
         clicksStatus.bindText(muc03Signals.getClicksRemainingSignal().map(
                 clicks -> clicks > 0 ? "Targets remaining: " + clicks : ""));
 

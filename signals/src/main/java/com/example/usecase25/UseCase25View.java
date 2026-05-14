@@ -36,7 +36,7 @@ public class UseCase25View extends Main {
     public UseCase25View(SchedulerService schedulerService) {
         addClassName("stock-ticker-view");
         getStyle().set("display", "block").set("padding",
-                "var(--lumo-space-l)");
+                "var(--vaadin-gap-l)");
 
         var title = new H2("Use Case 25: Stock Ticker");
         var description = new Paragraph(
@@ -77,12 +77,13 @@ public class UseCase25View extends Main {
         Div row = new Div();
         row.getStyle().set("display", "grid")
                 .set("grid-template-columns", "80px 1fr 120px 100px 100px")
-                .set("gap", "var(--lumo-space-s)")
-                .set("padding", "var(--lumo-space-s) var(--lumo-space-m)")
-                .set("border-bottom", "2px solid var(--lumo-contrast-20pct)")
+                .set("gap", "var(--vaadin-gap-s)")
+                .set("padding", "var(--vaadin-gap-s) var(--vaadin-gap-m)")
+                .set("border-bottom",
+                        "2px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent)")
                 .set("font-weight", "bold")
-                .set("font-size", "var(--lumo-font-size-s)")
-                .set("color", "var(--lumo-secondary-text-color)");
+                .set("font-size", "var(--aura-font-size-s)")
+                .set("color", "var(--vaadin-text-color-secondary)");
 
         row.add(headerCell("Symbol"), headerCell("Company"),
                 headerCell("Price", true), headerCell("Change", true),
@@ -106,10 +107,10 @@ public class UseCase25View extends Main {
         Div row = new Div();
         row.getStyle().set("display", "grid")
                 .set("grid-template-columns", "80px 1fr 120px 100px 100px")
-                .set("gap", "var(--lumo-space-s)")
-                .set("padding", "var(--lumo-space-s) var(--lumo-space-m)")
-                .set("align-items", "center")
-                .set("border-bottom", "1px solid var(--lumo-contrast-10pct)");
+                .set("gap", "var(--vaadin-gap-s)")
+                .set("padding", "var(--vaadin-gap-s) var(--vaadin-gap-m)")
+                .set("align-items", "center").set("border-bottom",
+                        "1px solid color-mix(in srgb, var(--vaadin-text-color) 10%, transparent)");
 
         // Symbol
         Span symbol = new Span();
@@ -120,8 +121,8 @@ public class UseCase25View extends Main {
         // Company name
         Span name = new Span();
         name.bindText(stockSignal.map(StockQuote::name));
-        name.getStyle().set("color", "var(--lumo-secondary-text-color)")
-                .set("font-size", "var(--lumo-font-size-s)");
+        name.getStyle().set("color", "var(--vaadin-text-color-secondary)")
+                .set("font-size", "var(--aura-font-size-s)");
 
         // Price
         Span price = new Span();

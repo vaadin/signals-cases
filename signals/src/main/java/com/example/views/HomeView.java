@@ -112,12 +112,11 @@ public class HomeView extends VerticalLayout {
     private Span createStat(String number, String description) {
         Span stat = new Span();
         Span num = new Span(number);
-        num.getStyle().set("font-size", "var(--lumo-font-size-xxl)")
-                .set("font-weight", "bold")
-                .set("color", "var(--lumo-primary-color)")
-                .set("margin-right", "var(--lumo-space-s)");
+        num.getStyle().set("font-size", "2em").set("font-weight", "bold")
+                .set("color", "var(--aura-accent-color)")
+                .set("margin-right", "var(--vaadin-gap-s)");
         Span desc = new Span(description);
-        desc.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        desc.getStyle().set("color", "var(--vaadin-text-color-secondary)");
         stat.add(num, desc);
         stat.getStyle().set("display", "flex").set("align-items", "center");
         return stat;
@@ -128,20 +127,20 @@ public class HomeView extends VerticalLayout {
         VerticalLayout category = new VerticalLayout();
         category.setSpacing(false);
         category.setPadding(false);
-        category.getStyle().set("margin-bottom", "var(--lumo-space-m)");
+        category.getStyle().set("margin-bottom", "var(--vaadin-gap-m)");
 
         Span titleSpan = new Span(title);
         titleSpan.getStyle().set("font-weight", "600");
 
         Span rangeSpan = new Span(range);
-        rangeSpan.getStyle().set("font-size", "var(--lumo-font-size-s)")
-                .set("color", "var(--lumo-secondary-text-color)")
-                .set("margin-left", "var(--lumo-space-s)");
+        rangeSpan.getStyle().set("font-size", "var(--aura-font-size-s)")
+                .set("color", "var(--vaadin-text-color-secondary)")
+                .set("margin-left", "var(--vaadin-gap-s)");
 
         Paragraph descPara = new Paragraph(description);
-        descPara.getStyle().set("margin-top", "var(--lumo-space-xs)")
+        descPara.getStyle().set("margin-top", "var(--vaadin-gap-xs)")
                 .set("margin-bottom", "0")
-                .set("color", "var(--lumo-secondary-text-color)");
+                .set("color", "var(--vaadin-text-color-secondary)");
 
         category.add(new Span(titleSpan, rangeSpan), descPara);
 

@@ -10,7 +10,7 @@ import com.vaadin.flow.theme.aura.Aura;
 
 @SpringBootApplication
 @EnableAsync
-@StyleSheet(Aura.STYLESHEET) // Use Lumo.STYLESHEET to use Lumo instead
+@StyleSheet(Aura.STYLESHEET)
 @StyleSheet("styles.css") // Your custom styles
 public class Application implements AppShellConfigurator {
 

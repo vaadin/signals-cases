@@ -205,11 +205,11 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         statsLayout.setSpacing(true);
 
         Div totalCard = createStatCard("Total", totalTasksSignal,
-                "var(--lumo-primary-color)");
+                "var(--aura-accent-color)");
         Div completedCard = createStatCard("Completed", completedTasksSignal,
-                "var(--lumo-success-color)");
+                "var(--aura-green)");
         Div pendingCard = createStatCard("Pending", pendingTasksSignal,
-                "var(--lumo-contrast-60pct)");
+                "color-mix(in srgb, var(--vaadin-text-color) 60%, transparent)");
 
         statsLayout.add(totalCard, completedCard, pendingCard);
         return statsLayout;
@@ -228,7 +228,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
                 .set("color", color).set("display", "block");
 
         Span titleLabel = new Span(label);
-        titleLabel.getStyle().set("color", "var(--lumo-secondary-text-color)")
+        titleLabel.getStyle().set("color", "var(--vaadin-text-color-secondary)")
                 .set("font-size", "0.875em");
 
         card.add(valueLabel, titleLabel);

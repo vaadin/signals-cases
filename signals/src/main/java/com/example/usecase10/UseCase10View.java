@@ -164,7 +164,7 @@ public class UseCase10View extends VerticalLayout {
         Paragraph hint = new Paragraph(
                 "Try pressing Ctrl+K, Ctrl+B, or Ctrl+J");
         hint.getStyle().set("font-size", "0.85em")
-                .set("color", "var(--lumo-secondary-text-color)")
+                .set("color", "var(--vaadin-text-color-secondary)")
                 .set("font-style", "italic");
 
         card.add(shortcutLabel, hint);
@@ -182,7 +182,7 @@ public class UseCase10View extends VerticalLayout {
         Paragraph hint = new Paragraph(
                 "Try toggling OS dark mode or browser theme");
         hint.getStyle().set("font-size", "0.85em")
-                .set("color", "var(--lumo-secondary-text-color)")
+                .set("color", "var(--vaadin-text-color-secondary)")
                 .set("font-style", "italic");
 
         card.add(indicator, hint);
@@ -195,7 +195,8 @@ public class UseCase10View extends VerticalLayout {
     private Div buildCompositionSection() {
         Div section = new Div();
         section.getStyle().set("margin-top", "1.5em").set("padding", "1.5em")
-                .set("background-color", "var(--lumo-contrast-5pct)")
+                .set("background-color",
+                        "color-mix(in srgb, var(--vaadin-text-color) 5%, transparent)")
                 .set("border-radius", "8px");
 
         H3 heading = new H3("Composed System Summary");
@@ -230,9 +231,9 @@ public class UseCase10View extends VerticalLayout {
         summaryText.getStyle().set("font-family", "monospace")
                 .set("font-size", "1.1em").set("font-weight", "bold")
                 .set("padding", "0.75em")
-                .set("background-color", "var(--lumo-base-color)")
-                .set("border-radius", "4px")
-                .set("border", "1px solid var(--lumo-contrast-20pct)");
+                .set("background-color", "var(--aura-background-color)")
+                .set("border-radius", "4px").set("border",
+                        "1px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent)");
 
         section.add(heading, intro, summaryText);
         return section;
@@ -292,10 +293,11 @@ public class UseCase10View extends VerticalLayout {
 
     private Div createCard(String title, String subtitle) {
         Div card = new Div();
-        card.getStyle().set("border", "1px solid var(--lumo-contrast-20pct)")
+        card.getStyle().set("border",
+                "1px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent)")
                 .set("border-radius", "8px").set("padding", "1.5em")
                 .set("flex", "1 1 250px").set("min-width", "250px")
-                .set("background-color", "var(--lumo-base-color)");
+                .set("background-color", "var(--aura-background-color)");
 
         H3 cardTitle = new H3(title);
         cardTitle.getStyle().set("margin-top", "0").set("margin-bottom",
@@ -304,7 +306,7 @@ public class UseCase10View extends VerticalLayout {
         Paragraph cardSubtitle = new Paragraph(subtitle);
         cardSubtitle.getStyle().set("font-family", "monospace")
                 .set("font-size", "0.8em")
-                .set("color", "var(--lumo-secondary-text-color)")
+                .set("color", "var(--vaadin-text-color-secondary)")
                 .set("margin-top", "0").set("margin-bottom", "1em");
 
         card.add(cardTitle, cardSubtitle);
@@ -320,9 +322,9 @@ public class UseCase10View extends VerticalLayout {
         Span dot = new Span();
         dot.getStyle().set("width", "12px").set("height", "12px")
                 .set("border-radius", "50%").set("display", "inline-block");
-        dot.getStyle().bind("background-color",
-                () -> activeSignal.get() ? "var(--lumo-contrast-80pct)"
-                        : "var(--lumo-contrast-30pct)");
+        dot.getStyle().bind("background-color", () -> activeSignal.get()
+                ? "color-mix(in srgb, var(--vaadin-text-color) 80%, transparent)"
+                : "color-mix(in srgb, var(--vaadin-text-color) 30%, transparent)");
 
         Span label = new Span(labelSignal);
         label.getStyle().set("font-weight", "bold").set("font-size", "1.1em");

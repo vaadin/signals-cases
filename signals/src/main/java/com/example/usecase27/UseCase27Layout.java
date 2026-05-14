@@ -37,14 +37,16 @@ public class UseCase27Layout extends Div implements RouterLayout {
 
     public UseCase27Layout() {
         breadcrumb.setId(BREADCRUMB_ID);
-        breadcrumb.getStyle().set("padding", "0.5em 0.75em")
-                .set("background-color", "var(--lumo-contrast-5pct)")
+        breadcrumb.getStyle().set("padding", "0.5em 0.75em").set(
+                "background-color",
+                "color-mix(in srgb, var(--vaadin-text-color) 5%, transparent)")
                 .set("border-radius", "4px")
-                .set("font-family", "var(--lumo-font-family)");
+                .set("font-family", "var(--aura-font-family)");
 
         updateBadge.setId(UPDATE_COUNT_ID);
-        updateBadge.getStyle().set("color", "var(--lumo-secondary-text-color)")
-                .set("font-size", "var(--lumo-font-size-s)")
+        updateBadge.getStyle()
+                .set("color", "var(--vaadin-text-color-secondary)")
+                .set("font-size", "var(--aura-font-size-s)")
                 .set("margin-left", "0.75em");
 
         Div header = new Div(breadcrumb, updateBadge);
@@ -72,8 +74,8 @@ public class UseCase27Layout extends Div implements RouterLayout {
 
         if (target == UseCase27DetailsView.class) {
             String id = state.routeParameters().get("id").orElse("?");
-            return new Component[] { overview, separator(),
-                    new Span("Details"), separator(), new Span("#" + id) };
+            return new Component[] { overview, separator(), new Span("Details"),
+                    separator(), new Span("#" + id) };
         }
         if (target == UseCase27SettingsView.class) {
             return new Component[] { overview, separator(),
@@ -86,7 +88,7 @@ public class UseCase27Layout extends Div implements RouterLayout {
 
     private static Span separator() {
         Span s = new Span(" › ");
-        s.getStyle().set("color", "var(--lumo-tertiary-text-color)")
+        s.getStyle().set("color", "var(--vaadin-text-color-secondary)")
                 .set("margin", "0 0.4em");
         return s;
     }

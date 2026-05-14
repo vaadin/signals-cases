@@ -42,10 +42,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ListSignal;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.flow.theme.lumo.LumoUtility.FontSize;
-import com.vaadin.flow.theme.lumo.LumoUtility.FontWeight;
-import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
-import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 
 @PageTitle("Use Case 23: Real-time Dashboard")
 @Route(value = "use-case-23", layout = MainLayout.class)
@@ -272,10 +268,12 @@ public class UseCase23View extends Main {
 
     private HorizontalLayout createHeader(String title, String subtitle) {
         H2 h2 = new H2(title);
-        h2.addClassNames(FontSize.XLARGE, Margin.NONE);
+        h2.getStyle().set("font-size", "var(--aura-font-size-xl)").set("margin",
+                "0");
 
         Span span = new Span(subtitle);
-        span.addClassNames(TextColor.SECONDARY, FontSize.XSMALL);
+        span.getStyle().set("color", "var(--vaadin-text-color-secondary)")
+                .set("font-size", "var(--aura-font-size-xs)");
 
         VerticalLayout column = new VerticalLayout(h2, span);
         column.setPadding(false);
@@ -403,11 +401,13 @@ public class UseCase23View extends Main {
                     .map(percentage -> percentage > 0);
 
             H2 h2 = new H2(title);
-            h2.addClassNames(FontWeight.NORMAL, Margin.NONE,
-                    TextColor.SECONDARY, FontSize.XSMALL);
+            h2.getStyle().set("font-weight", "400").set("margin", "0")
+                    .set("color", "var(--vaadin-text-color-secondary)")
+                    .set("font-size", "var(--aura-font-size-xs)");
 
             Span valueSpan = new Span();
-            valueSpan.addClassNames(FontWeight.SEMIBOLD, FontSize.XXXLARGE);
+            valueSpan.getStyle().set("font-weight", "600").set("font-size",
+                    "2.5em");
             valueSpan.bindText(signal.map(format::apply));
 
             Span percentageSpan = new Span();

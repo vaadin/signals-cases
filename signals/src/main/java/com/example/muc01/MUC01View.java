@@ -118,8 +118,9 @@ public class MUC01View extends VerticalLayout {
         Div messageCount = new Div();
         messageCount.bindText(muc01Signals.getMessagesSignal()
                 .map(messages -> "Total messages: " + messages.size()));
-        messageCount.getStyle().set("color", "var(--lumo-secondary-text-color)")
-                .set("font-size", "var(--lumo-font-size-s)");
+        messageCount.getStyle()
+                .set("color", "var(--vaadin-text-color-secondary)")
+                .set("font-size", "var(--aura-font-size-s)");
 
         add(title, description, activeUsersDisplay, new H3("Messages"),
                 messagesContainer, messageCount, messageInput, sendButton,
@@ -163,13 +164,13 @@ public class MUC01View extends VerticalLayout {
         Div timestamp = new Div();
         timestamp.setText(message.getFormattedTimestamp());
         timestamp.getStyle().set("font-size", "0.85em").set("color",
-                "var(--lumo-secondary-text-color)");
+                "var(--vaadin-text-color-secondary)");
 
         header.add(author, timestamp);
 
         Div text = new Div();
         text.setText(message.text());
-        text.getStyle().set("color", "var(--lumo-body-text-color)");
+        text.getStyle().set("color", "var(--vaadin-text-color)");
 
         contentArea.add(header, text);
         messageDiv.add(avatar, contentArea);

@@ -110,7 +110,7 @@ public class UseCase22View extends VerticalLayout {
             return "Full name: " + p.firstName() + " " + p.lastName();
         }));
         fullNameLabel.getStyle().set("font-weight", "bold").set("color",
-                "var(--lumo-primary-color)");
+                "var(--aura-accent-color)");
 
         section.add(sectionTitle, firstNameField, lastNameField, emailField,
                 ageField, fullNameLabel);
@@ -164,7 +164,7 @@ public class UseCase22View extends VerticalLayout {
                     + addr.zipCode() + ", " + addr.country();
         }));
         formattedAddressLabel.getStyle().set("font-weight", "bold")
-                .set("color", "var(--lumo-primary-color)")
+                .set("color", "var(--aura-accent-color)")
                 .set("word-break", "break-word");
 
         section.add(sectionTitle, streetField, cityField, zipCodeField,

@@ -202,8 +202,8 @@ public class UseCase16View extends VerticalLayout
         // Articles are read-only so no need to create bindings
         var article = articleSignal.peek();
         Div card = new Div();
-        card.getStyle().set("background-color", "#ffffff")
-                .set("border", "1px solid var(--lumo-contrast-20pct)")
+        card.getStyle().set("background-color", "#ffffff").set("border",
+                "1px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent)")
                 .set("border-radius", "4px").set("padding", "1em");
 
         Div headerDiv = new Div();
@@ -223,7 +223,7 @@ public class UseCase16View extends VerticalLayout
         headerDiv.add(titleDiv, categoryBadge);
 
         Div contentDiv = new Div(article.content());
-        contentDiv.getStyle().set("color", "var(--lumo-secondary-text-color)")
+        contentDiv.getStyle().set("color", "var(--vaadin-text-color-secondary)")
                 .set("font-size", "0.9em");
 
         card.add(headerDiv, contentDiv);

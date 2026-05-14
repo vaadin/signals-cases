@@ -107,8 +107,8 @@ public class UseCase14View extends VerticalLayout {
 
         // State display box
         Div stateBox = new Div();
-        stateBox.getStyle()
-                .set("border", "2px solid var(--lumo-contrast-20pct)")
+        stateBox.getStyle().set("border",
+                "2px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent)")
                 .set("border-radius", "8px").set("padding", "1.5em")
                 .set("margin", "1em 0").set("min-height", "300px");
 
@@ -116,7 +116,8 @@ public class UseCase14View extends VerticalLayout {
         Div idleContent = new Div();
         Paragraph idleMessage = new Paragraph(
                 "👆 Click 'Generate Analytics Report' to start the two-step process: fetch data, then generate comprehensive report with sales metrics and performance data");
-        idleMessage.getStyle().set("color", "var(--lumo-secondary-text-color)")
+        idleMessage.getStyle()
+                .set("color", "var(--vaadin-text-color-secondary)")
                 .set("font-style", "italic");
         idleContent.add(idleMessage);
         idleContent.bindVisible(() -> stateSignal.get() == LoadingState.IDLE);
@@ -137,7 +138,7 @@ public class UseCase14View extends VerticalLayout {
                 case GENERATING -> "Generating report... (2/2)";
                 default -> "";
                 });
-        loadingMessage.getStyle().set("color", "var(--lumo-primary-color)");
+        loadingMessage.getStyle().set("color", "var(--aura-accent-color)");
 
         loadingContent.add(progressBar, loadingMessage);
         loadingContent.bindVisible(isLoadingSignal);
@@ -149,7 +150,7 @@ public class UseCase14View extends VerticalLayout {
                         ? "Analytics Report - " + report.getPeriod()
                         : "Analytics Report"));
         successTitle.getStyle().set("margin-top", "0").set("color",
-                "var(--lumo-success-color)");
+                "var(--aura-green)");
 
         // Metrics grid
         Div metricsGrid = new Div();
@@ -205,11 +206,11 @@ public class UseCase14View extends VerticalLayout {
         Div errorContent = new Div();
         errorContent.getStyle().set("background-color", "#ffebee")
                 .set("padding", "1em").set("border-radius", "4px")
-                .set("border-left", "4px solid var(--lumo-error-color)");
+                .set("border-left", "4px solid var(--aura-red)");
 
         H3 errorTitle = new H3("❌ Report Generation Failed");
         errorTitle.getStyle().set("margin-top", "0").set("color",
-                "var(--lumo-error-color)");
+                "var(--aura-red)");
 
         Paragraph errorMessage = new Paragraph(
                 "Analytics report generation failed. Please contact the administrator.");
@@ -256,19 +257,19 @@ public class UseCase14View extends VerticalLayout {
         // Use headerPrefix slot for icon
         Icon icon = new Icon(iconType);
         icon.setColor(color);
-        icon.setSize("var(--lumo-icon-size-m)");
+        icon.setSize("24px");
         card.setHeaderPrefix(icon);
 
         // Use title slot for label
         Span labelSpan = new Span(label);
-        labelSpan.getStyle().set("font-size", "var(--lumo-font-size-s)")
-                .set("color", "var(--lumo-secondary-text-color)")
+        labelSpan.getStyle().set("font-size", "var(--aura-font-size-s)")
+                .set("color", "var(--vaadin-text-color-secondary)")
                 .set("font-weight", "500");
         card.setTitle(labelSpan);
 
         // Main content slot for value display
         Span valueSpan = new Span(valueSignal);
-        valueSpan.getStyle().set("font-size", "var(--lumo-font-size-xxxl)")
+        valueSpan.getStyle().set("font-size", "2.5em")
                 .set("font-weight", "bold").set("color", color)
                 .set("line-height", "1");
         card.add(valueSpan);

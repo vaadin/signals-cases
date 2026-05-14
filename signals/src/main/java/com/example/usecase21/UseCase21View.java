@@ -172,8 +172,9 @@ public class UseCase21View extends VerticalLayout {
         Span localeValue = new Span();
         localeValue.bindText(
                 UI.getCurrent().localeSignal().map(Locale::toLanguageTag));
-        localeValue.getStyle().set("font-family", "monospace")
-                .set("background-color", "var(--lumo-contrast-10pct)")
+        localeValue.getStyle().set("font-family", "monospace").set(
+                "background-color",
+                "color-mix(in srgb, var(--vaadin-text-color) 10%, transparent)")
                 .set("padding", "0.25em 0.5em").set("border-radius", "4px");
 
         localeRow.add(localeLabel, localeValue);
@@ -184,7 +185,8 @@ public class UseCase21View extends VerticalLayout {
 
     private Div createCard() {
         Div card = new Div();
-        card.getStyle().set("background-color", "var(--lumo-contrast-5pct)")
+        card.getStyle().set("background-color",
+                "color-mix(in srgb, var(--vaadin-text-color) 5%, transparent)")
                 .set("border-radius", "8px").set("padding", "1.5em")
                 .set("margin-bottom", "1em");
         return card;
