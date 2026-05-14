@@ -9,6 +9,8 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.FullscreenState;
 import com.vaadin.flow.router.Menu;
@@ -59,7 +61,9 @@ public class ImageLightboxView extends VerticalLayout {
                         + "Escape (or the browser's close gesture) to return. "
                         + "The lightbox is a single Div fullscreened with "
                         + "Component#requestFullscreen(); the rest of the view "
-                        + "is hidden by the wrapper."));
+                        + "is hidden by the wrapper. A Notification fired from "
+                        + "the click handler still appears on top of the "
+                        + "fullscreened element — overlays are not lost."));
 
         stateBadge.addClassName("status-badge");
         add(stateBadge);
@@ -106,6 +110,9 @@ public class ImageLightboxView extends VerticalLayout {
         thumb.addClickListener(e -> {
             showPhoto(photo);
             stage.requestFullscreen();
+            Notification notification = Notification
+                    .show("Showing " + photo.name(), 2500, Position.TOP_CENTER);
+            notification.addClassName("lightbox-toast");
         });
         return thumb;
     }
