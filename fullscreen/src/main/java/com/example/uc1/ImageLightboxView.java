@@ -9,8 +9,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.FullscreenState;
 import com.vaadin.flow.router.Menu;
@@ -22,11 +20,8 @@ import com.vaadin.flow.signals.Signal;
  * <p>
  * A grid of image thumbnails. Clicking one swaps it into the preview pane
  * below and immediately fullscreens that pane via
- * {@link com.vaadin.flow.component.Component#requestFullscreen()}. Because the
- * Flow API fullscreens the whole document and just hides the rest of the view
- * around the wrapped element, Vaadin theming and any overlay components keep
- * working — e.g. a Notification fired from the click handler still appears on
- * top of the lightbox.
+ * {@link com.vaadin.flow.component.Component#requestFullscreen()}. The browser
+ * renders only the wrapped stage; pressing Escape returns to the gallery.
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @Menu(order = 1, title = "UC1 — Image lightbox")
@@ -61,9 +56,7 @@ public class ImageLightboxView extends VerticalLayout {
                         + "Escape (or the browser's close gesture) to return. "
                         + "The lightbox is a single Div fullscreened with "
                         + "Component#requestFullscreen(); the rest of the view "
-                        + "is hidden by the wrapper. A Notification fired from "
-                        + "the click handler still appears on top of the "
-                        + "fullscreened element — overlays are not lost."));
+                        + "is hidden by the wrapper."));
 
         stateBadge.addClassName("status-badge");
         add(stateBadge);
@@ -108,9 +101,6 @@ public class ImageLightboxView extends VerticalLayout {
         thumb.addClickListener(e -> {
             showPhoto(photo);
             stage.requestFullscreen();
-            Notification notification = Notification
-                    .show("Showing " + photo.name(), 2500, Position.TOP_CENTER);
-            notification.addClassName("lightbox-toast");
         });
         return thumb;
     }

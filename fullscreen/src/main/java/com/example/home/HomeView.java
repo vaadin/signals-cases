@@ -31,7 +31,8 @@ public class HomeView extends BaseHomeView {
         Div cards = new Div();
         cards.addClassName("home-cards");
         cards.add(homeCard("UC1", "Image lightbox",
-                "Click an image to fullscreen it without losing overlays.",
+                "Click a thumbnail to fullscreen the preview pane; Escape "
+                        + "returns to the gallery.",
                 ImageLightboxView.class));
         cards.add(homeCard("UC2", "Slideshow / presentation",
                 "Component#requestFullscreen() fullscreens just the slide; "
