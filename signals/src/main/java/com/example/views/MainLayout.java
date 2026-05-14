@@ -5,6 +5,7 @@ import jakarta.annotation.security.PermitAll;
 import java.util.Locale;
 import java.util.Map;
 
+import com.example.common.AppCatalog;
 import com.example.preferences.UserPreferences;
 import com.example.security.CurrentUserSignal;
 import com.example.signals.SessionIdHelper;
