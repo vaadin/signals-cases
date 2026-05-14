@@ -61,7 +61,9 @@ class ImageLightboxViewTest extends SpringBrowserlessTest {
 
         FullscreenTestSupport.setFullscreenState(FullscreenState.FULLSCREEN);
         runPendingSignalsTasks();
-        assertBadgeContains("Fullscreen");
+        // Badge is hidden by the fullscreen wrapper so we intentionally
+        // keep the idle text instead of flipping to a message no one sees.
+        assertBadgeContains("Click a thumbnail");
 
         FullscreenTestSupport.setFullscreenState(FullscreenState.UNSUPPORTED);
         runPendingSignalsTasks();

@@ -60,7 +60,9 @@ class SlideshowViewTest extends SpringBrowserlessTest {
 
         FullscreenTestSupport.setFullscreenState(FullscreenState.FULLSCREEN);
         runPendingSignalsTasks();
-        assertBadgeContains("Presenting");
+        // Badge is hidden while presenting, so the text stays on the idle
+        // copy rather than flipping to a message no one sees.
+        assertBadgeContains("Present to start");
 
         FullscreenTestSupport.setFullscreenState(FullscreenState.NOT_FULLSCREEN);
         runPendingSignalsTasks();

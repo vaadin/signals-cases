@@ -94,8 +94,6 @@ public class ImageLightboxView extends VerticalLayout {
                 .fullscreenSignal();
 
         stateBadge.bindText(fs.map(ImageLightboxView::badgeText));
-        stateBadge.bindClassName("fullscreen",
-                fs.map(s -> s == FullscreenState.FULLSCREEN));
         stateBadge.bindClassName("unsupported",
                 fs.map(s -> s == FullscreenState.UNSUPPORTED));
         stage.bindClassName("active",
@@ -123,9 +121,10 @@ public class ImageLightboxView extends VerticalLayout {
     }
 
     private static String badgeText(FullscreenState state) {
+        // FULLSCREEN: the badge sits outside the fullscreened stage, so the
+        // user can't see it while fullscreen — no point switching the text.
         return switch (state) {
-        case FULLSCREEN -> "Fullscreen — press Escape to exit";
-        case NOT_FULLSCREEN -> "Click a thumbnail to enlarge";
+        case FULLSCREEN, NOT_FULLSCREEN -> "Click a thumbnail to enlarge";
         case UNSUPPORTED -> "Fullscreen is not supported in this browser";
         case UNKNOWN -> "Detecting fullscreen support…";
         };
