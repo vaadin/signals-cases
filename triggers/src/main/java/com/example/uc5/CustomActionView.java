@@ -4,6 +4,7 @@ import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -27,9 +28,11 @@ import com.vaadin.flow.router.Route;
 @PageTitle("UC5 — Custom action via @JsModule")
 @Menu(order = 5, title = "UC5 — Custom action")
 @JsModule("./flash-action.ts")
+@StyleSheet("uc5.css")
 public class CustomActionView extends VerticalLayout {
 
     public CustomActionView() {
+        addClassName("uc5-view");
         add(new H1("UC5 — Custom action via @JsModule"));
         add(new Paragraph(
                 "Click \"Flash\" to fire a FlashAction defined in this app. "
@@ -39,10 +42,7 @@ public class CustomActionView extends VerticalLayout {
 
         Div target = new Div("Flash me");
         target.setId("target");
-        target.getStyle().set("padding", "1rem")
-                .set("border", "1px solid var(--vaadin-border-color)")
-                .set("border-radius", "var(--vaadin-radius-m)").set("width",
-                        "fit-content");
+        target.addClassName("flash-target");
 
         Button trigger = new Button("Flash");
         trigger.setId("trigger");

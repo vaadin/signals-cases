@@ -3,6 +3,7 @@ package com.example.uc2;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Pre;
@@ -26,6 +27,7 @@ import com.vaadin.flow.router.Route;
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Copy code snippet")
 @Menu(order = 2, title = "UC2 — Copy code snippet")
+@StyleSheet("uc2.css")
 public class CopyCodeSnippetView extends VerticalLayout {
 
     private static final String SNIPPET = """
@@ -34,6 +36,7 @@ public class CopyCodeSnippetView extends VerticalLayout {
                     new PropertyOutput<>(field, "value", String.class)));""";
 
     public CopyCodeSnippetView() {
+        addClassName("uc2-view");
         add(new H1("UC2 — Copy a code snippet"));
         add(new Paragraph(
                 "PropertyOutput can read any JS property from any element. "

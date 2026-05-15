@@ -5,6 +5,7 @@ import java.util.UUID;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -30,9 +31,11 @@ import com.vaadin.flow.router.Route;
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Share URL")
 @Menu(order = 4, title = "UC4 — Share URL widget")
+@StyleSheet("uc4.css")
 public class ShareUrlView extends VerticalLayout {
 
     public ShareUrlView() {
+        addClassName("uc4-view");
         add(new H1("UC4 — Share URL widget"));
         add(new Paragraph(
                 "The URL below is generated on the server when the view is "

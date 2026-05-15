@@ -1,4 +1,4 @@
-/* Trigger / Action API use cases — small visual polish */
+/* Trigger / Action API use cases — cross-view styling */
 
 .home-cards {
     display: grid;
@@ -12,42 +12,4 @@
     text-transform: uppercase;
     color: var(--vaadin-text-color-secondary);
     letter-spacing: 0.05em;
-}
-
-.code-snippet {
-    font-family: monospace;
-    font-size: 0.9rem;
-    background: var(--vaadin-background-container);
-    border: 1px solid var(--vaadin-border-color);
-    border-radius: var(--vaadin-radius-m);
-    padding: 0.75rem 1rem;
-    white-space: pre-wrap;
-    word-break: break-word;
-    margin: 0;
-}
-
-.share-url-field {
-    width: 22rem;
-    max-width: 100%;
-}
-
-.event-log {
-    font-family: monospace;
-    font-size: 0.85rem;
-    background: var(--vaadin-background-container);
-    border: 1px solid var(--vaadin-border-color);
-    border-radius: var(--vaadin-radius-m);
-    padding: 0.5rem 0.75rem;
-    max-height: 200px;
-    overflow-y: auto;
-    min-width: 16rem;
-}
-
-.event-log > div {
-    padding: 0.1rem 0;
-    border-bottom: 1px dashed var(--vaadin-border-color);
-}
-
-.event-log > div:last-child {
-    border-bottom: none;
 }
