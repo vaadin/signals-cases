@@ -5,6 +5,7 @@ import java.util.List;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -25,6 +26,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @Menu(order = 1, title = "UC1 — Image lightbox")
+@StyleSheet("uc1.css")
 public class ImageLightboxView extends VerticalLayout {
 
     private record Photo(String name, String gradient) {
@@ -50,6 +52,7 @@ public class ImageLightboxView extends VerticalLayout {
     private final Span selectedName = new Span(PHOTOS.get(0).name());
 
     public ImageLightboxView() {
+        addClassName("uc1-view");
         add(new H1("UC1 — Image lightbox"));
         add(new Paragraph(
                 "Click any thumbnail to enlarge it to fullscreen. Press "
@@ -97,7 +100,9 @@ public class ImageLightboxView extends VerticalLayout {
         Div thumb = new Div();
         thumb.addClassName("lightbox-thumb");
         thumb.setText(photo.name());
-        thumb.getStyle().set("background", photo.gradient());
+        // Per-photo gradient is data, not a discrete state — pass it through
+        // as a CSS custom property so the rule lives in uc1.css.
+        thumb.getStyle().set("--lightbox-thumb-bg", photo.gradient());
         thumb.addClickListener(e -> {
             showPhoto(photo);
             stage.requestFullscreen();
@@ -107,7 +112,9 @@ public class ImageLightboxView extends VerticalLayout {
 
     private void showPhoto(Photo photo) {
         selectedName.setText(photo.name());
-        stageImage.getStyle().set("background", photo.gradient());
+        // Same pattern as the thumbnail: the gradient is dynamic per photo,
+        // exposed to uc1.css via a custom property.
+        stageImage.getStyle().set("--lightbox-image-bg", photo.gradient());
     }
 
     private static String badgeText(FullscreenState state) {

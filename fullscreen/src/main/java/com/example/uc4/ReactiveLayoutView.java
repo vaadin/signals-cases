@@ -6,6 +6,7 @@ import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -29,6 +30,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @Menu(order = 4, title = "UC4 — Reactive layout")
+@StyleSheet("uc4.css")
 public class ReactiveLayoutView extends VerticalLayout {
 
     private record Metric(String label, String value) {
@@ -47,6 +49,7 @@ public class ReactiveLayoutView extends VerticalLayout {
     private final Span stateBadge = new Span();
 
     public ReactiveLayoutView() {
+        addClassName("uc4-view");
         add(new H1("UC4 — Reactive layout"));
         add(new Paragraph(
                 "Click “Present” once. The 6 metric cards rearrange from "
