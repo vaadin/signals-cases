@@ -33,19 +33,3 @@ html {
     --vaadin-user-color-29: #FFD600; /* Yellow Accent */
 }
 
-.price-up {
-    color: var(--aura-green);
-    animation: flash-green 0.6s ease-out;
-}
-.price-down {
-    color: var(--aura-red);
-    animation: flash-red 0.6s ease-out;
-}
-@keyframes flash-green {
-    0% { background-color: rgba(76, 175, 80, 0.3); }
-    100% { background-color: transparent; }
-}
-@keyframes flash-red {
-    0% { background-color: rgba(244, 67, 54, 0.3); }
-    100% { background-color: transparent; }
-}

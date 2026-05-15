@@ -9,6 +9,7 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -26,10 +27,12 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Route(value = "use-case-02", layout = MainLayout.class)
 @PageTitle("Use Case 2: Progressive Disclosure with Nested Conditions")
 @Menu(order = 2, title = "UC 2: Nested Conditions")
+@StyleSheet("usecase02.css")
 @PermitAll
 public class UseCase02View extends VerticalLayout {
 
     public UseCase02View() {
+        addClassName("usecase02-view");
         setSpacing(true);
         setPadding(true);
 
@@ -170,14 +173,12 @@ public class UseCase02View extends VerticalLayout {
         var resultTextSignal = new ValueSignal<>("");
 
         Div resultDisplay = new Div();
-        resultDisplay.getStyle().set("margin-top", "2em").set("padding", "1em")
-                .set("border", "1px solid #ccc").set("border-radius", "4px")
-                .set("background-color", "#f5f5f5");
+        resultDisplay.addClassName("result-display");
         resultDisplay
                 .bindVisible(resultTextSignal.map(text -> !text.isBlank()));
 
         Pre resultText = new Pre(resultTextSignal);
-        resultText.getStyle().set("margin", "0");
+        resultText.addClassName("result-text");
 
         resultDisplay.add(new H3("Collected Form Data"), resultText);
 

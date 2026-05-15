@@ -141,7 +141,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         mainPanel.setHeightFull();
         mainPanel.setSpacing(true);
         mainPanel.setAlignItems(Alignment.STRETCH);
-        mainPanel.getStyle().set("min-height", "0");
+        mainPanel.addClassName("main-panel");
 
         // Left side: AI Chat
         VerticalLayout chatPanel = buildChatPanel();
@@ -161,10 +161,10 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         chatPanel.setHeightFull();
         chatPanel.setPadding(false);
         chatPanel.setSpacing(true);
-        chatPanel.getStyle().set("min-width", "0");
+        chatPanel.addClassName("chat-panel");
 
         H2 chatTitle = new H2("AI Task Assistant");
-        chatTitle.getStyle().set("margin", "0");
+        chatTitle.addClassName("panel-title");
 
         Paragraph chatDescription = new Paragraph(
                 "Chat with the AI to manage your tasks. Try commands like 'Add a task to buy groceries' or 'List my tasks'.");
@@ -181,10 +181,10 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         taskPanel.setHeightFull();
         taskPanel.setPadding(false);
         taskPanel.setSpacing(true);
-        taskPanel.getStyle().set("min-width", "0");
+        taskPanel.addClassName("task-panel");
 
         H2 title = new H2("Task Management");
-        title.getStyle().set("margin", "0");
+        title.addClassName("panel-title");
 
         VerticalLayout gridContainer = buildTaskGrid();
 
@@ -218,18 +218,16 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
     private Div createStatCard(String label, Signal<Integer> valueSignal,
             String color) {
         Div card = new Div();
-        card.getStyle().set("flex", "1").set("background-color", "#f5f5f5")
-                .set("padding", "1em").set("border-radius", "8px")
-                .set("text-align", "center");
+        card.addClassName("stat-card");
 
         Span valueLabel = new Span();
         valueLabel.bindText(valueSignal.map(String::valueOf));
-        valueLabel.getStyle().set("font-size", "2em").set("font-weight", "bold")
-                .set("color", color).set("display", "block");
+        valueLabel.addClassName("stat-card-value");
+        // Per-card color is dynamic — keep inline
+        valueLabel.getStyle().set("color", color);
 
         Span titleLabel = new Span(label);
-        titleLabel.getStyle().set("color", "var(--vaadin-text-color-secondary)")
-                .set("font-size", "0.875em");
+        titleLabel.addClassName("stat-card-label");
 
         card.add(valueLabel, titleLabel);
         return card;
@@ -285,7 +283,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         gridContainer.setWidthFull();
         gridContainer.setPadding(false);
         gridContainer.setSpacing(false);
-        gridContainer.getStyle().set("min-height", "0");
+        gridContainer.addClassName("grid-container");
 
         Grid<Task> grid = new Grid<>(Task.class, false);
         grid.addColumn(Task::title).setHeader("Title").setFlexGrow(2)
@@ -387,7 +385,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
         chatContainer.setWidthFull();
         chatContainer.setPadding(false);
         chatContainer.setSpacing(true);
-        chatContainer.getStyle().set("min-height", "0");
+        chatContainer.addClassName("chat-container");
 
         // Message list
         messageList = new MessageList();

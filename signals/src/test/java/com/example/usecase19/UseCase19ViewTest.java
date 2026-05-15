@@ -69,11 +69,10 @@ class UseCase19ViewTest extends SpringBrowserlessTest {
 
         Card card = $view(Card.class).all().getFirst();
 
-        // IDLE state should have contrast border
-        assertTrue(card.getStyle().get("border-left").contains(
-                "color-mix(in srgb, var(--vaadin-text-color) 20%, transparent)"),
-                "IDLE card should have contrast border but was: "
-                        + card.getStyle().get("border-left"));
+        // IDLE state should carry the state-idle class (rendered via CSS)
+        assertTrue(card.getClassNames().contains("state-idle"),
+                "IDLE card should have state-idle class but was: "
+                        + card.getClassNames());
     }
 
     @Test
@@ -88,13 +87,11 @@ class UseCase19ViewTest extends SpringBrowserlessTest {
         test(loadButton).click();
         runPendingSignalsTasks();
 
-        // Cards in LOADING state should have primary-color border
+        // Cards in LOADING state should carry the state-loading class
         Card card = $view(Card.class).all().getFirst();
-        assertTrue(
-                card.getStyle().get("border-left")
-                        .contains("var(--aura-accent-color)"),
-                "LOADING card should have primary border but was: "
-                        + card.getStyle().get("border-left"));
+        assertTrue(card.getClassNames().contains("state-loading"),
+                "LOADING card should have state-loading class but was: "
+                        + card.getClassNames());
     }
 
     @Test
