@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -36,6 +37,7 @@ import com.vaadin.flow.router.Route;
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Lock error UX")
 @Menu(order = 5, title = "UC5 — Lock error UX")
+@StyleSheet("uc5.css")
 public class LockErrorView extends VerticalLayout {
 
     private static final DateTimeFormatter TIME = DateTimeFormatter
@@ -44,6 +46,7 @@ public class LockErrorView extends VerticalLayout {
     private final Div log = new Div();
 
     public LockErrorView() {
+        addClassName("uc5-view");
         add(new H1("UC5 — Lock error UX"));
         add(new Paragraph("Each button triggers a typical lock failure path. "
                 + "Clicks log the resolved success/error directly under the "
@@ -65,7 +68,7 @@ public class LockErrorView extends VerticalLayout {
         HorizontalLayout actions = new HorizontalLayout(lockWithoutFullscreen,
                 rapidLocks, portraitLock);
         actions.setSpacing(true);
-        actions.getStyle().set("flex-wrap", "wrap");
+        actions.addClassName("uc5-actions");
         add(actions);
 
         log.addClassName("uc5-error-log");

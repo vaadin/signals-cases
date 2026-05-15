@@ -3,6 +3,7 @@ package com.example.uc2;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -29,6 +30,7 @@ import com.vaadin.flow.signals.Signal;
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("UC2 — Orientation viewer")
 @Menu(order = 2, title = "UC2 — Orientation viewer")
+@StyleSheet("uc2.css")
 public class OrientationViewerView extends VerticalLayout {
 
     private final Div arrow = new Div();
@@ -39,6 +41,7 @@ public class OrientationViewerView extends VerticalLayout {
     private final Span supportBadge = new Span();
 
     public OrientationViewerView() {
+        addClassName("uc2-view");
         add(new H1("UC2 — Orientation viewer"));
         add(new Paragraph("Live readout of the Screen Orientation signal. "
                 + "The arrow rotates to match the reported angle. The "
