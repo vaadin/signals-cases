@@ -4,6 +4,7 @@ import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -32,6 +33,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @Menu(order = 3, title = "UC3 — Distraction-free editor")
+@StyleSheet("uc3.css")
 public class DistractionFreeEditorView extends VerticalLayout {
 
     private final TextArea editor = new TextArea();
@@ -42,6 +44,7 @@ public class DistractionFreeEditorView extends VerticalLayout {
             e -> editorPane.exitFullscreen());
 
     public DistractionFreeEditorView() {
+        addClassName("uc3-view");
         add(new H1("UC3 — Distraction-free editor"));
         add(new Paragraph(
                 "Click “Expand to fullscreen” to focus only on the text. The "
