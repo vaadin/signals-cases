@@ -7,6 +7,7 @@ import com.example.uc3.DistractionFreeEditorView;
 import com.example.uc4.ReactiveLayoutView;
 import com.example.uc5.KioskExitDetectionView;
 import com.example.uc6.ChartExpandView;
+import com.example.uc7.AppFullscreenView;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.html.Div;
@@ -52,6 +53,10 @@ public class HomeView extends BaseHomeView {
         cards.add(homeCard("UC6", "Chart expand",
                 "Per-card expand buttons fullscreen a single Vaadin Chart.",
                 ChartExpandView.class));
+        cards.add(homeCard("UC7", "View app fullscreen",
+                "Page#requestFullscreen() hides browser chrome and shows "
+                        + "the whole app — kiosk-style.",
+                AppFullscreenView.class));
         add(cards);
     }
 }

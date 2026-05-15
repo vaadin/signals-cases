@@ -1,0 +1,57 @@
+package com.example.uc7;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import com.example.FullscreenTestSupport;
+import com.vaadin.browserless.SpringBrowserlessTest;
+import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.page.FullscreenState;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+@SpringBootTest
+@ViewPackages(classes = AppFullscreenView.class)
+class AppFullscreenViewTest extends SpringBrowserlessTest {
+
+    @Test
+    void viewRendersWithEnterExitAndBadge() {
+        navigate(AppFullscreenView.class);
+
+        assertTrue($view(H1.class).all().stream().anyMatch(h -> h.getText()
+                .equals("UC7 — View this app fullscreen")));
+        assertTrue($view(Button.class).all().stream()
+                .anyMatch(b -> "Enter fullscreen".equals(b.getText())));
+        assertTrue($view(Button.class).all().stream()
+                .anyMatch(b -> "Exit fullscreen".equals(b.getText())));
+    }
+
+    @Test
+    void badgeReflectsFullscreenSignal() {
+        navigate(AppFullscreenView.class);
+        runPendingSignalsTasks();
+
+        FullscreenTestSupport.setFullscreenState(FullscreenState.NOT_FULLSCREEN);
+        runPendingSignalsTasks();
+        assertBadgeContains("Enter fullscreen");
+
+        FullscreenTestSupport.setFullscreenState(FullscreenState.FULLSCREEN);
+        runPendingSignalsTasks();
+        assertBadgeContains("App is fullscreen");
+
+        FullscreenTestSupport.setFullscreenState(FullscreenState.UNSUPPORTED);
+        runPendingSignalsTasks();
+        assertBadgeContains("not supported");
+    }
+
+    private void assertBadgeContains(String fragment) {
+        assertTrue($view(Span.class).all().stream()
+                .anyMatch(s -> s.getClassNames().contains("status-badge")
+                        && s.getText() != null
+                        && s.getText().contains(fragment)),
+                "expected status badge to contain \"" + fragment + "\"");
+    }
+}
