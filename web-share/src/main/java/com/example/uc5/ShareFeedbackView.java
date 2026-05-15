@@ -8,6 +8,7 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -35,6 +36,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @Menu(order = 5, title = "UC5 — Completion feedback")
+@StyleSheet("uc5.css")
 public class ShareFeedbackView extends VerticalLayout {
 
     private static final DateTimeFormatter TIME = DateTimeFormatter
@@ -45,6 +47,7 @@ public class ShareFeedbackView extends VerticalLayout {
     private final Div log = new Div();
 
     public ShareFeedbackView() {
+        addClassName("uc5-view");
         add(new H1("UC5 — Share with completion feedback"));
         add(new Paragraph("Hooks .then(ok, err) on the PendingJavaScriptResult "
                 + "returned by Page.share(...). The browser resolves the "
