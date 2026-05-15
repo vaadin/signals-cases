@@ -49,3 +49,12 @@ html {
     0% { background-color: rgba(244, 67, 54, 0.3); }
     100% { background-color: transparent; }
 }
+
+/* Generic highlight flash used by UC28 and other "value changed" indicators */
+.uc28-flash {
+    animation: uc28-flash 0.6s ease-out;
+}
+@keyframes uc28-flash {
+    0% { background-color: rgba(33, 150, 243, 0.35); }
+    100% { background-color: transparent; }
+}
