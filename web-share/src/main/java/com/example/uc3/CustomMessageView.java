@@ -10,6 +10,7 @@ import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -37,6 +38,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @Menu(order = 3, title = "UC3 — Share a custom message")
+@StyleSheet("uc3.css")
 public class CustomMessageView extends VerticalLayout {
 
     private static final ObjectMapper JSON = JsonMapper.builder()
@@ -50,6 +52,7 @@ public class CustomMessageView extends VerticalLayout {
             VaadinIcon.SHARE.create());
 
     public CustomMessageView() {
+        addClassName("uc3-view");
         add(new H1("UC3 — Share a custom message"));
         add(new Paragraph("Fill any combination of the three fields. The "
                 + "preview shows exactly what gets passed to "

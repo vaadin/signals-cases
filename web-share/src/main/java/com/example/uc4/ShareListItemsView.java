@@ -7,6 +7,7 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -32,6 +33,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @Menu(order = 4, title = "UC4 — Per-item share")
+@StyleSheet("uc4.css")
 public class ShareListItemsView extends VerticalLayout {
 
     private record Article(String title, String summary, String url) {
@@ -53,6 +55,7 @@ public class ShareListItemsView extends VerticalLayout {
     private final Div list = new Div();
 
     public ShareListItemsView() {
+        addClassName("uc4-view");
         add(new H1("UC4 — Share each item in a list"));
         add(new Paragraph("Each row has its own Share button bound to its "
                 + "own payload. On a phone, tapping a row's icon opens the "

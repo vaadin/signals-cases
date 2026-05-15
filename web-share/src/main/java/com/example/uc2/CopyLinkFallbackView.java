@@ -6,6 +6,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -30,6 +31,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @Menu(order = 2, title = "UC2 — Copy-link fallback")
+@StyleSheet("uc2.css")
 public class CopyLinkFallbackView extends VerticalLayout {
 
     private static final String DOC_TITLE = "Web Share API use cases";
@@ -39,6 +41,7 @@ public class CopyLinkFallbackView extends VerticalLayout {
     private final Paragraph hint = new Paragraph();
 
     public CopyLinkFallbackView() {
+        addClassName("uc2-view");
         add(new H1("UC2 — Share with copy-link fallback"));
         add(new Paragraph("Mobile and modern Safari/Edge users get the "
                 + "native share sheet. Desktop Firefox and older browsers "
@@ -46,9 +49,8 @@ public class CopyLinkFallbackView extends VerticalLayout {
                 + "URL either way. The swap is driven entirely by the "
                 + "shareSupportSignal()."));
 
-        actionSlot.getStyle().set("margin-top", "0.5rem");
-        hint.getStyle().set("color", "var(--vaadin-text-color-secondary)")
-                .set("margin-top", "0.5rem");
+        actionSlot.addClassName("action-slot");
+        hint.addClassName("hint");
 
         add(actionSlot, hint);
     }
