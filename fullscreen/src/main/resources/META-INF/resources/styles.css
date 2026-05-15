@@ -105,6 +105,10 @@
     align-items: center;
     justify-content: center;
     font-size: 2.25rem;
+    /* Unitless so the line-height scales with font-size; the body's
+       length-valued line-height would otherwise stay ~20px and the
+       wrapped slide text would overlap at 2.25rem / 4rem. */
+    line-height: 1.2;
     text-align: center;
     padding: 2rem;
     box-sizing: border-box;
