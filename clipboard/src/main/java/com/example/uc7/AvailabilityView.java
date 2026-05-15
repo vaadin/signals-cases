@@ -5,6 +5,7 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.clipboard.Clipboard;
 import com.vaadin.flow.component.clipboard.ClipboardAvailability;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
@@ -32,9 +33,11 @@ import com.vaadin.flow.signals.Signal;
 @Route(value = "uc7", layout = MainLayout.class)
 @PageTitle("UC7 — Detect availability")
 @Menu(order = 7, title = "UC7 — Availability")
+@StyleSheet("uc7.css")
 public class AvailabilityView extends VerticalLayout {
 
     public AvailabilityView() {
+        addClassName("uc7-view");
         add(new H1("UC7 — Detect availability and degrade gracefully"));
         add(new Paragraph(
                 "Clipboard access is unavailable on plain HTTP, in restrictive "
@@ -43,9 +46,7 @@ public class AvailabilityView extends VerticalLayout {
                         + "instead of letting a copy fail silently."));
 
         Span status = new Span();
-        status.getStyle().set("padding", "var(--aura-space-s)")
-                .set("border-radius", "var(--aura-border-radius-m)")
-                .set("display", "block");
+        status.addClassName("availability-status");
 
         Button copyButton = new Button("Copy");
         Clipboard.copyOnClick(copyButton, "https://example.com/share/abc123",
@@ -55,24 +56,21 @@ public class AvailabilityView extends VerticalLayout {
         Signal<ClipboardAvailability> availability = Clipboard
                 .availabilityHintSignal();
         Signal.effect(this, () -> {
+            status.removeClassNames("available", "unsupported");
             switch (availability.get()) {
             case AVAILABLE -> {
                 status.setText("Clipboard is available.");
-                status.getStyle().set("background",
-                        "var(--aura-success-color-10pct)");
+                status.addClassName("available");
                 copyButton.setEnabled(true);
             }
             case UNSUPPORTED -> {
                 status.setText("Clipboard is unavailable in this context "
                         + "— the copy button is disabled.");
-                status.getStyle().set("background",
-                        "var(--aura-error-color-10pct)");
+                status.addClassName("unsupported");
                 copyButton.setEnabled(false);
             }
             case UNKNOWN -> {
                 status.setText("Checking clipboard availability…");
-                status.getStyle().set("background",
-                        "var(--aura-contrast-5pct)");
                 copyButton.setEnabled(false);
             }
             }

@@ -9,6 +9,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import com.vaadin.flow.component.clipboard.Clipboard;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -32,9 +33,11 @@ import com.vaadin.flow.router.Route;
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Paste a table from a spreadsheet")
 @Menu(order = 4, title = "UC4 — Paste a table")
+@StyleSheet("uc4.css")
 public class PasteSpreadsheetView extends VerticalLayout {
 
     public PasteSpreadsheetView() {
+        addClassName("uc4-view");
         add(new H1("UC4 — Paste a table from a spreadsheet"));
         add(new Paragraph(
                 "Select cells in the spreadsheet below and copy with Ctrl/Cmd-C, "
@@ -46,14 +49,10 @@ public class PasteSpreadsheetView extends VerticalLayout {
         add(spreadsheet);
 
         Div dropZone = new Div();
+        dropZone.addClassName("drop-zone");
         dropZone.setText("Paste here (Ctrl+V / Cmd+V)");
         dropZone.setWidthFull();
         dropZone.getElement().setAttribute("tabindex", "0");
-        dropZone.getStyle().set("border", "2px dashed #b0b8c0")
-                .set("padding", "24px").set("text-align", "center")
-                .set("border-radius", "8px").set("min-height", "80px")
-                .set("display", "flex").set("align-items", "center")
-                .set("justify-content", "center");
 
         Grid<List<String>> grid = new Grid<>();
         grid.setVisible(false);

@@ -6,6 +6,7 @@ import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.clipboard.Clipboard;
 import com.vaadin.flow.component.clipboard.ClipboardFile;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
@@ -34,9 +35,11 @@ import com.vaadin.flow.router.Route;
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Paste files")
 @Menu(order = 5, title = "UC5 — Paste files")
+@StyleSheet("uc5.css")
 public class PasteFilesView extends VerticalLayout {
 
     public PasteFilesView() {
+        addClassName("uc5-view");
         add(new H1("UC5 — Paste images and files"));
         add(new Paragraph(
                 "Click into the drop zone, then paste a screenshot or any "
@@ -44,24 +47,13 @@ public class PasteFilesView extends VerticalLayout {
                         + "bytes via the upload mechanism."));
 
         Div dropZone = new Div();
+        dropZone.addClassName("drop-zone");
         dropZone.setText("Paste a file here (Ctrl+V / Cmd+V)");
         dropZone.setWidthFull();
         dropZone.getElement().setAttribute("tabindex", "0");
-        dropZone.getStyle()
-                .set("border", "2px dashed var(--aura-contrast-30pct)")
-                .set("padding", "var(--aura-space-xl)")
-                .set("text-align", "center")
-                .set("border-radius", "var(--aura-border-radius-l)")
-                .set("min-height", "150px").set("display", "flex")
-                .set("align-items", "center").set("justify-content", "center");
 
         Span log = new Span("File log will appear here…");
-        log.getStyle().set("font-family", "monospace")
-                .set("white-space", "pre-wrap")
-                .set("padding", "var(--aura-space-s)")
-                .set("background", "var(--aura-contrast-5pct)")
-                .set("display", "block")
-                .set("border-radius", "var(--aura-border-radius-m)");
+        log.addClassName("file-log");
 
         ProgressBar uploadProgress = new ProgressBar();
         uploadProgress.setIndeterminate(true);
