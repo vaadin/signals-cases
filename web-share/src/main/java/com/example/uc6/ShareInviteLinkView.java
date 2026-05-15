@@ -8,6 +8,7 @@ import org.jspecify.annotations.Nullable;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -36,6 +37,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @Route(value = "uc6", layout = MainLayout.class)
 @Menu(order = 6, title = "UC6 — Share invite link")
+@StyleSheet("uc6.css")
 public class ShareInviteLinkView extends VerticalLayout {
 
     private static final SecureRandom RNG = new SecureRandom();
@@ -52,6 +54,7 @@ public class ShareInviteLinkView extends VerticalLayout {
     private boolean shareSupported;
 
     public ShareInviteLinkView() {
+        addClassName("uc6-view");
         add(new H1("UC6 — Share an invite link"));
         add(new Paragraph("Generates a fresh join code (server-side) and "
                 + "hands a https://example.com/join/<code> URL to the "

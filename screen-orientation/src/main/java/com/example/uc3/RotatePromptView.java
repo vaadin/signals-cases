@@ -3,6 +3,7 @@ package com.example.uc3;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -34,6 +35,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Rotate-your-device overlay")
 @Menu(order = 3, title = "UC3 — Rotate prompt")
+@StyleSheet("uc3.css")
 public class RotatePromptView extends VerticalLayout {
 
     enum Required {
@@ -59,6 +61,7 @@ public class RotatePromptView extends VerticalLayout {
     private final Span statusBadge = new Span();
 
     public RotatePromptView() {
+        addClassName("uc3-view");
         add(new H1("UC3 — Rotate-your-device overlay"));
         add(new Paragraph("Pick a required orientation, then rotate the "
                 + "device (or use the devtools rotate button in mobile "
@@ -84,7 +87,7 @@ public class RotatePromptView extends VerticalLayout {
 
         overlay.addClassName("uc3-overlay");
         Span icon = new Span("⟳");
-        icon.getStyle().set("font-size", "48px");
+        icon.addClassName("uc3-overlay-icon");
         overlay.add(icon, message);
         stage.add(overlay);
 

@@ -14,6 +14,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
@@ -46,6 +47,7 @@ import com.vaadin.flow.signals.shared.SharedValueSignal;
 @Route(value = "muc-06", layout = MainLayout.class)
 @PageTitle("MUC 6: Shared Task List")
 @Menu(order = 55, title = "MUC 6: Shared Task List")
+@StyleSheet("muc06.css")
 @PermitAll
 public class MUC06View extends VerticalLayout {
 
@@ -66,6 +68,7 @@ public class MUC06View extends VerticalLayout {
         this.muc06Signals = muc06Signals;
         this.userSessionRegistry = userSessionRegistry;
 
+        addClassName("muc06-view");
         setSpacing(true);
         setPadding(true);
 
@@ -98,24 +101,21 @@ public class MUC06View extends VerticalLayout {
 
         // Statistics panel
         Div statsBox = new Div();
-        statsBox.getStyle().set("background-color", "#f5f5f5")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("margin-bottom", "1em").set("display", "flex")
-                .set("gap", "2em");
+        statsBox.addClassName("stats-box");
 
         Span totalLabel = new Span();
         totalLabel.bindText(totalSignal.map(n -> "Total: " + n));
-        totalLabel.getStyle().set("font-weight", "500");
+        totalLabel.addClassName("stat-label");
 
         Span completedLabel = new Span();
         completedLabel.bindText(completedSignal.map(n -> "Completed: " + n));
-        completedLabel.getStyle().set("color", "var(--aura-green)")
-                .set("font-weight", "500");
+        completedLabel.addClassName("stat-label");
+        completedLabel.addClassName("stat-completed");
 
         Span pendingLabel = new Span();
         pendingLabel.bindText(pendingSignal.map(n -> "Pending: " + n));
-        pendingLabel.getStyle().set("color", "var(--aura-accent-color)")
-                .set("font-weight", "500");
+        pendingLabel.addClassName("stat-label");
+        pendingLabel.addClassName("stat-pending");
 
         statsBox.add(totalLabel, completedLabel, pendingLabel);
 
@@ -123,9 +123,7 @@ public class MUC06View extends VerticalLayout {
         H3 tasksTitle = new H3("Shared Tasks");
 
         Div tasksContainer = new Div();
-        tasksContainer.getStyle().set("display", "flex")
-                .set("flex-direction", "column").set("gap", "0.5em")
-                .set("margin-bottom", "1em");
+        tasksContainer.addClassName("tasks-container");
 
         tasksContainer.bindChildren(tasksSignal,
                 taskSignal -> createTaskRow(taskSignal, tasksSignal));
@@ -141,9 +139,7 @@ public class MUC06View extends VerticalLayout {
 
         // Info box
         Div infoBox = new Div();
-        infoBox.getStyle().set("background-color", "#e0f7fa")
-                .set("padding", "1em").set("border-radius", "4px")
-                .set("margin-top", "1em").set("font-style", "italic");
+        infoBox.addClassName("info-box");
         infoBox.add(new Paragraph(
                 "💡 This demonstrates real-time collaborative editing with shared signals. "
                         + "In production:\n"
@@ -203,9 +199,7 @@ public class MUC06View extends VerticalLayout {
         row.setDefaultVerticalComponentAlignment(Alignment.CENTER);
         row.setWidthFull();
         row.setPadding(true);
-        row.getStyle().set("background-color", "#ffffff").set("border",
-                "1px solid color-mix(in srgb, var(--vaadin-text-color) 20%, transparent)")
-                .set("border-radius", "4px");
+        row.addClassName("task-row");
 
         return row;
     }

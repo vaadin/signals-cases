@@ -10,6 +10,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -47,6 +48,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @Menu(order = 5, title = "UC5 — Kiosk")
+@StyleSheet("uc5.css")
 public class KioskExitDetectionView extends VerticalLayout {
 
     private static final DateTimeFormatter TIME = DateTimeFormatter
@@ -102,6 +104,7 @@ public class KioskExitDetectionView extends VerticalLayout {
     private @Nullable FullscreenSession session;
 
     public KioskExitDetectionView() {
+        addClassName("uc5-view");
         add(heading, intro);
 
         stateBadge.addClassName("status-badge");

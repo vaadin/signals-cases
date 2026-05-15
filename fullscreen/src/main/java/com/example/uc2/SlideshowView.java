@@ -8,6 +8,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -37,6 +38,7 @@ import com.vaadin.flow.signals.Signal;
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @Menu(order = 2, title = "UC2 — Slideshow")
+@StyleSheet("uc2.css")
 public class SlideshowView extends VerticalLayout {
 
     private static final List<String> SLIDES = List.of(
@@ -54,6 +56,7 @@ public class SlideshowView extends VerticalLayout {
     private int index;
 
     public SlideshowView() {
+        addClassName("uc2-view");
         add(new H1("UC2 — Slideshow / presentation mode"));
         add(new Paragraph(
                 "Click “Present” to fullscreen the slide. Only the slide is "

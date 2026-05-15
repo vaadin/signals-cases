@@ -13,6 +13,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.ChartType;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.ListSeries;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
@@ -50,6 +51,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc6", layout = MainLayout.class)
 @Menu(order = 6, title = "UC6 — Chart expand")
+@StyleSheet("uc6.css")
 public class ChartExpandView extends VerticalLayout {
 
     private static final List<String> CHART_TITLES = List.of("Visitors",
@@ -61,6 +63,7 @@ public class ChartExpandView extends VerticalLayout {
     private final List<Div> cards = new ArrayList<>();
 
     public ChartExpandView() {
+        addClassName("uc6-view");
         add(new H1("UC6 — Chart expand-to-fullscreen"));
         add(new Paragraph(
                 "Click Expand on any card to fill the screen with that chart "
