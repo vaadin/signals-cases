@@ -2,6 +2,7 @@ package com.example.uc6;
 
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -27,6 +28,7 @@ import com.vaadin.flow.signals.Signal;
 @Route(value = "uc6", layout = MainLayout.class)
 @PageTitle("UC6 — Live selection info")
 @Menu(order = 6, title = "UC6 — Live selection info")
+@StyleSheet("uc6.css")
 public class LiveSelectionInfoView extends VerticalLayout {
 
     private static final String SAMPLE = """
@@ -36,6 +38,7 @@ public class LiveSelectionInfoView extends VerticalLayout {
             zebras jump!""";
 
     public LiveSelectionInfoView() {
+        addClassName("uc6-view");
         add(new H1("UC6 — Live selection info"));
         add(new Paragraph(
                 "Drag to select text in the textarea below. The right panel "
