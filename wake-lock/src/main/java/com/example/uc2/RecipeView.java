@@ -7,6 +7,7 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -31,6 +32,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @Menu(order = 2, title = "UC2 — Recipe")
+@StyleSheet("uc2.css")
 public class RecipeView extends VerticalLayout {
 
     private static final List<String> STEPS = List.of(
@@ -48,6 +50,7 @@ public class RecipeView extends VerticalLayout {
     private final Button prevButton = new Button("Previous");
 
     public RecipeView() {
+        addClassName("uc2-view");
         add(new H1("UC2 — Leek tart, step by step"));
         add(new Paragraph("The wake lock is requested when this page is "
                 + "opened and released when you navigate away. While you "

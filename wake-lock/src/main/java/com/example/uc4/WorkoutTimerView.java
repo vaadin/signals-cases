@@ -11,6 +11,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
@@ -34,6 +35,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @Menu(order = 4, title = "UC4 — Workout timer")
+@StyleSheet("uc4.css")
 public class WorkoutTimerView extends VerticalLayout {
 
     private static final int WORK_SECONDS = 30;
@@ -62,6 +64,7 @@ public class WorkoutTimerView extends VerticalLayout {
     public WorkoutTimerView(TaskScheduler taskScheduler) {
         this.taskScheduler = taskScheduler;
 
+        addClassName("uc4-view");
         add(new H1("UC4 — Workout interval timer"));
         add(new Paragraph("30s Work, 10s Rest, repeat. The wake lock is "
                 + "requested while the timer is running and released the "
