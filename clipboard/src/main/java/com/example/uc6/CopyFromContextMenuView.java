@@ -5,6 +5,7 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.clipboard.Clipboard;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Pre;
@@ -26,9 +27,11 @@ import com.vaadin.flow.router.Route;
 @Route(value = "uc6", layout = MainLayout.class)
 @PageTitle("UC6 — Copy via context menu")
 @Menu(order = 6, title = "UC6 — Context menu")
+@StyleSheet("uc6.css")
 public class CopyFromContextMenuView extends VerticalLayout {
 
     public CopyFromContextMenuView() {
+        addClassName("uc6-view");
         add(new H1("UC6 — Copy via a context-menu item"));
         add(new Paragraph(
                 "Right-click (or long-press) the box below and pick \"Copy "
@@ -38,10 +41,7 @@ public class CopyFromContextMenuView extends VerticalLayout {
         String value = "secret-token-9f8e7a6b";
 
         Pre target = new Pre(value);
-        target.getStyle().set("padding", "var(--aura-space-m)")
-                .set("background", "var(--aura-contrast-5pct)")
-                .set("border-radius", "var(--aura-border-radius-m)")
-                .set("cursor", "context-menu");
+        target.addClassName("copy-target");
 
         ContextMenu menu = new ContextMenu(target);
         MenuItem copyItem = menu.addItem("Copy value");

@@ -1,0 +1,8 @@
+.uc6-view {
+    .copy-target {
+        padding: var(--aura-space-m);
+        background: var(--aura-contrast-5pct);
+        border-radius: var(--aura-border-radius-m);
+        cursor: context-menu;
+    }
+}
