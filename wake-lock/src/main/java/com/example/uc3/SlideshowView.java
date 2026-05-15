@@ -7,6 +7,7 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -35,6 +36,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @Menu(order = 3, title = "UC3 — Slideshow")
+@StyleSheet("uc3.css")
 public class SlideshowView extends VerticalLayout {
 
     private record Slide(String title, String body) {
@@ -67,6 +69,7 @@ public class SlideshowView extends VerticalLayout {
     private final Button nextButton = new Button("Next slide");
 
     public SlideshowView() {
+        addClassName("uc3-view");
         add(new H1("UC3 — Presentation slideshow"));
         add(new Paragraph("Click Start to begin presenting — the wake lock "
                 + "is requested while you advance through slides and "
