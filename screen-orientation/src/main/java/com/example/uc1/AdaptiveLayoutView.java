@@ -3,6 +3,7 @@ package com.example.uc1;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -28,12 +29,14 @@ import com.vaadin.flow.signals.Signal;
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Adaptive layout")
 @Menu(order = 1, title = "UC1 — Adaptive layout")
+@StyleSheet("uc1.css")
 public class AdaptiveLayoutView extends VerticalLayout {
 
     private final Div container = new Div();
     private final Span modeBadge = new Span();
 
     public AdaptiveLayoutView() {
+        addClassName("uc1-view");
         add(new H1("UC1 — Adaptive layout"));
         add(new Paragraph("The two panes below render side by side when the "
                 + "device is in landscape orientation and stack vertically "

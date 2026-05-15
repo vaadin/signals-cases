@@ -5,6 +5,7 @@ import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -36,6 +37,7 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Lock landscape for video")
 @Menu(order = 4, title = "UC4 — Lock for video")
+@StyleSheet("uc4.css")
 public class LockForVideoView extends VerticalLayout {
 
     private final Div stage = new Div();
@@ -46,6 +48,7 @@ public class LockForVideoView extends VerticalLayout {
     private final ValueSignal<String> lockBadgeMod = new ValueSignal<>("");
 
     public LockForVideoView() {
+        addClassName("uc4-view");
         add(new H1("UC4 — Lock landscape for video"));
         add(new Paragraph("Click \"Play\" to enter fullscreen and lock the "
                 + "screen to landscape. The lock typically only succeeds on "
