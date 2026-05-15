@@ -25,6 +25,8 @@ public final class AppCatalog {
             new App("signals", "Signal API", "https://signals-cases.fly.dev/"),
             new App("text-selection", "Text Selection API",
                     "https://text-selection-cases.fly.dev/"),
+            new App("triggers", "Trigger / Action API",
+                    "https://triggers-cases.fly.dev/"),
             new App("wake-lock", "Screen Wake Lock API",
                     "https://wake-lock-cases.fly.dev/"),
             new App("web-share", "Web Share API",
