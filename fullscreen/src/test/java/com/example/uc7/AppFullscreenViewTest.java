@@ -21,11 +21,11 @@ class AppFullscreenViewTest extends SpringBrowserlessTest {
     void viewRendersWithEnterExitAndBadge() {
         navigate(AppFullscreenView.class);
 
-        assertTrue($view(H1.class).all().stream().anyMatch(h -> h.getText()
+        assertTrue(findInView(H1.class).all().stream().anyMatch(h -> h.getText()
                 .equals("UC7 — View this app fullscreen")));
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Enter fullscreen".equals(b.getText())));
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Exit fullscreen".equals(b.getText())));
     }
 
@@ -48,7 +48,7 @@ class AppFullscreenViewTest extends SpringBrowserlessTest {
     }
 
     private void assertBadgeContains(String fragment) {
-        assertTrue($view(Span.class).all().stream()
+        assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> s.getClassNames().contains("status-badge")
                         && s.getText() != null
                         && s.getText().contains(fragment)),

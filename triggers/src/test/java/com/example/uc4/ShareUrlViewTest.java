@@ -26,10 +26,10 @@ class ShareUrlViewTest extends SpringBrowserlessTest {
     void viewRendersWithServerGeneratedUrl() {
         navigate(ShareUrlView.class);
 
-        assertTrue($view(H1.class).all().stream()
+        assertTrue(findInView(H1.class).all().stream()
                 .anyMatch(h -> "UC4 — Share URL widget".equals(h.getText())));
 
-        TextField field = $view(TextField.class).id("share-url");
+        TextField field = findInView(TextField.class).id("share-url");
         assertTrue(field.getValue().startsWith("https://example.com/share/"),
                 "server should render the share URL into the field");
         assertTrue(field.isReadOnly(), "share URL is read-only");
@@ -39,7 +39,7 @@ class ShareUrlViewTest extends SpringBrowserlessTest {
     void copyButtonIsWiredToReadFieldValue() {
         navigate(ShareUrlView.class);
 
-        Button copy = $view(Button.class).id("copy");
+        Button copy = findInView(Button.class).id("copy");
         ObjectNode snapshot = TriggerSupport.on(copy).snapshotForTest();
 
         assertEquals(ClickTrigger.TYPE_ID,
@@ -59,13 +59,13 @@ class ShareUrlViewTest extends SpringBrowserlessTest {
     @Test
     void twoSessionsGetDifferentShareUrls() {
         ShareUrlView first = navigate(ShareUrlView.class);
-        String firstUrl = $view(TextField.class).id("share-url").getValue();
+        String firstUrl = findInView(TextField.class).id("share-url").getValue();
 
         cleanVaadinEnvironment();
         initVaadinEnvironment();
 
         ShareUrlView second = navigate(ShareUrlView.class);
-        String secondUrl = $view(TextField.class).id("share-url").getValue();
+        String secondUrl = findInView(TextField.class).id("share-url").getValue();
 
         assertTrue(!firstUrl.equals(secondUrl),
                 "each session should generate its own share URL");

@@ -25,9 +25,9 @@ class ShareInviteLinkViewTest extends SpringBrowserlessTest {
     void viewRendersHeadingAndPlaceholders() {
         navigate(ShareInviteLinkView.class);
 
-        assertTrue($view(H1.class).all().stream().anyMatch(
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
                 h -> "UC6 — Share an invite link".equals(h.getText())));
-        assertTrue($view(Span.class).all().stream()
+        assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> "—".equals(s.getText())));
     }
 
@@ -81,14 +81,14 @@ class ShareInviteLinkViewTest extends SpringBrowserlessTest {
     }
 
     private void clickGenerate() {
-        Button generate = $view(Button.class).all().stream()
+        Button generate = findInView(Button.class).all().stream()
                 .filter(b -> "Generate invite".equals(b.getText())).findFirst()
                 .orElseThrow();
         generate.click();
     }
 
     private void assertShareButtonEnabled(boolean expected) {
-        Button share = $view(Button.class).all().stream()
+        Button share = findInView(Button.class).all().stream()
                 .filter(b -> "Share invite".equals(b.getText())).findFirst()
                 .orElseThrow();
         if (expected) {

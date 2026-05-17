@@ -27,17 +27,17 @@ class CopyCodeSnippetViewTest extends SpringBrowserlessTest {
     void viewRendersWithSnippetAndCopyButton() {
         navigate(CopyCodeSnippetView.class);
 
-        assertTrue($view(H1.class).all().stream()
+        assertTrue(findInView(H1.class).all().stream()
                 .anyMatch(h -> "UC2 — Copy a code snippet".equals(h.getText())));
-        assertNotNull($view(Pre.class).id("snippet"));
-        assertNotNull($view(Button.class).id("copy"));
+        assertNotNull(findInView(Pre.class).id("snippet"));
+        assertNotNull(findInView(Button.class).id("copy"));
     }
 
     @Test
     void outputReadsTextContentOfPreElement() {
         navigate(CopyCodeSnippetView.class);
 
-        Button copy = $view(Button.class).id("copy");
+        Button copy = findInView(Button.class).id("copy");
         ObjectNode snapshot = TriggerSupport.on(copy).snapshotForTest();
 
         JsonNode actionEntry = snapshot.get("actions").get("0");

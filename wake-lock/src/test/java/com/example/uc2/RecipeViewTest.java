@@ -22,12 +22,12 @@ class RecipeViewTest extends SpringBrowserlessTest {
         navigate(RecipeView.class);
         runPendingSignalsTasks();
 
-        assertTrue($view(H1.class).all().stream()
+        assertTrue(findInView(H1.class).all().stream()
                 .anyMatch(h -> h.getText() != null
                         && h.getText().contains("Leek tart")),
                 "view should render the recipe heading");
 
-        long stepCount = $view(Div.class).all().stream()
+        long stepCount = findInView(Div.class).all().stream()
                 .filter(d -> d.getElement().getClassList().contains(
                         "recipe-step"))
                 .count();
@@ -41,7 +41,7 @@ class RecipeViewTest extends SpringBrowserlessTest {
         navigate(RecipeView.class);
         runPendingSignalsTasks();
 
-        Div firstStep = $view(Div.class).all().stream()
+        Div firstStep = findInView(Div.class).all().stream()
                 .filter(d -> d.getElement().getClassList().contains(
                         "recipe-step"))
                 .findFirst().orElseThrow();
@@ -54,11 +54,11 @@ class RecipeViewTest extends SpringBrowserlessTest {
         navigate(RecipeView.class);
         runPendingSignalsTasks();
 
-        Button next = $(Button.class).withText("Next step").single();
+        Button next = find(Button.class).withText("Next step").single();
         test(next).click();
         runPendingSignalsTasks();
 
-        var steps = $view(Div.class).all().stream()
+        var steps = findInView(Div.class).all().stream()
                 .filter(d -> d.getElement().getClassList().contains(
                         "recipe-step"))
                 .toList();
@@ -82,7 +82,7 @@ class RecipeViewTest extends SpringBrowserlessTest {
     }
 
     private void assertBadgeContains(String fragment) {
-        assertTrue($view(Span.class).all().stream()
+        assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> s.getText() != null
                         && s.getText().toLowerCase().contains(
                                 fragment.toLowerCase())),

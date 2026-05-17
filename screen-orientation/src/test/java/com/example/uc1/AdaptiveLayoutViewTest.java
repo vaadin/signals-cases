@@ -21,7 +21,7 @@ class AdaptiveLayoutViewTest extends SpringBrowserlessTest {
     void viewRendersHeadingAndContainer() {
         navigate(AdaptiveLayoutView.class);
 
-        assertTrue($view(H1.class).all().stream()
+        assertTrue(findInView(H1.class).all().stream()
                 .anyMatch(h -> "UC1 — Adaptive layout".equals(h.getText())));
         assertTrue(hasContainer(), "expected the uc1-container to be rendered");
     }
@@ -48,12 +48,12 @@ class AdaptiveLayoutViewTest extends SpringBrowserlessTest {
     }
 
     private boolean hasContainer() {
-        return $view(Div.class).all().stream().anyMatch(d -> d.getClassNames()
+        return findInView(Div.class).all().stream().anyMatch(d -> d.getClassNames()
                 .stream().anyMatch(c -> c.equals("uc1-container")));
     }
 
     private void assertContainerClass(String cls) {
-        assertTrue($view(Div.class).all().stream()
+        assertTrue(findInView(Div.class).all().stream()
                 .filter(d -> d.getClassNames().contains("uc1-container"))
                 .anyMatch(d -> d.getClassNames().contains(cls)),
                 "expected uc1-container to carry class " + cls);
@@ -61,7 +61,7 @@ class AdaptiveLayoutViewTest extends SpringBrowserlessTest {
 
     private void assertBadgeContains(String fragment) {
         assertTrue(
-                $view(Span.class).all().stream()
+                findInView(Span.class).all().stream()
                         .anyMatch(s -> s.getText() != null
                                 && s.getText().contains(fragment)),
                 "expected mode badge to contain \"" + fragment + "\"");

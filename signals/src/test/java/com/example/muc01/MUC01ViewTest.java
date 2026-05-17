@@ -28,10 +28,10 @@ class MUC01ViewTest extends SpringBrowserlessTest {
     void viewRendersWithMessageInputAndButtons() {
         navigate(MUC01View.class);
 
-        assertEquals(1, $view(TextField.class).all().size());
-        assertTrue($view(Button.class).all().stream()
+        assertEquals(1, findInView(TextField.class).all().size());
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Send Message".equals(b.getText())));
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Clear All Messages".equals(b.getText())));
     }
 
@@ -40,17 +40,17 @@ class MUC01ViewTest extends SpringBrowserlessTest {
         navigate(MUC01View.class);
         runPendingSignalsTasks();
 
-        TextField messageInput = $view(TextField.class).single();
+        TextField messageInput = findInView(TextField.class).single();
         test(messageInput).setValue("Hello from User A");
 
-        Button sendButton = $view(Button.class).all().stream()
+        Button sendButton = findInView(Button.class).all().stream()
                 .filter(b -> "Send Message".equals(b.getText())).findFirst()
                 .orElseThrow();
         test(sendButton).click();
         runPendingSignalsTasks();
 
         // Message count should show 1
-        assertTrue($view(Div.class).all().stream()
+        assertTrue(findInView(Div.class).all().stream()
                 .anyMatch(d -> d.getText() != null
                         && d.getText().contains("Total messages: 1")));
     }
@@ -66,14 +66,14 @@ class MUC01ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // User A's view should show the message
-        assertTrue($view(Div.class).all().stream()
+        assertTrue(findInView(Div.class).all().stream()
                 .anyMatch(d -> d.getText() != null
                         && d.getText().contains("Total messages: 1")));
         // The message text should be rendered
-        assertTrue($view(Div.class).all().stream()
+        assertTrue(findInView(Div.class).all().stream()
                 .anyMatch(d -> "Hello from User B".equals(d.getText())));
         // The author name should be rendered
-        assertTrue($view(Div.class).all().stream()
+        assertTrue(findInView(Div.class).all().stream()
                 .anyMatch(d -> "User B".equals(d.getText())));
     }
 
@@ -83,9 +83,9 @@ class MUC01ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // User A sends a message
-        TextField messageInput = $view(TextField.class).single();
+        TextField messageInput = findInView(TextField.class).single();
         test(messageInput).setValue("Hello from A");
-        Button sendButton = $view(Button.class).all().stream()
+        Button sendButton = findInView(Button.class).all().stream()
                 .filter(b -> "Send Message".equals(b.getText())).findFirst()
                 .orElseThrow();
         test(sendButton).click();
@@ -97,7 +97,7 @@ class MUC01ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Both messages should be counted
-        assertTrue($view(Div.class).all().stream()
+        assertTrue(findInView(Div.class).all().stream()
                 .anyMatch(d -> d.getText() != null
                         && d.getText().contains("Total messages: 2")));
     }
@@ -114,18 +114,18 @@ class MUC01ViewTest extends SpringBrowserlessTest {
                 new MUC01Signals.Message("userB", "User B", "Message 2"));
         runPendingSignalsTasks();
 
-        assertTrue($view(Div.class).all().stream()
+        assertTrue(findInView(Div.class).all().stream()
                 .anyMatch(d -> d.getText() != null
                         && d.getText().contains("Total messages: 2")));
 
         // Clear all
-        Button clearButton = $view(Button.class).all().stream()
+        Button clearButton = findInView(Button.class).all().stream()
                 .filter(b -> "Clear All Messages".equals(b.getText()))
                 .findFirst().orElseThrow();
         test(clearButton).click();
         runPendingSignalsTasks();
 
-        assertTrue($view(Div.class).all().stream()
+        assertTrue(findInView(Div.class).all().stream()
                 .anyMatch(d -> d.getText() != null
                         && d.getText().contains("Total messages: 0")));
     }

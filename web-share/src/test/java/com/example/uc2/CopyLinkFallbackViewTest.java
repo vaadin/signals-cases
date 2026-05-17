@@ -20,7 +20,7 @@ class CopyLinkFallbackViewTest extends SpringBrowserlessTest {
     void viewRendersHeading() {
         navigate(CopyLinkFallbackView.class);
 
-        assertTrue($view(H1.class).all().stream().anyMatch(
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
                 h -> "UC2 — Share with copy-link fallback".equals(h.getText())));
     }
 
@@ -43,14 +43,14 @@ class CopyLinkFallbackViewTest extends SpringBrowserlessTest {
 
     private void assertButtonExists(String text) {
         assertTrue(
-                $view(Button.class).all().stream()
+                findInView(Button.class).all().stream()
                         .anyMatch(b -> text.equals(b.getText())),
                 "expected a button labelled \"" + text + "\"");
     }
 
     private void assertButtonAbsent(String text) {
         assertTrue(
-                $view(Button.class).all().stream()
+                findInView(Button.class).all().stream()
                         .noneMatch(b -> text.equals(b.getText())),
                 "expected no button labelled \"" + text + "\"");
     }
