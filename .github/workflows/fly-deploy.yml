@@ -14,14 +14,52 @@ jobs:
       modules: ${{ steps.find.outputs.modules }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - id: find
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.event.after }}
         run: |
-          modules=$(find . -mindepth 2 -maxdepth 2 -name fly.toml -printf '%h\n' \
+          all_modules=$(find . -mindepth 2 -maxdepth 2 -name fly.toml -printf '%h\n' \
             | sed 's|^\./||' \
-            | sort \
-            | jq -R -s -c 'split("\n") | map(select(length > 0))')
+            | sort)
+          all_json=$(printf '%s\n' "$all_modules" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+
+          select_all() {
+            echo "Selecting all modules: reason=$1"
+            echo "modules=$all_json" >> "$GITHUB_OUTPUT"
+            exit 0
+          }
+
+          # Manual runs always redeploy everything.
+          if [ "$EVENT_NAME" != "push" ]; then
+            select_all "event=$EVENT_NAME"
+          fi
+
+          # First push to the branch (no parent SHA) - redeploy everything.
+          if [ -z "$BEFORE_SHA" ] || [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            select_all "first push"
+          fi
+
+          changed=$(git diff --name-only "$BEFORE_SHA" "$AFTER_SHA")
+          echo "Changed files:"
+          echo "$changed"
+
+          # Anything outside a module directory (parent pom, common module,
+          # Maven wrapper, this workflow) forces a full redeploy.
+          shared_re='^(common/|pom\.xml$|mvnw($|\.cmd$)|\.mvn/|\.github/workflows/fly-deploy\.yml$)'
+          if echo "$changed" | grep -qE "$shared_re"; then
+            select_all "shared file changed"
+          fi
+
+          # Otherwise deploy only modules whose top-level directory changed.
+          changed_top=$(echo "$changed" | awk -F/ 'NF>1 {print $1}' | sort -u)
+          selected=$(comm -12 <(printf '%s\n' "$all_modules") <(printf '%s\n' "$changed_top"))
+          modules=$(printf '%s\n' "$selected" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "Selected modules: $modules"
           echo "modules=$modules" >> "$GITHUB_OUTPUT"
-          echo "Discovered modules: $modules"
   deploy:
     needs: discover
     name: Deploy ${{ matrix.module }}
