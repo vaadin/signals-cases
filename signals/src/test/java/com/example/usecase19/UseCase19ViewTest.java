@@ -25,14 +25,14 @@ class UseCase19ViewTest extends SpringBrowserlessTest {
         navigate(UseCase19View.class);
         runPendingSignalsTasks();
 
-        assertEquals(6, $view(Card.class).all().size());
+        assertEquals(6, findInView(Card.class).all().size());
     }
 
     @Test
     void loadButtonPresent() {
         navigate(UseCase19View.class);
 
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Load All Items".equals(b.getText())));
     }
 
@@ -40,7 +40,7 @@ class UseCase19ViewTest extends SpringBrowserlessTest {
     void errorCheckboxPresent() {
         navigate(UseCase19View.class);
 
-        assertTrue($view(Checkbox.class).all().stream()
+        assertTrue(findInView(Checkbox.class).all().stream()
                 .anyMatch(c -> "Simulate Random Errors".equals(c.getLabel())));
     }
 
@@ -50,7 +50,7 @@ class UseCase19ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Click "Load All Items"
-        Button loadButton = $view(Button.class).all().stream()
+        Button loadButton = findInView(Button.class).all().stream()
                 .filter(b -> "Load All Items".equals(b.getText())).findFirst()
                 .orElseThrow();
         test(loadButton).click();
@@ -58,7 +58,7 @@ class UseCase19ViewTest extends SpringBrowserlessTest {
 
         // All 6 cards should transition to LOADING — ProgressBars become
         // visible
-        assertTrue($view(ProgressBar.class).all().stream()
+        assertTrue(findInView(ProgressBar.class).all().stream()
                 .anyMatch(ProgressBar::isIndeterminate));
     }
 
@@ -67,7 +67,7 @@ class UseCase19ViewTest extends SpringBrowserlessTest {
         navigate(UseCase19View.class);
         runPendingSignalsTasks();
 
-        Card card = $view(Card.class).all().getFirst();
+        Card card = findInView(Card.class).all().getFirst();
 
         // IDLE state should carry the state-idle class (rendered via CSS)
         assertTrue(card.getClassNames().contains("state-idle"),
@@ -81,14 +81,14 @@ class UseCase19ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Click Load All to transition items to LOADING
-        Button loadButton = $view(Button.class).all().stream()
+        Button loadButton = findInView(Button.class).all().stream()
                 .filter(b -> "Load All Items".equals(b.getText())).findFirst()
                 .orElseThrow();
         test(loadButton).click();
         runPendingSignalsTasks();
 
         // Cards in LOADING state should carry the state-loading class
-        Card card = $view(Card.class).all().getFirst();
+        Card card = findInView(Card.class).all().getFirst();
         assertTrue(card.getClassNames().contains("state-loading"),
                 "LOADING card should have state-loading class but was: "
                         + card.getClassNames());
@@ -99,7 +99,7 @@ class UseCase19ViewTest extends SpringBrowserlessTest {
         navigate(UseCase19View.class);
         runPendingSignalsTasks();
 
-        Checkbox errorCheckbox = $view(Checkbox.class).all().stream()
+        Checkbox errorCheckbox = findInView(Checkbox.class).all().stream()
                 .filter(c -> "Simulate Random Errors".equals(c.getLabel()))
                 .findFirst().orElseThrow();
 

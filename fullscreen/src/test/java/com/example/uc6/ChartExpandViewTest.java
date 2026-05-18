@@ -23,16 +23,16 @@ class ChartExpandViewTest extends SpringBrowserlessTest {
     void viewRendersWithThreeChartCardsAndExpandButtons() {
         navigate(ChartExpandView.class);
 
-        assertTrue($view(H1.class).all().stream()
+        assertTrue(findInView(H1.class).all().stream()
                 .anyMatch(h -> "UC6 — Chart expand-to-fullscreen"
                         .equals(h.getText())));
 
-        long chartCardCount = $view(Div.class).all().stream()
+        long chartCardCount = findInView(Div.class).all().stream()
                 .filter(d -> d.getClassNames().contains("chart-card"))
                 .count();
         assertEquals(3, chartCardCount, "expected three chart cards");
 
-        long expandButtons = $view(Button.class).all().stream()
+        long expandButtons = findInView(Button.class).all().stream()
                 .filter(b -> "Expand".equals(b.getText())).count();
         assertEquals(3, expandButtons, "expected one Expand button per card");
     }
@@ -48,7 +48,7 @@ class ChartExpandViewTest extends SpringBrowserlessTest {
         // Click the Expand button next to the "Conversion" card. The middle
         // Expand button corresponds to it (cards are added in CHART_TITLES
         // order: Visitors, Conversion, Revenue).
-        Button conversionExpand = $view(Button.class).all().stream()
+        Button conversionExpand = findInView(Button.class).all().stream()
                 .filter(b -> "Expand".equals(b.getText())).skip(1).findFirst()
                 .orElseThrow();
         test(conversionExpand).click();
@@ -62,7 +62,7 @@ class ChartExpandViewTest extends SpringBrowserlessTest {
         navigate(ChartExpandView.class);
         runPendingSignalsTasks();
 
-        Button visitorsExpand = $view(Button.class).all().stream()
+        Button visitorsExpand = findInView(Button.class).all().stream()
                 .filter(b -> "Expand".equals(b.getText())).findFirst()
                 .orElseThrow();
         test(visitorsExpand).click();
@@ -86,7 +86,7 @@ class ChartExpandViewTest extends SpringBrowserlessTest {
     private void assertExpandedTitles(String... titles) {
         java.util.Set<String> expected = java.util.Set.of(titles);
         java.util.Set<String> actual = new java.util.LinkedHashSet<>();
-        for (Div card : $view(Div.class).all().stream()
+        for (Div card : findInView(Div.class).all().stream()
                 .filter(d -> d.getClassNames().contains("chart-card"))
                 .toList()) {
             if (card.getClassNames().contains("expanded")) {

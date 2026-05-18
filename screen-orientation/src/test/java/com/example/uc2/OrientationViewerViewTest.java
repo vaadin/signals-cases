@@ -22,7 +22,7 @@ class OrientationViewerViewTest extends SpringBrowserlessTest {
         navigate(OrientationViewerView.class);
         runPendingSignalsTasks();
 
-        assertTrue($view(H1.class).all().stream()
+        assertTrue(findInView(H1.class).all().stream()
                 .anyMatch(h -> "UC2 — Orientation viewer".equals(h.getText())));
         assertSpanText("UNKNOWN");
         assertSpanText("Waiting for client bootstrap");
@@ -58,7 +58,7 @@ class OrientationViewerViewTest extends SpringBrowserlessTest {
     }
 
     private void assertSpanText(String fragment) {
-        assertTrue($view(Span.class).all().stream()
+        assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> s.getText() != null
                         && s.getText().contains(fragment)),
                 "expected a span containing \"" + fragment + "\"");
@@ -66,7 +66,7 @@ class OrientationViewerViewTest extends SpringBrowserlessTest {
 
     private void assertArrowRotation(int degrees) {
         assertTrue(
-                $view(Div.class).all().stream()
+                findInView(Div.class).all().stream()
                         .filter(d -> d.getClassNames().contains("uc2-arrow"))
                         .anyMatch(d -> {
                             String transform = d.getStyle().get("transform");

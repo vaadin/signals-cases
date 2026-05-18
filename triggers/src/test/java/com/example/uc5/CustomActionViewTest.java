@@ -25,18 +25,18 @@ class CustomActionViewTest extends SpringBrowserlessTest {
     void viewRendersTargetAndTriggerButton() {
         navigate(CustomActionView.class);
 
-        assertTrue($view(H1.class).all().stream()
+        assertTrue(findInView(H1.class).all().stream()
                 .anyMatch(h -> "UC5 — Custom action via @JsModule"
                         .equals(h.getText())));
-        assertNotNull($view(Div.class).id("target"));
-        assertNotNull($view(Button.class).id("trigger"));
+        assertNotNull(findInView(Div.class).id("target"));
+        assertNotNull(findInView(Button.class).id("trigger"));
     }
 
     @Test
     void clickIsBoundToCustomActionTypeId() {
         navigate(CustomActionView.class);
 
-        Button trigger = $view(Button.class).id("trigger");
+        Button trigger = findInView(Button.class).id("trigger");
         ObjectNode snapshot = TriggerSupport.on(trigger).snapshotForTest();
 
         assertEquals(ClickTrigger.TYPE_ID,

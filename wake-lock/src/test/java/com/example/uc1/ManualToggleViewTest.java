@@ -21,12 +21,12 @@ class ManualToggleViewTest extends SpringBrowserlessTest {
     void viewRendersHeadingAndToggleButton() {
         navigate(ManualToggleView.class);
 
-        assertTrue($view(H1.class).all().stream()
+        assertTrue(findInView(H1.class).all().stream()
                 .anyMatch(h -> "UC1 — Manual keep-awake toggle"
                         .equals(h.getText())),
                 "Heading should render");
         // The toggle button starts as "Keep screen awake".
-        assertEquals(1, $view(Button.class).withText("Keep screen awake").all()
+        assertEquals(1, findInView(Button.class).withText("Keep screen awake").all()
                 .size(), "Toggle button should render with initial label");
     }
 
@@ -40,7 +40,7 @@ class ManualToggleViewTest extends SpringBrowserlessTest {
         WakeLockTestSupport.simulateAcquired();
         runPendingSignalsTasks();
         assertBadgeContains("Holding lock");
-        assertTrue($view(Button.class).withText("Allow screen to sleep").all()
+        assertTrue(findInView(Button.class).withText("Allow screen to sleep").all()
                 .size() == 1,
                 "Button label should switch when the lock is held");
 
@@ -54,7 +54,7 @@ class ManualToggleViewTest extends SpringBrowserlessTest {
         navigate(ManualToggleView.class);
         runPendingSignalsTasks();
 
-        Button toggle = $view(Button.class).withText("Keep screen awake")
+        Button toggle = findInView(Button.class).withText("Keep screen awake")
                 .single();
         test(toggle).click();
         // Click triggers request() (executeJs to the client); confirm via the
@@ -63,7 +63,7 @@ class ManualToggleViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
         assertBadgeContains("Holding lock");
 
-        Button release = $view(Button.class).withText("Allow screen to sleep")
+        Button release = findInView(Button.class).withText("Allow screen to sleep")
                 .single();
         test(release).click();
         WakeLockTestSupport.simulateReleased();
@@ -72,7 +72,7 @@ class ManualToggleViewTest extends SpringBrowserlessTest {
     }
 
     private void assertBadgeContains(String fragment) {
-        assertTrue($view(Span.class).all().stream()
+        assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> s.getText() != null
                         && s.getText().contains(fragment)),
                 "expected status badge to contain \"" + fragment + "\"");

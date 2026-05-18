@@ -26,17 +26,17 @@ class CopySelectValueViewTest extends SpringBrowserlessTest {
     void viewRendersHeadingAndCopyButton() {
         navigate(CopySelectValueView.class);
 
-        assertTrue($view(H1.class).all().stream()
+        assertTrue(findInView(H1.class).all().stream()
                 .anyMatch(h -> "UC3 — Copy the currently selected option"
                         .equals(h.getText())));
-        assertNotNull($view(Button.class).id("copy"));
+        assertNotNull(findInView(Button.class).id("copy"));
     }
 
     @Test
     void outputReadsValueOfNativeSelect() {
         navigate(CopySelectValueView.class);
 
-        Button copy = $view(Button.class).id("copy");
+        Button copy = findInView(Button.class).id("copy");
         ObjectNode snapshot = TriggerSupport.on(copy).snapshotForTest();
 
         JsonNode action = snapshot.get("actions").get("0");

@@ -25,11 +25,11 @@ class KioskExitDetectionViewTest extends SpringBrowserlessTest {
     void viewRendersWithKioskControlsAndLandingScreen() {
         navigate(KioskExitDetectionView.class);
 
-        assertTrue($view(H1.class).all().stream().anyMatch(h -> h.getText()
+        assertTrue(findInView(H1.class).all().stream().anyMatch(h -> h.getText()
                 .equals("UC5 — Kiosk: visitor sign-in")));
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Enter kiosk".equals(b.getText())));
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Start sign-in".equals(b.getText())),
                 "landing screen should expose Start sign-in");
     }
@@ -45,13 +45,13 @@ class KioskExitDetectionViewTest extends SpringBrowserlessTest {
         clickButton("Start sign-in");
         runPendingSignalsTasks();
 
-        TextField name = $view(TextField.class).all().stream()
+        TextField name = findInView(TextField.class).all().stream()
                 .filter(f -> "Your name".equals(f.getLabel())).findFirst()
                 .orElseThrow();
         test(name).setValue("Ada Lovelace");
 
         @SuppressWarnings("unchecked")
-        Select<String> purpose = $view(Select.class).all().stream()
+        Select<String> purpose = findInView(Select.class).all().stream()
                 .filter(s -> "Purpose of visit".equals(s.getLabel()))
                 .findFirst().orElseThrow();
         purpose.setValue("Meeting");
@@ -61,10 +61,10 @@ class KioskExitDetectionViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Confirmation screen now visible, log records the sign-in.
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "New visitor".equals(b.getText())),
                 "confirmation screen should expose New visitor");
-        assertTrue($view(Div.class).all().stream()
+        assertTrue(findInView(Div.class).all().stream()
                 .anyMatch(d -> d.getText() != null
                         && d.getText().contains("Signed in: Ada Lovelace")),
                 "log should record the sign-in");
@@ -82,11 +82,11 @@ class KioskExitDetectionViewTest extends SpringBrowserlessTest {
         FullscreenTestSupport.setFullscreenState(FullscreenState.NOT_FULLSCREEN);
         runPendingSignalsTasks();
 
-        assertTrue($view(Div.class).all().stream()
+        assertTrue(findInView(Div.class).all().stream()
                 .anyMatch(d -> d.getText() != null
                         && d.getText().contains("UNEXPECTED")),
                 "log should contain an unexpected-exit entry");
-        assertTrue($view(Span.class).all().stream()
+        assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> s.getClassNames().contains("unexpected-warning")
                         && s.getText() != null && !s.getText().isEmpty()),
                 "warning span should be visible after an unexpected exit");
@@ -104,7 +104,7 @@ class KioskExitDetectionViewTest extends SpringBrowserlessTest {
         clickButton("Staff");
         runPendingSignalsTasks();
 
-        PasswordField pin = $view(PasswordField.class).all().stream()
+        PasswordField pin = findInView(PasswordField.class).all().stream()
                 .findFirst().orElseThrow();
         test(pin).setValue(KioskExitDetectionView.STAFF_PIN);
         clickButton("Confirm");
@@ -112,11 +112,11 @@ class KioskExitDetectionViewTest extends SpringBrowserlessTest {
         FullscreenTestSupport.setFullscreenState(FullscreenState.NOT_FULLSCREEN);
         runPendingSignalsTasks();
 
-        assertTrue($view(Div.class).all().stream()
+        assertTrue(findInView(Div.class).all().stream()
                 .anyMatch(d -> d.getText() != null
                         && d.getText().contains("Staff exit confirmed")),
                 "log should record the staff exit");
-        assertTrue($view(Div.class).all().stream()
+        assertTrue(findInView(Div.class).all().stream()
                 .anyMatch(d -> d.getText() != null
                         && d.getText().contains("expected")
                         && !d.getText().contains("UNEXPECTED")),
@@ -137,24 +137,24 @@ class KioskExitDetectionViewTest extends SpringBrowserlessTest {
         clickButton("Staff");
         runPendingSignalsTasks();
 
-        PasswordField pin = $view(PasswordField.class).all().stream()
+        PasswordField pin = findInView(PasswordField.class).all().stream()
                 .findFirst().orElseThrow();
         test(pin).setValue("0000");
         clickButton("Confirm");
         runPendingSignalsTasks();
 
-        assertTrue($view(Div.class).all().stream()
+        assertTrue(findInView(Div.class).all().stream()
                 .anyMatch(d -> d.getText() != null
                         && d.getText().contains("Failed staff exit attempt")),
                 "log should record the failed staff attempt");
         // The dialog is still open (still rendering its Cancel button).
-        assertTrue($view(Button.class).all().stream()
+        assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Cancel".equals(b.getText())),
                 "staff prompt should still be open after a wrong PIN");
     }
 
     private void clickButton(String text) {
-        Button button = $view(Button.class).all().stream()
+        Button button = findInView(Button.class).all().stream()
                 .filter(b -> text.equals(b.getText())).findFirst()
                 .orElseThrow(() -> new AssertionError(
                         "button \"" + text + "\" not found"));

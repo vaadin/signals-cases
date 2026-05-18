@@ -27,18 +27,18 @@ class CopyFieldValueViewTest extends SpringBrowserlessTest {
     void viewRendersWithExpectedComponents() {
         navigate(CopyFieldValueView.class);
 
-        assertTrue($view(H1.class).all().stream()
+        assertTrue(findInView(H1.class).all().stream()
                 .anyMatch(h -> "UC1 — Copy field value on click"
                         .equals(h.getText())));
-        assertNotNull($view(TextField.class).id("source"));
-        assertNotNull($view(Button.class).id("copy"));
+        assertNotNull(findInView(TextField.class).id("source"));
+        assertNotNull(findInView(Button.class).id("copy"));
     }
 
     @Test
     void clickTriggerIsWiredToClipboardCopyActionReadingFieldValue() {
         navigate(CopyFieldValueView.class);
 
-        Button copy = $view(Button.class).id("copy");
+        Button copy = findInView(Button.class).id("copy");
         ObjectNode snapshot = TriggerSupport.on(copy).snapshotForTest();
 
         JsonNode triggers = snapshot.get("triggers");
