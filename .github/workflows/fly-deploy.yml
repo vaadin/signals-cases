@@ -71,8 +71,25 @@ jobs:
         module: ${{ fromJson(needs.discover.outputs.modules) }}
     steps:
       - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy . --remote-only --config ${{ matrix.module }}/fly.toml --dockerfile ${{ matrix.module }}/Dockerfile --build-secret proKey="$VAADIN_PRO_KEY"
+      - id: app
+        run: |
+          app=$(awk -F"'" '/^app *=/ {print $2}' ${{ matrix.module }}/fly.toml)
+          echo "name=$app" >> "$GITHUB_OUTPUT"
+      - run: flyctl auth docker
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-          VAADIN_PRO_KEY: ${{ secrets.VAADIN_PRO_KEY }}
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.module }}/Dockerfile
+          push: true
+          tags: registry.fly.io/${{ steps.app.outputs.name }}:${{ github.sha }}
+          secrets: |
+            proKey=${{ secrets.VAADIN_PRO_KEY }}
+          cache-from: type=gha,scope=${{ matrix.module }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.module }}
+      - run: flyctl deploy --image registry.fly.io/${{ steps.app.outputs.name }}:${{ github.sha }} --config ${{ matrix.module }}/fly.toml
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
