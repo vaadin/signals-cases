@@ -31,8 +31,8 @@
     <properties>
         <java.version>25</java.version>
         <vaadin.version>25.2-SNAPSHOT</vaadin.version>
-        <flow.version>${vaadin.version}</flow.version>
-        <flow-components.version>${vaadin.version}</flow-components.version>
+        <flow.version>25.2-SNAPSHOT</flow.version>
+        <flow-components.version>25.2-SNAPSHOT</flow-components.version>
         <jspecify.version>1.0.0</jspecify.version>
         <spotless.plugin.version>3.1.0</spotless.plugin.version>
         <nullability.plugin.version>0.3.0</nullability.plugin.version>
