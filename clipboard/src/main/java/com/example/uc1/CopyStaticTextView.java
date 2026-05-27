@@ -37,9 +37,9 @@ public class CopyStaticTextView extends VerticalLayout {
         add(new Pre(link));
 
         Button copyButton = new Button("Copy link");
-        Clipboard.copyOnClick(copyButton, link,
-                () -> Notification.show("Link copied"),
-                () -> Notification.show("Copy failed"));
+        Clipboard.onClick(copyButton).writeText(link,
+                written -> Notification.show("Link copied"),
+                error -> Notification.show("Copy failed: " + error.message()));
 
         add(copyButton);
     }

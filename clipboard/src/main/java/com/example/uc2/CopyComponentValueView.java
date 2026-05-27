@@ -38,9 +38,9 @@ public class CopyComponentValueView extends VerticalLayout {
         linkField.setWidthFull();
 
         Button copyButton = new Button("Copy");
-        Clipboard.copyOnClick(copyButton, linkField,
-                () -> Notification.show("Link copied"),
-                () -> Notification.show("Copy failed"));
+        Clipboard.onClick(copyButton).writeText(linkField,
+                written -> Notification.show("Link copied"),
+                error -> Notification.show("Copy failed: " + error.message()));
 
         HorizontalLayout row = new HorizontalLayout(linkField, copyButton);
         row.setAlignItems(Alignment.END);
