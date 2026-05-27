@@ -18,11 +18,10 @@ import com.vaadin.flow.router.Route;
 /**
  * UC6 — Copy via a context-menu item.
  * <p>
- * The PRD lists context-menu selection alongside button click as a primary
- * trigger for "Copy to clipboard". Any
- * {@link com.vaadin.flow.component.Component} can be passed to
- * {@link Clipboard#copyOnClick}, including a {@link MenuItem}, so the same
- * client-side gesture-safe path applies.
+ * Any {@link com.vaadin.flow.component.Component} that implements
+ * {@link com.vaadin.flow.component.ClickNotifier} can be the source of a
+ * {@link Clipboard#onClick} binding, including a {@link MenuItem}, so the same
+ * client-side gesture-safe path applies to context-menu triggers.
  */
 @Route(value = "uc6", layout = MainLayout.class)
 @PageTitle("UC6 — Copy via context menu")
@@ -35,8 +34,8 @@ public class CopyFromContextMenuView extends VerticalLayout {
         add(new H1("UC6 — Copy via a context-menu item"));
         add(new Paragraph(
                 "Right-click (or long-press) the box below and pick \"Copy "
-                        + "value\". The same copyOnClick API works on a menu "
-                        + "item — no JavaScript needed."));
+                        + "value\". The same Clipboard.onClick API works on a "
+                        + "menu item — no JavaScript needed."));
 
         String value = "secret-token-9f8e7a6b";
 
@@ -45,9 +44,9 @@ public class CopyFromContextMenuView extends VerticalLayout {
 
         ContextMenu menu = new ContextMenu(target);
         MenuItem copyItem = menu.addItem("Copy value");
-        Clipboard.copyOnClick(copyItem, value,
-                () -> Notification.show("Token copied"),
-                () -> Notification.show("Copy failed"));
+        Clipboard.onClick(copyItem).writeText(value,
+                written -> Notification.show("Token copied"),
+                error -> Notification.show("Copy failed: " + error.message()));
 
         add(target);
     }
