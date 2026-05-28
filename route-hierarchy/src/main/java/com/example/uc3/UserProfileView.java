@@ -15,19 +15,22 @@ import com.vaadin.flow.router.Route;
  * UC3 — Dynamic leaf label (profile, {@code uc3/:userId}).
  * <p>
  * Implements {@link HasDynamicTitle} so the breadcrumb leaf shows the resolved
- * person name rather than the static {@code @PageTitle}. The parent
- * {@code uc3} is still found by stripping the {@code :userId} segment.
+ * person name rather than the static {@code @PageTitle}. The parent {@code uc3}
+ * is still found by stripping the {@code :userId} segment.
+ * <p>
+ * {@code BeforeEnter} captures the resolved name into a field; the breadcrumb
+ * itself is signal-bound and re-reads {@link HasDynamicTitle#getPageTitle()}
+ * when the navigation signal fires.
  */
 @Route(value = "uc3/:userId", layout = MainLayout.class)
 public class UserProfileView extends VerticalLayout
         implements BeforeEnterObserver, HasDynamicTitle {
 
-    private final BreadcrumbBar breadcrumbs = new BreadcrumbBar();
     private final H1 heading = new H1();
     private String userName = "Unknown user";
 
     public UserProfileView() {
-        add(breadcrumbs);
+        add(new BreadcrumbBar());
         add(heading);
         add(new Paragraph(
                 "The breadcrumb leaf above matches this page's H1 — both come "
@@ -43,7 +46,6 @@ public class UserProfileView extends VerticalLayout
         String userId = event.getRouteParameters().get("userId").orElse("?");
         userName = Directory.nameOf(userId);
         heading.setText(userName);
-        breadcrumbs.show(this, event.getRouteParameters());
     }
 
     @Override

@@ -6,8 +6,6 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -17,33 +15,24 @@ import com.vaadin.flow.router.RouterLink;
  * UC5 — Up-one-level button (root, {@code uc5}).
  * <p>
  * Each page in this use case carries a single "↑ Up" control built from
- * {@link com.vaadin.flow.router.RouteHierarchy#resolveParent}. On this root page
- * {@code resolveParent} finds no parent within the use case, so the control
- * shows a "top level" note instead of a link.
+ * {@link com.vaadin.flow.router.RouteHierarchy#resolveParent}. On this root
+ * page {@code resolveParent} finds no parent within the use case, so the
+ * control shows a "top level" note instead of a link.
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("Settings")
 @Menu(order = 5, title = "UC5 — Up-one-level button")
-public class SettingsView extends VerticalLayout implements BeforeEnterObserver {
-
-    private final BreadcrumbBar breadcrumbs = new BreadcrumbBar();
-    private final UpLink upLink = new UpLink();
+public class SettingsView extends VerticalLayout {
 
     public SettingsView() {
-        add(breadcrumbs);
+        add(new BreadcrumbBar());
         add(new H1("Settings"));
         add(new Paragraph(
                 "The \"↑ Up\" control below uses resolveParent(...), which needs "
                         + "only the immediate parent rather than the whole "
                         + "chain. Drill into Security, then Sessions, and use "
                         + "the control to climb back one level at a time."));
-        add(upLink);
+        add(new UpLink());
         add(new RouterLink("Security settings →", SecurityView.class));
-    }
-
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        breadcrumbs.show(this, event.getRouteParameters());
-        upLink.show(this);
     }
 }

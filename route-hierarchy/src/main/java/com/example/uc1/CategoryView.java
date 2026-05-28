@@ -6,8 +6,6 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
@@ -20,13 +18,10 @@ import com.vaadin.flow.router.RouterLink;
  */
 @Route(value = "uc1/electronics", layout = MainLayout.class)
 @PageTitle("Electronics")
-public class CategoryView extends VerticalLayout
-        implements BeforeEnterObserver {
-
-    private final BreadcrumbBar breadcrumbs = new BreadcrumbBar();
+public class CategoryView extends VerticalLayout {
 
     public CategoryView() {
-        add(breadcrumbs);
+        add(new BreadcrumbBar());
         add(new H1("Electronics"));
         add(new Paragraph(
                 "The breadcrumb above now reads Catalog › Electronics. The "
@@ -34,10 +29,5 @@ public class CategoryView extends VerticalLayout
                         + "the uc1 route class; \"Electronics\" is the current "
                         + "page and is not a link."));
         add(new RouterLink("Browse Laptops →", SubcategoryView.class));
-    }
-
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        breadcrumbs.show(this, event.getRouteParameters());
     }
 }

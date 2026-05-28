@@ -12,7 +12,8 @@ import com.vaadin.flow.router.RouterLink;
  * UC6 — Layout-wide auto breadcrumbs (root, {@code uc6}).
  * <p>
  * This view adds no breadcrumb of its own — {@link TeamLayout} owns the single
- * shared trail and rebuilds it after every navigation.
+ * shared trail and rebuilds it reactively on every navigation via
+ * {@code UI.routerStateSignal()}.
  */
 @Route(value = "uc6", layout = TeamLayout.class)
 @PageTitle("Dashboard")
@@ -26,7 +27,7 @@ public class DashboardView extends VerticalLayout {
                         + "parent layout, not in this view. Navigate into the "
                         + "team and a member — the same bar updates and the "
                         + "counter ticks once per navigation, all from a single "
-                        + "AfterNavigationObserver."));
+                        + "Signal.effect subscribed to UI.routerStateSignal()."));
         add(new RouterLink("Open the team →", TeamView.class));
     }
 }

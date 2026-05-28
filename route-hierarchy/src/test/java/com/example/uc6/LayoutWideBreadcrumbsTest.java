@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.Map;
 
 import com.example.views.BreadcrumbBar;
-import com.vaadin.flow.component.html.Span;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.RouterLink;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,7 +53,7 @@ class LayoutWideBreadcrumbsTest extends SpringBrowserlessTest {
         assertTrue(trail().contains("Team"));
         int afterSecond = rebuildCount();
         assertTrue(afterSecond > afterFirst,
-                "AfterNavigationObserver must rebuild the trail on navigation");
+                "routerStateSignal effect must rebuild the trail on navigation");
 
         navigate(MemberView.class, Map.of("member", "lee"));
         assertTrue(trail().contains("Lee Wong"));
@@ -79,6 +79,7 @@ class LayoutWideBreadcrumbsTest extends SpringBrowserlessTest {
         Span badge = find(Span.class).withId(TeamLayout.REBUILD_BADGE_ID)
                 .single();
         String text = badge.getText();
-        return Integer.parseInt(text.substring(text.lastIndexOf(':') + 1).trim());
+        return Integer
+                .parseInt(text.substring(text.lastIndexOf(':') + 1).trim());
     }
 }

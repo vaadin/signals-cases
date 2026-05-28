@@ -6,8 +6,6 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
@@ -19,13 +17,10 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc1/electronics/laptops", layout = MainLayout.class)
 @PageTitle("Laptops")
-public class SubcategoryView extends VerticalLayout
-        implements BeforeEnterObserver {
-
-    private final BreadcrumbBar breadcrumbs = new BreadcrumbBar();
+public class SubcategoryView extends VerticalLayout {
 
     public SubcategoryView() {
-        add(breadcrumbs);
+        add(new BreadcrumbBar());
         add(new H1("Laptops"));
         add(new Paragraph(
                 "The deepest level. The breadcrumb reads Catalog › Electronics "
@@ -33,10 +28,5 @@ public class SubcategoryView extends VerticalLayout
                         + "their route classes, the last is the current page. "
                         + "All of it came from RouteHierarchy.resolveAncestors "
                         + "without a single @RouteParent annotation."));
-    }
-
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        breadcrumbs.show(this, event.getRouteParameters());
     }
 }

@@ -29,9 +29,8 @@ class SitemapTreeTest extends SpringBrowserlessTest {
         long links = findInView(RouterLink.class).all().size();
         assertEquals(9, links, "sitemap must render one link per route node");
 
-        String text = find(UnorderedList.class)
-                .withId(SitemapView.ROOT_LIST_ID).single().getElement()
-                .getTextRecursively();
+        String text = find(UnorderedList.class).withId(SitemapView.ROOT_LIST_ID)
+                .single().getElement().getTextRecursively();
         for (String title : new String[] { "Catalog", "Electronics", "Laptops",
                 "Settings", "Security", "Active sessions", "Dashboard", "Team",
                 "Orders" }) {

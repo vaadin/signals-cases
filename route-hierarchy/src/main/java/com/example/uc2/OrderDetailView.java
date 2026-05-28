@@ -20,17 +20,21 @@ import com.vaadin.flow.router.RouteParent;
  * lets {@link com.vaadin.flow.router.RouteHierarchy} place it under Orders. The
  * leaf label is supplied dynamically via {@link HasDynamicTitle} so it reflects
  * the actual order id.
+ * <p>
+ * {@code BeforeEnter} captures the order id into a field so
+ * {@link #getPageTitle()} can return a dynamic label; the breadcrumb itself
+ * needs no wiring — it is signal-bound and reads this view back from
+ * {@code UI.routerStateSignal().currentView()} when the navigation completes.
  */
 @Route(value = "order-detail/:orderId", layout = MainLayout.class)
 @RouteParent(OrdersView.class)
 public class OrderDetailView extends VerticalLayout
         implements BeforeEnterObserver, HasDynamicTitle {
 
-    private final BreadcrumbBar breadcrumbs = new BreadcrumbBar();
     private String orderId = "?";
 
     public OrderDetailView() {
-        add(breadcrumbs);
+        add(new BreadcrumbBar());
         add(new H1("Order detail"));
         add(new Paragraph(
                 "This page's URL is order-detail/:orderId — there is no uc2/ "
@@ -44,7 +48,6 @@ public class OrderDetailView extends VerticalLayout
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         orderId = event.getRouteParameters().get("orderId").orElse("?");
-        breadcrumbs.show(this, event.getRouteParameters());
     }
 
     @Override

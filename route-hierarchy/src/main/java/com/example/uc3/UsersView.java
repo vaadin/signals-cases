@@ -6,8 +6,6 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -27,12 +25,10 @@ import com.vaadin.flow.router.RouterLink;
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("Users")
 @Menu(order = 3, title = "UC3 — Dynamic leaf label")
-public class UsersView extends VerticalLayout implements BeforeEnterObserver {
-
-    private final BreadcrumbBar breadcrumbs = new BreadcrumbBar();
+public class UsersView extends VerticalLayout {
 
     public UsersView() {
-        add(breadcrumbs);
+        add(new BreadcrumbBar());
         add(new H1("Users"));
         add(new Paragraph(
                 "Open a profile below. Its breadcrumb leaf is not the static "
@@ -40,13 +36,7 @@ public class UsersView extends VerticalLayout implements BeforeEnterObserver {
                         + "resolved at runtime from the :userId via "
                         + "HasDynamicTitle. The Users crumb is still found by "
                         + "URL-prefix walking."));
-        Directory.USERS.forEach((id, name) -> add(new RouterLink(
-                "View " + name, UserProfileView.class,
-                new RouteParameters("userId", id))));
-    }
-
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        breadcrumbs.show(this, event.getRouteParameters());
+        Directory.USERS.forEach((id, name) -> add(new RouterLink("View " + name,
+                UserProfileView.class, new RouteParameters("userId", id))));
     }
 }

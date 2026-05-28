@@ -70,24 +70,26 @@ has no static title left for any *other* consumer that walks to it as an
 ancestor (it would fall back to a humanised class name). A walker-side title
 hook (gap 1) would side-step this by not depending on `@PageTitle` at all.
 
-## 4. No reactive "current navigation" signal — layout breadcrumbs need a listener
+## 4. ~~No reactive "current navigation" signal~~ — closed by `UI.routerStateSignal()`
 
-**Where it bit us:** uc6 / `TeamLayout.java`
-**Symptom:** for a single breadcrumb bar hosted in a parent layout and shared by
-all child views, there is no `Signal<NavigationState>` to subscribe to. You must
-implement `AfterNavigationObserver`, rebuild the trail in `afterNavigation`,
-pull the leaf instance out of `AfterNavigationEvent#getActiveChain()` and the
-parameters out of `getRouteParameters()`, and remember to seed the first render.
-**Workaround used:** `TeamLayout implements AfterNavigationObserver` and rebuilds
-on every event; a counter badge confirms the rebuild fires once per navigation.
-**Suggested API:** the `Signal<NavigationState>` proposed in the breadcrumbs
-flow-spec ("Reuse and Proposed Adjustments → a `Signal<NavigationState>` for the
-current route"). With it the layout collapses to a single
-`Signal.effect(this, () -> breadcrumbs.show(state.viewInstance(), state.routeParameters()))`
-that auto-seeds and auto-unsubscribes. (Note: a sibling snapshot already ships
-`UI.routerStateSignal()` in the `signals` module — this PR's snapshot does not
-include it, so the listener pattern is the only option here.) Ref: flow#24451 and
-the breadcrumbs flow-spec.
+**Status:** closed. This module's snapshot now carries the
+`UI.routerStateSignal()` from the breadcrumbs flow-spec
+("Reuse and Proposed Adjustments → a `Signal<NavigationState>` for the current
+route"), exposing a read-only `Signal<RouterState>` with `navigationTarget()`,
+`location()`, `routeParameters()`, `currentView()` and `activeChain()`.
+**How it landed in the demo:** every breadcrumb is signal-bound. `BreadcrumbBar`
+subscribes in its constructor via a single `Signal.effect(this, () -> { var
+state = UI.getCurrent().routerStateSignal().get(); rebuild(state); })` — the
+effect seeds the first render, auto-fires on every navigation (including
+same-class navigations with new `RouteParameters`) and auto-unsubscribes on
+detach. Views just `add(new BreadcrumbBar())`; no `BeforeEnterObserver`, no
+`AfterNavigationObserver`, no manual seed step. UC6's `TeamLayout` follows the
+same pattern for its rebuild counter. `UpLink` (UC5) is wired identically.
+**Note:** gaps 1, 2, 3 and 5 remain — the signal hands you the leaf instance and
+the current `RouteParameters`, but `RouteHierarchy.resolveAncestors` still
+returns bare classes, so label resolution, per-ancestor parameter filtering,
+dynamic-leaf labels and dynamic-ancestor labels stay an application
+responsibility.
 
 ## 5. Ancestor labels cannot be dynamic
 

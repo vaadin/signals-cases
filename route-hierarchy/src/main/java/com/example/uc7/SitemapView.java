@@ -20,8 +20,6 @@ import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -42,7 +40,7 @@ import com.vaadin.flow.router.RouterLink;
 @Route(value = "uc7", layout = MainLayout.class)
 @PageTitle("Sitemap")
 @Menu(order = 7, title = "UC7 — Route-tree sitemap")
-public class SitemapView extends VerticalLayout implements BeforeEnterObserver {
+public class SitemapView extends VerticalLayout {
 
     public static final String ROOT_LIST_ID = "sitemap-root";
 
@@ -51,26 +49,18 @@ public class SitemapView extends VerticalLayout implements BeforeEnterObserver {
             SubcategoryView.class, SessionsView.class, TeamView.class,
             OrdersView.class);
 
-    private final BreadcrumbBar breadcrumbs = new BreadcrumbBar();
-    private final VerticalLayout treeHolder = new VerticalLayout();
-
     public SitemapView() {
-        add(breadcrumbs);
+        add(new BreadcrumbBar());
         add(new H1("Sitemap"));
-        add(new Paragraph(
-                "Every node below was produced by calling "
-                        + "RouteHierarchy.resolveAncestors on a handful of leaf "
-                        + "routes and merging the returned chains into one tree. "
-                        + "The walker that draws a breadcrumb draws a sitemap "
-                        + "just as well."));
-        treeHolder.setPadding(false);
-        add(treeHolder);
+        add(new Paragraph("Every node below was produced by calling "
+                + "RouteHierarchy.resolveAncestors on a handful of leaf "
+                + "routes and merging the returned chains into one tree. "
+                + "The walker that draws a breadcrumb draws a sitemap "
+                + "just as well."));
+        add(buildTree());
     }
 
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        breadcrumbs.show(this, event.getRouteParameters());
-
+    private static UnorderedList buildTree() {
         RouteConfiguration routeConfiguration = RouteConfiguration
                 .forSessionScope();
 
@@ -92,8 +82,7 @@ public class SitemapView extends VerticalLayout implements BeforeEnterObserver {
 
         UnorderedList tree = renderLevel(roots, children);
         tree.setId(ROOT_LIST_ID);
-        treeHolder.removeAll();
-        treeHolder.add(tree);
+        return tree;
     }
 
     private static UnorderedList renderLevel(

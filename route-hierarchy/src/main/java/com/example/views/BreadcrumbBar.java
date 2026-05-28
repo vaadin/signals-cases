@@ -5,12 +5,16 @@ import java.util.List;
 import com.example.MissingAPI;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteHierarchy;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.router.RouterState;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * A reusable breadcrumb trail rendered as a {@link HorizontalLayout} of
@@ -19,13 +23,19 @@ import com.vaadin.flow.router.RouterLink;
  * <p>
  * The trail is built entirely from the Flow-core route-hierarchy API introduced
  * in <a href="https://github.com/vaadin/flow/pull/24451">flow#24451</a>:
- * {@link RouteHierarchy#resolveAncestors(Class, RouteConfiguration)} returns the
- * ancestor chain (root-first, leaf last) by consulting
- * {@code @RouteParent} first and falling back to URL-prefix walking. Each
- * ancestor becomes a {@link RouterLink}; the leaf is rendered as a plain,
- * non-linked {@link Span} marked as the current page. Label resolution and
- * per-ancestor parameter filtering are done by {@link MissingAPI} (see
- * {@code API-GAPS.md}).
+ * {@link RouteHierarchy#resolveAncestors(Class, RouteConfiguration)} returns
+ * the ancestor chain (root-first, leaf last) by consulting {@code @RouteParent}
+ * first and falling back to URL-prefix walking. Each ancestor becomes a
+ * {@link RouterLink}; the leaf is rendered as a plain, non-linked {@link Span}
+ * marked as the current page. Label resolution and per-ancestor parameter
+ * filtering are done by {@link MissingAPI} (see {@code API-GAPS.md}).
+ * <p>
+ * The bar wires itself to {@link UI#routerStateSignal()} from its constructor
+ * via a single {@link Signal#effect}: the effect rebuilds the trail from the
+ * current {@link RouterState} on every navigation (including same-class
+ * navigations with different route parameters) and unsubscribes automatically
+ * when this component is detached. Views just {@code add(new BreadcrumbBar())}
+ * — no {@code BeforeEnterObserver}, no manual seeding.
  */
 public class BreadcrumbBar extends HorizontalLayout {
 
@@ -33,22 +43,19 @@ public class BreadcrumbBar extends HorizontalLayout {
         addClassName("breadcrumb-bar");
         setSpacing(false);
         setPadding(false);
+
+        Signal.effect(this, () -> {
+            RouterState state = UI.getCurrent().routerStateSignal().get();
+            rebuild(state);
+        });
     }
 
-    /**
-     * Rebuilds the trail for {@code leafView} with no route parameters.
-     */
-    public void show(Component leafView) {
-        show(leafView, RouteParameters.empty());
-    }
-
-    /**
-     * Rebuilds the trail for {@code leafView}, carrying the relevant subset of
-     * {@code parameters} onto each ancestor link so parameterised ancestors
-     * resolve to working URLs.
-     */
-    public void show(Component leafView, RouteParameters parameters) {
+    private void rebuild(RouterState state) {
         removeAll();
+        HasElement leaf = state.currentView().orElse(null);
+        if (!(leaf instanceof Component leafView)) {
+            return;
+        }
 
         RouteConfiguration routeConfiguration = RouteConfiguration
                 .forSessionScope();
@@ -61,6 +68,7 @@ public class BreadcrumbBar extends HorizontalLayout {
             return;
         }
 
+        RouteParameters parameters = state.routeParameters();
         for (int i = 0; i < chain.size(); i++) {
             if (i > 0) {
                 add(separator());
@@ -76,8 +84,7 @@ public class BreadcrumbBar extends HorizontalLayout {
     }
 
     private static RouterLink ancestorLink(Class<? extends Component> ancestor,
-            RouteParameters parameters,
-            RouteConfiguration routeConfiguration) {
+            RouteParameters parameters, RouteConfiguration routeConfiguration) {
         String title = MissingAPI.staticTitle(ancestor);
         RouteParameters ancestorParameters = MissingAPI.parametersFor(ancestor,
                 parameters, routeConfiguration);

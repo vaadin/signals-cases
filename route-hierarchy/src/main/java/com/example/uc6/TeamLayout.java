@@ -1,18 +1,15 @@
 package com.example.uc6;
 
-import java.util.List;
-
 import com.example.views.BreadcrumbBar;
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.router.AfterNavigationEvent;
-import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.router.RouterLayout;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * UC6 — Layout-wide auto breadcrumbs.
@@ -21,17 +18,16 @@ import com.vaadin.flow.router.RouterLayout;
  * view ({@code uc6}, {@code uc6/team}, {@code uc6/team/:member}). The child
  * views build no breadcrumb of their own.
  * <p>
- * The route-hierarchy PR ships no reactive "current navigation" signal, so the
- * rebuild is driven the classic way: this layout implements
- * {@link AfterNavigationObserver} and rebuilds the trail in
- * {@link #afterNavigation}. {@code AfterNavigationEvent#getActiveChain()} gives
- * the leaf view instance (so {@code HasDynamicTitle} still works) and
- * {@code getRouteParameters()} the live parameters. See {@code API-GAPS.md} for
- * the {@code Signal<NavigationState>} this pattern is crying out for.
+ * The layout subscribes to {@link UI#routerStateSignal()} from its constructor:
+ * a single {@link Signal#effect} runs on the first attach (seeding the initial
+ * trail) and again on every subsequent navigation, without any
+ * {@code AfterNavigationObserver} registration or manual seeding step. The
+ * {@link BreadcrumbBar} itself is also signal-bound, so the only thing this
+ * effect adds is the rebuild counter — kept here to make the per-navigation
+ * fire visible from the tests.
  */
 @ParentLayout(MainLayout.class)
-public class TeamLayout extends Div
-        implements RouterLayout, AfterNavigationObserver {
+public class TeamLayout extends Div implements RouterLayout {
 
     public static final String REBUILD_BADGE_ID = "uc6-rebuilds";
 
@@ -48,6 +44,12 @@ public class TeamLayout extends Div
         header.addClassName("team-header");
         content.addClassName("team-content");
         add(header, content);
+
+        Signal.effect(this, () -> {
+            UI.getCurrent().routerStateSignal().get();
+            rebuilds++;
+            rebuildBadge.setText("breadcrumb rebuilds: " + rebuilds);
+        });
     }
 
     @Override
@@ -56,17 +58,5 @@ public class TeamLayout extends Div
         if (routerLayoutContent != null) {
             content.getElement().appendChild(routerLayoutContent.getElement());
         }
-    }
-
-    @Override
-    public void afterNavigation(AfterNavigationEvent event) {
-        List<HasElement> activeChain = event.getActiveChain();
-        if (activeChain.isEmpty()
-                || !(activeChain.get(0) instanceof Component leaf)) {
-            return;
-        }
-        breadcrumbs.show(leaf, event.getRouteParameters());
-        rebuilds++;
-        rebuildBadge.setText("breadcrumb rebuilds: " + rebuilds);
     }
 }

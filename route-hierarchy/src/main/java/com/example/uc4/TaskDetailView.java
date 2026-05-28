@@ -25,12 +25,11 @@ import com.vaadin.flow.router.RouteParameters;
 public class TaskDetailView extends VerticalLayout
         implements BeforeEnterObserver, HasDynamicTitle {
 
-    private final BreadcrumbBar breadcrumbs = new BreadcrumbBar();
     private final H1 heading = new H1();
     private String taskId = "?";
 
     public TaskDetailView() {
-        add(breadcrumbs);
+        add(new BreadcrumbBar());
         add(heading);
         add(new Paragraph(
                 "Hover the Project and Tasks crumbs above: both hrefs include "
@@ -45,7 +44,6 @@ public class TaskDetailView extends VerticalLayout
         RouteParameters parameters = event.getRouteParameters();
         taskId = parameters.get("taskId").orElse("?");
         heading.setText(ProjectData.taskName(taskId));
-        breadcrumbs.show(this, parameters);
     }
 
     @Override

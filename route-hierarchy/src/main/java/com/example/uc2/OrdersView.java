@@ -6,8 +6,6 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -27,12 +25,10 @@ import com.vaadin.flow.router.RouterLink;
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("Orders")
 @Menu(order = 2, title = "UC2 — @RouteParent override")
-public class OrdersView extends VerticalLayout implements BeforeEnterObserver {
-
-    private final BreadcrumbBar breadcrumbs = new BreadcrumbBar();
+public class OrdersView extends VerticalLayout {
 
     public OrdersView() {
-        add(breadcrumbs);
+        add(new BreadcrumbBar());
         add(new H1("Orders"));
         add(new Paragraph(
                 "The order detail page lives at order-detail/:orderId, which "
@@ -45,10 +41,5 @@ public class OrdersView extends VerticalLayout implements BeforeEnterObserver {
                 new RouteParameters("orderId", "1001")));
         add(new RouterLink("Open order #1002", OrderDetailView.class,
                 new RouteParameters("orderId", "1002")));
-    }
-
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        breadcrumbs.show(this, event.getRouteParameters());
     }
 }

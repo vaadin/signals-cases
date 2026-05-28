@@ -6,8 +6,6 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
@@ -19,24 +17,14 @@ import com.vaadin.flow.router.Route;
  */
 @Route(value = "uc5/security/sessions", layout = MainLayout.class)
 @PageTitle("Active sessions")
-public class SessionsView extends VerticalLayout
-        implements BeforeEnterObserver {
-
-    private final BreadcrumbBar breadcrumbs = new BreadcrumbBar();
-    private final UpLink upLink = new UpLink();
+public class SessionsView extends VerticalLayout {
 
     public SessionsView() {
-        add(breadcrumbs);
+        add(new BreadcrumbBar());
         add(new H1("Active sessions"));
         add(new Paragraph("The \"↑ Up\" control resolves to Security — the "
                 + "immediate parent — even though the full breadcrumb above "
                 + "spans three levels."));
-        add(upLink);
-    }
-
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        breadcrumbs.show(this, event.getRouteParameters());
-        upLink.show(this);
+        add(new UpLink());
     }
 }
