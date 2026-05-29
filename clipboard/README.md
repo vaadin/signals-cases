@@ -3,25 +3,51 @@
 This module contains a collection of Vaadin Flow views demonstrating the
 browser Clipboard API exposed via `com.vaadin.flow.component.clipboard.Clipboard`.
 
-The public API in Vaadin Flow 25.2 is intentionally narrow: it covers
-*writing* to the clipboard from a user click, in plain text, HTML, or
-multi-format. There is no Java API for reading from the clipboard,
-listening to paste events, copying image data, or detecting clipboard
-availability.
+The write surface in Vaadin Flow 25.2 covers *writing* to the clipboard
+from a user click in plain text, HTML, multi-format, or image. The
+`25.3.paste-events-SNAPSHOT` branch of `vaadin/flow` adds
+`Clipboard.onPaste(...)`, used in UC5 below, plus
+`writeImage(Component | DownloadHandler)`, used in UC4. The clipboard
+module is pinned to that branch via `<flow.version>` in
+`clipboard/pom.xml`; the rest of the Vaadin stack stays on the regular
+25.2 release.
+
+Two PRD use cases are still not supported by the API on this branch and
+are therefore not included here:
+
+- **Pasting files** (screenshots, binary clipboard items). `PasteEvent`
+  in this branch exposes `text/plain` and `text/html` only; its
+  Javadoc explicitly notes that file/binary support is tracked
+  separately.
+- **Detecting clipboard availability** (HTTPS context, restrictive
+  iframe, denied permission). No `availabilityHintSignal()` or
+  `ClipboardAvailability` type exists in this build.
 
 The original tracking issue is
 [vaadin/platform#8759](https://github.com/vaadin/platform/issues/8759);
-the API landed via
+the initial write API landed via
 [vaadin/flow#23615](https://github.com/vaadin/flow/pull/23615).
 
 ## API at a glance
 
 ```java
+// Write — fires on a user click on the source component.
 Clipboard.onClick(button).writeText("hello");
 Clipboard.onClick(button).writeText(textField);
 Clipboard.onClick(button).writeHtml("<p>hello</p>");
+Clipboard.onClick(button).writeImage(image);   // 25.3 paste-events branch
 Clipboard.onClick(button).write(
         ClipboardContent.create().text("hello").html("<p>hello</p>"));
+
+// Read — listens for browser paste events on a focused element.
+// 25.3 paste-events branch.
+Clipboard.onPaste(div, event -> {
+    if (event.hasHtml()) {
+        handleHtml(event.getHtml());
+    } else if (event.hasText()) {
+        handleText(event.getText());
+    }
+});
 ```
 
 Every variant has an overload that takes `onSuccess` and `onError`
@@ -45,13 +71,21 @@ component, which can be any `Component` that implements `ClickNotifier`
    `Clipboard.onClick(button).write(ClipboardContent.create().text(…).html(…))`.
    Rich destinations get the HTML; plain destinations get the
    plain-text fallback.
+4. **UC4 — Copy image** —
+   `Clipboard.onClick(button).writeImage(image, onCopied, onError)`.
+   The source component's root `<img>` is rasterised to PNG on the
+   client and written to the clipboard inside the click handler.
+5. **UC5 — Paste a table from a spreadsheet** —
+   `Clipboard.onPaste(div, event -> …)`. Reads the HTML branch of the
+   paste (a `<table>`) when available; falls back to TSV from the plain
+   text branch.
 6. **UC6 — Copy via context menu** —
    `Clipboard.onClick(menuItem).writeText(…)` on a `ContextMenu` item,
    demonstrating that the same path works for any `ClickNotifier`.
 
-Use-case numbers 4, 5 and 7 from the original PRD (paste text/HTML,
-paste files, availability signal) are intentionally omitted: the
-underlying APIs are not part of the merged Flow 25.2 surface.
+The two remaining PRD items (paste files, availability signal) are
+omitted because the underlying APIs are still not part of this Flow
+branch — see the note at the top of this file.
 
 ## Running the Application
 
@@ -63,7 +97,7 @@ For production builds, use `./mvnw package`.
 
 ## Technical Stack
 
-- **Vaadin 25.2-SNAPSHOT**
+- **Vaadin 25.2-SNAPSHOT** (Flow overridden to `25.3.paste-events-SNAPSHOT`)
 - **Spring Boot 4.0.5**
 - **Java 25**
 - **Maven**
