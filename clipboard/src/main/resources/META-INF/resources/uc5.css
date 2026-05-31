@@ -8,5 +8,16 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        transition: border-color 120ms, background-color 120ms;
+    }
+
+    /* `paste` fires on the focused element, so make the focus state
+       visually obvious — otherwise the user can't tell whether Ctrl+V
+       will land here or somewhere else on the page. */
+    .drop-zone:focus {
+        outline: none;
+        border-style: solid;
+        border-color: var(--aura-accent-color);
+        background: var(--aura-accent-surface);
     }
 }
