@@ -34,11 +34,10 @@ import com.vaadin.flow.router.Route;
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("UC5 — Paste a table from a spreadsheet")
 @Menu(order = 5, title = "UC5 — Paste a table")
-@StyleSheet("uc5.css")
+@StyleSheet("paste-drop-zone.css")
 public class PasteSpreadsheetView extends VerticalLayout {
 
     public PasteSpreadsheetView() {
-        addClassName("uc5-view");
         add(new H1("UC5 — Paste a table from a spreadsheet"));
         add(new Paragraph(
                 "Select cells in the spreadsheet below and copy with Ctrl/Cmd-C, "

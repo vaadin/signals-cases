@@ -35,6 +35,7 @@ import com.vaadin.flow.router.Route;
 @Route(value = "uc7", layout = MainLayout.class)
 @PageTitle("UC7 — Paste files")
 @Menu(order = 7, title = "UC7 — Paste files")
+@StyleSheet("paste-drop-zone.css")
 @StyleSheet("uc7.css")
 public class PasteFilesView extends VerticalLayout {
 

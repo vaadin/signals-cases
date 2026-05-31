@@ -1,32 +1,10 @@
 .uc7-view {
-    .drop-zone {
-        border: 2px dashed var(--aura-contrast-30pct);
-        padding: var(--aura-space-xl);
-        text-align: center;
-        border-radius: var(--aura-border-radius-l);
-        min-height: 150px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: border-color 120ms, background-color 120ms;
-    }
-
-    /* `paste` fires on the focused element, so make the focus state
-       visually obvious — otherwise the user can't tell whether Ctrl+V
-       will land here or somewhere else on the page. */
-    .drop-zone:focus {
-        outline: none;
-        border-style: solid;
-        border-color: var(--aura-accent-color);
-        background: var(--aura-accent-surface);
-    }
-
     .file-log {
         font-family: monospace;
         white-space: pre-wrap;
-        padding: var(--aura-space-s);
-        background: var(--aura-contrast-5pct);
+        padding: 8px;
+        background: #f4f4f4;
         display: block;
-        border-radius: var(--aura-border-radius-m);
+        border-radius: 4px;
     }
 }
