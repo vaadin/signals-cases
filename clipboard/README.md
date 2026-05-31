@@ -5,20 +5,24 @@ browser Clipboard API exposed via `com.vaadin.flow.component.clipboard.Clipboard
 
 The write surface in Vaadin Flow 25.2 covers *writing* to the clipboard
 from a user click in plain text, HTML, multi-format, or image. The
-`25.3.paste-events-SNAPSHOT` branch of `vaadin/flow` adds
-`Clipboard.onPaste(...)`, used in UC5 below, plus
-`writeImage(Component | DownloadHandler)`, used in UC4. The clipboard
-module is pinned to that branch via `<flow.version>` in
+`25.3.paste-file-SNAPSHOT` branch of `vaadin/flow`
+([PR #24485](https://github.com/vaadin/flow/pull/24485)) extends the
+surface with:
+
+- `Clipboard.onPaste(...)` — text/html paste listener, used in UC5;
+- `Clipboard.onClick(...).writeImage(Component | DownloadHandler)` —
+  client-side image copy, used in UC4;
+- `Clipboard.onFilePaste(component, UploadHandler)` plus
+  `PasteFileHandler.session()` / `PasteFileHandler.inMemory(...)` —
+  per-file upload of pasted screenshots and files, used in UC7.
+
+The clipboard module is pinned to that branch via `<flow.version>` in
 `clipboard/pom.xml`; the rest of the Vaadin stack stays on the regular
 25.2 release.
 
-Two PRD use cases are still not supported by the API on this branch and
-are therefore not included here:
+One PRD use case is still not supported by the API on this branch and
+is therefore not included here:
 
-- **Pasting files** (screenshots, binary clipboard items). `PasteEvent`
-  in this branch exposes `text/plain` and `text/html` only; its
-  Javadoc explicitly notes that file/binary support is tracked
-  separately.
 - **Detecting clipboard availability** (HTTPS context, restrictive
   iframe, denied permission). No `availabilityHintSignal()` or
   `ClipboardAvailability` type exists in this build.
@@ -26,7 +30,9 @@ are therefore not included here:
 The original tracking issue is
 [vaadin/platform#8759](https://github.com/vaadin/platform/issues/8759);
 the initial write API landed via
-[vaadin/flow#23615](https://github.com/vaadin/flow/pull/23615).
+[vaadin/flow#23615](https://github.com/vaadin/flow/pull/23615) and
+file-paste support is on
+[vaadin/flow#24485](https://github.com/vaadin/flow/pull/24485).
 
 ## API at a glance
 
@@ -40,7 +46,7 @@ Clipboard.onClick(button).write(
         ClipboardContent.create().text("hello").html("<p>hello</p>"));
 
 // Read — listens for browser paste events on a focused element.
-// 25.3 paste-events branch.
+// 25.3 paste-file branch.
 Clipboard.onPaste(div, event -> {
     if (event.hasHtml()) {
         handleHtml(event.getHtml());
@@ -48,6 +54,14 @@ Clipboard.onPaste(div, event -> {
         handleText(event.getText());
     }
 });
+
+// File paste — each pasted file is uploaded to the URL Flow generates
+// for the handler. 25.3 paste-file branch.
+Clipboard.onFilePaste(div, PasteFileHandler.session()
+        .onStart(start -> showProgress(start.totalFiles()))
+        .onFile(file -> render(file))
+        .onComplete(end -> hideProgress())
+        .build());
 ```
 
 Every variant has an overload that takes `onSuccess` and `onError`
@@ -82,10 +96,15 @@ component, which can be any `Component` that implements `ClickNotifier`
 6. **UC6 — Copy via context menu** —
    `Clipboard.onClick(menuItem).writeText(…)` on a `ContextMenu` item,
    demonstrating that the same path works for any `ClickNotifier`.
+7. **UC7 — Paste images and files** —
+   `Clipboard.onFilePaste(div, PasteFileHandler.session()…)`. Each
+   pasted file is uploaded via Flow's standard upload mechanism;
+   `onStart` / `onFile` / `onComplete` give the application
+   paste-aware lifecycle hooks for progress reporting.
 
-The two remaining PRD items (paste files, availability signal) are
-omitted because the underlying APIs are still not part of this Flow
-branch — see the note at the top of this file.
+The remaining PRD item (availability signal) is omitted because the
+underlying API is still not part of this Flow branch — see the note at
+the top of this file.
 
 ## Running the Application
 
@@ -97,7 +116,7 @@ For production builds, use `./mvnw package`.
 
 ## Technical Stack
 
-- **Vaadin 25.2-SNAPSHOT** (Flow overridden to `25.3.paste-events-SNAPSHOT`)
+- **Vaadin 25.2-SNAPSHOT** (Flow overridden to `25.3.paste-file-SNAPSHOT`)
 - **Spring Boot 4.0.5**
 - **Java 25**
 - **Maven**
