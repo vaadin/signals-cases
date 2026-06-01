@@ -12,13 +12,16 @@
     </parent>
 
     <properties>
-        <!-- Paste-events plus file-paste support live on the paste-file
-             feature branch of vaadin/flow (PR #24485); override flow.version
-             to pull that build. flow-components and vaadin-bom stay on the
-             parent's 25.2 versions — the branch only publishes flow
-             artifacts, and flow-bom is imported first in the parent so its
-             25.3 entries win for flow dependencies. -->
-        <flow.version>25.3.paste-file-SNAPSHOT</flow.version>
+        <!-- Pinned to the replace-children-temp feature branch of vaadin/flow
+             so the use cases can switch back to the new temporal trigger
+             actions (ReplaceChildrenTemporarilyAction, SetPropertyTemporarilyAction)
+             without bumping again. The branch is a superset of paste-file
+             (used by UC5/UC7 paste APIs) and the paste-events branch (UC4
+             writeImage). flow-components and vaadin-bom stay on the parent's
+             25.2 versions — the branch only publishes flow artifacts, and
+             flow-bom is imported first in the parent so its 25.3 entries win
+             for flow dependencies. -->
+        <flow.version>25.3.replace-children-temp-SNAPSHOT</flow.version>
     </properties>
 
     <dependencies>

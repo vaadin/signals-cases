@@ -73,10 +73,13 @@ component, which can be any `Component` that implements `ClickNotifier`
 
 ## Use Cases
 
-1. **UC1 — Copy static text on click** —
-   `Clipboard.onClick(button).writeText("…", onSuccess, onError)`. The
-   text is known at render time; the write happens client-side inside
-   the click handler so the user gesture is preserved.
+1. **UC1 — Copy static text on click, with in-button feedback** —
+   `Clipboard.onClick(button).writeText(link, onCopied, onError)`. The
+   server-side `onCopied` callback sets the button label to "Copied"
+   and adds a check icon; a one-second `setTimeout` on the client
+   dispatches a custom DOM event that a server-side listener uses to
+   revert the button. Demonstrates pairing the clipboard outcome
+   callback with a server-driven UI flash, without `@Push`.
 2. **UC2 — Copy current value of a component** —
    `Clipboard.onClick(button).writeText(textField, …)`. The source
    component's value is read client-side at click time, so editing the
