@@ -18,6 +18,15 @@ one is possible, live in `src/main/java/com/example/MissingAPI.java`.
 Meters referenced below use the branch's `MeterNames` constants (e.g.
 `vaadin.request.duration`, `vaadin.client.rpc.duration`).
 
+**Reachability is not the problem.** The in-browser collector POSTs its samples
+back via the `<vaadin-metrics-collector>` `@ClientCallable`, and `ClientMetricsBinder`
+records them into the *same server-side `MeterRegistry`* every other binder uses. So
+the client meters (`vaadin.client.rpc.duration`, `vaadin.client.errors`,
+`vaadin.client.web_vitals.*`, …) are readable by application code exactly like the
+server meters — a Flow view can inject the `MeterRegistry` and read them today. The
+gaps below are therefore about **granularity, correlation, and completeness of those
+meters**, not about getting client data to the server.
+
 ## 1. No public client-side request-lifecycle hook
 
 **Where it bites:** UC1 (end-to-end responsiveness); the whole client collector.
@@ -35,31 +44,36 @@ only sees `XMLHttpRequest`.
 emitting per-request timestamps, request/response sizes, transport, outcome, and a
 correlation id — surfacing the events `RequestResponseTracker` already fires.
 
-## 2. Client RPC timing excludes apply/paint; no "rendered" signal
+## 2. Client RPC timing is available, but excludes apply/paint and has no "rendered" signal
 
 **Where it bites:** UC1 (the browser segment of perceived latency).
-**Symptom:** `vaadin.client.rpc.duration` is measured from XHR `send` to `loadend`, so
-it captures network-up + server + network-down but **not** the time Flow then spends
-applying the UIDL diff to the DOM and painting. "Click-to-rendered" — the number the
-user actually feels — is therefore not measurable. The engine *does* measure render
-time (TestBench reads `timeSpentRenderingLastRequest()`), but it is not on any public
-JS surface.
-**Workaround used:** none; the apply/paint segment is simply absent.
+**Symptom:** `vaadin.client.rpc.duration` *is* collected and readable — but it is measured
+from XHR `send` to `loadend`, so it captures network-up + server + network-down and
+**not** the time Flow then spends applying the UIDL diff to the DOM and painting.
+"Click-to-rendered" — the number the user actually feels — is therefore not measurable
+even though the metric exists. The engine *does* measure render time (TestBench reads
+`timeSpentRenderingLastRequest()`), but it is not on any public JS surface.
+**Workaround used:** none; the apply/paint segment is simply absent from the sample.
 **Suggested API:** an `onRendered` timestamp on the hook from gap #1 (fired after the
 UIDL response has been applied), and/or exposing the engine's existing render timing to
 production client code.
 
-## 3. No correlation id linking the client and server halves of one interaction
+## 3. Client samples are aggregated and uncorrelated — no per-interaction value
 
 **Where it bites:** UC1 (browser/network/server breakdown), UC4 (single trace).
-**Symptom:** `vaadin.client.rpc.duration` and the server `vaadin.request.duration` are
-independent meters with no shared identifier. You can subtract *aggregates* to estimate
-network overhead, but you cannot attribute a *single* slow interaction to client vs.
-network vs. server. Relatedly, the client collector does not send a W3C `traceparent`
-on the UIDL request, so the server-side trace (`vaadin.request` observation) does not
-descend from a browser-rooted span — the trace effectively starts on the server, not at
-the click.
-**Workaround used:** aggregate subtraction only; no per-interaction stitch.
+**Symptom:** two distinct limitations, both about *granularity*, not availability:
+1. **Aggregated on ingest.** `ClientMetricsBinder.ingest` folds each browser sample into
+   a rolling `Timer` (`registry.timer(name, tags).record(...)`); the per-sample values the
+   JS buffers (each with its own `ts`/`valueMs`) are discarded. So we can read the *mean/
+   max/count* of `vaadin.client.rpc.duration`, but never *this click's* round-trip.
+2. **No correlation id.** `vaadin.client.rpc.duration` and the server
+   `vaadin.request.duration` share no identifier, so a single slow interaction can't be
+   attributed to client vs. network vs. server — only aggregates can be subtracted.
+   Relatedly, the collector sends no W3C `traceparent` on the UIDL request, so the
+   server-side trace (`vaadin.request` observation) doesn't descend from a browser-rooted
+   span — the trace effectively starts on the server, not at the click.
+**Workaround used:** aggregate subtraction only (mean client round-trip − mean server
+duration); no per-interaction stitch.
 **Suggested API:** a per-UIDL-request correlation id exposed to both the client hook
 (gap #1) and the server request interceptor, ideally as a W3C `traceparent` the client
 injects and the server continues, so browser → server → backend is one trace.
