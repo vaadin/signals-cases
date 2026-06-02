@@ -18,6 +18,8 @@ public final class AppCatalog {
                     "https://fullscreen-cases.fly.dev/"),
             new App("geolocation", "Geolocation API",
                     "https://geo-cases.fly.dev/"),
+            new App("observability", "Observability",
+                    "https://observability-cases.fly.dev/"),
             new App("page-visibility", "Page Visibility API",
                     "https://page-visibility-cases.fly.dev/"),
             new App("screen-orientation", "Screen Orientation API",

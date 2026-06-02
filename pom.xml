@@ -24,6 +24,7 @@
         <module>text-selection</module>
         <module>web-share</module>
         <module>screen-orientation</module>
+        <module>observability</module>
         <module>signals</module>
         <module>triggers</module>
         <module>wake-lock</module>
