@@ -11,6 +11,19 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <properties>
+        <!--
+          The vaadin-micrometer instrumentation (Flow's prototype/vaadin-micrometer
+          branch) is built on 25.3-SNAPSHOT. Pin this module to that line so the
+          micrometer artifacts align with flow-server / flow-components / vaadin,
+          the way other modules pin a feature snapshot. The rest of the repo stays
+          on the baseline 25.2-SNAPSHOT.
+        -->
+        <flow.version>25.3-SNAPSHOT</flow.version>
+        <flow-components.version>25.3-SNAPSHOT</flow-components.version>
+        <vaadin.version>25.3-SNAPSHOT</vaadin.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.example</groupId>
@@ -29,6 +42,21 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring-boot-starter</artifactId>
+        </dependency>
+        <!--
+          vaadin-micrometer instrumentation + its Spring Boot auto-configuration.
+          VaadinMetricsAutoConfiguration activates when a MeterRegistry bean is
+          present; spring-boot-starter-actuator both puts MeterRegistry on the
+          classpath and auto-configures a SimpleMeterRegistry to satisfy that.
+        -->
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-micrometer-spring-boot</artifactId>
+            <version>${flow.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
