@@ -6,8 +6,6 @@ import com.example.views.MainLayout;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -30,25 +28,18 @@ import com.vaadin.flow.router.RouterLink;
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("Projects")
 @Menu(order = 4, title = "UC4 — Parameter-preserving links")
-public class ProjectsView extends VerticalLayout implements BeforeEnterObserver {
-
-    private final BreadcrumbBar breadcrumbs = new BreadcrumbBar();
+public class ProjectsView extends VerticalLayout {
 
     public ProjectsView() {
-        add(breadcrumbs);
+        add(new BreadcrumbBar());
         add(new H1("Projects"));
         add(new Paragraph(
                 "Open a project, then its tasks, then a single task. On the "
                         + "deepest page the breadcrumb's Project and Tasks "
                         + "links still point at the right project because the "
                         + ":projectId is carried onto each ancestor link."));
-        ProjectData.PROJECTS.forEach((id, name) -> add(new RouterLink(
-                "Open " + name, ProjectView.class,
-                new RouteParameters("projectId", id))));
-    }
-
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        breadcrumbs.show(this, event.getRouteParameters());
+        ProjectData.PROJECTS.forEach((id,
+                name) -> add(new RouterLink("Open " + name, ProjectView.class,
+                        new RouteParameters("projectId", id))));
     }
 }

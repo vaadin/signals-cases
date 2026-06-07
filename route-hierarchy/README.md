@@ -10,7 +10,11 @@ repository stays on the baseline `25.2-SNAPSHOT`.
 The PR does **not** ship a `Breadcrumbs` component — that lives in
 flow-components and consumes this API. Every view here therefore builds its
 breadcrumb by hand as a `HorizontalLayout` of `RouterLink`s
-(`BreadcrumbBar`), driven entirely by `RouteHierarchy`. See
+(`BreadcrumbBar`), driven by `RouteHierarchy`. The bar wires itself to
+`UI.routerStateSignal()` via a single `Signal.effect` from its own constructor,
+so views never call a `show(...)` method — they just `add(new
+BreadcrumbBar())` and the bar rebuilds reactively on every navigation. The same
+applies to UC5's `UpLink` and UC6's `TeamLayout`. See
 [`API-GAPS.md`](API-GAPS.md) for what was awkward.
 
 | # | View | What it shows |
@@ -20,7 +24,7 @@ breadcrumb by hand as a `HorizontalLayout` of `RouterLink`s
 | UC3 | Dynamic leaf label | A profile at `uc3/:userId` implementing `HasDynamicTitle`; the current crumb shows the resolved person name, not the static `@PageTitle`. |
 | UC4 | Parameter-preserving links | A four-level parameterised hierarchy where each ancestor link keeps the live `:projectId` (and only the parameters its own template needs). |
 | UC5 | Up-one-level button | A single "↑ Up to <parent>" control built from `resolveParent(...)`, hidden at the hierarchy root. |
-| UC6 | Layout-wide auto breadcrumbs | One breadcrumb bar in a parent layout, rebuilt on every navigation via `AfterNavigationObserver` (no reactive navigation signal exists in this snapshot). |
+| UC6 | Layout-wide auto breadcrumbs | One breadcrumb bar in a parent layout, rebuilt on every navigation via a `Signal.effect` subscribed to `UI.routerStateSignal()` — no `AfterNavigationObserver` and no manual seeding. |
 | UC7 | Route-tree sitemap | `resolveAncestors` used as a graph-builder: leaf routes from across the demo are expanded and merged into a nested sitemap tree. |
 
 ## Run

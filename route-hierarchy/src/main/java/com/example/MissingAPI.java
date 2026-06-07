@@ -8,8 +8,8 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouteConfiguration;
-import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouteHierarchy;
+import com.vaadin.flow.router.RouteParameters;
 
 /**
  * Static shims for the bits of breadcrumb building that the route-hierarchy API
@@ -20,8 +20,8 @@ import com.vaadin.flow.router.RouteHierarchy;
  * {@code Class<? extends Component>} objects. To render a usable breadcrumb you
  * still have to (a) turn each class into a human label and (b) figure out which
  * route parameters each ancestor's template actually needs so its link resolves
- * to a working URL. Both of those are done here. See {@code API-GAPS.md} for the
- * shape these methods suggest the API should grow.
+ * to a working URL. Both of those are done here. See {@code API-GAPS.md} for
+ * the shape these methods suggest the API should grow.
  */
 public final class MissingAPI {
 
@@ -87,8 +87,7 @@ public final class MissingAPI {
         for (String segment : template.get().split("/")) {
             if (segment.startsWith(":")) {
                 String name = parameterName(segment);
-                available.get(name)
-                        .ifPresent(value -> subset.put(name, value));
+                available.get(name).ifPresent(value -> subset.put(name, value));
             }
         }
         return subset.isEmpty() ? RouteParameters.empty()

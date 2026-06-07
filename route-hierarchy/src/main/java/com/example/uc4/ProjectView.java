@@ -20,12 +20,11 @@ import com.vaadin.flow.router.RouterLink;
 @PageTitle("Project")
 public class ProjectView extends VerticalLayout implements BeforeEnterObserver {
 
-    private final BreadcrumbBar breadcrumbs = new BreadcrumbBar();
     private final H1 heading = new H1();
     private final RouterLink tasksLink = new RouterLink();
 
     public ProjectView() {
-        add(breadcrumbs);
+        add(new BreadcrumbBar());
         add(heading);
         add(new Paragraph(
                 "The Projects crumb above is a parameterless ancestor; this "
@@ -42,6 +41,5 @@ public class ProjectView extends VerticalLayout implements BeforeEnterObserver {
         heading.setText(ProjectData.projectName(projectId));
         tasksLink.setRoute(TasksView.class,
                 new RouteParameters("projectId", projectId));
-        breadcrumbs.show(this, parameters);
     }
 }

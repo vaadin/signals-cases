@@ -50,7 +50,8 @@ class ParameterPreservingTrailTest extends SpringBrowserlessTest {
 
         // Root "uc4" has no parameters at all.
         assertFalse(projectsHref.contains("apollo"),
-                "Projects root link must not carry :projectId: " + projectsHref);
+                "Projects root link must not carry :projectId: "
+                        + projectsHref);
 
         // The two middle links keep :projectId so they stay in this project...
         assertTrue(projectHref.contains("apollo"), projectHref);

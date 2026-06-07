@@ -26,13 +26,12 @@ import com.vaadin.flow.router.RouterLink;
 @PageTitle("Tasks")
 public class TasksView extends VerticalLayout implements BeforeEnterObserver {
 
-    private final BreadcrumbBar breadcrumbs = new BreadcrumbBar();
     private final H1 heading = new H1();
     private final VerticalLayout taskLinks = new VerticalLayout();
 
     public TasksView() {
         setPadding(false);
-        add(breadcrumbs);
+        add(new BreadcrumbBar());
         add(heading);
         add(new Paragraph("Each task link below opens a task page nested two "
                 + "levels under Projects. The breadcrumb there keeps both the "
@@ -50,9 +49,8 @@ public class TasksView extends VerticalLayout implements BeforeEnterObserver {
         taskLinks.removeAll();
         for (String taskId : ProjectData.taskIds()) {
             taskLinks.add(new RouterLink(ProjectData.taskName(taskId),
-                    TaskDetailView.class, new RouteParameters(Map.of(
-                            "projectId", projectId, "taskId", taskId))));
+                    TaskDetailView.class, new RouteParameters(
+                            Map.of("projectId", projectId, "taskId", taskId))));
         }
-        breadcrumbs.show(this, parameters);
     }
 }
