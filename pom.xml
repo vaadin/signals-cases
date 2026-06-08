@@ -10,7 +10,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.5</version>
+        <version>4.1.0-RC1</version>
         <relativePath/>
     </parent>
 
@@ -37,7 +37,7 @@
         <jspecify.version>1.0.0</jspecify.version>
         <spotless.plugin.version>3.1.0</spotless.plugin.version>
         <nullability.plugin.version>0.3.0</nullability.plugin.version>
-        <spring-ai.version>2.0.0-M4</spring-ai.version>
+        <spring-ai.version>2.0.0-RC1</spring-ai.version>
     </properties>
 
     <dependencyManagement>
