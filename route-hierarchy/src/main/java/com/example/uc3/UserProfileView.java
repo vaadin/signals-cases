@@ -12,15 +12,18 @@ import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC3 — Dynamic leaf label (profile, {@code uc3/:userId}).
+ * UC3 — Dynamic title gap (profile, {@code uc3/:userId}).
  * <p>
- * Implements {@link HasDynamicTitle} so the breadcrumb leaf shows the resolved
- * person name rather than the static {@code @PageTitle}. The parent {@code uc3}
- * is still found by stripping the {@code :userId} segment.
- * <p>
- * {@code BeforeEnter} captures the resolved name into a field; the breadcrumb
- * itself is signal-bound and re-reads {@link HasDynamicTitle#getPageTitle()}
- * when the navigation signal fires.
+ * This view implements {@link HasDynamicTitle}, so Flow shows the resolved
+ * person name as the browser tab title. The breadcrumb, however, cannot use it:
+ * {@code BreadcrumbBar} resolves every crumb from its route <em>class</em>, and
+ * {@code HasDynamicTitle#getPageTitle()} only exists on a live instance the
+ * class-based walker never hands out. Worse, a view that implements
+ * {@code HasDynamicTitle} cannot also declare {@code @PageTitle} (Flow throws
+ * {@code DuplicateNavigationTitleException}), so the class-based title resolver
+ * has nothing to read and falls back to the bare class name —
+ * {@code UserProfileView}. That ugly leaf crumb is the gap, on purpose; see
+ * gap 3 in {@code API-GAPS.md}.
  */
 @Route(value = "uc3/:userId", layout = MainLayout.class)
 public class UserProfileView extends VerticalLayout
@@ -33,12 +36,14 @@ public class UserProfileView extends VerticalLayout
         add(new BreadcrumbBar());
         add(heading);
         add(new Paragraph(
-                "The breadcrumb leaf above matches this page's H1 — both come "
-                        + "from getPageTitle(). This view carries no static "
-                        + "@PageTitle at all (a view cannot declare both). "
-                        + "RouteHierarchy resolved the Users ancestor; the "
-                        + "dynamic title is the breadcrumb builder's own "
-                        + "contribution for the current view."));
+                "The H1 and the browser tab title show this person's name "
+                        + "(via HasDynamicTitle), but the breadcrumb leaf above "
+                        + "reads \"UserProfileView\" — the class name. The "
+                        + "class-based breadcrumb cannot reach a per-instance "
+                        + "dynamic title, and this view carries no @PageTitle to "
+                        + "fall back to (a view cannot declare both). "
+                        + "RouteHierarchy still resolved the Users ancestor "
+                        + "correctly."));
     }
 
     @Override

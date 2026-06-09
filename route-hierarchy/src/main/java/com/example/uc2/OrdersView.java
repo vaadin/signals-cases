@@ -33,7 +33,7 @@ public class OrdersView extends VerticalLayout {
         add(new Paragraph(
                 "The order detail page lives at order-detail/:orderId, which "
                         + "does not start with uc2/. Click an order below: the "
-                        + "breadcrumb there still reads Orders › Order #… "
+                        + "breadcrumb there still reads Orders › Order "
                         + "because OrderDetailView is annotated "
                         + "@RouteParent(OrdersView.class), and RouteHierarchy "
                         + "honours that before falling back to the URL."));

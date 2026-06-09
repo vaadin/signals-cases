@@ -27,8 +27,11 @@ import com.vaadin.flow.signals.Signal;
  * the ancestor chain (root-first, leaf last) by consulting {@code @RouteParent}
  * first and falling back to URL-prefix walking. Each ancestor becomes a
  * {@link RouterLink}; the leaf is rendered as a plain, non-linked {@link Span}
- * marked as the current page. Label resolution and per-ancestor parameter
- * filtering are done by {@link MissingAPI} (see {@code API-GAPS.md}).
+ * marked as the current page. Every crumb's label is resolved from its route
+ * class via {@link MissingAPI#staticTitle(Class)}; per-ancestor parameter
+ * filtering is done by {@link MissingAPI} too (see {@code API-GAPS.md}). The
+ * bar does not apply per-view dynamic titles — those need a live view instance
+ * the class-based walker does not give you (gap 3).
  * <p>
  * The bar wires itself to {@link UI#routerStateSignal()} from its constructor
  * via a single {@link Signal#effect}: the effect rebuilds the trail from the
@@ -64,7 +67,7 @@ public class BreadcrumbBar extends HorizontalLayout {
 
         if (chain.isEmpty()) {
             // Defensive: a non-@Route leaf has no hierarchy to show.
-            add(currentCrumb(MissingAPI.dynamicTitle(leafView)));
+            add(currentCrumb(MissingAPI.staticTitle(leafView.getClass())));
             return;
         }
 
@@ -76,7 +79,7 @@ public class BreadcrumbBar extends HorizontalLayout {
             Class<? extends Component> step = chain.get(i);
             boolean isLeaf = i == chain.size() - 1;
             if (isLeaf) {
-                add(currentCrumb(MissingAPI.dynamicTitle(leafView)));
+                add(currentCrumb(MissingAPI.staticTitle(leafView.getClass())));
             } else {
                 add(ancestorLink(step, parameters, routeConfiguration));
             }

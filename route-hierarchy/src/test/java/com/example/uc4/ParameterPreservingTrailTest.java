@@ -28,7 +28,10 @@ class ParameterPreservingTrailTest extends SpringBrowserlessTest {
         assertTrue(trail.contains("Projects"), trail);
         assertTrue(trail.contains("Project"), trail);
         assertTrue(trail.contains("Tasks"), trail);
-        assertTrue(trail.contains("Task #2"), trail);
+        assertTrue(trail.endsWith("Task"),
+                "leaf must be the static @PageTitle label: " + trail);
+        assertFalse(trail.contains("#2"),
+                "the task id must not reach the breadcrumb leaf: " + trail);
 
         List<RouterLink> links = crumbLinks();
         assertEquals(3, links.size(),

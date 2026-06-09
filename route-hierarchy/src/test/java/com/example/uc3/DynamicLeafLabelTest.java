@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.router.RouterLink;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,15 +21,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class DynamicLeafLabelTest extends SpringBrowserlessTest {
 
     @Test
-    void leafUsesDynamicTitleNotStaticPageTitle() {
+    void leafFallsBackToClassNameNotDynamicTitle() {
         navigate(UserProfileView.class, Map.of("userId", "ada"));
 
+        // The view resolves the dynamic name into its H1 / browser tab title...
+        assertEquals("Ada Lovelace", heading());
+
+        // ...but the class-based breadcrumb cannot reach that per-instance
+        // dynamic title, so the leaf shows the bare class name (the gap).
         String trail = trail();
         assertTrue(trail.contains("Users"), trail);
-        assertTrue(trail.contains("Ada Lovelace"),
-                "leaf must use the HasDynamicTitle label: " + trail);
-        assertFalse(trail.contains("Profile"),
-                "leaf must NOT fall back to the static @PageTitle: " + trail);
+        assertTrue(trail.endsWith("UserProfileView"),
+                "leaf must fall back to the class name: " + trail);
+        assertFalse(trail.contains("Ada Lovelace"),
+                "dynamic title must NOT reach the breadcrumb: " + trail);
 
         List<RouterLink> links = crumbLinks();
         assertEquals(1, links.size());
@@ -36,9 +42,18 @@ class DynamicLeafLabelTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void leafLabelTracksTheRouteParameter() {
+    void breadcrumbLeafDoesNotTrackTheRouteParameter() {
         navigate(UserProfileView.class, Map.of("userId", "grace"));
-        assertTrue(trail().contains("Grace Hopper"), trail());
+
+        // The H1 tracks the parameter; the breadcrumb leaf stays static.
+        assertEquals("Grace Hopper", heading());
+        String trail = trail();
+        assertTrue(trail.endsWith("UserProfileView"), trail);
+        assertFalse(trail.contains("Grace Hopper"), trail);
+    }
+
+    private String heading() {
+        return findInView(H1.class).single().getText();
     }
 
     private String trail() {

@@ -39,8 +39,9 @@ public class HomeView extends BaseHomeView {
                 "A detail page whose URL is not a prefix of its conceptual "
                         + "parent.",
                 OrdersView.class));
-        cards.add(homeCard("UC3", "Dynamic leaf label",
-                "The current crumb shows a runtime title via HasDynamicTitle.",
+        cards.add(homeCard("UC3", "Dynamic title gap",
+                "A HasDynamicTitle view whose breadcrumb leaf can only show "
+                        + "its class name.",
                 UsersView.class));
         cards.add(homeCard("UC4", "Parameter-preserving links",
                 "Ancestor links carry the :projectId through the whole trail.",

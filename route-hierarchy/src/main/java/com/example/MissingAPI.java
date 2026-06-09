@@ -5,8 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.router.HasDynamicTitle;
-import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteHierarchy;
 import com.vaadin.flow.router.RouteParameters;
@@ -29,39 +28,22 @@ public final class MissingAPI {
     }
 
     /**
-     * Resolves the breadcrumb label for an ancestor route class: its
-     * {@link PageTitle} value, or a humanised class name when absent.
+     * Resolves the breadcrumb label for a route class: its {@code @PageTitle}
+     * value, or the simple class name when absent.
      * <p>
-     * Gap: {@code RouteHierarchy} hands back classes with no label resolution,
-     * so every consumer re-implements this. A
-     * {@code RouteHierarchy.titleOf(Class)} (or richer chain entries carrying a
-     * resolved title) would remove it.
+     * Gap: the actual logic already exists in Flow as
+     * {@link MenuRegistry#getTitle(Class)} — this method just delegates to it —
+     * but {@code MenuRegistry} lives in {@code com.vaadin.flow.internal.menu},
+     * so it is unsupported internal API. There is no public entry point (e.g.
+     * {@code RouteHierarchy.titleOf(Class)}) to resolve a route class's page
+     * title. See gap 1 in {@code API-GAPS.md}.
+     * <p>
+     * Note this is a purely class-based label: a view that opts into a dynamic
+     * title via {@code HasDynamicTitle} carries no {@code @PageTitle}, so it
+     * resolves to its bare class name here (see gap 3 and UC3).
      */
     public static String staticTitle(Class<? extends Component> viewClass) {
-        PageTitle pageTitle = viewClass.getAnnotation(PageTitle.class);
-        if (pageTitle != null && !pageTitle.value().isEmpty()) {
-            return pageTitle.value();
-        }
-        return humanize(viewClass.getSimpleName());
-    }
-
-    /**
-     * Resolves the breadcrumb label for the current (leaf) view instance:
-     * {@link HasDynamicTitle#getPageTitle()} when implemented, otherwise the
-     * static title.
-     * <p>
-     * Gap: the walker only sees classes, never the live view instance, so it
-     * cannot apply the dynamic-title step the current view may define. The
-     * caller has to special-case the leaf, as done here.
-     */
-    public static String dynamicTitle(Component leafView) {
-        if (leafView instanceof HasDynamicTitle dynamic) {
-            String title = dynamic.getPageTitle();
-            if (title != null && !title.isEmpty()) {
-                return title;
-            }
-        }
-        return staticTitle(leafView.getClass());
+        return MenuRegistry.getTitle(viewClass);
     }
 
     /**
@@ -105,18 +87,5 @@ public final class MissingAPI {
             name = name.substring(0, typeStart);
         }
         return name.replaceAll("[?*+]+$", "");
-    }
-
-    /**
-     * Turns a {@code FooBarView} class name into {@code "Foo Bar"} for use as a
-     * fallback breadcrumb label.
-     */
-    private static String humanize(String className) {
-        String name = className;
-        if (name.endsWith("View")) {
-            name = name.substring(0, name.length() - "View".length());
-        }
-        String spaced = name.replaceAll("(?<=[a-z0-9])(?=[A-Z])", " ");
-        return spaced.isEmpty() ? className : spaced;
     }
 }
