@@ -19,11 +19,12 @@ import com.vaadin.flow.router.RouteParameters;
  * Walking up from here produces Projects › Project › Tasks › Task. The two
  * middle links must carry {@code :projectId} but not {@code :taskId}; the root
  * carries neither. {@code BreadcrumbBar} derives each subset from the
- * ancestor's own template. The leaf label is the static {@link PageTitle}
- * "Task"; the concrete task name shows in the heading, not the trail.
+ * ancestor's own template. The leaf label is the dynamic task name, produced by
+ * {@link TaskTitleGenerator} instance-free from the {@code :taskId}
+ * (flow#24550).
  */
 @Route(value = "uc4/:projectId/tasks/:taskId", layout = MainLayout.class)
-@PageTitle("Task")
+@PageTitle(generator = TaskTitleGenerator.class)
 public class TaskDetailView extends VerticalLayout
         implements BeforeEnterObserver {
 
@@ -35,9 +36,9 @@ public class TaskDetailView extends VerticalLayout
         add(new Paragraph(
                 "Hover the Project and Tasks crumbs above: both hrefs include "
                         + "this project's id, while the Projects root link has "
-                        + "no parameter at all. None of that mapping is done by "
-                        + "RouteHierarchy — it only handed back the ancestor "
-                        + "classes."));
+                        + "no parameter at all. getRouteHierarchy did that "
+                        + "mapping — it paired each ancestor with the parameter "
+                        + "subset its template needs."));
     }
 
     @Override

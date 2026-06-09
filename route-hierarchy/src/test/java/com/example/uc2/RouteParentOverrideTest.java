@@ -12,7 +12,6 @@ import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.router.RouterLink;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -34,8 +33,8 @@ class RouteParentOverrideTest extends SpringBrowserlessTest {
         assertTrue(trail.contains("Orders"),
                 "Orders ancestor must come from @RouteParent, not the URL: "
                         + trail);
-        assertTrue(trail.endsWith("Order"),
-                "leaf must be the static @PageTitle label: " + trail);
+        assertTrue(trail.contains("Order #1001"),
+                "leaf must use the PageTitleGenerator label: " + trail);
 
         List<RouterLink> links = crumbLinks();
         assertEquals(1, links.size(),
@@ -44,13 +43,9 @@ class RouteParentOverrideTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void detailLeafIsStaticRegardlessOfTheOrderParameter() {
+    void detailLeafReflectsTheOrderParameter() {
         navigate(OrderDetailView.class, Map.of("orderId", "1002"));
-        String trail = trail();
-        assertTrue(trail.endsWith("Order"),
-                "class-based breadcrumb shows the static @PageTitle: " + trail);
-        assertFalse(trail.contains("1002"),
-                "the order id must not reach the breadcrumb leaf: " + trail);
+        assertTrue(trail().contains("Order #1002"), trail());
     }
 
     private String trail() {

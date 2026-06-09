@@ -1,26 +1,36 @@
 package com.example;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.router.RouteConfiguration;
-import com.vaadin.flow.router.RouteHierarchy;
 import com.vaadin.flow.router.RouteParameters;
+import com.vaadin.flow.router.RouteParentReference;
+import com.vaadin.flow.router.internal.RouteUtil;
 
 /**
- * Static shims for the bits of breadcrumb building that the route-hierarchy API
- * from <a href="https://github.com/vaadin/flow/pull/24451">flow#24451</a> does
- * not (yet) cover.
+ * Thin wrappers over the route-hierarchy and page-title resolution that
+ * <a href="https://github.com/vaadin/flow/pull/24550">flow#24550</a> added on
+ * top of <a href="https://github.com/vaadin/flow/pull/24451">flow#24451</a>.
  * <p>
- * {@link RouteHierarchy#resolveAncestors} returns bare
- * {@code Class<? extends Component>} objects. To render a usable breadcrumb you
- * still have to (a) turn each class into a human label and (b) figure out which
- * route parameters each ancestor's template actually needs so its link resolves
- * to a working URL. Both of those are done here. See {@code API-GAPS.md} for
- * the shape these methods suggest the API should grow.
+ * With #24550 the heavy lifting now lives in Flow: {@code getRouteHierarchy}
+ * walks {@code @RouteParent} (and falls back to the URL prefix) and pairs every
+ * entry with the {@link RouteParameters} subset it needs, and
+ * {@code MenuRegistry.getTitle(Class, RouteParameters)} resolves a label
+ * honouring {@code @PageTitle} <em>and</em> its instance-free
+ * {@code PageTitleGenerator}. That closes the per-ancestor parameter and the
+ * dynamic-title gaps this class used to fill.
+ * <p>
+ * What remains a gap (see {@code API-GAPS.md} gap 1) is that the resolution
+ * entry points are still <strong>internal</strong> API: {@code RouteUtil} is in
+ * {@code com.vaadin.flow.router.internal} and {@code MenuRegistry} in
+ * {@code com.vaadin.flow.internal.menu}. This class centralises those internal
+ * calls behind one supported-looking surface so the demo views never import
+ * {@code internal} directly.
  */
 public final class MissingAPI {
 
@@ -28,40 +38,62 @@ public final class MissingAPI {
     }
 
     /**
-     * Resolves the breadcrumb label for a route class: its {@code @PageTitle}
-     * value, or the simple class name when absent.
+     * Resolves the display label for a route class with the given parameters,
+     * honouring a static {@code @PageTitle} value or its instance-free
+     * {@code PageTitleGenerator}.
      * <p>
-     * Gap: the actual logic already exists in Flow as
-     * {@link MenuRegistry#getTitle(Class)} — this method just delegates to it —
-     * but {@code MenuRegistry} lives in {@code com.vaadin.flow.internal.menu},
-     * so it is unsupported internal API. There is no public entry point (e.g.
-     * {@code RouteHierarchy.titleOf(Class)}) to resolve a route class's page
-     * title. See gap 1 in {@code API-GAPS.md}.
-     * <p>
-     * Note this is a purely class-based label: a view that opts into a dynamic
-     * title via {@code HasDynamicTitle} carries no {@code @PageTitle}, so it
-     * resolves to its bare class name here (see gap 3 and UC3).
+     * Wraps {@code MenuRegistry.getTitle(Class, RouteParameters)} — gap 1: the
+     * resolver exists but only as internal API.
      */
-    public static String staticTitle(Class<? extends Component> viewClass) {
-        return MenuRegistry.getTitle(viewClass);
+    public static String titleOf(Class<? extends Component> viewClass,
+            RouteParameters parameters) {
+        return MenuRegistry.getTitle(viewClass, parameters);
     }
 
     /**
-     * Builds the subset of {@code available} route parameters that
-     * {@code ancestor}'s route template actually declares, so an ancestor
-     * {@code RouterLink} resolves without "too many parameters" errors.
+     * Returns the logical route hierarchy of {@code viewClass} ordered root to
+     * leaf (the leaf itself is the last entry), each entry already carrying the
+     * {@link RouteParameters} subset its template needs.
      * <p>
-     * Gap: {@code resolveAncestors} returns the ancestor classes but says
-     * nothing about how the current navigation's parameters map onto each one.
-     * Passing the full {@link RouteParameters} to {@code getUrl}/{@code
-     * RouterLink} of an ancestor with fewer template segments throws, so each
-     * consumer must re-derive the per-ancestor parameter subset from the
-     * template — exactly what this method does.
+     * Wraps {@code RouteUtil.getRouteHierarchy(Class, RouteParameters)} — gap
+     * 1: the walker exists but only as internal API.
      */
-    public static RouteParameters parametersFor(
-            Class<? extends Component> ancestor, RouteParameters available,
-            RouteConfiguration routeConfiguration) {
-        Optional<String> template = routeConfiguration.getTemplate(ancestor);
+    public static List<RouteParentReference> trail(
+            Class<? extends Component> viewClass, RouteParameters parameters) {
+        return RouteUtil.getRouteHierarchy(viewClass, parameters);
+    }
+
+    /**
+     * Returns the immediate logical parent of {@code viewClass}, or empty when
+     * it is a hierarchy root.
+     * <p>
+     * Wraps {@code RouteUtil.getRouteParent(Class, RouteParameters)} — gap 1:
+     * the resolver exists but only as internal API.
+     */
+    public static Optional<RouteParentReference> parentOf(
+            Class<? extends Component> viewClass, RouteParameters parameters) {
+        return RouteUtil.getRouteParent(viewClass, parameters);
+    }
+
+    /**
+     * Narrows the {@link RouteParameters} carried for a hierarchy entry down to
+     * only the names that entry's route template actually declares, so building
+     * a {@link com.vaadin.flow.router.RouterLink} to it never fails with "no
+     * route found for parameters".
+     * <p>
+     * Gap 2 (residual): {@code getRouteHierarchy} pairs each entry with
+     * parameters, and for a <em>URL-derived</em> parent those are already the
+     * parent's own subset. But for a <em>static</em> {@code @RouteParent}
+     * parent the resolver forwards the child's full parameters unchanged — so
+     * an ancestor whose template has fewer (or no) parameters, like UC2's
+     * Orders, receives a {@code :orderId} it cannot accept. This filter
+     * compensates; Flow filtering the static-parent parameters to the parent
+     * template would remove the need for it. See {@code API-GAPS.md}.
+     */
+    public static RouteParameters linkParameters(
+            Class<? extends Component> entry, RouteParameters carried) {
+        Optional<String> template = RouteConfiguration.forSessionScope()
+                .getTemplate(entry);
         if (template.isEmpty()) {
             return RouteParameters.empty();
         }
@@ -69,7 +101,7 @@ public final class MissingAPI {
         for (String segment : template.get().split("/")) {
             if (segment.startsWith(":")) {
                 String name = parameterName(segment);
-                available.get(name).ifPresent(value -> subset.put(name, value));
+                carried.get(name).ifPresent(value -> subset.put(name, value));
             }
         }
         return subset.isEmpty() ? RouteParameters.empty()

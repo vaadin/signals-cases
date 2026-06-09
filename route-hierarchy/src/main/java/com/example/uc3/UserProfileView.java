@@ -8,53 +8,43 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.HasDynamicTitle;
+import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC3 — Dynamic title gap (profile, {@code uc3/:userId}).
+ * UC3 — Dynamic leaf label (profile, {@code uc3/:userId}).
  * <p>
- * This view implements {@link HasDynamicTitle}, so Flow shows the resolved
- * person name as the browser tab title. The breadcrumb, however, cannot use it:
- * {@code BreadcrumbBar} resolves every crumb from its route <em>class</em>, and
- * {@code HasDynamicTitle#getPageTitle()} only exists on a live instance the
- * class-based walker never hands out. Worse, a view that implements
- * {@code HasDynamicTitle} cannot also declare {@code @PageTitle} (Flow throws
- * {@code DuplicateNavigationTitleException}), so the class-based title resolver
- * has nothing to read and falls back to the bare class name —
- * {@code UserProfileView}. That ugly leaf crumb is the gap, on purpose; see
- * gap 3 in {@code API-GAPS.md}.
+ * The breadcrumb leaf shows the resolved person name rather than a static title
+ * — and with flow#24550 it does so <em>without</em> a view instance. The label
+ * comes from {@link UserProfileTitleGenerator}, declared via
+ * {@code @PageTitle(generator = ...)}; the breadcrumb resolves it through
+ * {@code MenuRegistry.getTitle(class, params)} purely from the class and the
+ * {@code :userId} parameter. The parent {@code uc3} is found by stripping the
+ * {@code :userId} segment.
  */
 @Route(value = "uc3/:userId", layout = MainLayout.class)
+@PageTitle(generator = UserProfileTitleGenerator.class)
 public class UserProfileView extends VerticalLayout
-        implements BeforeEnterObserver, HasDynamicTitle {
+        implements BeforeEnterObserver {
 
     private final H1 heading = new H1();
-    private String userName = "Unknown user";
 
     public UserProfileView() {
         add(new BreadcrumbBar());
         add(heading);
         add(new Paragraph(
-                "The H1 and the browser tab title show this person's name "
-                        + "(via HasDynamicTitle), but the breadcrumb leaf above "
-                        + "reads \"UserProfileView\" — the class name. The "
-                        + "class-based breadcrumb cannot reach a per-instance "
-                        + "dynamic title, and this view carries no @PageTitle to "
-                        + "fall back to (a view cannot declare both). "
-                        + "RouteHierarchy still resolved the Users ancestor "
-                        + "correctly."));
+                "The breadcrumb leaf above matches this page's H1 — both are "
+                        + "the person's name resolved from the :userId. The "
+                        + "breadcrumb gets it from a PageTitleGenerator (no view "
+                        + "instance, no HasDynamicTitle), so the same dynamic "
+                        + "label also works when this view is only an ancestor "
+                        + "of a deeper page. RouteHierarchy resolved the Users "
+                        + "ancestor by URL-prefix walking."));
     }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         String userId = event.getRouteParameters().get("userId").orElse("?");
-        userName = Directory.nameOf(userId);
-        heading.setText(userName);
-    }
-
-    @Override
-    public String getPageTitle() {
-        return userName;
+        heading.setText(Directory.nameOf(userId));
     }
 }

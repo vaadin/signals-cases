@@ -17,13 +17,12 @@ import com.vaadin.flow.router.RouterLink;
  * <p>
  * The hierarchy is deep and parameterised: {@code uc4} → {@code uc4/:projectId}
  * → {@code uc4/:projectId/tasks} → {@code uc4/:projectId/tasks/:taskId}.
- * RouteHierarchy walks it fine by stripping segments, but it returns ancestor
- * <em>classes</em> only — it says nothing about which of the current
- * navigation's parameters each ancestor needs. Passing the full
- * {@code RouteParameters} to an ancestor link with fewer segments throws, so
- * {@code BreadcrumbBar} filters per-ancestor (see {@code MissingAPI} and
- * {@code API-GAPS.md}). The payoff: every ancestor link keeps the live
- * {@code :projectId}.
+ * {@code getRouteHierarchy} walks it by stripping segments and — since #24550 —
+ * pairs each ancestor with the {@code RouteParameters} subset its own template
+ * needs, so every ancestor link keeps the live {@code :projectId} without the
+ * caller re-deriving it. (For URL-derived parents the subset is exact; the
+ * residual filtering in {@code MissingAPI} only guards the static
+ * {@code @RouteParent} case — see {@code API-GAPS.md}.)
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("Projects")

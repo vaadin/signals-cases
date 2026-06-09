@@ -12,7 +12,7 @@ import com.vaadin.flow.router.Route;
 /**
  * UC1 — URL-prefix trail (leaf, {@code uc1/electronics/laptops}).
  * <p>
- * RouteHierarchy strips two segments to reach the root, producing the full
+ * getRouteHierarchy strips two segments to reach the root, producing the full
  * Catalog › Electronics › Laptops trail with both ancestors rendered as links.
  */
 @Route(value = "uc1/electronics/laptops", layout = MainLayout.class)
@@ -26,7 +26,7 @@ public class SubcategoryView extends VerticalLayout {
                 "The deepest level. The breadcrumb reads Catalog › Electronics "
                         + "› Laptops; the first two crumbs are links built from "
                         + "their route classes, the last is the current page. "
-                        + "All of it came from RouteHierarchy.resolveAncestors "
-                        + "without a single @RouteParent annotation."));
+                        + "All of it came from getRouteHierarchy without a "
+                        + "single @RouteParent annotation."));
     }
 }

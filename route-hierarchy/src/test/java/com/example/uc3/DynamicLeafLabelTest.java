@@ -21,20 +21,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class DynamicLeafLabelTest extends SpringBrowserlessTest {
 
     @Test
-    void leafFallsBackToClassNameNotDynamicTitle() {
+    void leafUsesGeneratorTitleNotClassName() {
         navigate(UserProfileView.class, Map.of("userId", "ada"));
 
-        // The view resolves the dynamic name into its H1 / browser tab title...
+        // The H1 and the breadcrumb leaf both resolve the person's name...
         assertEquals("Ada Lovelace", heading());
-
-        // ...but the class-based breadcrumb cannot reach that per-instance
-        // dynamic title, so the leaf shows the bare class name (the gap).
         String trail = trail();
         assertTrue(trail.contains("Users"), trail);
-        assertTrue(trail.endsWith("UserProfileView"),
-                "leaf must fall back to the class name: " + trail);
-        assertFalse(trail.contains("Ada Lovelace"),
-                "dynamic title must NOT reach the breadcrumb: " + trail);
+        assertTrue(trail.endsWith("Ada Lovelace"),
+                "leaf must use the PageTitleGenerator label: " + trail);
+        // ...and never fall back to the bare class name.
+        assertFalse(trail.contains("UserProfileView"),
+                "leaf must not show the class name: " + trail);
 
         List<RouterLink> links = crumbLinks();
         assertEquals(1, links.size());
@@ -42,14 +40,10 @@ class DynamicLeafLabelTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void breadcrumbLeafDoesNotTrackTheRouteParameter() {
+    void leafLabelTracksTheRouteParameter() {
         navigate(UserProfileView.class, Map.of("userId", "grace"));
-
-        // The H1 tracks the parameter; the breadcrumb leaf stays static.
         assertEquals("Grace Hopper", heading());
-        String trail = trail();
-        assertTrue(trail.endsWith("UserProfileView"), trail);
-        assertFalse(trail.contains("Grace Hopper"), trail);
+        assertTrue(trail().endsWith("Grace Hopper"), trail());
     }
 
     private String heading() {

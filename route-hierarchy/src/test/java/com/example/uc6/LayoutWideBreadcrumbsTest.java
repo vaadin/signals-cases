@@ -13,7 +13,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.RouterLink;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -28,16 +27,14 @@ class LayoutWideBreadcrumbsTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void sharedBarTracksDeeperChildren() {
+    void sharedBarTracksDeeperChildrenIncludingDynamicLeaf() {
         navigate(MemberView.class, Map.of("member", "kim"));
 
         String trail = trail();
         assertTrue(trail.contains("Dashboard"), trail);
         assertTrue(trail.contains("Team"), trail);
-        assertTrue(trail.endsWith("Member"),
-                "leaf must be the static @PageTitle label: " + trail);
-        assertFalse(trail.contains("Kim Park"),
-                "the member name must not reach the breadcrumb leaf: " + trail);
+        assertTrue(trail.endsWith("Kim Park"),
+                "leaf must use the PageTitleGenerator label: " + trail);
 
         List<RouterLink> links = crumbLinks();
         assertEquals(2, links.size());
@@ -58,7 +55,7 @@ class LayoutWideBreadcrumbsTest extends SpringBrowserlessTest {
                 "routerStateSignal effect must rebuild the trail on navigation");
 
         navigate(MemberView.class, Map.of("member", "lee"));
-        assertTrue(trail().endsWith("Member"));
+        assertTrue(trail().endsWith("Lee Wong"));
         assertTrue(rebuildCount() > afterSecond);
 
         TeamLayout lastLayout = find(TeamLayout.class).single();

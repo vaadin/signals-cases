@@ -15,9 +15,9 @@ import com.vaadin.flow.router.RouterLink;
  * UC5 — Up-one-level button (root, {@code uc5}).
  * <p>
  * Each page in this use case carries a single "↑ Up" control built from
- * {@link com.vaadin.flow.router.RouteHierarchy#resolveParent}. On this root
- * page {@code resolveParent} finds no parent within the use case, so the
- * control shows a "top level" note instead of a link.
+ * {@code getRouteParent}. On this root page {@code getRouteParent} finds no
+ * parent within the use case, so the control shows a "top level" note instead
+ * of a link.
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @PageTitle("Settings")
@@ -28,7 +28,7 @@ public class SettingsView extends VerticalLayout {
         add(new BreadcrumbBar());
         add(new H1("Settings"));
         add(new Paragraph(
-                "The \"↑ Up\" control below uses resolveParent(...), which needs "
+                "The \"↑ Up\" control below uses getRouteParent(...), which needs "
                         + "only the immediate parent rather than the whole "
                         + "chain. Drill into Security, then Sessions, and use "
                         + "the control to climb back one level at a time."));

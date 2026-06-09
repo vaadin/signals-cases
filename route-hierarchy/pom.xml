@@ -13,15 +13,15 @@
 
     <properties>
         <!--
-          @RouteParent and RouteHierarchy land in flow-server only (PR #24451),
-          so this module pins Flow to the feature snapshot deployed from the PR
-          branch (vaadin-prereleases) while the rest of the repo stays on the
-          baseline 25.2-SNAPSHOT. flow-bom is imported first in the parent's
-          dependencyManagement, so this flow-server build wins over the version
+          @RouteParent, the route-hierarchy walker and the instance-free page
+          title generators land in flow-server (PRs #24451 and #24550), so this
+          module pins Flow to the feature snapshot while the rest of the repo
+          stays on the baseline 25.2-SNAPSHOT. flow-bom is imported first in the
+          parent's dependencyManagement, so this Flow build wins over the version
           transitively pulled by the components/vaadin BOMs. The
           flow-maven-plugin version follows the same property.
         -->
-        <flow.version>25.2.route-hierarchy-SNAPSHOT</flow.version>
+        <flow.version>25.3-SNAPSHOT</flow.version>
     </properties>
 
     <dependencies>
