@@ -2,26 +2,17 @@
 
 This module was first built on flow#24451 (the `@RouteParent` annotation and a
 `RouteHierarchy` walker) and is now rebuilt on **flow#24550**, which reworks that
-feature set:
+feature set: the walker is now `RouteUtil.getRouteParent` /
+`getRouteHierarchy` (each entry paired with the `RouteParameters` subset it
+needs), `@RouteParent` gains a dynamic `resolver()`, and page titles can be
+**instance-free dynamic** via `@PageTitle(generator = ...)` +
+`PageTitleGenerator`.
 
-- `RouteHierarchy` is gone; the walker is now
-  `RouteUtil.getRouteParent(class, params)` /
-  `RouteUtil.getRouteHierarchy(class, params)` — still `@RouteParent`-first with a
-  URL-prefix fallback, but each returned `RouteParentReference` is **paired with
-  the `RouteParameters` subset that entry needs**.
-- `@RouteParent` gains a dynamic `resolver()` (a `RouteParentResolver`) next to
-  the static `value()`.
-- Page titles can now be **instance-free dynamic**: `@PageTitle(generator = ...)`
-  points at a `PageTitleGenerator` that maps `(class, RouteParameters)` to a
-  label, and `MenuRegistry.getTitle(class, params)` resolves it.
+That closed most of what the first cut had to hand-roll. Two gaps remain open;
+everything else that was previously flagged is now fixed and summarised at the
+end. The reusable shims live in `src/main/java/com/example/MissingAPI.java`.
 
-That closes most of the gaps the first cut had to fill in application code. What
-remains lives in `src/main/java/com/example/MissingAPI.java`, which now only
-wraps the (still internal) resolution entry points and patches one residual
-parameter bug. The walker is pure static logic over the route registry, so the
-browserless tests drive it directly through `navigate(...)`.
-
-## 1. The resolution entry points are still *internal* API — OPEN (narrowed)
+## 1. The resolution entry points are still *internal* API
 
 **Where it bites us:** every view, via `MissingAPI`
 (`BreadcrumbBar`, `UpLink`, `SitemapView`).
@@ -43,20 +34,18 @@ records, e.g. `RouteHierarchy.of(class, params) → List<RouteParentReference>` 
 `RouteHierarchy.titleOf(class, params)` (or fold the title onto the reference as
 `RouteParentReference#title()`). Ref: flow#24550.
 
-## 2. Static `@RouteParent` forwards the child's parameters unchanged — OPEN (residual)
+## 2. Static `@RouteParent` forwards the child's parameters unchanged
 
 **Where it bit us:** uc2 `OrderDetailView` → `OrdersView`;
 `MissingAPI.linkParameters`
-**Status:** the *general* "which parameters does each ancestor need" gap is
-**closed** — `getRouteHierarchy` pairs every entry with a `RouteParameters`
+**Symptom:** `getRouteHierarchy` pairs every entry with a `RouteParameters`
 subset, and for a **URL-derived** parent that subset is exactly the parent's own
-parameters. The residual bug is the **static `@RouteParent`** path:
+parameters. But the **static `@RouteParent`** path does not narrow them:
 `getRouteParent` resolves `@RouteParent(value = …)` by handing the parent *the
-child's full `RouteParameters`* (`new RouteParentReference(value, parameters)`),
-without narrowing them to the parent's template.
-**Symptom:** UC2's `OrderDetailView` (`order-detail/:orderId`) declares
-`@RouteParent(OrdersView.class)`, and `OrdersView` (`uc2`) takes no parameters.
-The trail hands `OrdersView` a `{orderId=…}` it cannot accept, so building its
+child's full `RouteParameters`* (`new RouteParentReference(value, parameters)`).
+UC2's `OrderDetailView` (`order-detail/:orderId`) declares
+`@RouteParent(OrdersView.class)`, and `OrdersView` (`uc2`) takes no parameters —
+so the trail hands `OrdersView` a `{orderId=…}` it cannot accept and building its
 `RouterLink` throws `NotFoundException: No route found for … OrdersView and
 parameters '{orderId=1001}'`.
 **Workaround used:** `MissingAPI.linkParameters(entry, carried)` filters the
@@ -64,58 +53,32 @@ carried parameters down to the names the entry's own template declares before th
 link is built. (For URL-derived ancestors this is a harmless no-op; it only
 matters for the static-parent case.)
 **Suggested API:** in `getRouteParent`, narrow a static parent's parameters to
-its template — i.e. apply the same subset logic the URL-derived path already
-does — so a static `@RouteParent` whose parent has fewer parameters resolves to a
-working link with no caller-side filtering. Ref: flow#24550.
+its template — the same subset logic the URL-derived path already does — so a
+static `@RouteParent` whose parent has fewer parameters resolves to a working
+link with no caller-side filtering. Ref: flow#24550.
 
-## 3. ~~Dynamic page titles can't feed a class-based breadcrumb~~ — closed by `PageTitleGenerator`
+## Previously found, now closed
 
-**Status:** closed by flow#24550. The earlier cut had to drop dynamic breadcrumb
-labels because `HasDynamicTitle#getPageTitle()` is an **instance** method and the
-walker only has classes — and we would not instantiate a view just to read a
-title. `@PageTitle(generator = …)` removes that constraint: a
-`PageTitleGenerator` resolves the label from `(class, RouteParameters)` with **no
-instance**, and `MenuRegistry.getTitle(class, params)` honours it.
-**How it landed in the demo:** UC2 (`OrderTitleGenerator` → "Order #1234"), UC3
-(`UserProfileTitleGenerator` → "Ada Lovelace"), UC4 (`TaskTitleGenerator`) and
-UC6 (`MemberTitleGenerator`) all show a dynamic **leaf** crumb resolved purely
-from the route parameters. The breadcrumb is still 100% class-based; it never
-touches a view instance.
-**Dissolved side note:** a class used to be forced to choose `@PageTitle` *or*
-`HasDynamicTitle` (`DuplicateNavigationTitleException`). The dynamic title now
-rides *on* `@PageTitle` via `generator()`, so there is no either/or and a
-class-based resolver always has something to read.
+These gaps the demo originally had to work around no longer exist:
 
-## 4. ~~No reactive "current navigation" signal~~ — closed by `UI.routerStateSignal()`
-
-**Status:** closed. The snapshot carries `UI.routerStateSignal()`, a read-only
-`Signal<RouterState>` with `navigationTarget()`, `location()`,
-`routeParameters()`, `currentView()` and `activeChain()`.
-**How it landed in the demo:** every breadcrumb is signal-bound. `BreadcrumbBar`
-subscribes in its constructor via a single `Signal.effect(this, () -> { var
-state = UI.getCurrent().routerStateSignal().get(); rebuild(state); })` — the
-effect seeds the first render, auto-fires on every navigation (including
-same-class navigations with new `RouteParameters`) and auto-unsubscribes on
-detach. Views just `add(new BreadcrumbBar())`; no `BeforeEnterObserver`, no
-`AfterNavigationObserver`, no manual seed step. UC6's `TeamLayout` follows the
-same pattern for its rebuild counter; `UpLink` (UC5) is wired identically.
-**Note:** gaps 1 and 2 remain — the signal hands you the leaf class and the
-current `RouteParameters`, but the resolvers behind `MissingAPI` are still
-internal (gap 1) and the static-parent parameter bug still needs the
-`linkParameters` patch (gap 2).
-
-## 5. ~~Ancestor labels cannot be dynamic~~ — closed by `PageTitleGenerator` + per-ancestor params
-
-**Status:** closed by flow#24550, and it is the headline win. Because
-`getRouteHierarchy` carries the `RouteParameters` *for each ancestor* and
-`MenuRegistry.getTitle(class, params)` honours that ancestor's
-`PageTitleGenerator`, an **ancestor** crumb can now be dynamic too — not just the
-leaf.
-**How it landed in the demo:** UC4's `ProjectView` (`uc4/:projectId`) declares
-`@PageTitle(generator = ProjectTitleGenerator.class)`, so when it sits *as an
-ancestor* of `TaskDetailView` its crumb reads "Project Apollo" — resolved from
-the `:projectId` the trail carried for that crumb — instead of a static
-"Project". No instance, no per-consumer callback.
-**Suggested API:** none outstanding; the public `PageTitleGenerator` +
-per-ancestor `RouteParameters` is exactly the `(routeClass, params) -> label`
-hook the earlier draft asked for. Ref: flow#24550.
+- **Dynamic page titles needed a view instance.** `HasDynamicTitle#getPageTitle()`
+  is an instance method, so a class-based breadcrumb could not show a runtime
+  label. **Closed by `@PageTitle(generator = ...)` / `PageTitleGenerator`**, which
+  resolves a label from `(class, RouteParameters)` with no instance. The old
+  `@PageTitle`-*or*-`HasDynamicTitle` exclusivity also dissolves — the dynamic
+  title now rides on `@PageTitle`. UC2/UC3/UC4/UC6 show dynamic leaf crumbs.
+- **Ancestor labels could not be dynamic.** An ancestor crumb could only show its
+  static `@PageTitle`. **Closed**, because `getRouteHierarchy` carries each
+  ancestor's own `RouteParameters` and `MenuRegistry.getTitle(class, params)`
+  honours that ancestor's generator — UC4's `ProjectView` reads "Project Apollo"
+  as an ancestor of `TaskDetailView`.
+- **No per-ancestor parameter mapping.** The walker used to return bare classes,
+  leaving the caller to figure out which parameters each ancestor link needed.
+  **Closed** by `getRouteHierarchy` pairing every entry with its subset (the only
+  residual is the static-`@RouteParent` case, gap 2 above).
+- **No reactive "current navigation" signal.** **Closed by
+  `UI.routerStateSignal()`** — a read-only `Signal<RouterState>` exposing
+  `navigationTarget()`, `location()`, `routeParameters()`, `currentView()` and
+  `activeChain()`. `BreadcrumbBar`/`UpLink`/`TeamLayout` subscribe with a single
+  `Signal.effect` that rebuilds on every navigation and auto-unsubscribes on
+  detach — no `BeforeEnterObserver`, no `AfterNavigationObserver`, no manual seed.

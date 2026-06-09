@@ -26,8 +26,8 @@ class ParameterPreservingTrailTest extends SpringBrowserlessTest {
 
         String trail = trail();
         assertTrue(trail.contains("Projects"), trail);
-        // The Project ancestor crumb is itself dynamic (gap-5 win): it reads
-        // "Project Apollo" from the :projectId, not a static "Project".
+        // The Project ancestor crumb is itself dynamic: it reads "Project
+        // Apollo" from the :projectId, not a static "Project".
         assertTrue(trail.contains("Project Apollo"), trail);
         assertTrue(trail.contains("Tasks"), trail);
         assertTrue(trail.endsWith("Wire the backend"),
