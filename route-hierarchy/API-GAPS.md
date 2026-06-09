@@ -10,12 +10,12 @@ needs), `@RouteParent` gains a dynamic `resolver()`, and page titles can be
 
 That closed most of what the first cut had to hand-roll. Two gaps remain open;
 everything else that was previously flagged is now fixed and summarised at the
-end. The reusable shims live in `src/main/java/com/example/MissingAPI.java`.
+end. The one remaining shim — for gap 2 below — lives in
+`src/main/java/com/example/MissingAPI.java`.
 
 ## 1. The resolution entry points are still *internal* API
 
-**Where it bites us:** every view, via `MissingAPI`
-(`BreadcrumbBar`, `UpLink`, `SitemapView`).
+**Where it bites us:** `BreadcrumbBar`, `UpLink`, `SitemapView`.
 **Symptom:** #24550 makes the *building blocks* public — `PageTitleGenerator`,
 `PageTitleContext`, `RouteParentReference`, `RouteParentResolver` and
 `@PageTitle(generator)` are all in `com.vaadin.flow.router`. But the methods that
@@ -25,10 +25,9 @@ actually *resolve* a hierarchy or a title are still unsupported **internal** API
 - `com.vaadin.flow.internal.menu.MenuRegistry#getTitle(Class, RouteParameters)`
 
 So a breadcrumb/sitemap/up-link consumer either re-implements the walk and the
-title reflection, or (as here) imports `internal`.
-**Workaround used:** `MissingAPI` centralises those three internal calls behind
-`trail(...)`, `parentOf(...)` and `titleOf(...)` so no demo view imports
-`internal` directly.
+title reflection, or imports `internal`. The demo does the latter — `BreadcrumbBar`,
+`UpLink` and `SitemapView` call `RouteUtil` and `MenuRegistry` directly, since a
+one-line wrapper around them would only obscure the dependency.
 **Suggested API:** promote them to a supported surface next to the public
 records, e.g. `RouteHierarchy.of(class, params) → List<RouteParentReference>` and
 `RouteHierarchy.titleOf(class, params)` (or fold the title onto the reference as

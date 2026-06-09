@@ -9,10 +9,12 @@ import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouteParentReference;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.router.RouterState;
+import com.vaadin.flow.router.internal.RouteUtil;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -31,8 +33,9 @@ import com.vaadin.flow.signals.Signal;
  * current page. Each label comes from
  * {@code MenuRegistry.getTitle(class, params)}, which honours both static
  * {@code @PageTitle} and instance-free {@code PageTitleGenerator}s — so dynamic
- * crumbs (leaf <em>and</em> ancestor) need no view instance. The thin wrappers
- * live in {@link MissingAPI}.
+ * crumbs (leaf <em>and</em> ancestor) need no view instance. The one rough edge
+ * is {@link MissingAPI#linkParameters}, which narrows an ancestor's parameters
+ * to its template (see {@code API-GAPS.md}).
  * <p>
  * The bar wires itself to {@link UI#routerStateSignal()} from its constructor
  * via a single {@link Signal#effect}: the effect rebuilds the trail from the
@@ -61,15 +64,15 @@ public class BreadcrumbBar extends HorizontalLayout {
             return;
         }
 
-        List<RouteParentReference> trail = MissingAPI.trail(leafView.getClass(),
-                state.routeParameters());
+        List<RouteParentReference> trail = RouteUtil.getRouteHierarchy(
+                leafView.getClass(), state.routeParameters());
 
         for (int i = 0; i < trail.size(); i++) {
             if (i > 0) {
                 add(separator());
             }
             RouteParentReference entry = trail.get(i);
-            String title = MissingAPI.titleOf(entry.navigationTarget(),
+            String title = MenuRegistry.getTitle(entry.navigationTarget(),
                     entry.routeParameters());
             boolean isLeaf = i == trail.size() - 1;
             if (isLeaf) {

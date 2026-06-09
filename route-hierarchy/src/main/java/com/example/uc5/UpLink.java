@@ -9,10 +9,12 @@ import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouteParentReference;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.router.RouterState;
+import com.vaadin.flow.router.internal.RouteUtil;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -20,10 +22,10 @@ import com.vaadin.flow.signals.Signal;
  * helper the route-hierarchy PR names as a target consumer.
  * <p>
  * Unlike a full breadcrumb it only needs the <em>immediate</em> parent, so it
- * calls {@code getRouteParent(class, parameters)} (via {@link MissingAPI})
- * rather than the whole hierarchy. When the current view is already a hierarchy
- * root, that returns {@link Optional#empty()} and the control renders a plain
- * "top level" note instead of a link.
+ * calls {@code RouteUtil.getRouteParent(class, parameters)} rather than the
+ * whole hierarchy. When the current view is already a hierarchy root, that
+ * returns {@link Optional#empty()} and the control renders a plain "top level"
+ * note instead of a link.
  * <p>
  * The control wires itself to {@link UI#routerStateSignal()} via a single
  * {@link Signal#effect}; the parent is recomputed from the current
@@ -47,12 +49,12 @@ public class UpLink extends Div {
         if (!(leaf instanceof Component leafView)) {
             return;
         }
-        Optional<RouteParentReference> parent = MissingAPI
-                .parentOf(leafView.getClass(), state.routeParameters());
+        Optional<RouteParentReference> parent = RouteUtil
+                .getRouteParent(leafView.getClass(), state.routeParameters());
         if (parent.isPresent()) {
             RouteParentReference ref = parent.get();
-            String label = "↑ Up to " + MissingAPI
-                    .titleOf(ref.navigationTarget(), ref.routeParameters());
+            String label = "↑ Up to " + MenuRegistry
+                    .getTitle(ref.navigationTarget(), ref.routeParameters());
             RouteParameters parameters = MissingAPI.linkParameters(
                     ref.navigationTarget(), ref.routeParameters());
             RouterLink link = parameters.getParameterNames().isEmpty()

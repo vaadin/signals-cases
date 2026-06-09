@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.example.MissingAPI;
 import com.example.uc1.SubcategoryView;
 import com.example.uc2.OrdersView;
 import com.example.uc5.SessionsView;
@@ -20,12 +19,14 @@ import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouteParentReference;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.router.internal.RouteUtil;
 
 /**
  * UC7 — Route-tree sitemap.
@@ -64,7 +65,7 @@ public class SitemapView extends VerticalLayout {
         Map<Class<? extends Component>, Set<Class<? extends Component>>> children = new LinkedHashMap<>();
 
         for (Class<? extends Component> leaf : LEAVES) {
-            List<RouteParentReference> chain = MissingAPI.trail(leaf,
+            List<RouteParentReference> chain = RouteUtil.getRouteHierarchy(leaf,
                     RouteParameters.empty());
             for (int i = 0; i < chain.size(); i++) {
                 Class<? extends Component> node = chain.get(i)
@@ -93,7 +94,8 @@ public class SitemapView extends VerticalLayout {
             ListItem item = new ListItem();
             item.addClassName("sitemap-node");
             item.add(new RouterLink(
-                    MissingAPI.titleOf(node, RouteParameters.empty()), node));
+                    MenuRegistry.getTitle(node, RouteParameters.empty()),
+                    node));
             Set<Class<? extends Component>> kids = children.get(node);
             if (kids != null && !kids.isEmpty()) {
                 item.add(renderLevel(kids, children));
