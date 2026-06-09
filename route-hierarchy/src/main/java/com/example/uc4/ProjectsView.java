@@ -20,9 +20,7 @@ import com.vaadin.flow.router.RouterLink;
  * {@code getRouteHierarchy} walks it by stripping segments and — since #24550 —
  * pairs each ancestor with the {@code RouteParameters} subset its own template
  * needs, so every ancestor link keeps the live {@code :projectId} without the
- * caller re-deriving it. (For URL-derived parents the subset is exact; the
- * residual filtering in {@code MissingAPI} only guards the static
- * {@code @RouteParent} case — see {@code API-GAPS.md}.)
+ * caller re-deriving it.
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("Projects")

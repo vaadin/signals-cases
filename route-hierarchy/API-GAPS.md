@@ -8,10 +8,10 @@ needs), `@RouteParent` gains a dynamic `resolver()`, and page titles can be
 **instance-free dynamic** via `@PageTitle(generator = ...)` +
 `PageTitleGenerator`.
 
-That closed most of what the first cut had to hand-roll. Two gaps remain open;
+That closed most of what the first cut had to hand-roll. One gap remains open;
 everything else that was previously flagged is now fixed and summarised at the
-end. The one remaining shim — for gap 2 below — lives in
-`src/main/java/com/example/MissingAPI.java`.
+end. The demo carries no shim of its own any more — it calls the Flow API
+directly.
 
 ## 1. The resolution entry points are still *internal* API
 
@@ -33,33 +33,17 @@ records, e.g. `RouteHierarchy.of(class, params) → List<RouteParentReference>` 
 `RouteHierarchy.titleOf(class, params)` (or fold the title onto the reference as
 `RouteParentReference#title()`). Ref: flow#24550.
 
-## 2. Static `@RouteParent` forwards the child's parameters unchanged
-
-**Where it bit us:** uc2 `OrderDetailView` → `OrdersView`;
-`MissingAPI.linkParameters`
-**Symptom:** `getRouteHierarchy` pairs every entry with a `RouteParameters`
-subset, and for a **URL-derived** parent that subset is exactly the parent's own
-parameters. But the **static `@RouteParent`** path does not narrow them:
-`getRouteParent` resolves `@RouteParent(value = …)` by handing the parent *the
-child's full `RouteParameters`* (`new RouteParentReference(value, parameters)`).
-UC2's `OrderDetailView` (`order-detail/:orderId`) declares
-`@RouteParent(OrdersView.class)`, and `OrdersView` (`uc2`) takes no parameters —
-so the trail hands `OrdersView` a `{orderId=…}` it cannot accept and building its
-`RouterLink` throws `NotFoundException: No route found for … OrdersView and
-parameters '{orderId=1001}'`.
-**Workaround used:** `MissingAPI.linkParameters(entry, carried)` filters the
-carried parameters down to the names the entry's own template declares before the
-link is built. (For URL-derived ancestors this is a harmless no-op; it only
-matters for the static-parent case.)
-**Suggested API:** in `getRouteParent`, narrow a static parent's parameters to
-its template — the same subset logic the URL-derived path already does — so a
-static `@RouteParent` whose parent has fewer parameters resolves to a working
-link with no caller-side filtering. Ref: flow#24550.
-
 ## Previously found, now closed
 
 These gaps the demo originally had to work around no longer exist:
 
+- **Static `@RouteParent` forwarded the child's parameters unchanged.** A static
+  `@RouteParent(value = …)` used to hand the parent the child's full
+  `RouteParameters`, so UC2's `OrderDetailView` (`order-detail/:orderId`) →
+  `OrdersView` (`uc2`, no parameters) made the ancestor `RouterLink` throw
+  `NotFoundException`. **Closed** by `getRouteParent` narrowing a static parent's
+  parameters to its own template (matching the URL-derived path); the demo's
+  `linkParameters` shim — and the whole `MissingAPI` class — is gone.
 - **Dynamic page titles needed a view instance.** `HasDynamicTitle#getPageTitle()`
   is an instance method, so a class-based breadcrumb could not show a runtime
   label. **Closed by `@PageTitle(generator = ...)` / `PageTitleGenerator`**, which
@@ -73,8 +57,8 @@ These gaps the demo originally had to work around no longer exist:
   as an ancestor of `TaskDetailView`.
 - **No per-ancestor parameter mapping.** The walker used to return bare classes,
   leaving the caller to figure out which parameters each ancestor link needed.
-  **Closed** by `getRouteHierarchy` pairing every entry with its subset (the only
-  residual is the static-`@RouteParent` case, gap 2 above).
+  **Closed** by `getRouteHierarchy` pairing every entry with its own subset, for
+  both URL-derived and static-`@RouteParent` parents.
 - **No reactive "current navigation" signal.** **Closed by
   `UI.routerStateSignal()`** — a read-only `Signal<RouterState>` exposing
   `navigationTarget()`, `location()`, `routeParameters()`, `currentView()` and

@@ -2,8 +2,6 @@ package com.example.views;
 
 import java.util.List;
 
-import com.example.MissingAPI;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.UI;
@@ -33,9 +31,7 @@ import com.vaadin.flow.signals.Signal;
  * current page. Each label comes from
  * {@code MenuRegistry.getTitle(class, params)}, which honours both static
  * {@code @PageTitle} and instance-free {@code PageTitleGenerator}s — so dynamic
- * crumbs (leaf <em>and</em> ancestor) need no view instance. The one rough edge
- * is {@link MissingAPI#linkParameters}, which narrows an ancestor's parameters
- * to its template (see {@code API-GAPS.md}).
+ * crumbs (leaf <em>and</em> ancestor) need no view instance.
  * <p>
  * The bar wires itself to {@link UI#routerStateSignal()} from its constructor
  * via a single {@link Signal#effect}: the effect rebuilds the trail from the
@@ -85,8 +81,7 @@ public class BreadcrumbBar extends HorizontalLayout {
 
     private static RouterLink ancestorLink(RouteParentReference ancestor,
             String title) {
-        RouteParameters parameters = MissingAPI.linkParameters(
-                ancestor.navigationTarget(), ancestor.routeParameters());
+        RouteParameters parameters = ancestor.routeParameters();
         if (parameters.getParameterNames().isEmpty()) {
             return new RouterLink(title, ancestor.navigationTarget());
         }

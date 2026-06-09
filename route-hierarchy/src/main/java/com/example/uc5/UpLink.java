@@ -2,8 +2,6 @@ package com.example.uc5;
 
 import java.util.Optional;
 
-import com.example.MissingAPI;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.UI;
@@ -55,8 +53,7 @@ public class UpLink extends Div {
             RouteParentReference ref = parent.get();
             String label = "↑ Up to " + MenuRegistry
                     .getTitle(ref.navigationTarget(), ref.routeParameters());
-            RouteParameters parameters = MissingAPI.linkParameters(
-                    ref.navigationTarget(), ref.routeParameters());
+            RouteParameters parameters = ref.routeParameters();
             RouterLink link = parameters.getParameterNames().isEmpty()
                     ? new RouterLink(label, ref.navigationTarget())
                     : new RouterLink(label, ref.navigationTarget(), parameters);
