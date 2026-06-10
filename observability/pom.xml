@@ -13,15 +13,16 @@
 
     <properties>
         <!--
-          The vaadin-micrometer instrumentation (Flow's prototype/vaadin-micrometer
-          branch) is built on 25.3-SNAPSHOT. Pin this module to that line so the
-          micrometer artifacts align with flow-server / flow-components / vaadin,
-          the way other modules pin a feature snapshot. The rest of the repo stays
-          on the baseline 25.2-SNAPSHOT.
+          Observability Kit (the Micrometer rewrite, 5.0-SNAPSHOT) builds on Flow
+          25.3-SNAPSHOT and relies on the SessionLockListener / RpcInvocationListener
+          SPIs (Flow PRs #24498 / #24499). Pin this module to the 25.3 line so the
+          Flow / components / vaadin artifacts align with the kit; the rest of the
+          repo stays on the baseline 25.2-SNAPSHOT.
         -->
         <flow.version>25.3-SNAPSHOT</flow.version>
         <flow-components.version>25.3-SNAPSHOT</flow-components.version>
         <vaadin.version>25.3-SNAPSHOT</vaadin.version>
+        <observability-kit.version>5.0-SNAPSHOT</observability-kit.version>
     </properties>
 
     <dependencies>
@@ -44,15 +45,17 @@
             <artifactId>vaadin-spring-boot-starter</artifactId>
         </dependency>
         <!--
-          vaadin-micrometer instrumentation + its Spring Boot auto-configuration.
-          VaadinMetricsAutoConfiguration activates when a MeterRegistry bean is
-          present; spring-boot-starter-actuator both puts MeterRegistry on the
-          classpath and auto-configures a SimpleMeterRegistry to satisfy that.
+          Observability Kit Spring Boot starter. Its auto-configuration pulls in
+          Boot's Micrometer metrics support (a MeterRegistry is wired out of the
+          box) and registers the Vaadin instrumentation, which records into that
+          registry. spring-boot-starter-actuator is kept to expose the metrics
+          over /actuator; it is otherwise optional now that the starter provides
+          the registry.
         -->
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-micrometer-spring-boot</artifactId>
-            <version>${flow.version}</version>
+            <artifactId>observability-kit-starter</artifactId>
+            <version>${observability-kit.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
