@@ -60,7 +60,7 @@ public class CopyStaticTextView extends VerticalLayout {
                 copied -> {
                     copyButton.setText(FLASH_LABEL);
                     copyButton.setIcon(VaadinIcon.CHECK.create());
-                    UI.getCurrentOrThrow().runAfter(Duration.ofSeconds(1), () -> {
+                    UI.getCurrentOrThrow().triggerAfter(Duration.ofSeconds(1), () -> {
                         copyButton.setText(DEFAULT_LABEL);
                         copyButton.setIcon(null);
                     });
