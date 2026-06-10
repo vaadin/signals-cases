@@ -3,26 +3,6 @@
 This module contains a collection of Vaadin Flow views demonstrating the
 browser Clipboard API exposed via `com.vaadin.flow.component.clipboard.Clipboard`.
 
-The write surface in Vaadin Flow 25.2 covers *writing* to the clipboard
-from a user click in plain text, HTML, multi-format, or image. The
-`25.3.paste-file-SNAPSHOT` branch of `vaadin/flow`
-([PR #24485](https://github.com/vaadin/flow/pull/24485)) extends the
-surface with:
-
-- `Clipboard.onPaste(...)` — text/html paste listener, used in UC5;
-- `Clipboard.onClick(...).writeImage(Component | DownloadHandler)` —
-  client-side image copy, used in UC4;
-- `Clipboard.onFilePaste(component, UploadHandler)` plus
-  `PasteFileHandler.session()` / `PasteFileHandler.inMemory(...)` —
-  per-file upload of pasted screenshots and files, used in UC7.
-
-The clipboard module is pinned to that branch via `<flow.version>` in
-`clipboard/pom.xml`; the rest of the Vaadin stack stays on the regular
-25.2 release.
-
-One PRD use case is still not supported by the API on this branch and
-is therefore not included here:
-
 - **Detecting clipboard availability** (HTTPS context, restrictive
   iframe, denied permission). No `availabilityHintSignal()` or
   `ClipboardAvailability` type exists in this build.

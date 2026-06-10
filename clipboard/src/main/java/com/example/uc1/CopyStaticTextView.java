@@ -1,7 +1,9 @@
 package com.example.uc1;
 
-import com.example.views.MainLayout;
+import java.time.Duration;
 
+import com.example.views.MainLayout;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.clipboard.Clipboard;
 import com.vaadin.flow.component.html.H1;
@@ -39,8 +41,6 @@ public class CopyStaticTextView extends VerticalLayout {
     private static final String LINK = "https://example.com/share/abc123";
     private static final String DEFAULT_LABEL = "Copy link";
     private static final String FLASH_LABEL = "Copied";
-    private static final String REVERT_EVENT = "flash-revert";
-    private static final long FLASH_MS = 1000L;
 
     public CopyStaticTextView() {
         add(new H1("UC1 — Copy static text on click"));
@@ -56,19 +56,14 @@ public class CopyStaticTextView extends VerticalLayout {
 
         Button copyButton = new Button(DEFAULT_LABEL);
 
-        copyButton.getElement().addEventListener(REVERT_EVENT, e -> {
-            copyButton.setText(DEFAULT_LABEL);
-            copyButton.setIcon(null);
-        });
-
         Clipboard.onClick(copyButton).writeText(LINK,
                 copied -> {
                     copyButton.setText(FLASH_LABEL);
                     copyButton.setIcon(VaadinIcon.CHECK.create());
-                    copyButton.getElement().executeJs(
-                            "setTimeout(() => this.dispatchEvent("
-                                    + "new CustomEvent($0)), $1)",
-                            REVERT_EVENT, FLASH_MS);
+                    UI.getCurrentOrThrow().runAfter(Duration.ofSeconds(1), () -> {
+                        copyButton.setText(DEFAULT_LABEL);
+                        copyButton.setIcon(null);
+                    });
                 },
                 error -> Notification
                         .show("Copy failed: " + error.message()));

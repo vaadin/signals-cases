@@ -34,23 +34,6 @@
             <groupId>com.vaadin</groupId>
             <!-- Replace artifactId with vaadin-core to use only free components -->
             <artifactId>vaadin</artifactId>
-            <exclusions>
-                <!-- vaadin-board-flow 25.2 has a packaging bug: it ships
-                     byte-identical duplicates of flow-server's
-                     com.vaadin.flow.component.clipboard.{Clipboard,
-                     ClipboardBinding, ClipboardContent} classes and even
-                     claims to export the package in its OSGi manifest. With
-                     flow-server pinned to 25.3.paste-events-SNAPSHOT, the
-                     board jar appears earlier on the classpath and shadows
-                     the new clipboard API (writeImage, onPaste, ...). The
-                     views here don't use Board, so dropping it is the
-                     simplest workaround until the board jar stops bundling
-                     classes that aren't its own. -->
-                <exclusion>
-                    <groupId>com.vaadin</groupId>
-                    <artifactId>vaadin-board-flow</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
