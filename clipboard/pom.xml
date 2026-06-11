@@ -11,6 +11,19 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <properties>
+        <!-- Pinned to the replace-children-temp feature branch of vaadin/flow
+             so the use cases can switch back to the new temporal trigger
+             actions (ReplaceChildrenTemporarilyAction, SetPropertyTemporarilyAction)
+             without bumping again. The branch is a superset of paste-file
+             (used by UC5/UC7 paste APIs) and the paste-events branch (UC4
+             writeImage). flow-components and vaadin-bom stay on the parent's
+             25.2 versions — the branch only publishes flow artifacts, and
+             flow-bom is imported first in the parent so its 25.3 entries win
+             for flow dependencies. -->
+        <flow.version>25.3.replace-children-temp-SNAPSHOT</flow.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.example</groupId>
@@ -21,6 +34,15 @@
             <groupId>com.vaadin</groupId>
             <!-- Replace artifactId with vaadin-core to use only free components -->
             <artifactId>vaadin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-spreadsheet-flow</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.18.3</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
