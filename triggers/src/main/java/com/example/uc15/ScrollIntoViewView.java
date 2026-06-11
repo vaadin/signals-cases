@@ -6,10 +6,12 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.trigger.internal.ClickTrigger;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -17,10 +19,20 @@ import com.vaadin.flow.router.Route;
 /**
  * UC15 — Scroll a target into view on click.
  * <p>
- * Two "Jump to …" buttons each wired to a {@link ScrollIntoViewAction}
- * pointing at a section far down the page. The simplest possible custom
- * action that doesn't take inputs or report outcome — just calls a method
- * on the captured target.
+ * Two parallel rows of buttons let you compare two ways to do the same
+ * thing:
+ * <ul>
+ * <li><b>Client row</b> wires each button through a
+ * {@link ScrollIntoViewAction} on a {@link ClickTrigger}. The scroll fires
+ * synchronously inside the click handler — no server round-trip.</li>
+ * <li><b>Server row</b> uses a regular server-side {@code addClickListener}
+ * that calls {@code Element#executeJs} to scroll. The click goes to the
+ * server, the server emits JS back, then the scroll starts — with the
+ * latency that brings.</li>
+ * </ul>
+ * On a fast local connection the difference is small; on a slow or
+ * congested one (or with throttled DevTools network) the client-side path
+ * stays smooth while the server-side path stutters.
  */
 @Route(value = "uc15", layout = MainLayout.class)
 @PageTitle("UC15 — Scroll into view")
@@ -32,10 +44,11 @@ public class ScrollIntoViewView extends VerticalLayout {
         addClassName("uc15-view");
         add(new H1("UC15 — Scroll into view"));
         add(new Paragraph(
-                "Click a button to smoothly scroll the corresponding section "
-                        + "into the centre of the viewport. The custom "
-                        + "ScrollIntoViewAction is 5 effective lines — capture "
-                        + "the target, call scrollIntoView."));
+                "Compare the same scroll done two ways. The Client row uses "
+                        + "the trigger API — synchronous, in-handler. The Server "
+                        + "row uses a regular click listener that asks the "
+                        + "server to scroll via executeJs — extra round-trip. "
+                        + "Throttle the network in DevTools to see the gap."));
 
         Div sectionA = new Div("Section A");
         sectionA.setId("section-a");
@@ -49,19 +62,41 @@ public class ScrollIntoViewView extends VerticalLayout {
         sectionC.setId("section-c");
         sectionC.addClassName("section");
 
-        Button toA = new Button("Jump to A");
-        toA.setId("to-a");
-        new ClickTrigger(toA).triggers(new ScrollIntoViewAction(sectionA));
+        HorizontalLayout clientRow = new HorizontalLayout();
+        clientRow.add(rowLabel("Client (trigger)"));
+        clientRow.add(clientButton("client-a", "→ A", sectionA));
+        clientRow.add(clientButton("client-b", "→ B", sectionB));
+        clientRow.add(clientButton("client-c", "→ C", sectionC));
 
-        Button toB = new Button("Jump to B");
-        toB.setId("to-b");
-        new ClickTrigger(toB).triggers(new ScrollIntoViewAction(sectionB));
+        HorizontalLayout serverRow = new HorizontalLayout();
+        serverRow.add(rowLabel("Server (round-trip)"));
+        serverRow.add(serverButton("server-a", "→ A", sectionA));
+        serverRow.add(serverButton("server-b", "→ B", sectionB));
+        serverRow.add(serverButton("server-c", "→ C", sectionC));
 
-        Button toC = new Button("Jump to C");
-        toC.setId("to-c");
-        new ClickTrigger(toC).triggers(new ScrollIntoViewAction(sectionC));
-
-        add(new HorizontalLayout(toA, toB, toC));
+        add(clientRow, serverRow);
         add(new Div(sectionA, sectionB, sectionC));
+    }
+
+    private static H2 rowLabel(String text) {
+        H2 h2 = new H2(text);
+        h2.addClassName("row-label");
+        return h2;
+    }
+
+    private static Button clientButton(String id, String label, Div target) {
+        Button button = new Button(label);
+        button.setId(id);
+        new ClickTrigger(button).triggers(new ScrollIntoViewAction(target));
+        return button;
+    }
+
+    private static Button serverButton(String id, String label, Div target) {
+        Button button = new Button(label);
+        button.setId(id);
+        Element targetElement = target.getElement();
+        button.addClickListener(e -> targetElement.executeJs(
+                "this.scrollIntoView({behavior:'smooth',block:'center'})"));
+        return button;
     }
 }

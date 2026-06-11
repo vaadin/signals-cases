@@ -1,4 +1,12 @@
 .uc15-view {
+    .row-label {
+        font-size: var(--aura-font-size-s);
+        color: var(--vaadin-text-color-secondary);
+        margin: 0;
+        align-self: center;
+        min-width: 12rem;
+    }
+
     .section {
         height: 60vh;
         margin: 8rem 0;
