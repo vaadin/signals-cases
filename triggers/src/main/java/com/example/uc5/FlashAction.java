@@ -2,26 +2,29 @@ package com.example.uc5;
 
 import java.util.Objects;
 
-import tools.jackson.databind.node.ObjectNode;
-
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.trigger.AbstractAction;
-import com.vaadin.flow.component.trigger.internal.ConfigContext;
+import com.vaadin.flow.component.trigger.internal.Action;
+import com.vaadin.flow.component.trigger.internal.Trigger;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.dom.JsFunction;
 
 /**
  * Custom action that briefly flashes the target element's background.
  * <p>
- * Demonstrates the extension SPI: namespaced type id, an
- * {@link com.vaadin.flow.component.trigger.AbstractAction} subclass on the
- * server, and a matching factory registered against
- * {@code window.Vaadin.Flow.triggers} by the {@code flash-action.ts} module
- * that ships with this view.
+ * Demonstrates the extension SPI: subclass {@link Action} and emit the JS
+ * that runs when the trigger fires by returning a {@link JsFunction} from
+ * {@link #toJs(Trigger)}. The target element is captured as {@code $0} so it
+ * arrives on the client as a DOM reference — no {@code @JsModule} or
+ * client-side registry needed.
  */
-public class FlashAction extends AbstractAction {
+public class FlashAction extends Action {
 
-    public static final String TYPE_ID = "demo:flash";
+    private static final String BODY = """
+            const t=$0;
+            const o=t.style.backgroundColor;
+            t.style.transition='background-color 200ms';
+            t.style.backgroundColor='var(--aura-yellow, gold)';
+            window.setTimeout(()=>{t.style.backgroundColor=o;},220);""";
 
     private final Element target;
 
@@ -30,7 +33,6 @@ public class FlashAction extends AbstractAction {
     }
 
     public FlashAction(Element target) {
-        super(TYPE_ID);
         this.target = Objects.requireNonNull(target);
     }
 
@@ -39,9 +41,7 @@ public class FlashAction extends AbstractAction {
     }
 
     @Override
-    public ObjectNode buildClientConfig(ConfigContext context) {
-        ObjectNode node = JacksonUtils.createObjectNode();
-        node.put("element", context.referenceElement(target));
-        return node;
+    protected JsFunction toJs(Trigger trigger) {
+        return JsFunction.of(BODY, target);
     }
 }

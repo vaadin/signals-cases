@@ -1,129 +1,134 @@
 # Trigger / Action API — gaps surfaced by the use-case module
 
-This module exercises slice 1 of the trigger API
-(<https://github.com/vaadin/flow/pull/24353>). The use cases that fit slice 1
-have a view (UC1–UC5). Several other use cases that the feature is *for* — i.e.
-client-only actions that need a user-gesture and would otherwise force a server
-round-trip — can't be expressed yet. They are recorded here so the next slice
-can prioritise.
+This module exercises the public-facing trigger API at
+`com.vaadin.flow.component.trigger.internal.*` in mainline
+`25.2-SNAPSHOT`. The classes there carry "For internal use only. May be
+renamed or removed in a future release." — using them is supported but the
+shapes will keep evolving.
 
-## No client-side handler for `ServerCallbackAction` (round-trip after copy)
+## Status
 
-**Where it bit us:** No UC view; mentioned in `Trigger#triggers(SerializableRunnable)`.
-**Symptom:** `new ClickTrigger(button).triggers(() -> ...)` registers a
-`ServerCallbackAction` (type id `flow:server-callback`) on the server, but
-`Triggers.ts` ships no `flow:server-callback` factory. The server callback
-never runs. The action's own javadoc admits this: *"binding this action emits
-the snapshot entry but no client behaviour is wired up"*.
-**Workaround used:** None — a UC that wanted "copy AND tell the server it
-happened" had to be left out.
-**Suggested API:** Land the matching client handler in slice 2; until then a
-`ServerCallbackAction` should either throw on registration or log a clear
-warning, so applications don't silently drop callbacks.
+| Gap | State | See |
+|---|---|---|
+| `ServerCallbackAction` post-copy | **Closed** — `WriteToClipboardAction(text, html, onCopied, onError)` | UC10 |
+| `SignalOutput` → server-side signal as Output | **Closed** — `SignalInput(owner, signal)` mirrors via effect | UC4, UC8 |
+| `FullscreenAction` | **Closed** — `RequestFullscreenAction` ships | (not yet demoed in this module) |
+| `ShortcutTrigger` | **Re-opened in mainline** — no public class | UC6, UC7 |
+| `ClickAction` (synthesise a click on another element) | **Open** — no public class | UC7 |
+| Client-side test simulator | Open — no introspection at all in the new architecture | — |
+| Server-side feature detection | Open | — |
+| `PropertyInput` doesn't accept raw `Element` | Open — only `Component` accepted; native elements need a wrapper | UC3 |
+| Public introspection of trigger wiring | Open — `addJsInitializer` exposes no inspect surface | All tests |
 
-## No `ShortcutTrigger` (keyboard shortcuts can't fire client-only actions)
+## [Closed in mainline] Server callback after copy
 
-**Where it bit us:** No UC view (Ctrl+C → copy).
-**Symptom:** The only built-in `Trigger` is `ClickTrigger`. A clipboard-copy
-fired by a keyboard shortcut would need a `ShortcutTrigger(host, key, mods)`,
-but slice 1 doesn't ship one. Writing one against the public SPI is doable but
-needs an accompanying JS factory.
-**Suggested API:**
-```java
-new ShortcutTrigger(button, Key.KEY_C, KeyModifier.CONTROL)
-    .triggers(new ClipboardCopyAction(value));
-```
+**Where it bit us (originally):** UC10. No working server callback in slice 1.
+**Symptom (originally):** `Trigger#triggers(SerializableRunnable)` registered a
+`ServerCallbackAction` whose client factory wasn't wired.
+**Closed by:** `WriteToClipboardAction(textInput, htmlInput, onCopied, onError)`
+exposes the post-copy callback as first-class constructor parameters. The
+generic mechanism is `CallbackAction<T>(Class<T>, Consumer<T>, Input<? extends T>)`.
+**See:** UC10 (`com.example.uc10.CopyAndCountView`).
 
-## No `FullscreenAction` (the PR's own motivating example)
+## [Closed in mainline] No `SignalOutput`
 
-**Where it bit us:** No UC view (toggle fullscreen on click).
-**Symptom:** The PR description names fullscreen as a target use case for the
-trigger API, but slice 1 only ships clipboard copy. A fullscreen toggle action
-would be a 30-line subclass of `AbstractAction` plus a small TS factory — but
-that's an extension job, not built-in.
-**Suggested API:** Ship `FullscreenAction(target)` (and an exit/toggle
-variant) so the most-cited use case works without each app re-implementing
-it.
+**Where it bit us (originally):** UC4 had to stash a URL in a read-only
+`TextField` so a `PropertyOutput` could read it back.
+**Closed by:** `SignalInput<T>(Component owner, Signal<T> signal)` mirrors the
+signal value into a private property on the owner element via a Vaadin
+effect; the trigger handler then reads from that mirror with the same shape
+as `PropertyInput`.
+**See:** UC4 (static), UC8 (live mutation).
 
-## No `WebShareAction` (the PR's other motivating example)
+## [Closed in mainline] No `FullscreenAction`
 
-**Where it bit us:** No UC view.
-**Symptom:** Same shape as the fullscreen gap — the PR description cites
-`navigator.share` as motivation, but no built-in action ships it. Apps that
-want server data → `share` have to write the action themselves; a custom
-shim isn't reachable from the simple use case the API is meant to enable.
-**Suggested API:** `WebShareAction(titleOutput, textOutput, urlOutput)` whose
-client factory calls `navigator.share({...})`.
+**Symptom (originally):** The PR description named fullscreen as motivation
+but no built-in action shipped.
+**Closed by:** `RequestFullscreenAction(target, onSuccess?, onError?)` (and
+the higher-level `Component#requestFullscreen()` facade tracked in
+vaadin/flow#24326).
 
-## No `SignalOutput` (signal values can't feed actions)
+## No public `ShortcutTrigger`
 
-**Where it bit us:** UC4 (share URL widget) had to stash the URL in a
-read-only `TextField` so `PropertyOutput` could read it back. The natural
-shape would be `new SignalOutput<>(shareUrlSignal)` so the action reads
-straight from the server-side signal.
-**Symptom:** `PropertyOutput` is the only built-in `Output`; it can only read
-DOM properties. The `Output` javadoc gestures at "use a `SignalOutput` if you
-need a server-side `Signal` to feed the value" — but no such class ships.
-**Workaround used:** Render the value into a hidden/read-only field and read
-the property.
-**Suggested API:**
-```java
-Signal<String> url = ...;
-new ClickTrigger(button).triggers(new ClipboardCopyAction(new SignalOutput<>(url)));
-```
+**Where it bit us:** UC6 (Ctrl+C copy), UC7 (Enter → submit + disable).
+**Symptom:** Mainline ships no keyboard-shortcut Trigger subclass. The
+existing `com.vaadin.flow.component.Shortcuts` framework (and
+`ShortcutRegistration`) handles keyboard shortcuts for component focus, but
+isn't a `Trigger` and so can't be wired to actions through
+`trigger.triggers(...)`.
+**Workaround used:** A small `com.example.ShortcutTrigger` subclassing the
+new public `Trigger`. Listens for `keydown`, filters by exact modifier match
+and matches the key against both `event.key` and `event.code`. ~80 lines;
+see `triggers/src/main/java/com/example/ShortcutTrigger.java`.
+**Suggested API:** The feature branch
+`vaadin/flow:feature/triggers-actions` has a `ShortcutTrigger` built on a
+`KeyboardEventTrigger` parent. Once that lands in mainline, delete our
+local file and switch the imports.
 
-## No test simulator / mock for the client side
+## No public `ClickAction`
 
-**Where it bit us:** UC1–UC5 tests.
-**Symptom:** `Element.executeJs(...)` runs the snapshot bind on the client at
-runtime, so a browserless test can't observe what actually fires when the
-trigger goes off. The tests fall back to inspecting
-`TriggerSupport.on(host).snapshotForTest()` — they verify the wiring is
-correct, but not that the client factories run, the clipboard write succeeds,
-or the user-gesture context is preserved.
-**Workaround used:** Treat the snapshot as the test contract: type ids,
-config keys, element/output ids, bindings list. Functional behaviour has to
-be tested with a real browser (as the upstream `TriggerClipboardCopyIT`
-does).
-**Suggested API:** A `TriggerSupportTestKit` that drives a trigger's "fire"
-path from JUnit, instantiating registered factories against a stubbed DOM
-(JSDOM-style). Alternatively, expose hooks so tests can assert "if trigger 0
-fires, action 0 sees output 0 with value X".
+**Where it bit us:** UC7 (Enter shortcut chains a synthetic click on the
+Send button followed by SetPropertyAction(disabled)).
+**Symptom:** No built-in action calls `target.click()`. Reasonable
+alternatives:
+- Inline the submit logic into the shortcut trigger via a `CallbackAction`
+  (changes the demo's teaching point from "fire another button's logic"
+  into "the shortcut handler does the work").
+- Use `SetPropertyAction(target, "click", true)` — no, that doesn't work
+  (`click` isn't an assignable property).
+- Subclass `Action` and emit `$0.click()`.
+**Workaround used:** A 30-line `com.example.ClickAction`. Same constructor
+shape as the slice-2 class we used to import. Delete + import once it
+lands in mainline.
 
-## No server-side feature-detection for trigger support
+## No client-side test simulator / introspection
 
-**Where it bit us:** Not blocking any UC, but relevant for the share / file
-system / payment / clipboard-read action variants that would land later.
-**Symptom:** Slice 1 always emits the snapshot; if the browser lacks
-`navigator.clipboard`, the client factory `console.debug`s and the click does
-nothing. There is no server-side way to say *"don't even render the Copy
-button on this browser"*.
-**Suggested API:** A `Feature.detect(host, "clipboard")` Signal/CompletableFuture
-or a `Trigger.onAvailable(...)` hook that surfaces support state back to the
-server. Until then, applications must always show the trigger UI and live
-with the silent no-op when the API is missing.
+**Where it bit us:** All tests in this module.
+**Symptom:** The new architecture installs handlers via
+`Element#addJsInitializer`, which exposes no introspection surface — there
+is no equivalent of the old `TriggerSupport.snapshotForTest()`. Browserless
+tests can verify view rendering and server-side state changes (e.g.
+"clicking Send disables the button server-side") but cannot inspect what
+JavaScript was actually emitted. Functional verification of the
+trigger-action wire (clipboard write happens, shortcut fires, dblclick
+copies) requires a real browser.
+**Workaround used:** Browserless tests are pure render assertions;
+Playwright is the source of truth for behaviour.
+**Suggested API:** Either a `JsInitializerSnapshot` accessor on `Element`
+exposing the installed expressions (for assertions on the generated JS),
+or a higher-level `TriggerTestKit` that mocks the gesture path so actions
+can be fired headlessly.
 
-## `flow:property` output ignores `elementIndex === 0` (the host)
+## No server-side feature-detection signal
 
-**Where it bit us:** None of UC1–UC5 — every UC referenced a non-host element
-for its output. But this is a latent gap: the `Triggers.ts` factory has a
-comment-laden explicit early-return when the property is read against the
-host element, with the note *"elementIndex 0 means 'host'; not supported for
-property outputs in v0 (outputs aren't bound to the host element directly)"*.
-**Symptom:** A natural pattern — copy *this very button's* `textContent` —
-silently produces `undefined`.
-**Suggested API:** Either lift the restriction (the host element is in scope
-as `this` on the client) or surface a `referenceHost()` flag that says
-"resolve to the same element this trigger fired on".
+**Where it bit us:** Not blocking any UC, but relevant for the share /
+file-system / payment / clipboard-read variants.
+**Symptom:** A trigger always installs; if the browser lacks the API the
+action targets, the call fails silently in JS. There is no server-side way
+to ask "is this gesture-gated API supported here?" so the app could
+proactively hide the relevant control.
+**Suggested API:** A `Feature.detect(host, "clipboard.write")` returning a
+`Signal<Boolean>` resolved per session.
 
-## No way to introspect bindings without `snapshotForTest`
+## `PropertyInput` doesn't accept a raw `Element`
 
-**Where it bit us:** All five UC tests.
-**Symptom:** Verifying that a trigger is wired correctly required calling
-`TriggerSupport.on(host).snapshotForTest()`, which is marked `// Test-only
-accessors.` in the PR. Production code that needed to inspect its own
-bindings (e.g. an add-on that wants to add a server-side mirror to an
-existing trigger) has no supported API.
-**Suggested API:** Expose a stable public view —
-`TriggerSupport#getTriggers()`, `#getActionsFor(Trigger)` — separate from
-the JSON snapshot.
+**Where it bit us:** UC3 wanted to read a native `<select>` element's
+`value` property. `PropertyInput`'s only constructor takes a `Component`
+target.
+**Symptom:** A raw `new Element("select")` cannot be passed to
+`PropertyInput`. The workaround is to wrap it in a tiny `@Tag("select")
+Component` subclass.
+**Workaround used:** `com.example.uc3.NativeSelect` — a 12-line
+`Component` wrapper.
+**Suggested API:** Add a `PropertyInput(Element target, String name,
+Class<T> type)` overload. The body is identical to the current Component
+overload after the `.getElement()` call.
+
+## No public introspection of trigger wiring
+
+**Symptom:** Even outside tests — an add-on that wanted to inspect or
+augment a trigger's bindings after the fact has no API. The old
+`TriggerSupport.snapshotForTest()` was at least documented as test-only;
+the new architecture has nothing.
+**Suggested API:** A read-only view on `Element#getJsInitializers()` (or a
+similar accessor) that returns the install expressions and their captures.

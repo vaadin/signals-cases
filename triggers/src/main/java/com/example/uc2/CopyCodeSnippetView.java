@@ -8,10 +8,10 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.trigger.ClickTrigger;
-import com.vaadin.flow.component.trigger.ClipboardCopyAction;
-import com.vaadin.flow.component.trigger.Output;
-import com.vaadin.flow.component.trigger.PropertyOutput;
+import com.vaadin.flow.component.trigger.internal.Action;
+import com.vaadin.flow.component.trigger.internal.ClickTrigger;
+import com.vaadin.flow.component.trigger.internal.PropertyInput;
+import com.vaadin.flow.component.trigger.internal.WriteToClipboardAction;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -19,9 +19,9 @@ import com.vaadin.flow.router.Route;
 /**
  * UC2 — Copy a code snippet's text on click.
  * <p>
- * Same wiring as UC1, but the {@link PropertyOutput} reads the
+ * Same wiring as UC1, but the {@link PropertyInput} reads the
  * {@code textContent} property of a {@code <pre>} element instead of a form
- * field's {@code value}. Demonstrates that PropertyOutput is not specific to
+ * field's {@code value}. Demonstrates that PropertyInput is not specific to
  * form inputs — any DOM element with a readable property works.
  */
 @Route(value = "uc2", layout = MainLayout.class)
@@ -32,14 +32,14 @@ public class CopyCodeSnippetView extends VerticalLayout {
 
     private static final String SNIPPET = """
             new ClickTrigger(button).triggers(
-                new ClipboardCopyAction(
-                    new PropertyOutput<>(field, "value", String.class)));""";
+                new WriteToClipboardAction(
+                    new PropertyInput<>(field, "value", String.class), null));""";
 
     public CopyCodeSnippetView() {
         addClassName("uc2-view");
         add(new H1("UC2 — Copy a code snippet"));
         add(new Paragraph(
-                "PropertyOutput can read any JS property from any element. "
+                "PropertyInput can read any JS property from any element. "
                         + "Here it reads the textContent of the <pre> below."));
 
         Pre snippet = new Pre(SNIPPET);
@@ -49,9 +49,10 @@ public class CopyCodeSnippetView extends VerticalLayout {
         Button copy = new Button("Copy snippet");
         copy.setId("copy");
 
-        Output<String> text = new PropertyOutput<>(snippet, "textContent",
+        Action.Input<String> text = new PropertyInput<>(snippet, "textContent",
                 String.class);
-        new ClickTrigger(copy).triggers(new ClipboardCopyAction(text));
+        new ClickTrigger(copy)
+                .triggers(new WriteToClipboardAction(text, null));
 
         add(snippet, copy);
     }

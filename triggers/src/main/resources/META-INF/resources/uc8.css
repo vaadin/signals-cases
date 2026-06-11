@@ -1,0 +1,14 @@
+.uc8-view {
+    .counter {
+        font-family: monospace;
+        font-size: 1.6rem;
+        font-weight: 600;
+        min-width: 3rem;
+        display: inline-flex;
+        align-items: center;
+        padding: 0.1rem 0.6rem;
+        background: var(--vaadin-background-container);
+        border: 1px solid var(--vaadin-border-color);
+        border-radius: var(--vaadin-radius-m);
+    }
+}
