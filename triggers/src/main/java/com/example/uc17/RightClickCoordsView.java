@@ -1,5 +1,6 @@
 package com.example.uc17;
 
+import com.example.PreventDefaultAction;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.dependency.StyleSheet;
@@ -50,10 +51,11 @@ public class RightClickCoordsView extends VerticalLayout {
 
         MouseEventTrigger contextMenu = new MouseEventTrigger(panel,
                 "contextmenu");
-        contextMenu.triggers(new CallbackAction<>(Point.class, point -> {
-            lastClick.setText("Last right-click: x=" + point.x() + " y="
-                    + point.y());
-        }, new PointInput()));
+        contextMenu.triggers(new PreventDefaultAction(),
+                new CallbackAction<>(Point.class, point -> {
+                    lastClick.setText("Last right-click: x=" + point.x() + " y="
+                            + point.y());
+                }, new PointInput()));
 
         add(panel, lastClick);
     }
