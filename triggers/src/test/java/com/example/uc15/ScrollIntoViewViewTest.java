@@ -17,14 +17,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ScrollIntoViewViewTest extends SpringBrowserlessTest {
 
     @Test
-    void viewRendersWithJumpButtonsAndSections() {
+    void viewRendersWithClientAndServerRows() {
         navigate(ScrollIntoViewView.class);
 
         assertTrue(findInView(H1.class).all().stream()
                 .anyMatch(h -> "UC15 — Scroll into view".equals(h.getText())));
-        assertNotNull(findInView(Button.class).id("to-a"));
-        assertNotNull(findInView(Button.class).id("to-b"));
-        assertNotNull(findInView(Button.class).id("to-c"));
+        // Client row (trigger API)
+        assertNotNull(findInView(Button.class).id("client-a"));
+        assertNotNull(findInView(Button.class).id("client-b"));
+        assertNotNull(findInView(Button.class).id("client-c"));
+        // Server row (round-trip via executeJs in click listener)
+        assertNotNull(findInView(Button.class).id("server-a"));
+        assertNotNull(findInView(Button.class).id("server-b"));
+        assertNotNull(findInView(Button.class).id("server-c"));
+        // Scroll targets
         assertNotNull(findInView(Div.class).id("section-a"));
         assertNotNull(findInView(Div.class).id("section-b"));
         assertNotNull(findInView(Div.class).id("section-c"));
