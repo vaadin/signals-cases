@@ -6,27 +6,28 @@ import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.StyleSheet;
+import com.vaadin.flow.component.html.Code;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.trigger.ClickTrigger;
-import com.vaadin.flow.component.trigger.ClipboardCopyAction;
-import com.vaadin.flow.component.trigger.Output;
-import com.vaadin.flow.component.trigger.PropertyOutput;
+import com.vaadin.flow.component.trigger.internal.ClickTrigger;
+import com.vaadin.flow.component.trigger.internal.SignalInput;
+import com.vaadin.flow.component.trigger.internal.WriteToClipboardAction;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.signals.local.ValueSignal;
 
 /**
- * UC4 — Server-generated share URL, copied without a server round-trip.
+ * UC4 — Server-side {@link ValueSignal} read on click, no round-trip.
  * <p>
- * Highlights the main reason the trigger API exists: the clipboard write must
- * happen synchronously inside the click handler or the browser refuses it. The
- * server renders the URL into a field at view-construction time; from that
- * point on the copy is pure client behaviour and works the first time the user
- * clicks.
+ * The URL lives in a {@link ValueSignal} on the server; a {@link SignalInput}
+ * mirrors the current value into a property on the host element via an effect,
+ * and the click handler copies it without a round-trip. If the signal changes
+ * server-side, the mirrored property updates automatically so the next click
+ * sees the new value — the only context in which the browser permits
+ * {@code navigator.clipboard.write}.
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Share URL")
@@ -38,28 +39,27 @@ public class ShareUrlView extends VerticalLayout {
         addClassName("uc4-view");
         add(new H1("UC4 — Share URL widget"));
         add(new Paragraph(
-                "The URL below is generated on the server when the view is "
-                        + "rendered. Copying it does not require a round-trip — the "
-                        + "click handler reads the field's current value and copies "
-                        + "it inside the user gesture, which is the only time the "
-                        + "browser permits a clipboard write."));
+                "The URL below is held in a server-side ValueSignal. "
+                        + "SignalInput mirrors its current value to the client so "
+                        + "the click handler can copy it without a server "
+                        + "round-trip — the only context in which the browser "
+                        + "permits navigator.clipboard.write."));
 
-        String shareUrl = "https://example.com/share/"
-                + UUID.randomUUID().toString().substring(0, 8);
+        ValueSignal<String> urlSignal = new ValueSignal<>(
+                "https://example.com/share/"
+                        + UUID.randomUUID().toString().substring(0, 8));
 
-        TextField field = new TextField();
-        field.setId("share-url");
-        field.setValue(shareUrl);
-        field.setReadOnly(true);
-        field.addClassName("share-url-field");
+        Code display = new Code();
+        display.setId("share-url");
+        display.addClassName("share-url-display");
+        display.bindText(urlSignal);
 
         Button copy = new Button("Copy link");
         copy.setId("copy");
 
-        Output<String> value = new PropertyOutput<>(field, "value",
-                String.class);
-        new ClickTrigger(copy).triggers(new ClipboardCopyAction(value));
+        new ClickTrigger(copy).triggers(new WriteToClipboardAction(
+                new SignalInput<>(copy, urlSignal), null));
 
-        add(new HorizontalLayout(field, copy));
+        add(new HorizontalLayout(display, copy));
     }
 }

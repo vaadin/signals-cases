@@ -1,0 +1,15 @@
+.uc10-view {
+    .count-badge {
+        font-size: 0.85rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--aura-blue) 12%, transparent);
+        color: var(--aura-blue-text);
+        border: 1px solid color-mix(in srgb, var(--aura-blue) 30%, transparent);
+        align-self: center;
+    }
+
+    .payload {
+        display: none;
+    }
+}

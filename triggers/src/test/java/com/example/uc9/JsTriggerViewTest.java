@@ -1,11 +1,10 @@
-package com.example.uc5;
+package com.example.uc9;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 
@@ -13,16 +12,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@ViewPackages(classes = CustomActionView.class)
-class CustomActionViewTest extends SpringBrowserlessTest {
+@ViewPackages(classes = JsTriggerView.class)
+class JsTriggerViewTest extends SpringBrowserlessTest {
 
     @Test
-    void viewRendersTargetAndTriggerButton() {
-        navigate(CustomActionView.class);
+    void viewRendersTarget() {
+        navigate(JsTriggerView.class);
 
         assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC5 — Custom action".equals(h.getText())));
+                .anyMatch(h -> "UC9 — Double-click to copy".equals(h.getText())));
         assertNotNull(findInView(Div.class).id("target"));
-        assertNotNull(findInView(Button.class).id("trigger"));
     }
 }
