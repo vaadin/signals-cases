@@ -20,6 +20,8 @@ public final class AppCatalog {
                     "https://geo-cases.fly.dev/"),
             new App("page-visibility", "Page Visibility API",
                     "https://page-visibility-cases.fly.dev/"),
+            new App("route-hierarchy", "Route Hierarchy & Menu",
+                    "https://route-hierarchy-cases.fly.dev/"),
             new App("screen-orientation", "Screen Orientation API",
                     "https://screen-orientation-cases.fly.dev/"),
             new App("signals", "Signal API", "https://signals-cases.fly.dev/"),
