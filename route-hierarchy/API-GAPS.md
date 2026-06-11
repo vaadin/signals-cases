@@ -28,3 +28,20 @@ one-line wrapper around them would only obscure the dependency.
 records, e.g. `RouteHierarchy.of(class, params) → List<RouteReference>` and
 `RouteHierarchy.titleOf(class, params)` (or fold the title onto the reference
 as `RouteReference#title()`).
+
+## A flat menu entry does not say where it sits in the tree
+
+**Where it bites us:** `MainLayout#includeInMainNav` (UC8).
+**Symptom:** `MenuConfiguration.getMenuEntriesTree()` + `MenuEntry#children()`
+give a *nested* view of the `@Menu` set — public, supported API in
+`com.vaadin.flow.server.menu`, and the whole of UC8. But the flat
+`getMenuEntries()` that a normal side nav is built from still hands back every
+entry with no indication of its depth, so a layout that wants "top-level items
+only" (leaving the deeper ones to UC8's tree) has to work the nesting out for
+itself. `MainLayout` does that by calling the same **internal**
+`RouteUtil.getRouteParent` as the gap above — comparing URL path prefixes is not a
+substitute, because a logical parent need not share a URL prefix.
+**Suggested API:** either give `MenuEntry` a `parent()`/depth of its own, or let
+the caller flatten the tree itself — e.g. `MenuEntry#descendants()` — so that
+"top-level only" is a filter on public API rather than a second walk through
+`internal`.

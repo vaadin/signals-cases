@@ -8,6 +8,7 @@ import com.example.uc4.ProjectsView;
 import com.example.uc5.SettingsView;
 import com.example.uc6.DashboardView;
 import com.example.uc7.SitemapView;
+import com.example.uc8.HierarchicalMenuView;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.html.Div;
@@ -58,6 +59,10 @@ public class HomeView extends BaseHomeView {
                 "getRouteHierarchy used as a graph-builder to render the whole "
                         + "hierarchy.",
                 SitemapView.class));
+        cards.add(homeCard("UC8", "Hierarchical menu",
+                "MenuConfiguration.getMenuEntriesTree() nests the @Menu entries "
+                        + "the flat nav lists.",
+                HierarchicalMenuView.class));
         add(cards);
     }
 }

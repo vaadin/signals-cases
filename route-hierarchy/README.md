@@ -15,10 +15,16 @@ each crumb with the route's page title — including instance-free
 `PageTitleGenerator`s, resolved without instantiating ancestor views. No
 `BeforeEnterObserver`, no manual seeding.
 
-UC5 and UC7 are not breadcrumbs: they consume the same route-hierarchy API
+UC5, UC7 and UC8 are not breadcrumbs: they consume the same route-hierarchy API
 directly — `UpLink` calls `getRouteParent` for a single up-one-level control,
-and `SitemapView` uses `getRouteHierarchy` as a graph-builder. Those still reach
-for internal API; see [`API-GAPS.md`](API-GAPS.md).
+`SitemapView` uses `getRouteHierarchy` as a graph-builder, and
+`HierarchicalMenuView` renders `MenuConfiguration.getMenuEntriesTree()` as a
+nested `SideNav`. The first two still reach for internal API; see
+[`API-GAPS.md`](API-GAPS.md).
+
+The hierarchical menu has not landed in the baseline Flow version yet, so this
+module pins `flow.version` to `25.3.hierarchical-menu-SNAPSHOT` (see
+[`pom.xml`](pom.xml)).
 
 | # | View | What it shows |
 | - | ---- | ------------- |
@@ -29,6 +35,7 @@ for internal API; see [`API-GAPS.md`](API-GAPS.md).
 | UC5 | Up-one-level button | A single "↑ Up to <parent>" control built from `getRouteParent(...)`, hidden at the hierarchy root. |
 | UC6 | Layout-wide auto breadcrumbs | One `Breadcrumbs` component in a parent layout, shared by every child view; in `ROUTER` mode it rebuilds on every navigation with no `AfterNavigationObserver` and no manual seeding. |
 | UC7 | Route-tree sitemap | `getRouteHierarchy` used as a graph-builder: leaf routes from across the demo are expanded and merged into a nested sitemap tree. |
+| UC8 | Hierarchical menu | `MenuConfiguration.getMenuEntriesTree()` renders the same `@Menu` set the flat drawer shows, nested by route hierarchy via `MenuEntry.children()`. |
 
 ## Run
 

@@ -14,6 +14,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.server.menu.MenuConfiguration;
+import com.vaadin.flow.server.menu.MenuEntry;
 
 /**
  * Shared {@link AppLayout} for the use-case demo apps. Renders a navbar with
@@ -45,9 +46,21 @@ public abstract class BaseMainLayout extends AppLayout
         addToDrawer(AppCatalog.createSelector(moduleId));
 
         SideNav nav = new SideNav();
-        MenuConfiguration.getMenuEntries().forEach(entry -> nav
-                .addItem(new SideNavItem(entry.title(), entry.path())));
+        MenuConfiguration.getMenuEntries().stream()
+                .filter(this::includeInMainNav).forEach(entry -> nav
+                        .addItem(new SideNavItem(entry.title(), entry.path())));
         addToDrawer(nav);
+    }
+
+    /**
+     * Whether a menu entry is shown in the main side navigation. The default
+     * shows every entry; a module whose menu nests routes can override this to
+     * keep deeper entries out of the flat nav — {@code getMenuEntries()} is
+     * flat and says nothing about an entry's depth, so working that out needs
+     * the route hierarchy, which only the route-hierarchy module depends on.
+     */
+    protected boolean includeInMainNav(MenuEntry entry) {
+        return true;
     }
 
     private static Element buildSourceCodeOverlay(Anchor link) {
