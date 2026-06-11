@@ -12,19 +12,19 @@ PR has a feedback trail.
 
 | Gap | State | See |
 |---|---|---|
-| No public `ShortcutTrigger` | **Open** — local shim | UC6, UC7 |
-| No public `ClickAction` | **Open** — local shim | UC7 |
-| No generic `PreventDefaultAction` | **Open** — local shim | UC17 |
-| `Action.Input#toJs` not reachable outside `internal` | **Open** | UC19 |
-| `HandlerInput` not public | **Open** | UC11, UC13 |
-| `PropertyInput` doesn't accept a raw `Element` | **Open** | — *(used to bite UC3 before that UC was dropped)* |
+| No public `ShortcutTrigger` | **Open** — local shim | UC1, UC2 |
+| No public `ClickAction` | **Open** — local shim | UC2 |
+| No generic `PreventDefaultAction` | **Open** — local shim | UC11 |
+| `Action.Input#toJs` not reachable outside `internal` | **Open** | UC13 |
+| `HandlerInput` not public | **Open** | UC5, UC7 |
+| `PropertyInput` doesn't accept a raw `Element` | **Open** | — *(no current UC; see history note below)* |
 | Server-side feature detection | **Open** | — |
 | Public introspection of trigger wiring | **Open** | all tests |
 | Client-side test simulator | **Open** | all tests |
 
 ## No public `ShortcutTrigger`
 
-**Where it bit us:** UC6 (Ctrl+S save), UC7 (Enter → submit + disable).
+**Where it bit us:** UC1 (Ctrl+S save), UC2 (Enter → submit + disable).
 **Symptom:** Mainline ships no keyboard-shortcut Trigger subclass. The
 existing `com.vaadin.flow.component.Shortcuts` framework (and
 `ShortcutRegistration`) handles keyboard shortcuts for component focus,
@@ -44,7 +44,7 @@ delete our local file and switch the imports.
 
 ## No public `ClickAction`
 
-**Where it bit us:** UC7 (the Enter shortcut chains a synthetic click
+**Where it bit us:** UC2 (the Enter shortcut chains a synthetic click
 on the Send button followed by `SetPropertyAction(disabled)`).
 **Symptom:** No built-in action calls `target.click()`. Alternatives are
 all unattractive — `SetPropertyAction(target, "click", true)` doesn't
@@ -57,7 +57,7 @@ once it lands in mainline.
 
 ## No generic `PreventDefaultAction`
 
-**Where it bit us:** UC17. A right-click `MouseEventTrigger("contextmenu")`
+**Where it bit us:** UC11. A right-click `MouseEventTrigger("contextmenu")`
 needs to suppress the browser's native context menu before the coordinate
 callback is useful.
 **Symptom:** The framework's only `preventDefault` story is the
@@ -65,7 +65,7 @@ chainable `KeyboardEventTrigger.preventDefault()` on the feature branch
 (and that's keyboard-only). For other DOM events, applications have to
 write their own action.
 **Workaround used:** A 10-line `com.example.PreventDefaultAction` that
-emits `event.preventDefault()`. Wired as the first action in UC17's
+emits `event.preventDefault()`. Wired as the first action in UC11's
 trigger.
 **Suggested API:** Either promote a generic `PreventDefaultAction` to
 the public surface or add a chainable builder method on `DomEventTrigger`
@@ -73,7 +73,7 @@ mirroring `KeyboardEventTrigger.preventDefault()`.
 
 ## `Action.Input#toJs` is package-private
 
-**Where it bit us:** UC19 wanted a `FilterListAction` that took an
+**Where it bit us:** UC13 wanted a `FilterListAction` that took an
 `Action.Input<String>` as the query source — the natural shape mirroring
 `SetPropertyAction(target, name, source)`. But
 `Action.Input#toJs(Trigger)` has `protected` visibility, and the
@@ -83,7 +83,7 @@ other package can't call it.
 **Symptom:** `source.toJs(trigger)` from a custom Action outside the
 `internal` package fails to compile with "toJs has protected access in
 Input".
-**Workaround used:** Drop the Input parameter entirely. UC19's
+**Workaround used:** Drop the Input parameter entirely. UC13's
 `FilterListAction` is hard-wired to read its query from
 `event.target.value` and only works when bound to a `DomEventTrigger` on
 the relevant search field.
@@ -93,7 +93,7 @@ render method that wraps `toJs` for external callers.
 
 ## `HandlerInput` is not public
 
-**Where it bit us:** UC11 (`IdleTrigger`), UC13 (`BroadcastChannelTrigger`).
+**Where it bit us:** UC5 (`IdleTrigger`), UC7 (`BroadcastChannelTrigger`).
 Both expose event-scoped state through static `Action.Input` fields and
 would naturally use `HandlerInput<>("event.detail.idle",
 IdleTrigger.class)` — the exact pattern the built-in triggers use (see
@@ -110,10 +110,10 @@ reuse the canonical implementation.
 
 ## `PropertyInput` doesn't accept a raw `Element`
 
-**Where it bit us:** *(historical — UC3 wrapped a native `<select>` in a
-12-line `@Tag("select")` Component subclass; the UC has since been
-dropped because the click-and-copy pattern is covered by the high-level
-Clipboard API.)*
+**Where it bit us:** *(historical — a now-dropped UC wrapped a native
+`<select>` in a 12-line `@Tag("select")` Component subclass just to get
+a target for `PropertyInput`; the UC was dropped because the
+click-and-copy pattern is covered by the high-level Clipboard API.)*
 **Symptom:** A raw `new Element("select")` cannot be passed to
 `PropertyInput`. The only constructor takes a `Component` target. The
 workaround is to wrap the element in a tiny `Component` subclass.

@@ -1,21 +1,20 @@
 .uc18-view {
-    /* Visually hidden but reachable by screen readers — the canonical
-       sr-only utility. */
-    .sr-only {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
+    .draft {
+        width: 100%;
+        max-width: 36rem;
+        min-height: 8rem;
     }
 
-    .badge {
+    .counts {
+        gap: 1.5rem;
+    }
+
+    .count {
         font-family: monospace;
-        color: var(--vaadin-text-color-secondary);
-        align-self: center;
+        font-size: 0.95rem;
+        padding: 0.3rem 0.8rem;
+        background: var(--vaadin-background-container);
+        border: 1px solid var(--vaadin-border-color);
+        border-radius: var(--vaadin-radius-m);
     }
 }

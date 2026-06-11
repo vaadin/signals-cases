@@ -1,23 +1,20 @@
 .uc15-view {
-    .row-label {
-        font-size: var(--aura-font-size-s);
-        color: var(--vaadin-text-color-secondary);
-        margin: 0;
-        align-self: center;
-        min-width: 12rem;
+    .line {
+        display: inline-flex;
+        gap: 0.4rem;
+        align-items: baseline;
+        font-family: monospace;
+        font-size: 1.1rem;
+        margin-right: 1.5rem;
     }
 
-    .section {
-        height: 60vh;
-        margin: 8rem 0;
-        padding: 2rem;
-        font-size: 2rem;
+    .label {
+        color: var(--vaadin-text-color-secondary);
+    }
+
+    .readout {
         font-weight: 600;
-        background: var(--vaadin-background-container);
-        border: 1px solid var(--vaadin-border-color);
-        border-radius: var(--vaadin-radius-l);
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        min-width: 4ch;
+        text-align: right;
     }
 }
