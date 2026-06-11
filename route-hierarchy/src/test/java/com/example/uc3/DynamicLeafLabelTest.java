@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.router.RouterLink;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,15 +21,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class DynamicLeafLabelTest extends SpringBrowserlessTest {
 
     @Test
-    void leafUsesDynamicTitleNotStaticPageTitle() {
+    void leafUsesGeneratorTitleNotClassName() {
         navigate(UserProfileView.class, Map.of("userId", "ada"));
 
+        // The H1 and the breadcrumb leaf both resolve the person's name...
+        assertEquals("Ada Lovelace", heading());
         String trail = trail();
         assertTrue(trail.contains("Users"), trail);
-        assertTrue(trail.contains("Ada Lovelace"),
-                "leaf must use the HasDynamicTitle label: " + trail);
-        assertFalse(trail.contains("Profile"),
-                "leaf must NOT fall back to the static @PageTitle: " + trail);
+        assertTrue(trail.endsWith("Ada Lovelace"),
+                "leaf must use the PageTitleGenerator label: " + trail);
+        // ...and never fall back to the bare class name.
+        assertFalse(trail.contains("UserProfileView"),
+                "leaf must not show the class name: " + trail);
 
         List<RouterLink> links = crumbLinks();
         assertEquals(1, links.size());
@@ -38,7 +42,12 @@ class DynamicLeafLabelTest extends SpringBrowserlessTest {
     @Test
     void leafLabelTracksTheRouteParameter() {
         navigate(UserProfileView.class, Map.of("userId", "grace"));
-        assertTrue(trail().contains("Grace Hopper"), trail());
+        assertEquals("Grace Hopper", heading());
+        assertTrue(trail().endsWith("Grace Hopper"), trail());
+    }
+
+    private String heading() {
+        return findInView(H1.class).single().getText();
     }
 
     private String trail() {

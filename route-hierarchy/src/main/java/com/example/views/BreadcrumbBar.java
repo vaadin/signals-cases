@@ -2,18 +2,19 @@ package com.example.views;
 
 import java.util.List;
 
-import com.example.MissingAPI;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.router.RouteConfiguration;
-import com.vaadin.flow.router.RouteHierarchy;
+import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.router.RouteParameters;
+import com.vaadin.flow.router.RouteParentReference;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.router.RouterState;
+import com.vaadin.flow.router.internal.RouteUtil;
+import com.vaadin.flow.server.RouteRegistry;
+import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -21,14 +22,18 @@ import com.vaadin.flow.signals.Signal;
  * {@link RouterLink}s. It is the "breadcrumbs section" shared by every use case
  * in this module.
  * <p>
- * The trail is built entirely from the Flow-core route-hierarchy API introduced
- * in <a href="https://github.com/vaadin/flow/pull/24451">flow#24451</a>:
- * {@link RouteHierarchy#resolveAncestors(Class, RouteConfiguration)} returns
- * the ancestor chain (root-first, leaf last) by consulting {@code @RouteParent}
- * first and falling back to URL-prefix walking. Each ancestor becomes a
- * {@link RouterLink}; the leaf is rendered as a plain, non-linked {@link Span}
- * marked as the current page. Label resolution and per-ancestor parameter
- * filtering are done by {@link MissingAPI} (see {@code API-GAPS.md}).
+ * The trail is built entirely from the route-hierarchy API introduced in
+ * <a href="https://github.com/vaadin/flow/pull/24451">flow#24451</a> and
+ * reworked in
+ * <a href="https://github.com/vaadin/flow/pull/24550">flow#24550</a>: a single
+ * {@code getRouteHierarchy(leafClass, parameters)} call returns the whole chain
+ * (root first, leaf last) with every entry already paired with the
+ * {@link RouteParameters} subset its template needs. Each non-leaf entry
+ * becomes a {@link RouterLink}; the leaf is a plain {@link Span} marked as the
+ * current page. Each label comes from
+ * {@code MenuRegistry.getTitle(class, params)}, which honours both static
+ * {@code @PageTitle} and instance-free {@code PageTitleGenerator}s — so dynamic
+ * crumbs (leaf <em>and</em> ancestor) need no view instance.
  * <p>
  * The bar wires itself to {@link UI#routerStateSignal()} from its constructor
  * via a single {@link Signal#effect}: the effect rebuilds the trail from the
@@ -57,41 +62,34 @@ public class BreadcrumbBar extends HorizontalLayout {
             return;
         }
 
-        RouteConfiguration routeConfiguration = RouteConfiguration
-                .forSessionScope();
-        List<Class<? extends Component>> chain = RouteHierarchy
-                .resolveAncestors(leafView.getClass(), routeConfiguration);
+        RouteRegistry registry = VaadinService.getCurrent().getRouter()
+                .getRegistry();
+        List<RouteParentReference> trail = RouteUtil.getRouteHierarchy(registry,
+                leafView.getClass(), state.routeParameters());
 
-        if (chain.isEmpty()) {
-            // Defensive: a non-@Route leaf has no hierarchy to show.
-            add(currentCrumb(MissingAPI.dynamicTitle(leafView)));
-            return;
-        }
-
-        RouteParameters parameters = state.routeParameters();
-        for (int i = 0; i < chain.size(); i++) {
+        for (int i = 0; i < trail.size(); i++) {
             if (i > 0) {
                 add(separator());
             }
-            Class<? extends Component> step = chain.get(i);
-            boolean isLeaf = i == chain.size() - 1;
+            RouteParentReference entry = trail.get(i);
+            String title = MenuRegistry.getTitle(entry.navigationTarget(),
+                    entry.routeParameters());
+            boolean isLeaf = i == trail.size() - 1;
             if (isLeaf) {
-                add(currentCrumb(MissingAPI.dynamicTitle(leafView)));
+                add(currentCrumb(title));
             } else {
-                add(ancestorLink(step, parameters, routeConfiguration));
+                add(ancestorLink(entry, title));
             }
         }
     }
 
-    private static RouterLink ancestorLink(Class<? extends Component> ancestor,
-            RouteParameters parameters, RouteConfiguration routeConfiguration) {
-        String title = MissingAPI.staticTitle(ancestor);
-        RouteParameters ancestorParameters = MissingAPI.parametersFor(ancestor,
-                parameters, routeConfiguration);
-        if (ancestorParameters.getParameterNames().isEmpty()) {
-            return new RouterLink(title, ancestor);
+    private static RouterLink ancestorLink(RouteParentReference ancestor,
+            String title) {
+        RouteParameters parameters = ancestor.routeParameters();
+        if (parameters.getParameterNames().isEmpty()) {
+            return new RouterLink(title, ancestor.navigationTarget());
         }
-        return new RouterLink(title, ancestor, ancestorParameters);
+        return new RouterLink(title, ancestor.navigationTarget(), parameters);
     }
 
     private static Span currentCrumb(String text) {

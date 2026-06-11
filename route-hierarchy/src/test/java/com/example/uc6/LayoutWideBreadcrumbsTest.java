@@ -33,9 +33,8 @@ class LayoutWideBreadcrumbsTest extends SpringBrowserlessTest {
         String trail = trail();
         assertTrue(trail.contains("Dashboard"), trail);
         assertTrue(trail.contains("Team"), trail);
-        assertTrue(trail.contains("Kim Park"),
-                "leaf must use the dynamic title read from the active chain: "
-                        + trail);
+        assertTrue(trail.endsWith("Kim Park"),
+                "leaf must use the PageTitleGenerator label: " + trail);
 
         List<RouterLink> links = crumbLinks();
         assertEquals(2, links.size());
@@ -56,7 +55,7 @@ class LayoutWideBreadcrumbsTest extends SpringBrowserlessTest {
                 "routerStateSignal effect must rebuild the trail on navigation");
 
         navigate(MemberView.class, Map.of("member", "lee"));
-        assertTrue(trail().contains("Lee Wong"));
+        assertTrue(trail().endsWith("Lee Wong"));
         assertTrue(rebuildCount() > afterSecond);
 
         TeamLayout lastLayout = find(TeamLayout.class).single();

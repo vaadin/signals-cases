@@ -26,15 +26,18 @@ class ParameterPreservingTrailTest extends SpringBrowserlessTest {
 
         String trail = trail();
         assertTrue(trail.contains("Projects"), trail);
-        assertTrue(trail.contains("Project"), trail);
+        // The Project ancestor crumb is itself dynamic: it reads "Project
+        // Apollo" from the :projectId, not a static "Project".
+        assertTrue(trail.contains("Project Apollo"), trail);
         assertTrue(trail.contains("Tasks"), trail);
-        assertTrue(trail.contains("Task #2"), trail);
+        assertTrue(trail.endsWith("Wire the backend"),
+                "leaf must use the PageTitleGenerator label: " + trail);
 
         List<RouterLink> links = crumbLinks();
         assertEquals(3, links.size(),
                 "leaf trail must link the three ancestors");
         assertEquals("Projects", links.get(0).getText());
-        assertEquals("Project", links.get(1).getText());
+        assertEquals("Project Apollo", links.get(1).getText());
         assertEquals("Tasks", links.get(2).getText());
     }
 

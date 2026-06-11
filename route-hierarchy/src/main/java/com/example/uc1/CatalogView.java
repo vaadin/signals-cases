@@ -16,11 +16,11 @@ import com.vaadin.flow.router.RouterLink;
  * <p>
  * The three views of this use case nest purely by URL: {@code uc1},
  * {@code uc1/electronics}, {@code uc1/electronics/laptops}. None of them carry
- * a {@code @RouteParent} annotation, so
- * {@link com.vaadin.flow.router.RouteHierarchy} discovers the trail entirely
- * through its URL-prefix fallback — it strips the last path segment and looks
- * the shorter URL up in the route registry. This is the zero-configuration
- * case: lay your routes out hierarchically and the breadcrumb just works.
+ * a {@code @RouteParent} annotation, so {@code getRouteHierarchy} discovers the
+ * trail entirely through its URL-prefix fallback — it strips the last path
+ * segment and looks the shorter URL up in the route registry. This is the
+ * zero-configuration case: lay your routes out hierarchically and the
+ * breadcrumb just works.
  * <p>
  * The view does no breadcrumb plumbing: the {@link BreadcrumbBar} subscribes to
  * {@code UI.routerStateSignal()} from its own constructor and rebuilds itself
@@ -38,9 +38,9 @@ public class CatalogView extends VerticalLayout {
                 "This is the root of a three-level catalog. Each level lives at "
                         + "a longer URL — uc1 → uc1/electronics → "
                         + "uc1/electronics/laptops — with no @RouteParent "
-                        + "annotations anywhere. RouteHierarchy walks the trail "
-                        + "by stripping URL segments. Drill in and watch the "
-                        + "breadcrumb above grow."));
+                        + "annotations anywhere. getRouteHierarchy walks the "
+                        + "trail by stripping URL segments. Drill in and watch "
+                        + "the breadcrumb above grow."));
         add(new RouterLink("Browse Electronics →", CategoryView.class));
     }
 }
