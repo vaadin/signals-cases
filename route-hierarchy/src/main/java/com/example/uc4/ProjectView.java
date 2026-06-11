@@ -8,16 +8,21 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.DynamicPageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouterLink;
 
 /**
  * UC4 — Parameter-preserving links (project, {@code uc4/:projectId}).
+ * <p>
+ * When this view is an <em>ancestor</em> of a deeper page, its breadcrumb crumb
+ * is still dynamic: {@link ProjectTitleGenerator} resolves "Project Apollo"
+ * from the {@code :projectId} that {@code getRouteHierarchy} carries for this
+ * crumb — a dynamic ancestor label, instance-free (flow#24550).
  */
 @Route(value = "uc4/:projectId", layout = MainLayout.class)
-@PageTitle("Project")
+@DynamicPageTitle(ProjectTitleGenerator.class)
 public class ProjectView extends VerticalLayout implements BeforeEnterObserver {
 
     private final H1 heading = new H1();

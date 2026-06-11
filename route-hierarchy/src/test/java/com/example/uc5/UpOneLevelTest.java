@@ -44,7 +44,7 @@ class UpOneLevelTest extends SpringBrowserlessTest {
                 .filter(RouterLink.class::isInstance)
                 .map(RouterLink.class::cast).toList();
         assertTrue(links.isEmpty(),
-                "resolveParent must find no parent for the use-case root");
+                "getRouteParent must find no parent for the use-case root");
 
         boolean hasTopLevelNote = find(UpLink.class).single().getChildren()
                 .filter(Span.class::isInstance).map(Span.class::cast)

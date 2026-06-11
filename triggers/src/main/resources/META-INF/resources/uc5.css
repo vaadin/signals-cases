@@ -1,8 +1,0 @@
-.uc5-view {
-    .flash-target {
-        padding: 1rem;
-        border: 1px solid var(--vaadin-border-color);
-        border-radius: var(--vaadin-radius-m);
-        width: fit-content;
-    }
-}

@@ -12,7 +12,7 @@ import com.vaadin.flow.router.Route;
 /**
  * UC5 — Up-one-level button (leaf, {@code uc5/security/sessions}).
  * <p>
- * {@code resolveParent} resolves {@code uc5/security} (Security) as the
+ * {@code getRouteParent} resolves {@code uc5/security} (Security) as the
  * immediate parent — one level up, not all the way to the root.
  */
 @Route(value = "uc5/security/sessions", layout = MainLayout.class)

@@ -8,7 +8,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.HasDynamicTitle;
+import com.vaadin.flow.router.DynamicPageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParent;
 
@@ -17,25 +17,22 @@ import com.vaadin.flow.router.RouteParent;
  * <p>
  * The route sits at a top-level URL that shares no prefix with {@code uc2}, so
  * the {@code @RouteParent(OrdersView.class)} annotation is the only thing that
- * lets {@link com.vaadin.flow.router.RouteHierarchy} place it under Orders. The
- * leaf label is supplied dynamically via {@link HasDynamicTitle} so it reflects
- * the actual order id.
- * <p>
- * {@code BeforeEnter} captures the order id into a field so
- * {@link #getPageTitle()} can return a dynamic label; the breadcrumb itself
- * needs no wiring — it is signal-bound and reads this view back from
- * {@code UI.routerStateSignal().currentView()} when the navigation completes.
+ * lets the route hierarchy place it under Orders. The leaf label is a dynamic
+ * "Order #&lt;id&gt;" produced by {@link OrderTitleGenerator} via
+ * {@code @DynamicPageTitle} — resolved instance-free from the {@code :orderId}
+ * parameter (flow#24550).
  */
 @Route(value = "order-detail/:orderId", layout = MainLayout.class)
 @RouteParent(OrdersView.class)
+@DynamicPageTitle(OrderTitleGenerator.class)
 public class OrderDetailView extends VerticalLayout
-        implements BeforeEnterObserver, HasDynamicTitle {
+        implements BeforeEnterObserver {
 
-    private String orderId = "?";
+    private final H1 heading = new H1("Order detail");
 
     public OrderDetailView() {
         add(new BreadcrumbBar());
-        add(new H1("Order detail"));
+        add(heading);
         add(new Paragraph(
                 "This page's URL is order-detail/:orderId — there is no uc2/ "
                         + "prefix to walk. The breadcrumb above reads "
@@ -47,11 +44,7 @@ public class OrderDetailView extends VerticalLayout
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        orderId = event.getRouteParameters().get("orderId").orElse("?");
-    }
-
-    @Override
-    public String getPageTitle() {
-        return "Order #" + orderId;
+        String orderId = event.getRouteParameters().get("orderId").orElse("?");
+        heading.setText("Order #" + orderId);
     }
 }

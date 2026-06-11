@@ -22,12 +22,13 @@ public class HomeView extends BaseHomeView {
         super("Route Hierarchy — use cases",
                 "Each card below builds a breadcrumb trail as a HorizontalLayout "
                         + "of RouterLinks, driven by the Flow-core route-hierarchy "
-                        + "API from PR #24451: RouteHierarchy.resolveAncestors(...) "
-                        + "/ resolveParent(...) walk a view's ancestors via the "
+                        + "API from PRs #24451 and #24550: getRouteHierarchy(...) "
+                        + "/ getRouteParent(...) walk a view's ancestors via the "
                         + "@RouteParent annotation first and URL-prefix matching as "
-                        + "the fallback. The Breadcrumbs component itself is not part "
-                        + "of that PR — these views show what you can build directly "
-                        + "on top of the walker.");
+                        + "the fallback, and instance-free PageTitleGenerators "
+                        + "label each crumb. The Breadcrumbs component itself is not "
+                        + "part of those PRs — these views show what you can build "
+                        + "directly on top of the walker.");
 
         Div cards = new Div();
         cards.addClassName("home-cards");
@@ -40,20 +41,21 @@ public class HomeView extends BaseHomeView {
                         + "parent.",
                 OrdersView.class));
         cards.add(homeCard("UC3", "Dynamic leaf label",
-                "The current crumb shows a runtime title via HasDynamicTitle.",
+                "The current crumb shows a runtime title via a "
+                        + "PageTitleGenerator — no view instance needed.",
                 UsersView.class));
         cards.add(homeCard("UC4", "Parameter-preserving links",
                 "Ancestor links carry the :projectId through the whole trail.",
                 ProjectsView.class));
         cards.add(homeCard("UC5", "Up-one-level button",
-                "A single \"↑ Up\" link built from resolveParent(...).",
+                "A single \"↑ Up\" link built from getRouteParent(...).",
                 SettingsView.class));
         cards.add(homeCard("UC6", "Layout-wide auto breadcrumbs",
                 "One breadcrumb bar in a parent layout, rebuilt on every "
                         + "navigation.",
                 DashboardView.class));
         cards.add(homeCard("UC7", "Route-tree sitemap",
-                "resolveAncestors used as a graph-builder to render the whole "
+                "getRouteHierarchy used as a graph-builder to render the whole "
                         + "hierarchy.",
                 SitemapView.class));
         add(cards);

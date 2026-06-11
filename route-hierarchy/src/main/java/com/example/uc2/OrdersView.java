@@ -18,9 +18,8 @@ import com.vaadin.flow.router.RouterLink;
  * The detail page in this use case lives at {@code order-detail/:orderId} — a
  * URL that is <em>not</em> a prefix-descendant of {@code uc2}. URL-prefix
  * walking alone would never connect the two. {@link OrderDetailView} therefore
- * declares {@code @RouteParent(OrdersView.class)}, and
- * {@link com.vaadin.flow.router.RouteHierarchy} consults that annotation before
- * it ever tries the URL fallback.
+ * declares {@code @RouteParent(OrdersView.class)}, and {@code getRouteParent}
+ * consults that annotation before it ever tries the URL fallback.
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @PageTitle("Orders")
@@ -35,7 +34,7 @@ public class OrdersView extends VerticalLayout {
                         + "does not start with uc2/. Click an order below: the "
                         + "breadcrumb there still reads Orders › Order #… "
                         + "because OrderDetailView is annotated "
-                        + "@RouteParent(OrdersView.class), and RouteHierarchy "
+                        + "@RouteParent(OrdersView.class), and getRouteParent "
                         + "honours that before falling back to the URL."));
         add(new RouterLink("Open order #1001", OrderDetailView.class,
                 new RouteParameters("orderId", "1001")));

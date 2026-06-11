@@ -11,7 +11,15 @@ import com.example.uc17.RightClickCoordsView;
 import com.example.uc18.AccessibleSaveView;
 import com.example.uc19.ClientFilterView;
 import com.example.uc20.ResponsiveCardsView;
-import com.example.uc5.CustomActionView;
+import com.example.uc21.LiveSizeReadoutView;
+import com.example.uc22.PointerTrackerView;
+import com.example.uc23.AtomicResetView;
+import com.example.uc24.AutoSaveSignalView;
+import com.example.uc25.DynamicResponsiveStylingView;
+import com.example.uc26.DoubleClickOpenView;
+import com.example.uc27.ShortcutDownloadView;
+import com.example.uc28.KeyEventLogView;
+import com.example.uc29.KonamiCodeView;
 import com.example.uc6.ShortcutSaveView;
 import com.example.uc7.SubmitAndDisableView;
 import com.example.uc8.LiveSignalCounterView;
@@ -42,9 +50,6 @@ public class HomeView extends BaseHomeView {
 
         Div cards = new Div();
         cards.addClassName("home-cards");
-        cards.add(homeCard("UC5", "Custom action",
-                "Subclass Action and emit JS via toJs — no @JsModule.",
-                CustomActionView.class));
         cards.add(homeCard("UC6", "Ctrl+S save shortcut",
                 "Custom ShortcutTrigger; preventDefault beats the browser's Save dialog.",
                 ShortcutSaveView.class));
@@ -87,6 +92,33 @@ public class HomeView extends BaseHomeView {
         cards.add(homeCard("UC20", "Responsive cards",
                 "SizeTrigger + custom ClassByWidthAction swap a card grid between 1, 2, 3 columns.",
                 ResponsiveCardsView.class));
+        cards.add(homeCard("UC21", "Live size readout",
+                "SizeTrigger.EventData.width/height feed SetPropertyAction directly — no callback.",
+                LiveSizeReadoutView.class));
+        cards.add(homeCard("UC22", "Pointer tracker",
+                "MouseEventTrigger(pointermove) + SetPropertyAction with clientX/Y built-in inputs.",
+                PointerTrackerView.class));
+        cards.add(homeCard("UC23", "Atomic reset",
+                "One ClickTrigger fans out to three SetPropertyActions on different targets.",
+                AtomicResetView.class));
+        cards.add(homeCard("UC24", "Auto-save signal",
+                "DomEventTrigger(input) + SetSignalAction routes typing into a ValueSignal.",
+                AutoSaveSignalView.class));
+        cards.add(homeCard("UC25", "Dynamic responsive styling",
+                "Three colour pickers + SizeTrigger; one Action shared across four triggers.",
+                DynamicResponsiveStylingView.class));
+        cards.add(homeCard("UC26", "Double-click → new tab",
+                "DoubleClickTrigger + OpenInNewTabAction — the high-level API is click-only.",
+                DoubleClickOpenView.class));
+        cards.add(homeCard("UC27", "Shortcut download",
+                "Ctrl+Shift+D fires DownloadAction with a server-side DownloadHandler.",
+                ShortcutDownloadView.class));
+        cards.add(homeCard("UC28", "Key event log",
+                "Local KeyboardEventTrigger; SetPropertyAction mirrors event.key/code/modifiers.",
+                KeyEventLogView.class));
+        cards.add(homeCard("UC29", "Konami code",
+                "Local SequenceTrigger fires only on the complete sequence; partial state stays client-side.",
+                KonamiCodeView.class));
         add(cards);
     }
 }
