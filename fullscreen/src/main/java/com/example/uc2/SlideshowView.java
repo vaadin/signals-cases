@@ -34,7 +34,7 @@ import com.vaadin.flow.signals.Signal;
  * <p>
  * Page-level fullscreen — where the whole document is fullscreened, app
  * chrome included — is demonstrated separately in
- * {@link com.example.uc5.KioskExitDetectionView UC5}.
+ * {@link com.example.uc7.AppFullscreenView UC7}.
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @Menu(order = 2, title = "UC2 — Slideshow")
