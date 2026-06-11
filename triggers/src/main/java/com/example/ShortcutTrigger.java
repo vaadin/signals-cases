@@ -21,14 +21,22 @@ import com.vaadin.flow.shared.Registration;
  * instead.
  *
  * <p>
- * Listens for {@code keydown} on the host, filters by an exact modifier match
- * (required modifiers must be pressed, all others must NOT be pressed — so
- * {@code Ctrl+S} doesn't also fire on {@code Ctrl+Shift+S}, leaving that combo
- * free to bind separately), matches the key against both {@code event.key} and
- * {@code event.code} so a single binding handles {@link Key#KEY_S} regardless
- * of which representation the browser sends, and calls {@code preventDefault()}
- * and {@code stopPropagation()} so the browser's default action and any
- * ancestor handler do not double-fire.
+ * Listens for {@code keydown} on {@code window} in capture phase — that's
+ * the only reliable way to beat the browser's built-in shortcut handling
+ * (e.g. {@code Ctrl+S} opens the Save Page dialog before any element-scoped
+ * listener can see the event). The listener is installed when the host
+ * element attaches and removed when it detaches, so the shortcut is "active
+ * while the view is mounted" — not "active only when focus is in the host's
+ * subtree".
+ * <p>
+ * Filters by an exact modifier match (required modifiers must be pressed,
+ * all others must NOT be pressed — so {@code Ctrl+S} doesn't also fire on
+ * {@code Ctrl+Shift+S}, leaving that combo free to bind separately), matches
+ * the key against both {@code event.key} and {@code event.code} so a single
+ * binding handles {@link Key#KEY_S} regardless of which representation the
+ * browser sends, and calls {@code preventDefault()} and
+ * {@code stopPropagation()} so the browser's default action and any other
+ * handler do not double-fire.
  *
  * <p>
  * Example:
@@ -110,8 +118,12 @@ public class ShortcutTrigger extends Trigger {
                 "if(!allowed.includes(e.key)&&!allowed.includes(e.code))return;");
         js.append("e.preventDefault();e.stopPropagation();$0(e);");
         js.append("};");
-        js.append("this.addEventListener('keydown',listener);");
-        js.append("return ()=>this.removeEventListener('keydown',listener);");
+        // Window + capture: beats the browser's built-in shortcut handler
+        // (e.g. Ctrl+S Save Page) and any descendant handler that might
+        // stopPropagation before the event reaches the host's bubble phase.
+        js.append("window.addEventListener('keydown',listener,true);");
+        js.append(
+                "return ()=>window.removeEventListener('keydown',listener,true);");
         return getHost().addJsInitializer(js.toString(), action);
     }
 }
