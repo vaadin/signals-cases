@@ -26,7 +26,7 @@ import com.vaadin.flow.router.Route;
  * Clipboard.onFilePaste} registers a per-file upload handler for paste
  * gestures: each file the browser puts on {@code event.clipboardData.files} is
  * POSTed to the URL Flow generates for the handler, and the bytes arrive on the
- * server. {@link PasteFileHandler#session()} adds paste-aware orchestration on
+ * server. {@link PasteFileHandler#batch()} adds paste-aware orchestration on
  * top: {@code onStart} fires once before the first file of a paste,
  * {@code onFile} fires per file with the bytes and metadata, and
  * {@code onComplete} fires once the paste's declared file count has been
@@ -71,7 +71,7 @@ public class PasteFilesView extends VerticalLayout {
         StringBuilder logText = new StringBuilder();
 
         Clipboard.onFilePaste(dropZone,
-                PasteFileHandler.session().onStart(start -> {
+                PasteFileHandler.batch().onStart(start -> {
                     previews.removeAll();
                     logText.setLength(0);
                     log.setText("");
