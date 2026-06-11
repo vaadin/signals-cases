@@ -1,9 +1,6 @@
 package com.example.uc1;
 
-import java.time.Duration;
-
 import com.example.views.MainLayout;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.clipboard.Clipboard;
 import com.vaadin.flow.component.html.H1;
@@ -60,13 +57,17 @@ public class CopyStaticTextView extends VerticalLayout {
                 copied -> {
                     copyButton.setText(FLASH_LABEL);
                     copyButton.setIcon(VaadinIcon.CHECK.create());
-                    UI.getCurrentOrThrow().triggerAfter(Duration.ofSeconds(1), () -> {
-                        copyButton.setText(DEFAULT_LABEL);
-                        copyButton.setIcon(null);
-                    });
+                    copyButton.getElement().executeJs(
+                            "setTimeout(() => this.dispatchEvent("
+                                    + "new Event('copy-flash-end')), 1000)");
                 },
                 error -> Notification
                         .show("Copy failed: " + error.message()));
+
+        copyButton.getElement().addEventListener("copy-flash-end", e -> {
+            copyButton.setText(DEFAULT_LABEL);
+            copyButton.setIcon(null);
+        });
 
         add(copyButton);
     }

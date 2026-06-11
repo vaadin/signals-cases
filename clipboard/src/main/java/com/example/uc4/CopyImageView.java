@@ -64,7 +64,7 @@ public class CopyImageView extends VerticalLayout {
 
         Button copyButton = new Button("Copy chart");
         Clipboard.onClick(copyButton).writeImage(preview,
-                copied -> Notification.show("Chart copied"),
+                () -> Notification.show("Chart copied"),
                 error -> Notification.show("Copy failed: " + error.message()));
 
         HorizontalLayout row = new HorizontalLayout(preview, copyButton);
