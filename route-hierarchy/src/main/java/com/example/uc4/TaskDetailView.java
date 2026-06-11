@@ -8,7 +8,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.HasDynamicTitle;
+import com.vaadin.flow.router.DynamicPageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 
@@ -16,17 +16,19 @@ import com.vaadin.flow.router.RouteParameters;
  * UC4 — Parameter-preserving links (leaf,
  * {@code uc4/:projectId/tasks/:taskId}).
  * <p>
- * Walking up from here produces Projects › Project › Tasks › (current). The two
+ * Walking up from here produces Projects › Project › Tasks › Task. The two
  * middle links must carry {@code :projectId} but not {@code :taskId}; the root
  * carries neither. {@code BreadcrumbBar} derives each subset from the
- * ancestor's own template.
+ * ancestor's own template. The leaf label is the dynamic task name, produced by
+ * {@link TaskTitleGenerator} instance-free from the {@code :taskId}
+ * (flow#24550).
  */
 @Route(value = "uc4/:projectId/tasks/:taskId", layout = MainLayout.class)
+@DynamicPageTitle(TaskTitleGenerator.class)
 public class TaskDetailView extends VerticalLayout
-        implements BeforeEnterObserver, HasDynamicTitle {
+        implements BeforeEnterObserver {
 
     private final H1 heading = new H1();
-    private String taskId = "?";
 
     public TaskDetailView() {
         add(new BreadcrumbBar());
@@ -34,20 +36,15 @@ public class TaskDetailView extends VerticalLayout
         add(new Paragraph(
                 "Hover the Project and Tasks crumbs above: both hrefs include "
                         + "this project's id, while the Projects root link has "
-                        + "no parameter at all. None of that mapping is done by "
-                        + "RouteHierarchy — it only handed back the ancestor "
-                        + "classes."));
+                        + "no parameter at all. getRouteHierarchy did that "
+                        + "mapping — it paired each ancestor with the parameter "
+                        + "subset its template needs."));
     }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         RouteParameters parameters = event.getRouteParameters();
-        taskId = parameters.get("taskId").orElse("?");
+        String taskId = parameters.get("taskId").orElse("?");
         heading.setText(ProjectData.taskName(taskId));
-    }
-
-    @Override
-    public String getPageTitle() {
-        return "Task #" + taskId;
     }
 }

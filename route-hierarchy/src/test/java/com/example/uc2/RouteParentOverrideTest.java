@@ -34,7 +34,7 @@ class RouteParentOverrideTest extends SpringBrowserlessTest {
                 "Orders ancestor must come from @RouteParent, not the URL: "
                         + trail);
         assertTrue(trail.contains("Order #1001"),
-                "leaf must use the HasDynamicTitle label: " + trail);
+                "leaf must use the PageTitleGenerator label: " + trail);
 
         List<RouterLink> links = crumbLinks();
         assertEquals(1, links.size(),

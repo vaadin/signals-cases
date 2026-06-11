@@ -13,7 +13,7 @@ import com.vaadin.flow.router.RouterLink;
 /**
  * UC5 — Up-one-level button (mid, {@code uc5/security}).
  * <p>
- * {@code resolveParent} strips the {@code /security} segment and resolves
+ * {@code getRouteParent} strips the {@code /security} segment and resolves
  * {@code uc5} (Settings) as the immediate parent.
  */
 @Route(value = "uc5/security", layout = MainLayout.class)
@@ -24,7 +24,7 @@ public class SecurityView extends VerticalLayout {
         add(new BreadcrumbBar());
         add(new H1("Security"));
         add(new Paragraph("The \"↑ Up\" control points at Settings — the "
-                + "immediate parent resolved by resolveParent(...)."));
+                + "immediate parent resolved by getRouteParent(...)."));
         add(new UpLink());
         add(new RouterLink("Active sessions →", SessionsView.class));
     }

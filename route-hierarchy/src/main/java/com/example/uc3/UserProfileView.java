@@ -8,48 +8,43 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.HasDynamicTitle;
+import com.vaadin.flow.router.DynamicPageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
  * UC3 — Dynamic leaf label (profile, {@code uc3/:userId}).
  * <p>
- * Implements {@link HasDynamicTitle} so the breadcrumb leaf shows the resolved
- * person name rather than the static {@code @PageTitle}. The parent {@code uc3}
- * is still found by stripping the {@code :userId} segment.
- * <p>
- * {@code BeforeEnter} captures the resolved name into a field; the breadcrumb
- * itself is signal-bound and re-reads {@link HasDynamicTitle#getPageTitle()}
- * when the navigation signal fires.
+ * The breadcrumb leaf shows the resolved person name rather than a static title
+ * — and with flow#24550 it does so <em>without</em> a view instance. The label
+ * comes from {@link UserProfileTitleGenerator}, declared via
+ * {@code @DynamicPageTitle}; the breadcrumb resolves it through
+ * {@code MenuRegistry.getTitle(class, params)} purely from the class and the
+ * {@code :userId} parameter. The parent {@code uc3} is found by stripping the
+ * {@code :userId} segment.
  */
 @Route(value = "uc3/:userId", layout = MainLayout.class)
+@DynamicPageTitle(UserProfileTitleGenerator.class)
 public class UserProfileView extends VerticalLayout
-        implements BeforeEnterObserver, HasDynamicTitle {
+        implements BeforeEnterObserver {
 
     private final H1 heading = new H1();
-    private String userName = "Unknown user";
 
     public UserProfileView() {
         add(new BreadcrumbBar());
         add(heading);
         add(new Paragraph(
-                "The breadcrumb leaf above matches this page's H1 — both come "
-                        + "from getPageTitle(). This view carries no static "
-                        + "@PageTitle at all (a view cannot declare both). "
-                        + "RouteHierarchy resolved the Users ancestor; the "
-                        + "dynamic title is the breadcrumb builder's own "
-                        + "contribution for the current view."));
+                "The breadcrumb leaf above matches this page's H1 — both are "
+                        + "the person's name resolved from the :userId. The "
+                        + "breadcrumb gets it from a PageTitleGenerator (no view "
+                        + "instance, no HasDynamicTitle), so the same dynamic "
+                        + "label also works when this view is only an ancestor "
+                        + "of a deeper page. RouteHierarchy resolved the Users "
+                        + "ancestor by URL-prefix walking."));
     }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         String userId = event.getRouteParameters().get("userId").orElse("?");
-        userName = Directory.nameOf(userId);
-        heading.setText(userName);
-    }
-
-    @Override
-    public String getPageTitle() {
-        return userName;
+        heading.setText(Directory.nameOf(userId));
     }
 }
