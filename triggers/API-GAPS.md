@@ -3,145 +3,81 @@
 This module exercises the public-facing trigger API at
 `com.vaadin.flow.component.trigger.internal.*` in mainline
 `25.2-SNAPSHOT`. The classes there carry "For internal use only. May be
-renamed or removed in a future release." — using them is supported but the
-shapes will keep evolving.
+renamed or removed in a future release." — using them is supported but
+the shapes are still evolving. This file records the points where the
+module hit a wall and what the workaround looks like, so the upstream
+PR has a feedback trail.
 
 ## Status
 
 | Gap | State | See |
 |---|---|---|
-| `ServerCallbackAction` post-copy | **Closed** — `WriteToClipboardAction(text, html, onCopied, onError)` | UC10 |
-| `SignalOutput` → server-side signal as Output | **Closed** — `SignalInput(owner, signal)` mirrors via effect | UC4, UC8 |
-| `FullscreenAction` | **Closed** — `RequestFullscreenAction` ships | (not yet demoed in this module) |
-| `ShortcutTrigger` | **Re-opened in mainline** — no public class | UC6, UC7 |
-| `ClickAction` (synthesise a click on another element) | **Open** — no public class | UC7 |
-| Client-side test simulator | Open — no introspection at all in the new architecture | — |
-| Server-side feature detection | Open | — |
-| `PropertyInput` doesn't accept raw `Element` | Open — only `Component` accepted; native elements need a wrapper | UC3 |
-| `Action.Input#toJs` not reachable from outside `internal` | Open — application Actions can't consume Inputs they didn't declare statically | UC19 |
-| `HandlerInput` not public | Open — custom Triggers can't reuse the canonical handler-scoped input class | UC11, UC13 |
-| Public introspection of trigger wiring | Open — `addJsInitializer` exposes no inspect surface | All tests |
-
-## [Closed in mainline] Server callback after copy
-
-**Where it bit us (originally):** UC10. No working server callback in slice 1.
-**Symptom (originally):** `Trigger#triggers(SerializableRunnable)` registered a
-`ServerCallbackAction` whose client factory wasn't wired.
-**Closed by:** `WriteToClipboardAction(textInput, htmlInput, onCopied, onError)`
-exposes the post-copy callback as first-class constructor parameters. The
-generic mechanism is `CallbackAction<T>(Class<T>, Consumer<T>, Input<? extends T>)`.
-**See:** UC10 (`com.example.uc10.CopyAndCountView`).
-
-## [Closed in mainline] No `SignalOutput`
-
-**Where it bit us (originally):** UC4 had to stash a URL in a read-only
-`TextField` so a `PropertyOutput` could read it back.
-**Closed by:** `SignalInput<T>(Component owner, Signal<T> signal)` mirrors the
-signal value into a private property on the owner element via a Vaadin
-effect; the trigger handler then reads from that mirror with the same shape
-as `PropertyInput`.
-**See:** UC4 (static), UC8 (live mutation).
-
-## [Closed in mainline] No `FullscreenAction`
-
-**Symptom (originally):** The PR description named fullscreen as motivation
-but no built-in action shipped.
-**Closed by:** `RequestFullscreenAction(target, onSuccess?, onError?)` (and
-the higher-level `Component#requestFullscreen()` facade tracked in
-vaadin/flow#24326).
+| No public `ShortcutTrigger` | **Open** — local shim | UC6, UC7 |
+| No public `ClickAction` | **Open** — local shim | UC7 |
+| No generic `PreventDefaultAction` | **Open** — local shim | UC17 |
+| `Action.Input#toJs` not reachable outside `internal` | **Open** | UC19 |
+| `HandlerInput` not public | **Open** | UC11, UC13 |
+| `PropertyInput` doesn't accept a raw `Element` | **Open** | — *(used to bite UC3 before that UC was dropped)* |
+| Server-side feature detection | **Open** | — |
+| Public introspection of trigger wiring | **Open** | all tests |
+| Client-side test simulator | **Open** | all tests |
 
 ## No public `ShortcutTrigger`
 
-**Where it bit us:** UC6 (Ctrl+C copy), UC7 (Enter → submit + disable).
+**Where it bit us:** UC6 (Ctrl+S save), UC7 (Enter → submit + disable).
 **Symptom:** Mainline ships no keyboard-shortcut Trigger subclass. The
 existing `com.vaadin.flow.component.Shortcuts` framework (and
-`ShortcutRegistration`) handles keyboard shortcuts for component focus, but
-isn't a `Trigger` and so can't be wired to actions through
+`ShortcutRegistration`) handles keyboard shortcuts for component focus,
+but isn't a `Trigger` and so can't be wired to actions through
 `trigger.triggers(...)`.
-**Workaround used:** A small `com.example.ShortcutTrigger` subclassing the
-new public `Trigger`. Listens for `keydown`, filters by exact modifier match
-and matches the key against both `event.key` and `event.code`. ~80 lines;
-see `triggers/src/main/java/com/example/ShortcutTrigger.java`.
+**Workaround used:** A small `com.example.ShortcutTrigger` subclassing
+the public `Trigger`. Listens on `window` in capture phase (the only
+reliable way to win against the browser's built-in shortcut handler,
+e.g. Ctrl+S Save Page), filters by exact modifier match, matches the
+key against both `event.key` and `event.code`, and calls
+`preventDefault()` + `stopPropagation()` before fanning out to the
+actions.
 **Suggested API:** The feature branch
-`vaadin/flow:feature/triggers-actions` has a `ShortcutTrigger` built on a
-`KeyboardEventTrigger` parent. Once that lands in mainline, delete our
-local file and switch the imports.
+`vaadin/flow:feature/triggers-actions` already has a `ShortcutTrigger`
+built on a `KeyboardEventTrigger` parent. Once that lands in mainline,
+delete our local file and switch the imports.
 
 ## No public `ClickAction`
 
-**Where it bit us:** UC7 (Enter shortcut chains a synthetic click on the
-Send button followed by SetPropertyAction(disabled)).
-**Symptom:** No built-in action calls `target.click()`. Reasonable
-alternatives:
-- Inline the submit logic into the shortcut trigger via a `CallbackAction`
-  (changes the demo's teaching point from "fire another button's logic"
-  into "the shortcut handler does the work").
-- Use `SetPropertyAction(target, "click", true)` — no, that doesn't work
-  (`click` isn't an assignable property).
-- Subclass `Action` and emit `$0.click()`.
-**Workaround used:** A 30-line `com.example.ClickAction`. Same constructor
-shape as the slice-2 class we used to import. Delete + import once it
-lands in mainline.
+**Where it bit us:** UC7 (the Enter shortcut chains a synthetic click
+on the Send button followed by `SetPropertyAction(disabled)`).
+**Symptom:** No built-in action calls `target.click()`. Alternatives are
+all unattractive — `SetPropertyAction(target, "click", true)` doesn't
+work because `click` isn't an assignable property, and inlining the
+submit logic into a `CallbackAction` would change the demo's teaching
+point from "fire another button's logic" into "the shortcut handler
+does the work".
+**Workaround used:** A 30-line `com.example.ClickAction`. Delete + import
+once it lands in mainline.
 
-## No client-side test simulator / introspection
+## No generic `PreventDefaultAction`
 
-**Where it bit us:** All tests in this module.
-**Symptom:** The new architecture installs handlers via
-`Element#addJsInitializer`, which exposes no introspection surface — there
-is no equivalent of the old `TriggerSupport.snapshotForTest()`. Browserless
-tests can verify view rendering and server-side state changes (e.g.
-"clicking Send disables the button server-side") but cannot inspect what
-JavaScript was actually emitted. Functional verification of the
-trigger-action wire (clipboard write happens, shortcut fires, dblclick
-copies) requires a real browser.
-**Workaround used:** Browserless tests are pure render assertions;
-Playwright is the source of truth for behaviour.
-**Suggested API:** Either a `JsInitializerSnapshot` accessor on `Element`
-exposing the installed expressions (for assertions on the generated JS),
-or a higher-level `TriggerTestKit` that mocks the gesture path so actions
-can be fired headlessly.
-
-## No server-side feature-detection signal
-
-**Where it bit us:** Not blocking any UC, but relevant for the share /
-file-system / payment / clipboard-read variants.
-**Symptom:** A trigger always installs; if the browser lacks the API the
-action targets, the call fails silently in JS. There is no server-side way
-to ask "is this gesture-gated API supported here?" so the app could
-proactively hide the relevant control.
-**Suggested API:** A `Feature.detect(host, "clipboard.write")` returning a
-`Signal<Boolean>` resolved per session.
-
-## `PropertyInput` doesn't accept a raw `Element`
-
-**Where it bit us:** UC3 wanted to read a native `<select>` element's
-`value` property. `PropertyInput`'s only constructor takes a `Component`
-target.
-**Symptom:** A raw `new Element("select")` cannot be passed to
-`PropertyInput`. The workaround is to wrap it in a tiny `@Tag("select")
-Component` subclass.
-**Workaround used:** `com.example.uc3.NativeSelect` — a 12-line
-`Component` wrapper.
-**Suggested API:** Add a `PropertyInput(Element target, String name,
-Class<T> type)` overload. The body is identical to the current Component
-overload after the `.getElement()` call.
-
-## No public introspection of trigger wiring
-
-**Symptom:** Even outside tests — an add-on that wanted to inspect or
-augment a trigger's bindings after the fact has no API. The old
-`TriggerSupport.snapshotForTest()` was at least documented as test-only;
-the new architecture has nothing.
-**Suggested API:** A read-only view on `Element#getJsInitializers()` (or a
-similar accessor) that returns the install expressions and their captures.
+**Where it bit us:** UC17. A right-click `MouseEventTrigger("contextmenu")`
+needs to suppress the browser's native context menu before the coordinate
+callback is useful.
+**Symptom:** The framework's only `preventDefault` story is the
+chainable `KeyboardEventTrigger.preventDefault()` on the feature branch
+(and that's keyboard-only). For other DOM events, applications have to
+write their own action.
+**Workaround used:** A 10-line `com.example.PreventDefaultAction` that
+emits `event.preventDefault()`. Wired as the first action in UC17's
+trigger.
+**Suggested API:** Either promote a generic `PreventDefaultAction` to
+the public surface or add a chainable builder method on `DomEventTrigger`
+mirroring `KeyboardEventTrigger.preventDefault()`.
 
 ## `Action.Input#toJs` is package-private
 
 **Where it bit us:** UC19 wanted a `FilterListAction` that took an
 `Action.Input<String>` as the query source — the natural shape mirroring
 `SetPropertyAction(target, name, source)`. But
-`Action.Input#toJs(Trigger)` has `protected` visibility, and the surrounding
-`Action` class lives in
+`Action.Input#toJs(Trigger)` has `protected` visibility, and the
+surrounding `Action` class lives in
 `com.vaadin.flow.component.trigger.internal`, so application code in any
 other package can't call it.
 **Symptom:** `source.toJs(trigger)` from a custom Action outside the
@@ -150,24 +86,75 @@ Input".
 **Workaround used:** Drop the Input parameter entirely. UC19's
 `FilterListAction` is hard-wired to read its query from
 `event.target.value` and only works when bound to a `DomEventTrigger` on
-the relevant search field. A more general shape isn't expressible.
-**Suggested API:** Promote `Input#toJs` to `public` (it is already public
-by intent — every `Action` calls it). Or give Input a public render method
-that wraps `toJs` for external callers.
+the relevant search field.
+**Suggested API:** Promote `Input#toJs` to `public` (it is already
+public by intent — every `Action` calls it). Or give Input a public
+render method that wraps `toJs` for external callers.
 
 ## `HandlerInput` is not public
 
-**Where it bit us:** UC11 (IdleTrigger), UC13 (BroadcastChannelTrigger).
+**Where it bit us:** UC11 (`IdleTrigger`), UC13 (`BroadcastChannelTrigger`).
 Both expose event-scoped state through static `Action.Input` fields and
 would naturally use `HandlerInput<>("event.detail.idle",
 IdleTrigger.class)` — the exact pattern the built-in triggers use (see
 `SizeTrigger.EventData`, `MouseEventTrigger.EventData`).
 **Symptom:** `HandlerInput` is in the `internal` package and
 package-private. Custom Triggers in any other package fall back to
-declaring an anonymous `Action.Input<T>` per field with an inline trigger
-type check.
+declaring an anonymous `Action.Input<T>` per field with an inline
+trigger type check.
 **Workaround used:** Anonymous classes (see `IdleTrigger.EventData.idle`,
 `BroadcastChannelTrigger.EventData.data`). Each is ~10 lines instead of
 one.
 **Suggested API:** Make `HandlerInput` `public` so add-on triggers can
 reuse the canonical implementation.
+
+## `PropertyInput` doesn't accept a raw `Element`
+
+**Where it bit us:** *(historical — UC3 wrapped a native `<select>` in a
+12-line `@Tag("select")` Component subclass; the UC has since been
+dropped because the click-and-copy pattern is covered by the high-level
+Clipboard API.)*
+**Symptom:** A raw `new Element("select")` cannot be passed to
+`PropertyInput`. The only constructor takes a `Component` target. The
+workaround is to wrap the element in a tiny `Component` subclass.
+**Suggested API:** Add a `PropertyInput(Element target, String name,
+Class<T> type)` overload. The body is identical to the current Component
+overload after the `.getElement()` call.
+
+## No server-side feature-detection signal
+
+**Where it bit us:** Not blocking any current UC, but relevant for any
+share / file-system / payment / clipboard-read variants an application
+might want to write.
+**Symptom:** A trigger always installs; if the browser lacks the API the
+action targets, the call fails silently in JS. There is no server-side
+way to ask "is this gesture-gated API supported here?" so the app could
+proactively hide the relevant control.
+**Suggested API:** A `Feature.detect(host, "clipboard.write")` returning
+a `Signal<Boolean>` resolved per session.
+
+## No public introspection of trigger wiring
+
+**Symptom:** An add-on that wants to inspect or augment a trigger's
+bindings after the fact has no API. The new architecture installs
+handlers via `Element#addJsInitializer`, which exposes no introspection
+surface.
+**Suggested API:** A read-only view on `Element#getJsInitializers()` (or
+similar accessor) that returns the install expressions and their
+captures.
+
+## No client-side test simulator / introspection
+
+**Where it bit us:** Every browserless test in this module.
+**Symptom:** Tests can verify view rendering and server-side state
+changes (e.g. "clicking Send disables the button server-side") but
+cannot inspect what JavaScript was actually emitted by a Trigger or
+Action. Functional verification of the trigger-action wire (clipboard
+write happens, shortcut fires, dblclick copies, resize updates classes)
+requires a real browser.
+**Workaround used:** Browserless tests are pure render assertions;
+Playwright is the source of truth for behaviour.
+**Suggested API:** Either a `JsInitializerSnapshot` accessor on
+`Element` exposing the installed expressions (for assertions on the
+generated JS), or a higher-level `TriggerTestKit` that mocks the
+gesture path so actions can be fired headlessly.

@@ -19,11 +19,12 @@ import com.vaadin.flow.router.Route;
  * UC17 — Right-click and report pointer coordinates to the server.
  * <p>
  * The panel listens for {@code contextmenu} via a
- * {@link MouseEventTrigger}. A custom {@link PointInput} reads
- * {@code event.clientX}/{@code event.clientY}, returns them as a JS
- * {@code {x, y}} object literal, and Jackson decodes that into a
- * {@link Point} record on the server. A {@link CallbackAction Point} consumes
- * it.
+ * {@link MouseEventTrigger}. A {@link com.example.PreventDefaultAction}
+ * suppresses the browser's native context menu, then a
+ * {@link CallbackAction} consumes the value produced by the custom
+ * {@link PointInput}: that input returns a JS {@code {x, y}} object literal
+ * built from {@code event.clientX}/{@code event.clientY}, and Jackson
+ * decodes it into a {@link Point} record on the server.
  * <p>
  * Demonstrates a custom Input that produces a structured server-side value.
  */

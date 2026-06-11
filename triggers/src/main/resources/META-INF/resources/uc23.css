@@ -1,0 +1,6 @@
+.uc23-view {
+    .fields {
+        align-items: end;
+        gap: 1rem;
+    }
+}
