@@ -18,6 +18,8 @@ shapes will keep evolving.
 | Client-side test simulator | Open — no introspection at all in the new architecture | — |
 | Server-side feature detection | Open | — |
 | `PropertyInput` doesn't accept raw `Element` | Open — only `Component` accepted; native elements need a wrapper | UC3 |
+| `Action.Input#toJs` not reachable from outside `internal` | Open — application Actions can't consume Inputs they didn't declare statically | UC19 |
+| `HandlerInput` not public | Open — custom Triggers can't reuse the canonical handler-scoped input class | UC11, UC13 |
 | Public introspection of trigger wiring | Open — `addJsInitializer` exposes no inspect surface | All tests |
 
 ## [Closed in mainline] Server callback after copy
@@ -132,3 +134,40 @@ augment a trigger's bindings after the fact has no API. The old
 the new architecture has nothing.
 **Suggested API:** A read-only view on `Element#getJsInitializers()` (or a
 similar accessor) that returns the install expressions and their captures.
+
+## `Action.Input#toJs` is package-private
+
+**Where it bit us:** UC19 wanted a `FilterListAction` that took an
+`Action.Input<String>` as the query source — the natural shape mirroring
+`SetPropertyAction(target, name, source)`. But
+`Action.Input#toJs(Trigger)` has `protected` visibility, and the surrounding
+`Action` class lives in
+`com.vaadin.flow.component.trigger.internal`, so application code in any
+other package can't call it.
+**Symptom:** `source.toJs(trigger)` from a custom Action outside the
+`internal` package fails to compile with "toJs has protected access in
+Input".
+**Workaround used:** Drop the Input parameter entirely. UC19's
+`FilterListAction` is hard-wired to read its query from
+`event.target.value` and only works when bound to a `DomEventTrigger` on
+the relevant search field. A more general shape isn't expressible.
+**Suggested API:** Promote `Input#toJs` to `public` (it is already public
+by intent — every `Action` calls it). Or give Input a public render method
+that wraps `toJs` for external callers.
+
+## `HandlerInput` is not public
+
+**Where it bit us:** UC11 (IdleTrigger), UC13 (BroadcastChannelTrigger).
+Both expose event-scoped state through static `Action.Input` fields and
+would naturally use `HandlerInput<>("event.detail.idle",
+IdleTrigger.class)` — the exact pattern the built-in triggers use (see
+`SizeTrigger.EventData`, `MouseEventTrigger.EventData`).
+**Symptom:** `HandlerInput` is in the `internal` package and
+package-private. Custom Triggers in any other package fall back to
+declaring an anonymous `Action.Input<T>` per field with an inline trigger
+type check.
+**Workaround used:** Anonymous classes (see `IdleTrigger.EventData.idle`,
+`BroadcastChannelTrigger.EventData.data`). Each is ~10 lines instead of
+one.
+**Suggested API:** Make `HandlerInput` `public` so add-on triggers can
+reuse the canonical implementation.

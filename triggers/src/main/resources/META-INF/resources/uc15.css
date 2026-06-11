@@ -1,0 +1,15 @@
+.uc15-view {
+    .section {
+        height: 60vh;
+        margin: 8rem 0;
+        padding: 2rem;
+        font-size: 2rem;
+        font-weight: 600;
+        background: var(--vaadin-background-container);
+        border: 1px solid var(--vaadin-border-color);
+        border-radius: var(--vaadin-radius-l);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
