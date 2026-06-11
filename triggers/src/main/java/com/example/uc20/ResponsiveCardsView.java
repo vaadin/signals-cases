@@ -17,16 +17,18 @@ import com.vaadin.flow.router.Route;
 /**
  * UC20 — Responsive card grid driven by SizeTrigger.
  * <p>
- * A grid container holds six {@link Card}s. A {@link SizeTrigger} observes
- * the container's width via {@code ResizeObserver}; the custom
+ * A grid holds six {@link Card}s. A {@link SizeTrigger} on the view (not
+ * the grid) observes its width via {@code ResizeObserver}; the custom
  * {@link ClassByWidthAction} reads {@code event.width} at every fire and
  * applies one of three breakpoint classes ({@code w-narrow},
- * {@code w-medium}, {@code w-wide}) which CSS turns into a 1, 2, or 3-column
- * grid. The whole responsive switch happens client-side without a server
- * round-trip on resize.
+ * {@code w-medium}, {@code w-wide}) to the grid, which CSS turns into a
+ * 1, 2, or 3-column layout. The whole responsive switch happens
+ * client-side without a server round-trip on resize.
  * <p>
- * Container-relative, not viewport-relative: the same widget would behave
- * correctly inside a sidebar that's narrower than the viewport.
+ * Tracking the view (not the grid) means the breakpoint reacts to the
+ * column the view is rendered into, not the grid's own post-layout
+ * width. Container-relative, not viewport-relative: the same widget
+ * would behave correctly inside a sidebar narrower than the viewport.
  */
 @Route(value = "uc20", layout = MainLayout.class)
 @PageTitle("UC20 — Responsive cards")

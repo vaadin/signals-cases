@@ -20,11 +20,10 @@ import com.vaadin.flow.signals.local.ValueSignal;
 /**
  * UC8 — Copy a value from a live signal that mutates over time.
  * <p>
- * Unlike UC4 (signal initialised once at view construction), the counter here
- * increments via a server-side click handler on "Tick"; {@link SignalInput}
- * mirrors the current value into a property on the host element via an
- * effect, so every signal change is reflected on the next click without any
- * round-trip on the gesture.
+ * A server-side click handler on "Tick" increments the counter signal.
+ * {@link SignalInput} mirrors the current value into a property on the
+ * host element via an effect, so every signal change is reflected on the
+ * next click without any round-trip on the gesture itself.
  */
 @Route(value = "uc8", layout = MainLayout.class)
 @PageTitle("UC8 — Live signal counter")
