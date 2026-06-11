@@ -56,7 +56,12 @@ public class ResponsiveCardsView extends VerticalLayout {
             grid.add(card);
         }
 
-        new SizeTrigger(grid).triggers(new ClassByWidthAction(grid, 520, 900,
+        // Track the view's width — the column the view is rendered in —
+        // and apply the breakpoint class to the grid inside. Tracking the
+        // grid itself would observe its post-layout width, which depends
+        // on the breakpoint class we're about to set; tracking the view
+        // observes the "space we have to work with".
+        new SizeTrigger(this).triggers(new ClassByWidthAction(grid, 520, 900,
                 "w-narrow", "w-medium", "w-wide"));
 
         add(grid);
