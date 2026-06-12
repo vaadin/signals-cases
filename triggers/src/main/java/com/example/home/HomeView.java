@@ -50,14 +50,14 @@ public class HomeView extends BaseHomeView {
 
         Div cards = new Div();
         cards.addClassName("home-cards");
-        cards.add(homeCard("UC1", "Ctrl+S save shortcut",
-                "Custom ShortcutTrigger; preventDefault beats the browser's Save dialog.",
+        cards.add(homeCard("UC1", "Ctrl+S snapshot",
+                "ShortcutTrigger fires WriteToClipboardAction + a badge flip atomically in the user gesture — @Shortcut would have to round-trip.",
                 ShortcutSaveView.class));
-        cards.add(homeCard("UC2", "Submit + disable",
-                "Enter clicks Send via a synthetic ClickAction, then disables it.",
+        cards.add(homeCard("UC2", "Click image, dim siblings",
+                "One ClickTrigger fans three SetPropertyAction calls onto three non-HasEnabled <img> tiles in a single event.",
                 SubmitAndDisableView.class));
-        cards.add(homeCard("UC3", "Live signal",
-                "Counter mutates server-side; SignalInput mirrors on change.",
+        cards.add(homeCard("UC3", "Hidden share link",
+                "SignalInput reads a ValueSignal that's bound to nothing; WriteToClipboardAction copies it inside the gesture.",
                 LiveSignalCounterView.class));
         cards.add(homeCard("UC4", "Double-click copy",
                 "Built-in DoubleClickTrigger — the high-level Clipboard API is click-only.",

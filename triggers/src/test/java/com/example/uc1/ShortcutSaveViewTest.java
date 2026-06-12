@@ -7,7 +7,7 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.TextArea;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -18,13 +18,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ShortcutSaveViewTest extends SpringBrowserlessTest {
 
     @Test
-    void viewRendersWithFieldAndStatus() {
+    void viewRendersWithNotesAndStatus() {
         navigate(ShortcutSaveView.class);
 
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC1 — Ctrl+S save".equals(h.getText())));
-        assertNotNull(findInView(TextField.class).id("message"));
-        assertEquals("(not saved yet)",
+        assertTrue(findInView(H1.class).all().stream().anyMatch(h ->
+                "UC1 — Ctrl+S writes a snapshot to the clipboard"
+                        .equals(h.getText())));
+        assertNotNull(findInView(TextArea.class).id("notes"));
+        assertEquals("(no snapshot yet)",
                 findInView(Span.class).id("status").getText());
     }
 }
