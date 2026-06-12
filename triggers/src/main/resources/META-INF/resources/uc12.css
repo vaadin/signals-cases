@@ -1,24 +1,21 @@
 .uc12-view {
-    .status-badge {
-        display: inline-block;
-        padding: 0.3rem 0.9rem;
-        border-radius: 999px;
+    /* Visually hidden but reachable by screen readers — the canonical
+       sr-only utility. */
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    .badge {
         font-family: monospace;
-        font-size: 0.95rem;
-        background: var(--vaadin-background-container);
-        border: 1px solid var(--vaadin-border-color);
-        transition: background-color 200ms, color 200ms, border-color 200ms;
-    }
-
-    .status-badge.online {
-        background: color-mix(in srgb, var(--aura-green) 18%, transparent);
-        color: var(--aura-green-text, var(--aura-green));
-        border-color: color-mix(in srgb, var(--aura-green) 35%, transparent);
-    }
-
-    .status-badge.offline {
-        background: color-mix(in srgb, var(--aura-red) 18%, transparent);
-        color: var(--aura-red-text, var(--aura-red));
-        border-color: color-mix(in srgb, var(--aura-red) 35%, transparent);
+        color: var(--vaadin-text-color-secondary);
+        align-self: center;
     }
 }

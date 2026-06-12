@@ -1,0 +1,12 @@
+.uc2-view {
+    .message-field {
+        width: 22rem;
+        max-width: 100%;
+    }
+
+    .echo {
+        font-family: monospace;
+        color: var(--vaadin-text-color-secondary);
+        min-height: 1.5rem;
+    }
+}
