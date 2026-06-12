@@ -69,8 +69,10 @@ public class SequenceTrigger extends Trigger {
         js.append("if(++i!==seq.length)return;i=0;");
         js.append("$0(e);");
         js.append("};");
-        js.append("this.addEventListener('keydown',listener);");
-        js.append("return ()=>this.removeEventListener('keydown',listener);");
+        // Listen on window in the capture phase: a view with no focusable
+        // children never receives bubbled keydown on the host element.
+        js.append("window.addEventListener('keydown',listener,true);");
+        js.append("return ()=>window.removeEventListener('keydown',listener,true);");
         return getHost().addJsInitializer(js.toString(), action);
     }
 }

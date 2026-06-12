@@ -88,10 +88,12 @@ public class KeyboardEventTrigger extends Trigger {
         }
         js.append("$0(e);");
         js.append("};");
-        js.append("this.addEventListener(").append(quotedEvent)
-                .append(",listener);");
-        js.append("return ()=>this.removeEventListener(").append(quotedEvent)
-                .append(",listener);");
+        // Listen on window in the capture phase: a view with no focusable
+        // children never receives bubbled keydown on the host element.
+        js.append("window.addEventListener(").append(quotedEvent)
+                .append(",listener,true);");
+        js.append("return ()=>window.removeEventListener(").append(quotedEvent)
+                .append(",listener,true);");
         return getHost().addJsInitializer(js.toString(), action);
     }
 
