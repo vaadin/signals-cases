@@ -1,74 +1,101 @@
 package com.example.uc2;
 
-import com.example.ClickAction;
-import com.example.ShortcutTrigger;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 import com.example.views.MainLayout;
 
-import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.trigger.internal.ClickTrigger;
 import com.vaadin.flow.component.trigger.internal.SetPropertyAction;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 /**
- * UC2 — Submit on Enter, then disable the submit button.
+ * UC2 — Click an image to dim its siblings atomically.
  * <p>
- * Pressing Enter inside the field fires a {@link ShortcutTrigger} that chains
- * two actions: a {@link ClickAction} that synthesises a click on the submit
- * button (running its server-side handler) and a {@link SetPropertyAction}
- * that disables the button so a stray double-press can't re-submit. The
- * disable runs client-side immediately. The button's click listener also
- * calls {@code setEnabled(false)} server-side so the next render keeps the
- * disabled state.
+ * Three {@link Image} tiles. One {@link ClickTrigger} per tile fires
+ * three {@link SetPropertyAction} calls in sequence on the same gesture
+ * — mark self {@code selected}, set the other two to {@code dimmed} —
+ * so the three DOM mutations land before the next paint with no server
+ * round-trip between them. A "Reset" button fans out three more
+ * actions to clear all classes.
  * <p>
- * Order matters: click first, then disable — browsers block clicks on
- * already-disabled elements.
- * <p>
- * {@code ShortcutTrigger} and {@code ClickAction} are local shims in
- * {@code com.example}; both are gone from the published API.
+ * The framework analogue would attach three server-side click
+ * listeners and call {@code img.getElement().getClassList().add(...)}
+ * for each target; every click costs one round-trip and the
+ * mid-sequence states (one image selected, the others still pristine)
+ * are observable. Triggers ship the whole transition as one atomic
+ * client-side handler. The same applies to any non-{@code HasEnabled}
+ * target — {@link Image} doesn't have a {@code setEnabled}, but
+ * {@link SetPropertyAction} can write any DOM property regardless.
  */
 @Route(value = "uc2", layout = MainLayout.class)
-@PageTitle("UC2 — Submit + disable chain")
-@Menu(order = 2, title = "UC2 — Submit + disable")
+@PageTitle("UC2 — Click an image to dim its siblings")
+@Menu(order = 2, title = "UC2 — Image gallery select")
 @StyleSheet("uc2.css")
 public class SubmitAndDisableView extends VerticalLayout {
 
     public SubmitAndDisableView() {
         addClassName("uc2-view");
-        add(new H1("UC2 — Submit on Enter, then disable"));
+        add(new H1("UC2 — Click an image to dim its siblings"));
         add(new Paragraph(
-                "Type a message and press Enter. A ShortcutTrigger on the "
-                        + "field clicks \"Send\" (running its click handler) and "
-                        + "immediately disables it client-side, so an accidental "
-                        + "second Enter can't re-submit. The click listener also "
-                        + "disables the button server-side."));
+                "Click one tile: the other two fade to grayscale and the "
+                        + "selected one gets a primary border — all three DOM "
+                        + "mutations land in one event, no server round-trip "
+                        + "between them. Image isn't HasEnabled, but "
+                        + "SetPropertyAction writes any property on any "
+                        + "element. Reset clears everything in one trigger."));
 
-        TextField field = new TextField("Message");
-        field.setId("message");
-        field.addClassName("message-field");
+        Image a = tile("a", "ALPHA", "1976d2");
+        Image b = tile("b", "BETA", "d81b60");
+        Image c = tile("c", "GAMMA", "388e3c");
 
-        Span echo = new Span();
-        echo.setId("echo");
-        echo.addClassName("echo");
+        HorizontalLayout gallery = new HorizontalLayout(a, b, c);
+        gallery.addClassName("gallery");
 
-        Button send = new Button("Send");
-        send.setId("send");
-        send.addClickListener(e -> {
-            echo.setText("Sent: " + field.getValue());
-            send.setEnabled(false);
-        });
+        wire(a, b, c);
+        wire(b, a, c);
+        wire(c, a, b);
 
-        new ShortcutTrigger(field, Key.ENTER).triggers(new ClickAction(send),
-                new SetPropertyAction<>(send, "disabled", true));
+        Button reset = new Button("Reset");
+        reset.setId("reset");
+        new ClickTrigger(reset).triggers(
+                new SetPropertyAction<>(a, "className", ""),
+                new SetPropertyAction<>(b, "className", ""),
+                new SetPropertyAction<>(c, "className", ""));
 
-        add(new HorizontalLayout(field, send), echo);
+        add(gallery, reset);
+    }
+
+    private static void wire(Image self, Image other1, Image other2) {
+        new ClickTrigger(self).triggers(
+                new SetPropertyAction<>(self, "className", "selected"),
+                new SetPropertyAction<>(other1, "className", "dimmed"),
+                new SetPropertyAction<>(other2, "className", "dimmed"));
+    }
+
+    private static Image tile(String id, String label, String hexColor) {
+        String svg = "<svg xmlns='http://www.w3.org/2000/svg' "
+                + "viewBox='0 0 200 200'>"
+                + "<rect width='200' height='200' fill='#" + hexColor
+                + "'/>"
+                + "<text x='100' y='115' text-anchor='middle' fill='white' "
+                + "font-size='28' font-family='sans-serif' "
+                + "font-weight='600'>" + label + "</text>"
+                + "</svg>";
+        String dataUri = "data:image/svg+xml;base64,"
+                + Base64.getEncoder().encodeToString(
+                        svg.getBytes(StandardCharsets.UTF_8));
+        Image img = new Image(dataUri, label);
+        img.setId(id);
+        return img;
     }
 }

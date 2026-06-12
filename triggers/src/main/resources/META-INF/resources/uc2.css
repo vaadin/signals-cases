@@ -1,12 +1,30 @@
 .uc2-view {
-    .message-field {
-        width: 22rem;
-        max-width: 100%;
+    .gallery {
+        gap: 1.5rem;
+        margin-top: 0.5rem;
     }
 
-    .echo {
-        font-family: monospace;
-        color: var(--vaadin-text-color-secondary);
-        min-height: 1.5rem;
+    .gallery img {
+        width: 180px;
+        height: 180px;
+        object-fit: cover;
+        border-radius: var(--vaadin-radius-l);
+        border: 3px solid transparent;
+        cursor: pointer;
+        transition: opacity 200ms, filter 200ms, border-color 200ms;
+    }
+
+    .gallery img.selected {
+        border-color: var(--vaadin-color-primary);
+    }
+
+    .gallery img.dimmed {
+        opacity: 0.25;
+        filter: grayscale(100%);
+    }
+
+    #reset {
+        align-self: flex-start;
+        margin-top: 1.5rem;
     }
 }

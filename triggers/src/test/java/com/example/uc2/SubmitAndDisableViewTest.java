@@ -7,8 +7,7 @@ import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.html.Image;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -19,27 +18,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class SubmitAndDisableViewTest extends SpringBrowserlessTest {
 
     @Test
-    void viewRendersFieldSendButtonAndEcho() {
+    void viewRendersThreeTilesAndResetButton() {
         navigate(SubmitAndDisableView.class);
 
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC2 — Submit on Enter, then disable"
+        assertTrue(findInView(H1.class).all().stream().anyMatch(h ->
+                "UC2 — Click an image to dim its siblings"
                         .equals(h.getText())));
-        assertNotNull(findInView(TextField.class).id("message"));
-        assertNotNull(findInView(Button.class).id("send"));
-        assertNotNull(findInView(Span.class).id("echo"));
-    }
-
-    @Test
-    void clickingSendDisablesItServerSide() {
-        navigate(SubmitAndDisableView.class);
-        TextField field = findInView(TextField.class).id("message");
-        Button send = findInView(Button.class).id("send");
-        field.setValue("hello");
-        test(send).click();
-        assertTrue(!send.isEnabled(),
-                "click listener disables the button server-side");
-        assertEquals("Sent: hello",
-                findInView(Span.class).id("echo").getText());
+        assertNotNull(findInView(Image.class).id("a"));
+        assertNotNull(findInView(Image.class).id("b"));
+        assertNotNull(findInView(Image.class).id("c"));
+        assertEquals("Reset", findInView(Button.class).id("reset").getText());
     }
 }
