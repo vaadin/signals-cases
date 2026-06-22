@@ -17,10 +17,10 @@ import com.vaadin.flow.router.RouterLink;
  * <p>
  * The hierarchy is deep and parameterised: {@code uc4} → {@code uc4/:projectId}
  * → {@code uc4/:projectId/tasks} → {@code uc4/:projectId/tasks/:taskId}.
- * {@code getRouteHierarchy} walks it by stripping segments and — since #24550 —
- * pairs each ancestor with the {@code RouteParameters} subset its own template
- * needs, so every ancestor link keeps the live {@code :projectId} without the
- * caller re-deriving it.
+ * {@code getRouteHierarchy} walks it by stripping segments and pairs each
+ * ancestor with the {@code RouteParameters} subset its own template needs, so
+ * every ancestor link keeps the live {@code :projectId} without the caller
+ * re-deriving it.
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("Projects")

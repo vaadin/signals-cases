@@ -22,12 +22,12 @@ public class HomeView extends BaseHomeView {
         super("Route Hierarchy — use cases",
                 "Each card below builds a breadcrumb trail as a HorizontalLayout "
                         + "of RouterLinks, driven by the Flow-core route-hierarchy "
-                        + "API from PRs #24451 and #24550: getRouteHierarchy(...) "
+                        + "API: getRouteHierarchy(...) "
                         + "/ getRouteParent(...) walk a view's ancestors via the "
                         + "@RouteParent annotation first and URL-prefix matching as "
                         + "the fallback, and instance-free PageTitleGenerators "
-                        + "label each crumb. The Breadcrumbs component itself is not "
-                        + "part of those PRs — these views show what you can build "
+                        + "label each crumb. The Breadcrumbs component itself is "
+                        + "separate — these views show what you can build "
                         + "directly on top of the walker.");
 
         Div cards = new Div();

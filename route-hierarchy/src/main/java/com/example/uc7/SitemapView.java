@@ -24,7 +24,7 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
-import com.vaadin.flow.router.RouteParentReference;
+import com.vaadin.flow.router.RouteReference;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.router.internal.RouteUtil;
 import com.vaadin.flow.server.RouteRegistry;
@@ -69,8 +69,8 @@ public class SitemapView extends VerticalLayout {
         Map<Class<? extends Component>, Set<Class<? extends Component>>> children = new LinkedHashMap<>();
 
         for (Class<? extends Component> leaf : LEAVES) {
-            List<RouteParentReference> chain = RouteUtil
-                    .getRouteHierarchy(registry, leaf, RouteParameters.empty());
+            List<RouteReference> chain = RouteUtil.getRouteHierarchy(registry,
+                    leaf, RouteParameters.empty());
             for (int i = 0; i < chain.size(); i++) {
                 Class<? extends Component> node = chain.get(i)
                         .navigationTarget();
