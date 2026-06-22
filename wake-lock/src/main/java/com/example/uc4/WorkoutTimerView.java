@@ -17,7 +17,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.WakeLock;
+import com.vaadin.flow.component.wakelock.WakeLock;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
@@ -97,8 +97,7 @@ public class WorkoutTimerView extends VerticalLayout {
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         UI ui = attachEvent.getUI();
-        WakeLock wakeLock = ui.getPage().getWakeLock();
-        Signal<Boolean> active = wakeLock.activeSignal();
+        Signal<Boolean> active = WakeLock.activeSignal();
 
         lockBadge.bindText(active.map(held -> Boolean.TRUE.equals(held)
                 ? "Holding — screen will stay on between sets"
@@ -107,10 +106,10 @@ public class WorkoutTimerView extends VerticalLayout {
 
         Signal.effect(this, () -> {
             if (Boolean.TRUE.equals(running.get())) {
-                wakeLock.request();
+                WakeLock.request();
                 startTicking(ui);
             } else {
-                wakeLock.release();
+                WakeLock.release();
                 stopTicking();
             }
         });
@@ -119,7 +118,7 @@ public class WorkoutTimerView extends VerticalLayout {
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         stopTicking();
-        detachEvent.getUI().getPage().getWakeLock().release();
+        WakeLock.release();
         super.onDetach(detachEvent);
     }
 

@@ -12,8 +12,9 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.ScreenOrientation;
-import com.vaadin.flow.component.page.ScreenOrientationData;
+import com.vaadin.flow.component.screenorientation.ScreenOrientation;
+import com.vaadin.flow.component.screenorientation.ScreenOrientationData;
+import com.vaadin.flow.component.screenorientation.ScreenOrientationType;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -26,8 +27,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * Classic media app pattern: when the user hits "Play", the player goes
  * fullscreen and the screen is locked to landscape. Closing the player releases
  * the lock. The lock request goes through
- * {@link com.vaadin.flow.component.page.Page#lockOrientation(ScreenOrientation, com.vaadin.flow.function.SerializableRunnable, com.vaadin.flow.function.SerializableConsumer)
- * Page#lockOrientation(...)} so success and failure are surfaced reactively;
+ * {@link ScreenOrientation#lock(ScreenOrientationType, com.vaadin.flow.function.SerializableRunnable, com.vaadin.flow.function.SerializableConsumer)
+ * ScreenOrientation.lock(...)} so success and failure are surfaced reactively;
  * fullscreen is requested through
  * {@link MissingAPI#requestFullscreen( com.vaadin.flow.component.Component)}
  * because Flow has no first-class fullscreen API yet (see {@code API-GAPS.md}).
@@ -79,8 +80,8 @@ public class LockForVideoView extends VerticalLayout {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        Signal<ScreenOrientationData> orientation = attachEvent.getUI()
-                .getPage().screenOrientationSignal();
+        Signal<ScreenOrientationData> orientation = ScreenOrientation
+                .orientationSignal(attachEvent.getUI());
 
         playingLabel.bindText(Signal.computed(() -> locked.get()
                 ? "Playing — orientation locked to "
@@ -93,21 +94,20 @@ public class LockForVideoView extends VerticalLayout {
 
     private void startPlayback() {
         MissingAPI.requestFullscreen(stage);
-        getUI().ifPresent(ui -> ui.getPage()
-                .lockOrientation(ScreenOrientation.LANDSCAPE_PRIMARY, () -> {
-                    locked.set(true);
-                    lockMessage.set("Locked to landscape");
-                    lockBadgeMod.set("");
-                }, error -> {
-                    locked.set(false);
-                    lockMessage.set("Lock failed: " + error.name() + " — "
-                            + error.message());
-                    lockBadgeMod.set("error");
-                }));
+        ScreenOrientation.lock(ScreenOrientationType.LANDSCAPE_PRIMARY, () -> {
+            locked.set(true);
+            lockMessage.set("Locked to landscape");
+            lockBadgeMod.set("");
+        }, error -> {
+            locked.set(false);
+            lockMessage.set("Lock failed: " + error.errorCode().name() + " — "
+                    + error.debugInfo());
+            lockBadgeMod.set("error");
+        });
     }
 
     private void stopPlayback() {
-        getUI().ifPresent(ui -> ui.getPage().unlockOrientation());
+        ScreenOrientation.unlock();
         MissingAPI.exitFullscreen(this);
         locked.set(false);
         lockMessage.set("Idle");

@@ -12,9 +12,9 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Page;
-import com.vaadin.flow.component.page.ScreenOrientation;
-import com.vaadin.flow.component.page.ScreenOrientationLockError;
+import com.vaadin.flow.component.screenorientation.ScreenOrientation;
+import com.vaadin.flow.component.screenorientation.ScreenOrientationLockError;
+import com.vaadin.flow.component.screenorientation.ScreenOrientationType;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -23,8 +23,8 @@ import com.vaadin.flow.router.Route;
  * UC5 — Lock error UX.
  * <p>
  * Demonstrates the three common error paths surfaced through
- * {@link Page#lockOrientation(ScreenOrientation, com.vaadin.flow.function.SerializableRunnable, com.vaadin.flow.function.SerializableConsumer)
- * Page#lockOrientation(...)}:
+ * {@link ScreenOrientation#lock(ScreenOrientationType, com.vaadin.flow.function.SerializableRunnable, com.vaadin.flow.function.SerializableConsumer)
+ * ScreenOrientation.lock(...)}:
  * <ul>
  * <li>{@code SecurityError} — locking without fullscreen on most desktops,
  * <li>{@code NotSupportedError} — browsers that don't implement the API,
@@ -55,14 +55,14 @@ public class LockErrorView extends VerticalLayout {
 
         Button lockWithoutFullscreen = new Button(
                 "Lock without fullscreen (expect SecurityError)",
-                e -> attempt(ScreenOrientation.LANDSCAPE_PRIMARY));
+                e -> attempt(ScreenOrientationType.LANDSCAPE_PRIMARY));
         Button rapidLocks = new Button(
                 "Two locks in a row (expect AbortError on the first)", e -> {
-                    attempt(ScreenOrientation.LANDSCAPE_PRIMARY);
-                    attempt(ScreenOrientation.PORTRAIT_PRIMARY);
+                    attempt(ScreenOrientationType.LANDSCAPE_PRIMARY);
+                    attempt(ScreenOrientationType.PORTRAIT_PRIMARY);
                 });
         Button portraitLock = new Button("Lock to portrait",
-                e -> attempt(ScreenOrientation.PORTRAIT_PRIMARY));
+                e -> attempt(ScreenOrientationType.PORTRAIT_PRIMARY));
 
         HorizontalLayout actions = new HorizontalLayout(lockWithoutFullscreen,
                 rapidLocks, portraitLock);
@@ -75,11 +75,11 @@ public class LockErrorView extends VerticalLayout {
         add(log);
     }
 
-    private void attempt(ScreenOrientation target) {
-        getUI().ifPresent(ui -> ui.getPage().lockOrientation(target,
+    private void attempt(ScreenOrientationType target) {
+        ScreenOrientation.lock(target,
                 () -> addLog("ok", "✓ Locked to " + target.getClientValue()),
                 error -> addLog("err", "✗ " + target.getClientValue() + " — "
-                        + error.name() + ": " + error.message())));
+                        + error.errorCode().name() + ": " + error.debugInfo()));
     }
 
     private void addLog(String cls, String text) {

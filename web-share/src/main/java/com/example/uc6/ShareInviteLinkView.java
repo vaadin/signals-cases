@@ -19,8 +19,10 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Page;
-import com.vaadin.flow.component.page.WebShareSupport;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.webshare.ShareContent;
+import com.vaadin.flow.component.webshare.WebShare;
+import com.vaadin.flow.component.webshare.WebShareSupport;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
@@ -30,8 +32,9 @@ import com.vaadin.flow.signals.Signal;
  * <p>
  * Models the "invite a friend" flow: clicking <em>Generate invite</em> produces
  * a fresh short code (so the server can later resolve invitee identities) and
- * renders it as a join URL. The <em>Share invite</em> button then hands that
- * URL to {@link Page#share(String, String, String)}. A new invite each click
+ * renders it as a join URL. The <em>Share invite</em> button is bound once via
+ * {@link WebShare#onClick} to the live invite URL, so each click hands the most
+ * recently generated URL to the native share sheet. A new invite each click
  * gives a clean cross-session trail and proves the demo is not stuck on a
  * single hard-coded URL.
  */
@@ -45,6 +48,9 @@ public class ShareInviteLinkView extends VerticalLayout {
 
     private final Span codeLabel = new Span("—");
     private final Anchor linkAnchor = new Anchor("", "—");
+    // Non-visible holder for the live invite URL; the share binding reads its
+    // value on each click so the most recently generated URL is shared.
+    private final TextField urlHolder = new TextField();
     private final Button shareButton = new Button("Share invite",
             VaadinIcon.SHARE.create());
     private final Button generateButton = new Button("Generate invite",
@@ -64,6 +70,8 @@ public class ShareInviteLinkView extends VerticalLayout {
         generateButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         codeLabel.addClassName("invite-code");
         linkAnchor.setTarget("_blank");
+        urlHolder.setVisible(false);
+        add(urlHolder);
 
         HorizontalLayout codeRow = new HorizontalLayout(new Span("Code:"),
                 codeLabel);
@@ -85,24 +93,23 @@ public class ShareInviteLinkView extends VerticalLayout {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        Page page = attachEvent.getUI().getPage();
-        Signal<WebShareSupport> support = page.shareSupportSignal();
+        Signal<WebShareSupport> support = WebShare.supportSignal();
 
         Signal.effect(this, () -> {
             shareSupported = support.get() == WebShareSupport.SUPPORTED;
             refreshShareButtonState();
         });
 
-        shareButton.addClickListener(e -> {
-            String code = currentCode;
-            if (code == null) {
-                return;
-            }
-            String url = inviteUrl(code);
-            page.share("Join me on the demo", null, url);
-            Notification.show("Share invoked: " + url, 2500,
-                    Notification.Position.BOTTOM_START);
-        });
+        // Bind the share once to the live invite URL held in urlHolder; the
+        // button stays disabled until a code has been generated, so a click
+        // can only fire with a real URL.
+        WebShare.onClick(shareButton).share(
+                ShareContent.create().title("Join me on the demo")
+                        .url(urlHolder),
+                () -> Notification.show("Shared invite link", 2500,
+                        Notification.Position.BOTTOM_START),
+                err -> Notification.show("Share failed: " + err.message(), 2500,
+                        Notification.Position.BOTTOM_START));
     }
 
     private void regenerate() {
@@ -111,6 +118,7 @@ public class ShareInviteLinkView extends VerticalLayout {
         String url = inviteUrl(currentCode);
         linkAnchor.setHref(url);
         linkAnchor.setText(url);
+        urlHolder.setValue(url);
         refreshShareButtonState();
     }
 

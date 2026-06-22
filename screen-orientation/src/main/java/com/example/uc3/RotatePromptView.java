@@ -10,9 +10,10 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.ScreenOrientation;
-import com.vaadin.flow.component.page.ScreenOrientationData;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.screenorientation.ScreenOrientation;
+import com.vaadin.flow.component.screenorientation.ScreenOrientationData;
+import com.vaadin.flow.component.screenorientation.ScreenOrientationType;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -104,8 +105,8 @@ public class RotatePromptView extends VerticalLayout {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        Signal<ScreenOrientationData> orientation = attachEvent.getUI()
-                .getPage().screenOrientationSignal();
+        Signal<ScreenOrientationData> orientation = ScreenOrientation
+                .orientationSignal(attachEvent.getUI());
 
         Signal<Boolean> mismatch = Signal.computed(
                 () -> isMismatch(required.get(), orientation.get().type()));
@@ -117,7 +118,7 @@ public class RotatePromptView extends VerticalLayout {
                 () -> describe(required.get(), orientation.get().type())));
         statusBadge.bindClassName("warn", mismatch);
         statusBadge.bindClassName("error", orientation
-                .map(d -> d.type() == ScreenOrientation.UNSUPPORTED));
+                .map(d -> d.type() == ScreenOrientationType.UNSUPPORTED));
     }
 
     /**
@@ -125,9 +126,9 @@ public class RotatePromptView extends VerticalLayout {
      * and UNSUPPORTED platforms cannot be expected to rotate at all.
      */
     private static boolean isMismatch(Required required,
-            ScreenOrientation type) {
-        if (type == ScreenOrientation.UNKNOWN
-                || type == ScreenOrientation.UNSUPPORTED) {
+            ScreenOrientationType type) {
+        if (type == ScreenOrientationType.UNKNOWN
+                || type == ScreenOrientationType.UNSUPPORTED) {
             return false;
         }
         return switch (required) {
@@ -136,7 +137,8 @@ public class RotatePromptView extends VerticalLayout {
         };
     }
 
-    private static String describe(Required required, ScreenOrientation type) {
+    private static String describe(Required required,
+            ScreenOrientationType type) {
         return switch (type) {
         case UNKNOWN -> "Waiting for orientation…";
         case UNSUPPORTED ->

@@ -9,7 +9,7 @@ import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.page.ScreenOrientation;
+import com.vaadin.flow.component.screenorientation.ScreenOrientationType;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -33,8 +33,8 @@ class OrientationViewerViewTest extends SpringBrowserlessTest {
         navigate(OrientationViewerView.class);
         runPendingSignalsTasks();
 
-        ScreenOrientationTestSupport
-                .setScreenOrientation(ScreenOrientation.LANDSCAPE_PRIMARY, 90);
+        ScreenOrientationTestSupport.setScreenOrientation(
+                ScreenOrientationType.LANDSCAPE_PRIMARY, 90);
         runPendingSignalsTasks();
 
         assertSpanText("LANDSCAPE_PRIMARY");
@@ -43,7 +43,7 @@ class OrientationViewerViewTest extends SpringBrowserlessTest {
         assertArrowRotation(90);
 
         ScreenOrientationTestSupport.setScreenOrientation(
-                ScreenOrientation.PORTRAIT_SECONDARY, 180);
+                ScreenOrientationType.PORTRAIT_SECONDARY, 180);
         runPendingSignalsTasks();
 
         assertSpanText("PORTRAIT_SECONDARY");
@@ -51,7 +51,7 @@ class OrientationViewerViewTest extends SpringBrowserlessTest {
         assertArrowRotation(180);
 
         ScreenOrientationTestSupport
-                .setScreenOrientation(ScreenOrientation.UNSUPPORTED, 0);
+                .setScreenOrientation(ScreenOrientationType.UNSUPPORTED, 0);
         runPendingSignalsTasks();
         assertSpanText("Screen Orientation API not supported");
     }

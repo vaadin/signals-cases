@@ -9,7 +9,7 @@ import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.page.ScreenOrientation;
+import com.vaadin.flow.component.screenorientation.ScreenOrientationType;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -35,15 +35,15 @@ class AdaptiveLayoutViewTest extends SpringBrowserlessTest {
         assertContainerClass("stacked");
         assertBadgeContains("Orientation unknown");
 
-        setOrientation(ScreenOrientation.LANDSCAPE_PRIMARY, 90);
+        setOrientation(ScreenOrientationType.LANDSCAPE_PRIMARY, 90);
         assertContainerClass("side-by-side");
         assertBadgeContains("Landscape");
 
-        setOrientation(ScreenOrientation.PORTRAIT_PRIMARY, 0);
+        setOrientation(ScreenOrientationType.PORTRAIT_PRIMARY, 0);
         assertContainerClass("stacked");
         assertBadgeContains("Portrait");
 
-        setOrientation(ScreenOrientation.UNSUPPORTED, 0);
+        setOrientation(ScreenOrientationType.UNSUPPORTED, 0);
         assertBadgeContains("not supported");
     }
 
@@ -69,7 +69,7 @@ class AdaptiveLayoutViewTest extends SpringBrowserlessTest {
                 "expected mode badge to contain \"" + fragment + "\"");
     }
 
-    private void setOrientation(ScreenOrientation type, int angle) {
+    private void setOrientation(ScreenOrientationType type, int angle) {
         ScreenOrientationTestSupport.setScreenOrientation(type, angle);
         runPendingSignalsTasks();
     }

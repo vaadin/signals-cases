@@ -7,9 +7,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.fullscreen.FullscreenState;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.page.FullscreenState;
 import com.vaadin.flow.component.textfield.TextArea;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;

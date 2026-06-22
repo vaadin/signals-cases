@@ -15,7 +15,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.WakeLock;
+import com.vaadin.flow.component.wakelock.WakeLock;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
@@ -82,20 +82,19 @@ public class RecipeView extends VerticalLayout {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        WakeLock wakeLock = attachEvent.getUI().getPage().getWakeLock();
-        Signal<Boolean> active = wakeLock.activeSignal();
+        Signal<Boolean> active = WakeLock.activeSignal();
 
         statusBadge.bindText(active.map(held -> Boolean.TRUE.equals(held)
                 ? "Holding — screen will stay on"
                 : "Released — waiting for browser"));
         statusBadge.bindClassName("active", active);
 
-        wakeLock.request();
+        WakeLock.request();
     }
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
-        detachEvent.getUI().getPage().getWakeLock().release();
+        WakeLock.release();
         super.onDetach(detachEvent);
     }
 }
