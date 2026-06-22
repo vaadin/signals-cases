@@ -1,11 +1,11 @@
 package com.example.uc4;
 
-import com.example.MissingAPI;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.StyleSheet;
+import com.vaadin.flow.component.fullscreen.Fullscreen;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -29,9 +29,10 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * the lock. The lock request goes through
  * {@link ScreenOrientation#lock(ScreenOrientationType, com.vaadin.flow.function.SerializableRunnable, com.vaadin.flow.function.SerializableConsumer)
  * ScreenOrientation.lock(...)} so success and failure are surfaced reactively;
- * fullscreen is requested through
- * {@link MissingAPI#requestFullscreen( com.vaadin.flow.component.Component)}
- * because Flow has no first-class fullscreen API yet (see {@code API-GAPS.md}).
+ * fullscreen is requested by binding
+ * {@link Fullscreen#onClick(com.vaadin.flow.component.Component)
+ * Fullscreen.onClick(play).enter(stage)} to the Play button, since the lock is
+ * only honoured inside a fullscreen document.
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Lock landscape for video")
@@ -65,6 +66,10 @@ public class LockForVideoView extends VerticalLayout {
         add(stage);
 
         Button play = new Button("Play (lock landscape)", e -> startPlayback());
+        // Fullscreen needs the click's user gesture, so bind the request to the
+        // Play button's click trigger; the lock then runs inside the fullscreen
+        // document, which is where browsers honour it.
+        Fullscreen.onClick(play).enter(stage);
         Button stop = new Button("Stop (unlock)", e -> stopPlayback());
         HorizontalLayout actions = new HorizontalLayout(play, stop);
         add(actions);
@@ -93,7 +98,6 @@ public class LockForVideoView extends VerticalLayout {
     }
 
     private void startPlayback() {
-        MissingAPI.requestFullscreen(stage);
         ScreenOrientation.lock(ScreenOrientationType.LANDSCAPE_PRIMARY, () -> {
             locked.set(true);
             lockMessage.set("Locked to landscape");
@@ -108,7 +112,7 @@ public class LockForVideoView extends VerticalLayout {
 
     private void stopPlayback() {
         ScreenOrientation.unlock();
-        MissingAPI.exitFullscreen(this);
+        Fullscreen.exit();
         locked.set(false);
         lockMessage.set("Idle");
         lockBadgeMod.set("");
