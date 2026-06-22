@@ -122,7 +122,7 @@ public class KeyboardEventTrigger extends Trigger {
                     .toString();
             return new Action.Input<T>() {
                 @Override
-                protected JsFunction toJs(Trigger trigger) {
+                public JsFunction toJs(Trigger trigger) {
                     if (!(trigger instanceof KeyboardEventTrigger)) {
                         throw new IllegalArgumentException(
                                 "Input is scoped to KeyboardEventTrigger and cannot be used in a "

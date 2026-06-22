@@ -18,7 +18,7 @@ import com.vaadin.flow.dom.JsFunction;
 public final class PointInput extends Action.Input<Point> {
 
     @Override
-    protected JsFunction toJs(Trigger trigger) {
+    public JsFunction toJs(Trigger trigger) {
         if (!(trigger instanceof MouseEventTrigger)) {
             throw new IllegalArgumentException(
                     "PointInput is scoped to MouseEventTrigger and cannot be used in a "

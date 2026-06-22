@@ -50,7 +50,7 @@ public class BroadcastChannelTrigger extends Trigger {
          */
         public static final Action.Input<String> data = new Action.Input<>() {
             @Override
-            protected JsFunction toJs(Trigger trigger) {
+            public JsFunction toJs(Trigger trigger) {
                 if (!(trigger instanceof BroadcastChannelTrigger)) {
                     throw new IllegalArgumentException(
                             "Input is scoped to BroadcastChannelTrigger and cannot be used in a "

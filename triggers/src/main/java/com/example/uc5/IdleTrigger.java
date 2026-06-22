@@ -70,7 +70,7 @@ public class IdleTrigger extends Trigger {
          */
         public static final Action.Input<Boolean> idle = new Action.Input<>() {
             @Override
-            protected JsFunction toJs(Trigger trigger) {
+            public JsFunction toJs(Trigger trigger) {
                 if (!(trigger instanceof IdleTrigger)) {
                     throw new IllegalArgumentException(
                             "Input is scoped to IdleTrigger and cannot be used in a "
