@@ -13,18 +13,17 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * Fires when a specific ordered sequence of keys is pressed on the host —
- * e.g. the Konami code or a "hello" Easter egg. State is tracked
- * client-side; only a completed sequence produces a server-side fire, so
- * partial progress never crosses the network.
+ * Fires when a specific ordered sequence of keys is pressed on the host — e.g.
+ * the Konami code or a "hello" Easter egg. State is tracked client-side; only a
+ * completed sequence produces a server-side fire, so partial progress never
+ * crosses the network.
  * <p>
  * Each key in the sequence matches against {@code event.key} or
- * {@code event.code}, so both event.key-named keys (e.g. {@link Key#ENTER})
- * and event.code-named keys (e.g. {@link Key#KEY_S}) work. A wrong key
- * resets the position to 0; if that wrong key happens to match position 0,
- * the position advances to 1 (so {@code "abab"} on the sequence
- * {@code "abab"} completes correctly). No timeout — a partial sequence
- * persists across arbitrary gaps.
+ * {@code event.code}, so both event.key-named keys (e.g. {@link Key#ENTER}) and
+ * event.code-named keys (e.g. {@link Key#KEY_S}) work. A wrong key resets the
+ * position to 0; if that wrong key happens to match position 0, the position
+ * advances to 1 (so {@code "abab"} on the sequence {@code "abab"} completes
+ * correctly). No timeout — a partial sequence persists across arbitrary gaps.
  * <p>
  * A local stand-in for the {@code SequenceTrigger} on
  * {@code vaadin/flow:feature/triggers-actions}; rewritten on top of the
@@ -52,9 +51,8 @@ public class SequenceTrigger extends Trigger {
     @Override
     protected Registration install(JsFunction action) {
         String sequenceJson = sequenceKeys.stream()
-                .map(slot -> slot.stream()
-                        .map(s -> JacksonUtils.getMapper().valueToTree(s)
-                                .toString())
+                .map(slot -> slot.stream().map(
+                        s -> JacksonUtils.getMapper().valueToTree(s).toString())
                         .collect(Collectors.joining(",", "[", "]")))
                 .collect(Collectors.joining(",", "[", "]"));
 
@@ -72,7 +70,8 @@ public class SequenceTrigger extends Trigger {
         // Listen on window in the capture phase: a view with no focusable
         // children never receives bubbled keydown on the host element.
         js.append("window.addEventListener('keydown',listener,true);");
-        js.append("return ()=>window.removeEventListener('keydown',listener,true);");
+        js.append(
+                "return ()=>window.removeEventListener('keydown',listener,true);");
         return getHost().addJsInitializer(js.toString(), action);
     }
 }

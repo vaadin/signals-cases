@@ -19,7 +19,7 @@ import com.vaadin.flow.router.RouterLink;
  * When this view is an <em>ancestor</em> of a deeper page, its breadcrumb crumb
  * is still dynamic: {@link ProjectTitleGenerator} resolves "Project Apollo"
  * from the {@code :projectId} that {@code getRouteHierarchy} carries for this
- * crumb — a dynamic ancestor label, instance-free (flow#24550).
+ * crumb — a dynamic ancestor label, instance-free.
  */
 @Route(value = "uc4/:projectId", layout = MainLayout.class)
 @DynamicPageTitle(ProjectTitleGenerator.class)

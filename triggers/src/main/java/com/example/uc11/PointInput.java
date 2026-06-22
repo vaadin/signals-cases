@@ -12,13 +12,13 @@ import com.vaadin.flow.dom.JsFunction;
  * <p>
  * Demonstrates two things at once: writing a custom Input, and reading
  * trigger-scoped handler state (the {@code event} parameter) from one. The
- * trigger check rejects use in any non-mouse-event handler at install time,
- * the same protection the built-in handler-scoped inputs apply.
+ * trigger check rejects use in any non-mouse-event handler at install time, the
+ * same protection the built-in handler-scoped inputs apply.
  */
 public final class PointInput extends Action.Input<Point> {
 
     @Override
-    protected JsFunction toJs(Trigger trigger) {
+    public JsFunction toJs(Trigger trigger) {
         if (!(trigger instanceof MouseEventTrigger)) {
             throw new IllegalArgumentException(
                     "PointInput is scoped to MouseEventTrigger and cannot be used in a "

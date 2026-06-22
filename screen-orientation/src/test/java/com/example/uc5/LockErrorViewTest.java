@@ -22,11 +22,13 @@ class LockErrorViewTest extends SpringBrowserlessTest {
 
         assertTrue(findInView(H1.class).all().stream()
                 .anyMatch(h -> "UC5 — Lock error UX".equals(h.getText())));
-        assertTrue(findInView(Button.class).all().stream().anyMatch(
-                b -> b.getText().startsWith("Lock without fullscreen")),
+        assertTrue(
+                findInView(Button.class).all().stream().anyMatch(
+                        b -> b.getText().startsWith("Lock without fullscreen")),
                 "expected the SecurityError-style trigger button");
-        assertTrue(findInView(Button.class).all().stream()
-                .anyMatch(b -> b.getText().startsWith("Two locks in a row")),
+        assertTrue(
+                findInView(Button.class).all().stream().anyMatch(
+                        b -> b.getText().startsWith("Two locks in a row")),
                 "expected the AbortError-style trigger button");
 
         // The log starts with one info line so users see the area before

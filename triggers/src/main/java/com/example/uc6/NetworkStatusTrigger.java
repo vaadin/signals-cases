@@ -22,16 +22,14 @@ public class NetworkStatusTrigger extends Trigger {
 
     @Override
     protected Registration install(JsFunction action) {
-        return getHost().addJsInitializer(
-                """
-                        const fire = () => $0(new Event('networkstatus'));
-                        window.addEventListener('online', fire);
-                        window.addEventListener('offline', fire);
-                        queueMicrotask(fire);
-                        return () => {
-                            window.removeEventListener('online', fire);
-                            window.removeEventListener('offline', fire);
-                        };""",
-                action);
+        return getHost().addJsInitializer("""
+                const fire = () => $0(new Event('networkstatus'));
+                window.addEventListener('online', fire);
+                window.addEventListener('offline', fire);
+                queueMicrotask(fire);
+                return () => {
+                    window.removeEventListener('online', fire);
+                    window.removeEventListener('offline', fire);
+                };""", action);
     }
 }

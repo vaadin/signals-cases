@@ -1,11 +1,7 @@
 package com.example.home;
 
 import com.example.common.BaseHomeView;
-import com.example.uc5.IdleWarningView;
-import com.example.uc6.NetworkStatusView;
-import com.example.uc7.CrossTabBroadcastView;
-import com.example.uc8.LongPressDeleteView;
-import com.example.uc9.ScrollIntoViewView;
+import com.example.uc1.ShortcutSaveView;
 import com.example.uc10.HighlightView;
 import com.example.uc11.RightClickCoordsView;
 import com.example.uc12.AccessibleSaveView;
@@ -16,14 +12,18 @@ import com.example.uc16.PointerTrackerView;
 import com.example.uc17.AtomicResetView;
 import com.example.uc18.AutoSaveSignalView;
 import com.example.uc19.DynamicResponsiveStylingView;
+import com.example.uc2.SubmitAndDisableView;
 import com.example.uc20.DoubleClickOpenView;
 import com.example.uc21.ShortcutDownloadView;
 import com.example.uc22.KeyEventLogView;
 import com.example.uc23.KonamiCodeView;
-import com.example.uc1.ShortcutSaveView;
-import com.example.uc2.SubmitAndDisableView;
 import com.example.uc3.LiveSignalCounterView;
 import com.example.uc4.JsTriggerView;
+import com.example.uc5.IdleWarningView;
+import com.example.uc6.NetworkStatusView;
+import com.example.uc7.CrossTabBroadcastView;
+import com.example.uc8.LongPressDeleteView;
+import com.example.uc9.ScrollIntoViewView;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.html.Div;

@@ -1,9 +1,9 @@
 package com.example.uc3;
 
+import com.example.WakeLockTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.example.WakeLockTestSupport;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -23,9 +23,10 @@ class SlideshowViewTest extends SpringBrowserlessTest {
         navigate(SlideshowView.class);
         runPendingSignalsTasks();
 
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC3 — Presentation slideshow"
-                        .equals(h.getText())),
+        assertTrue(
+                findInView(H1.class).all().stream()
+                        .anyMatch(h -> "UC3 — Presentation slideshow"
+                                .equals(h.getText())),
                 "view should render heading");
 
         Button start = findInView(Button.class).withText("Start presentation")
@@ -104,16 +105,18 @@ class SlideshowViewTest extends SpringBrowserlessTest {
     }
 
     private void assertSlideBodyContains(String fragment) {
-        assertTrue(findInView(Div.class).all().stream()
-                .anyMatch(d -> d.getText() != null
-                        && d.getText().contains(fragment)),
+        assertTrue(
+                findInView(Div.class).all().stream()
+                        .anyMatch(d -> d.getText() != null
+                                && d.getText().contains(fragment)),
                 "expected a slide body div containing \"" + fragment + "\"");
     }
 
     private void assertBadgeContains(String fragment) {
-        assertTrue(findInView(Span.class).all().stream()
-                .anyMatch(s -> s.getText() != null
-                        && s.getText().contains(fragment)),
+        assertTrue(
+                findInView(Span.class).all().stream()
+                        .anyMatch(s -> s.getText() != null
+                                && s.getText().contains(fragment)),
                 "expected status badge to contain \"" + fragment + "\"");
     }
 }

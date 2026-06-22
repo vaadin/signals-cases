@@ -209,9 +209,10 @@ class UseCase24ViewTest extends SpringBrowserlessTest {
         navigate(UseCase24View.class);
         runPendingSignalsTasks();
 
-        ComboBox<String> typeFilter = (ComboBox<String>) findInView(ComboBox.class)
-                .all().stream().filter(c -> "Type".equals(c.getLabel()))
-                .findFirst().orElseThrow();
+        ComboBox<String> typeFilter = (ComboBox<String>) findInView(
+                ComboBox.class).all().stream()
+                .filter(c -> "Type".equals(c.getLabel())).findFirst()
+                .orElseThrow();
         test(typeFilter).selectItem("ERROR");
         runPendingSignalsTasks();
 

@@ -21,8 +21,8 @@ class DynamicResponsiveStylingViewTest extends SpringBrowserlessTest {
     void viewRendersWithThreePickersAndATarget() {
         navigate(DynamicResponsiveStylingView.class);
 
-        assertTrue(findInView(H1.class).all().stream().anyMatch(h -> "UC19 — Dynamic responsive styling"
-                .equals(h.getText())));
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
+                h -> "UC19 — Dynamic responsive styling".equals(h.getText())));
         Input small = findInView(Input.class).id("small");
         Input medium = findInView(Input.class).id("medium");
         Input large = findInView(Input.class).id("large");

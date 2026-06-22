@@ -18,8 +18,8 @@ class CopyRichContentViewTest extends SpringBrowserlessTest {
     void viewRendersHeadingAndCopyButton() {
         navigate(CopyRichContentView.class);
 
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC3 — Copy rich content (HTML + plain-text fallback)"
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
+                h -> "UC3 — Copy rich content (HTML + plain-text fallback)"
                         .equals(h.getText())));
         assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Copy rich content".equals(b.getText())));

@@ -39,7 +39,8 @@ class OneShotOnClickViewTest extends BrowserlessTest {
         Button locate = find(Button.class).withText("Use my location").single();
         test(locate).click();
 
-        Span result = find(Span.class).withTextContaining("permission").single();
+        Span result = find(Span.class).withTextContaining("permission")
+                .single();
         assertTrue(result.getText().contains("denied"),
                 "Result span should explain that permission was denied, was: "
                         + result.getText());

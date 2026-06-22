@@ -18,17 +18,17 @@ import com.vaadin.flow.signals.local.ValueSignal;
 /**
  * UC7 — Cross-tab broadcast.
  * <p>
- * Open this view in two browser tabs. Clicking "Broadcast hello" in tab A
- * posts a message on a {@code BroadcastChannel}; tab B's
+ * Open this view in two browser tabs. Clicking "Broadcast hello" in tab A posts
+ * a message on a {@code BroadcastChannel}; tab B's
  * {@link BroadcastChannelTrigger} fires, {@link SetSignalAction} pushes the
- * payload into a server-side signal, and tab B's "Last received" badge
- * updates. The sender does NOT receive its own broadcast — that's
- * BroadcastChannel semantics.
+ * payload into a server-side signal, and tab B's "Last received" badge updates.
+ * The sender does NOT receive its own broadcast — that's BroadcastChannel
+ * semantics.
  * <p>
  * The send button uses {@code Element.executeJs} to post on the same channel
  * the trigger listens on. A production view would wrap that as a custom
- * {@code Action} (e.g. {@code BroadcastSendAction}) so the send is also part
- * of the trigger system.
+ * {@code Action} (e.g. {@code BroadcastSendAction}) so the send is also part of
+ * the trigger system.
  */
 @Route(value = "uc7", layout = MainLayout.class)
 @PageTitle("UC7 — Cross-tab broadcast")

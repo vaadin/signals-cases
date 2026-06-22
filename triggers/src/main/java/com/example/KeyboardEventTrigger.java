@@ -16,15 +16,14 @@ import com.vaadin.flow.shared.Registration;
 /**
  * Fires on a DOM keyboard event ({@code keydown} by default). Exposes the
  * {@code KeyboardEvent} properties as static {@link Action.Input} fields on
- * {@link EventData}, and supports filtering by key via
- * {@link #forKeys(Key...)} so only the configured keys produce a server-side
- * fire.
+ * {@link EventData}, and supports filtering by key via {@link #forKeys(Key...)}
+ * so only the configured keys produce a server-side fire.
  * <p>
  * A local stand-in for the {@code KeyboardEventTrigger} on
- * {@code vaadin/flow:feature/triggers-actions}. The upstream class extends
- * the feature branch's {@code DomEventTrigger} with extension hooks that
- * mainline doesn't have; this version sits directly on {@link Trigger}.
- * Delete this file once the upstream class lands and switch the imports.
+ * {@code vaadin/flow:feature/triggers-actions}. The upstream class extends the
+ * feature branch's {@code DomEventTrigger} with extension hooks that mainline
+ * doesn't have; this version sits directly on {@link Trigger}. Delete this file
+ * once the upstream class lands and switch the imports.
  */
 public class KeyboardEventTrigger extends Trigger {
 
@@ -74,7 +73,8 @@ public class KeyboardEventTrigger extends Trigger {
         if (!keyFilter.isEmpty()) {
             String allowed = keyFilter.stream()
                     .flatMap(k -> k.getKeys().stream()).distinct()
-                    .map(s -> JacksonUtils.getMapper().valueToTree(s).toString())
+                    .map(s -> JacksonUtils.getMapper().valueToTree(s)
+                            .toString())
                     .collect(Collectors.joining(",", "[", "]"));
             js.append("const allowed=").append(allowed).append(";");
             js.append(
@@ -122,7 +122,7 @@ public class KeyboardEventTrigger extends Trigger {
                     .toString();
             return new Action.Input<T>() {
                 @Override
-                protected JsFunction toJs(Trigger trigger) {
+                public JsFunction toJs(Trigger trigger) {
                     if (!(trigger instanceof KeyboardEventTrigger)) {
                         throw new IllegalArgumentException(
                                 "Input is scoped to KeyboardEventTrigger and cannot be used in a "

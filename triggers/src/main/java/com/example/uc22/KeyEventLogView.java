@@ -17,12 +17,12 @@ import com.vaadin.flow.router.Route;
 /**
  * UC22 — Live key event log.
  * <p>
- * A {@link KeyboardEventTrigger} fires on every {@code keydown} anywhere
- * inside the view. The trigger's typed inputs
+ * A {@link KeyboardEventTrigger} fires on every {@code keydown} anywhere inside
+ * the view. The trigger's typed inputs
  * ({@link KeyboardEventTrigger.EventData#key},
- * {@link KeyboardEventTrigger.EventData#code} and the four modifier
- * flags) feed {@link SetPropertyAction SetPropertyActions} that update
- * the labels in real time. No callback, no server round-trip per key.
+ * {@link KeyboardEventTrigger.EventData#code} and the four modifier flags) feed
+ * {@link SetPropertyAction SetPropertyActions} that update the labels in real
+ * time. No callback, no server round-trip per key.
  * <p>
  * Demonstrates {@code KeyboardEventTrigger} (a local port of the
  * feature/triggers-actions class) and its EventData inputs.

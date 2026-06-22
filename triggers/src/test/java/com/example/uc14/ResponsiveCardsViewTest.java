@@ -21,9 +21,8 @@ class ResponsiveCardsViewTest extends SpringBrowserlessTest {
     void viewRendersWithGridAndSixCards() {
         navigate(ResponsiveCardsView.class);
 
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC14 — Responsive card grid"
-                        .equals(h.getText())));
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
+                h -> "UC14 — Responsive card grid".equals(h.getText())));
         assertNotNull(findInView(Div.class).id("grid"));
         assertEquals(6, findInView(Card.class).all().size());
     }

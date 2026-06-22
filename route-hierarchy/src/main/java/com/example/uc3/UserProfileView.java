@@ -15,9 +15,9 @@ import com.vaadin.flow.router.Route;
  * UC3 — Dynamic leaf label (profile, {@code uc3/:userId}).
  * <p>
  * The breadcrumb leaf shows the resolved person name rather than a static title
- * — and with flow#24550 it does so <em>without</em> a view instance. The label
- * comes from {@link UserProfileTitleGenerator}, declared via
- * {@code @DynamicPageTitle}; the breadcrumb resolves it through
+ * — and it does so <em>without</em> a view instance. The label comes from
+ * {@link UserProfileTitleGenerator}, declared via {@code @DynamicPageTitle};
+ * the breadcrumb resolves it through
  * {@code MenuRegistry.getTitle(class, params)} purely from the class and the
  * {@code :userId} parameter. The parent {@code uc3} is found by stripping the
  * {@code :userId} segment.
@@ -38,7 +38,7 @@ public class UserProfileView extends VerticalLayout
                         + "breadcrumb gets it from a PageTitleGenerator (no view "
                         + "instance, no HasDynamicTitle), so the same dynamic "
                         + "label also works when this view is only an ancestor "
-                        + "of a deeper page. RouteHierarchy resolved the Users "
+                        + "of a deeper page. getRouteHierarchy resolves the Users "
                         + "ancestor by URL-prefix walking."));
     }
 

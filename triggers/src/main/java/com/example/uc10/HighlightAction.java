@@ -10,9 +10,9 @@ import com.vaadin.flow.dom.JsFunction;
 
 /**
  * Custom {@link Action} that briefly tints the target's background with a
- * configurable colour for a configurable duration. The colour and duration
- * are captured as JS arguments — they materialise on the client without any
- * string concatenation in the body.
+ * configurable colour for a configurable duration. The colour and duration are
+ * captured as JS arguments — they materialise on the client without any string
+ * concatenation in the body.
  * <p>
  * Demonstrates how an action takes <em>server-side configuration</em> at
  * construction and threads it through captures. Same pattern any reusable
@@ -39,13 +39,12 @@ public class HighlightAction extends Action {
 
     @Override
     protected JsFunction toJs(Trigger trigger) {
-        return JsFunction.of(
-                """
-                        const t=$0;
-                        const o=t.style.backgroundColor;
-                        t.style.transition='background-color 200ms';
-                        t.style.backgroundColor=$1;
-                        window.setTimeout(()=>{t.style.backgroundColor=o;},$2);""",
+        return JsFunction.of("""
+                const t=$0;
+                const o=t.style.backgroundColor;
+                t.style.transition='background-color 200ms';
+                t.style.backgroundColor=$1;
+                window.setTimeout(()=>{t.style.backgroundColor=o;},$2);""",
                 target, color, durationMs);
     }
 }

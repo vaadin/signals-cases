@@ -21,9 +21,8 @@ class RightClickCoordsViewTest extends SpringBrowserlessTest {
     void viewRendersWithPanelAndCoords() {
         navigate(RightClickCoordsView.class);
 
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC11 — Right-click coordinates"
-                        .equals(h.getText())));
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
+                h -> "UC11 — Right-click coordinates".equals(h.getText())));
         assertNotNull(findInView(Div.class).id("panel"));
         assertEquals("(no right-click yet)",
                 findInView(Span.class).id("last").getText());

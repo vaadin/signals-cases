@@ -9,9 +9,9 @@ import com.vaadin.flow.dom.JsFunction;
 import com.vaadin.flow.shared.Registration;
 
 /**
- * Custom {@link Trigger} that fires when a message arrives on the given
- * named {@code BroadcastChannel}. The channel is created when the trigger
- * installs and closed when it uninstalls.
+ * Custom {@link Trigger} that fires when a message arrives on the given named
+ * {@code BroadcastChannel}. The channel is created when the trigger installs
+ * and closed when it uninstalls.
  * <p>
  * Demonstrates a Trigger whose "event source" isn't a DOM event at all — it's
  * an object the trigger constructs (a {@code BroadcastChannel}) and observes
@@ -26,8 +26,7 @@ public class BroadcastChannelTrigger extends Trigger {
         super(host);
         this.channelName = Objects.requireNonNull(channelName, "channelName");
         if (channelName.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "channelName must not be empty");
+            throw new IllegalArgumentException("channelName must not be empty");
         }
     }
 
@@ -45,13 +44,13 @@ public class BroadcastChannelTrigger extends Trigger {
         }
 
         /**
-         * {@code event.data} — the payload posted on the channel by the
-         * sending tab. Decoded server-side via Jackson when consumed by an
-         * action that decodes its input.
+         * {@code event.data} — the payload posted on the channel by the sending
+         * tab. Decoded server-side via Jackson when consumed by an action that
+         * decodes its input.
          */
         public static final Action.Input<String> data = new Action.Input<>() {
             @Override
-            protected JsFunction toJs(Trigger trigger) {
+            public JsFunction toJs(Trigger trigger) {
                 if (!(trigger instanceof BroadcastChannelTrigger)) {
                     throw new IllegalArgumentException(
                             "Input is scoped to BroadcastChannelTrigger and cannot be used in a "

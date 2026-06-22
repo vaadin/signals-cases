@@ -1,15 +1,15 @@
 package com.example.uc2;
 
+import com.example.FullscreenTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.example.FullscreenTestSupport;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.fullscreen.FullscreenState;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.page.FullscreenState;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -64,7 +64,8 @@ class SlideshowViewTest extends SpringBrowserlessTest {
         // copy rather than flipping to a message no one sees.
         assertBadgeContains("Present to start");
 
-        FullscreenTestSupport.setFullscreenState(FullscreenState.NOT_FULLSCREEN);
+        FullscreenTestSupport
+                .setFullscreenState(FullscreenState.NOT_FULLSCREEN);
         runPendingSignalsTasks();
         assertBadgeContains("Present to start");
     }

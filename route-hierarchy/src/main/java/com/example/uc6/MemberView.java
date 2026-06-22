@@ -12,8 +12,8 @@ import com.vaadin.flow.router.Route;
  * UC6 — Layout-wide auto breadcrumbs (leaf, {@code uc6/team/:member}).
  * <p>
  * The leaf label is the dynamic member name, produced instance-free by
- * {@link MemberTitleGenerator} (flow#24550): the layout's shared breadcrumb is
- * signal-bound and resolves each crumb with {@code MenuRegistry.getTitle(class,
+ * {@link MemberTitleGenerator}: the layout's shared breadcrumb is signal-bound
+ * and resolves each crumb with {@code MenuRegistry.getTitle(class,
  * params)}, so the member name appears in the trail without this view touching
  * the bar.
  */

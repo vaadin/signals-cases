@@ -17,10 +17,10 @@ import com.vaadin.flow.router.Route;
 /**
  * UC10 — Parameterised highlight action.
  * <p>
- * Three buttons each fire a {@link HighlightAction} configured with a
- * different colour and duration. Demonstrates how an action's constructor
- * arguments thread through to the rendered JS via captures. The same target
- * is reused by all three; the configuration is per-instance, not per-target.
+ * Three buttons each fire a {@link HighlightAction} configured with a different
+ * colour and duration. Demonstrates how an action's constructor arguments
+ * thread through to the rendered JS via captures. The same target is reused by
+ * all three; the configuration is per-instance, not per-target.
  */
 @Route(value = "uc10", layout = MainLayout.class)
 @PageTitle("UC10 — Highlight")
@@ -48,13 +48,13 @@ public class HighlightView extends VerticalLayout {
 
         Button red = new Button("Long red (1.2s)");
         red.setId("red");
-        new ClickTrigger(red).triggers(
-                new HighlightAction(target, "tomato", 1200));
+        new ClickTrigger(red)
+                .triggers(new HighlightAction(target, "tomato", 1200));
 
         Button blue = new Button("Cyan tap (500ms)");
         blue.setId("cyan");
-        new ClickTrigger(blue).triggers(
-                new HighlightAction(target, "cyan", 500));
+        new ClickTrigger(blue)
+                .triggers(new HighlightAction(target, "cyan", 500));
 
         add(target);
         add(new HorizontalLayout(yellow, red, blue));

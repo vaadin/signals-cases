@@ -22,8 +22,8 @@ class LiveSignalCounterViewTest extends SpringBrowserlessTest {
     void viewRendersWithSlugAndConfirmation() {
         navigate(LiveSignalCounterView.class);
 
-        assertTrue(findInView(H1.class).all().stream().anyMatch(h ->
-                "UC3 — Copy a share link that's never rendered"
+        assertTrue(findInView(H1.class).all().stream()
+                .anyMatch(h -> "UC3 — Copy a share link that's never rendered"
                         .equals(h.getText())));
         assertNotNull(findInView(TextField.class).id("slug"));
         assertNotNull(findInView(Button.class).id("copy"));

@@ -44,9 +44,9 @@ class UseCase17ViewTest extends SpringBrowserlessTest {
         navigate(UseCase17View.class);
         runPendingSignalsTasks();
 
-        ComboBox<CPU> cpuSelect = (ComboBox<CPU>) findInView(ComboBox.class).all()
-                .stream().filter(c -> "CPU".equals(c.getLabel())).findFirst()
-                .orElseThrow();
+        ComboBox<CPU> cpuSelect = (ComboBox<CPU>) findInView(ComboBox.class)
+                .all().stream().filter(c -> "CPU".equals(c.getLabel()))
+                .findFirst().orElseThrow();
         test(cpuSelect).selectItem("Intel Core i5-14600K");
         runPendingSignalsTasks();
 
@@ -62,9 +62,9 @@ class UseCase17ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Select Intel CPU (LGA1700)
-        ComboBox<CPU> cpuSelect = (ComboBox<CPU>) findInView(ComboBox.class).all()
-                .stream().filter(c -> "CPU".equals(c.getLabel())).findFirst()
-                .orElseThrow();
+        ComboBox<CPU> cpuSelect = (ComboBox<CPU>) findInView(ComboBox.class)
+                .all().stream().filter(c -> "CPU".equals(c.getLabel()))
+                .findFirst().orElseThrow();
         test(cpuSelect).selectItem("Intel Core i5-14600K");
 
         // Select AMD motherboard (AM5 socket) - socket mismatch

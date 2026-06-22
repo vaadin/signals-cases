@@ -11,11 +11,10 @@ import com.vaadin.flow.dom.JsFunction;
 /**
  * Custom {@link Action} that calls {@code target.scrollIntoView} on a target
  * element when the bound trigger fires. Uses {@code behavior: 'smooth'} and
- * {@code block: 'center'} so the target settles in the middle of the
- * viewport.
+ * {@code block: 'center'} so the target settles in the middle of the viewport.
  * <p>
- * The simplest possible custom action: capture the target as {@code $0},
- * call a method on it. No inputs, no outcome.
+ * The simplest possible custom action: capture the target as {@code $0}, call a
+ * method on it. No inputs, no outcome.
  */
 public class ScrollIntoViewAction extends Action {
 

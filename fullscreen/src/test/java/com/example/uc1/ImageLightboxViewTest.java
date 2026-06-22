@@ -1,15 +1,15 @@
 package com.example.uc1;
 
+import com.example.FullscreenTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.example.FullscreenTestSupport;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.fullscreen.FullscreenState;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.page.FullscreenState;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -43,8 +43,9 @@ class ImageLightboxViewTest extends SpringBrowserlessTest {
         test(ocean).click();
         runPendingSignalsTasks();
 
-        assertTrue(findInView(Span.class).all().stream()
-                .anyMatch(s -> "Ocean".equals(s.getText())),
+        assertTrue(
+                findInView(Span.class).all().stream()
+                        .anyMatch(s -> "Ocean".equals(s.getText())),
                 "selected name should update on thumbnail click");
     }
 
@@ -55,7 +56,8 @@ class ImageLightboxViewTest extends SpringBrowserlessTest {
 
         assertBadgeContains("Detecting");
 
-        FullscreenTestSupport.setFullscreenState(FullscreenState.NOT_FULLSCREEN);
+        FullscreenTestSupport
+                .setFullscreenState(FullscreenState.NOT_FULLSCREEN);
         runPendingSignalsTasks();
         assertBadgeContains("Click a thumbnail");
 
@@ -71,11 +73,10 @@ class ImageLightboxViewTest extends SpringBrowserlessTest {
     }
 
     private void assertBadgeContains(String fragment) {
-        assertTrue(
-                findInView(Span.class).all().stream()
-                        .anyMatch(s -> s.getClassNames().contains("status-badge")
-                                && s.getText() != null
-                                && s.getText().contains(fragment)),
+        assertTrue(findInView(Span.class).all().stream()
+                .anyMatch(s -> s.getClassNames().contains("status-badge")
+                        && s.getText() != null
+                        && s.getText().contains(fragment)),
                 "expected status badge to contain \"" + fragment + "\"");
     }
 }

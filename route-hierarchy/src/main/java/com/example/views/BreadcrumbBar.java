@@ -9,7 +9,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.router.RouteParameters;
-import com.vaadin.flow.router.RouteParentReference;
+import com.vaadin.flow.router.RouteReference;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.router.RouterState;
 import com.vaadin.flow.router.internal.RouteUtil;
@@ -22,10 +22,7 @@ import com.vaadin.flow.signals.Signal;
  * {@link RouterLink}s. It is the "breadcrumbs section" shared by every use case
  * in this module.
  * <p>
- * The trail is built entirely from the route-hierarchy API introduced in
- * <a href="https://github.com/vaadin/flow/pull/24451">flow#24451</a> and
- * reworked in
- * <a href="https://github.com/vaadin/flow/pull/24550">flow#24550</a>: a single
+ * The trail is built entirely from the route-hierarchy API: a single
  * {@code getRouteHierarchy(leafClass, parameters)} call returns the whole chain
  * (root first, leaf last) with every entry already paired with the
  * {@link RouteParameters} subset its template needs. Each non-leaf entry
@@ -64,14 +61,14 @@ public class BreadcrumbBar extends HorizontalLayout {
 
         RouteRegistry registry = VaadinService.getCurrent().getRouter()
                 .getRegistry();
-        List<RouteParentReference> trail = RouteUtil.getRouteHierarchy(registry,
+        List<RouteReference> trail = RouteUtil.getRouteHierarchy(registry,
                 leafView.getClass(), state.routeParameters());
 
         for (int i = 0; i < trail.size(); i++) {
             if (i > 0) {
                 add(separator());
             }
-            RouteParentReference entry = trail.get(i);
+            RouteReference entry = trail.get(i);
             String title = MenuRegistry.getTitle(entry.navigationTarget(),
                     entry.routeParameters());
             boolean isLeaf = i == trail.size() - 1;
@@ -83,7 +80,7 @@ public class BreadcrumbBar extends HorizontalLayout {
         }
     }
 
-    private static RouterLink ancestorLink(RouteParentReference ancestor,
+    private static RouterLink ancestorLink(RouteReference ancestor,
             String title) {
         RouteParameters parameters = ancestor.routeParameters();
         if (parameters.getParameterNames().isEmpty()) {

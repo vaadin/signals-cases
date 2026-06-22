@@ -20,9 +20,8 @@ class ClientFilterViewTest extends SpringBrowserlessTest {
     void viewRendersWithSearchAndFullList() {
         navigate(ClientFilterView.class);
 
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC13 — Client-side filter"
-                        .equals(h.getText())));
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
+                h -> "UC13 — Client-side filter".equals(h.getText())));
         assertNotNull(findInView(TextField.class).id("search"));
         Div list = findInView(Div.class).id("list");
         assertNotNull(list);

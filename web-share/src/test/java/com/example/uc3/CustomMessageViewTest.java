@@ -9,9 +9,9 @@ import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.page.WebShareSupport;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.webshare.WebShareSupport;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -70,8 +70,7 @@ class CustomMessageViewTest extends SpringBrowserlessTest {
 
         WebShareTestSupport.setSupport(WebShareSupport.SUPPORTED);
         runPendingSignalsTasks();
-        assertTrue(share.isEnabled(),
-                "should enable once SUPPORTED arrives");
+        assertTrue(share.isEnabled(), "should enable once SUPPORTED arrives");
 
         WebShareTestSupport.setSupport(WebShareSupport.UNSUPPORTED);
         runPendingSignalsTasks();

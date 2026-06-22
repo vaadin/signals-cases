@@ -1,15 +1,15 @@
 package com.example.uc3;
 
+import com.example.FullscreenTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.example.FullscreenTestSupport;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.fullscreen.FullscreenState;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.page.FullscreenState;
 import com.vaadin.flow.component.textfield.TextArea;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -23,8 +23,8 @@ class DistractionFreeEditorViewTest extends SpringBrowserlessTest {
     void viewRendersWithEditorAndExpandButton() {
         navigate(DistractionFreeEditorView.class);
 
-        assertTrue(findInView(H1.class).all().stream().anyMatch(h -> h.getText()
-                .equals("UC3 — Distraction-free editor")));
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
+                h -> h.getText().equals("UC3 — Distraction-free editor")));
         assertTrue(!findInView(TextArea.class).all().isEmpty());
         assertTrue(findInView(Button.class).all().stream()
                 .anyMatch(b -> "Expand to fullscreen".equals(b.getText())));
@@ -41,14 +41,17 @@ class DistractionFreeEditorViewTest extends SpringBrowserlessTest {
 
         FullscreenTestSupport.setFullscreenState(FullscreenState.FULLSCREEN);
         runPendingSignalsTasks();
-        assertTrue(findInView(Button.class).all().stream()
-                .anyMatch(b -> "Done".equals(b.getText())),
+        assertTrue(
+                findInView(Button.class).all().stream()
+                        .anyMatch(b -> "Done".equals(b.getText())),
                 "Done button should be visible while fullscreen");
 
-        FullscreenTestSupport.setFullscreenState(FullscreenState.NOT_FULLSCREEN);
+        FullscreenTestSupport
+                .setFullscreenState(FullscreenState.NOT_FULLSCREEN);
         runPendingSignalsTasks();
-        assertFalse(findInView(Button.class).all().stream()
-                .anyMatch(b -> "Done".equals(b.getText())),
+        assertFalse(
+                findInView(Button.class).all().stream()
+                        .anyMatch(b -> "Done".equals(b.getText())),
                 "Done button should hide again when leaving fullscreen");
     }
 

@@ -14,12 +14,12 @@ import com.vaadin.flow.router.Route;
 /**
  * UC6 — Network status badge.
  * <p>
- * The status flips between "Online" and "Offline" purely client-side because
- * a server callback wouldn't be reachable when the network drops. A custom
+ * The status flips between "Online" and "Offline" purely client-side because a
+ * server callback wouldn't be reachable when the network drops. A custom
  * {@link NetworkStatusTrigger} fires on the browser's {@code online} and
  * {@code offline} window events; a custom {@link ApplyNetworkStatusAction}
- * reads {@code navigator.onLine} at fire time and updates the badge's text
- * and class.
+ * reads {@code navigator.onLine} at fire time and updates the badge's text and
+ * class.
  * <p>
  * To test: open DevTools' Network panel and toggle "Offline".
  */

@@ -33,7 +33,8 @@ class DbTrackingViewTest extends SpringBrowserlessTest {
         test(start).click();
 
         geolocation.setLocation(60.1699, 24.9384, 15.0);
-        Span status = find(Span.class).withText("Saved update #1 to DB").single();
+        Span status = find(Span.class).withText("Saved update #1 to DB")
+                .single();
         assertEquals("Saved update #1 to DB", status.getText());
         assertEquals(1, test(grid).size(),
                 "Grid should reflect one row from the database");
