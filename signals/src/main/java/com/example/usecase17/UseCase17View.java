@@ -650,8 +650,8 @@ public class UseCase17View extends VerticalLayout {
 
         // Compatibility box (color depends on compatibility signal)
         Div compatBox = createStatBox("Compatibility",
-                compatibilityCheckCountSignal
-                        .map(count -> count + "/13 checks passing"),
+                compatibilityCheckCountSignal.map(
+                        count -> count + "/13 checks passing"),
                 "compat-box");
         compatBox.getClassNames().bind("is-ok", allCompatibleSignal);
 

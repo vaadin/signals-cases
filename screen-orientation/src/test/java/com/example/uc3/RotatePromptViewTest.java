@@ -23,8 +23,8 @@ class RotatePromptViewTest extends SpringBrowserlessTest {
         navigate(RotatePromptView.class);
         runPendingSignalsTasks();
 
-        assertTrue(findInView(H1.class).all().stream().anyMatch(h -> h.getText()
-                .equals("UC3 — Rotate-your-device overlay")));
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
+                h -> h.getText().equals("UC3 — Rotate-your-device overlay")));
         assertTrue(hasOverlay());
         assertTrue(findInView(RadioButtonGroup.class).all().size() >= 1,
                 "expected the required-orientation picker");

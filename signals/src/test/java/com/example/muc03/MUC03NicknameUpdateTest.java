@@ -140,15 +140,16 @@ class MUC03NicknameUpdateTest extends SpringBrowserlessTest {
                 .append(k).append("=").append(v.peek()).append(" "));
         sb.append("\n");
 
-        sb.append("active users: ").append(userSessionRegistry
-                .getActiveUsersSignal().peek().stream()
-                .map(s -> s.peek().getCompositeKey() + "(nickname="
-                        + s.peek().nickname() + ")")
-                .collect(Collectors.joining(", ")))
+        sb.append("active users: ")
+                .append(userSessionRegistry.getActiveUsersSignal().peek()
+                        .stream()
+                        .map(s -> s.peek().getCompositeKey() + "(nickname="
+                                + s.peek().nickname() + ")")
+                        .collect(Collectors.joining(", ")))
                 .append("\n");
 
-        sb.append("display names: ").append(userSessionRegistry
-                .getDisplayNamesSignal().peek())
+        sb.append("display names: ")
+                .append(userSessionRegistry.getDisplayNamesSignal().peek())
                 .append("\n");
 
         sb.append("buttonVisible=")
@@ -158,8 +159,8 @@ class MUC03NicknameUpdateTest extends SpringBrowserlessTest {
                 .append("\n");
 
         sb.append("spans on view:\n");
-        findInView(Span.class).all().forEach(s -> sb.append("  [")
-                .append(s.getText()).append("]\n"));
+        findInView(Span.class).all().forEach(
+                s -> sb.append("  [").append(s.getText()).append("]\n"));
 
         return sb.toString();
     }

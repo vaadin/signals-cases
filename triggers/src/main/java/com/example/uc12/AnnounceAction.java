@@ -9,16 +9,16 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.JsFunction;
 
 /**
- * Custom {@link Action} that sets an aria-live region's {@code textContent}
- * so a screen reader announces the message without moving keyboard focus.
+ * Custom {@link Action} that sets an aria-live region's {@code textContent} so
+ * a screen reader announces the message without moving keyboard focus.
  * <p>
- * The message is captured at constructor time as a JS literal. Production
- * code would accept an {@code Action.Input<String>} as well so dynamic
- * messages can come from a {@code PropertyInput}.
+ * The message is captured at constructor time as a JS literal. Production code
+ * would accept an {@code Action.Input<String>} as well so dynamic messages can
+ * come from a {@code PropertyInput}.
  * <p>
- * The target should be a hidden element with
- * {@code aria-live="polite"} or {@code "assertive"} — the styling that hides
- * it visually lives in the view's CSS.
+ * The target should be a hidden element with {@code aria-live="polite"} or
+ * {@code "assertive"} — the styling that hides it visually lives in the view's
+ * CSS.
  */
 public class AnnounceAction extends Action {
 

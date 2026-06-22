@@ -26,8 +26,8 @@ import com.vaadin.flow.signals.Signal;
  * <p>
  * Models the common mobile pattern of a feed/list with a Share icon on every
  * row: tapping a row's icon hands that row's specific {@code title}/
- * {@code url} payload to the native sheet, so the receiving app sees a
- * coherent per-item preview. All buttons stay in sync with
+ * {@code url} payload to the native sheet, so the receiving app sees a coherent
+ * per-item preview. All buttons stay in sync with
  * {@link Page#shareSupportSignal()} — they disable together when the API is
  * unavailable.
  */
@@ -75,10 +75,8 @@ public class ShareListItemsView extends VerticalLayout {
 
         Signal.effect(this, () -> {
             boolean enabled = support.get() == WebShareSupport.SUPPORTED;
-            list.getChildren()
-                    .flatMap(r -> r.getChildren())
-                    .filter(Button.class::isInstance)
-                    .map(Button.class::cast)
+            list.getChildren().flatMap(r -> r.getChildren())
+                    .filter(Button.class::isInstance).map(Button.class::cast)
                     .forEach(b -> b.setEnabled(enabled));
         });
     }

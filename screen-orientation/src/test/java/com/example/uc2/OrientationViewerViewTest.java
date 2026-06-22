@@ -42,9 +42,8 @@ class OrientationViewerViewTest extends SpringBrowserlessTest {
         assertSpanText("Supported — current type: landscape-primary");
         assertArrowRotation(90);
 
-        ScreenOrientationTestSupport
-                .setScreenOrientation(ScreenOrientation.PORTRAIT_SECONDARY,
-                        180);
+        ScreenOrientationTestSupport.setScreenOrientation(
+                ScreenOrientation.PORTRAIT_SECONDARY, 180);
         runPendingSignalsTasks();
 
         assertSpanText("PORTRAIT_SECONDARY");
@@ -58,21 +57,21 @@ class OrientationViewerViewTest extends SpringBrowserlessTest {
     }
 
     private void assertSpanText(String fragment) {
-        assertTrue(findInView(Span.class).all().stream()
-                .anyMatch(s -> s.getText() != null
-                        && s.getText().contains(fragment)),
+        assertTrue(
+                findInView(Span.class).all().stream()
+                        .anyMatch(s -> s.getText() != null
+                                && s.getText().contains(fragment)),
                 "expected a span containing \"" + fragment + "\"");
     }
 
     private void assertArrowRotation(int degrees) {
-        assertTrue(
-                findInView(Div.class).all().stream()
-                        .filter(d -> d.getClassNames().contains("uc2-arrow"))
-                        .anyMatch(d -> {
-                            String transform = d.getStyle().get("transform");
-                            return transform != null
-                                    && transform.contains(degrees + "deg");
-                        }),
+        assertTrue(findInView(Div.class).all().stream()
+                .filter(d -> d.getClassNames().contains("uc2-arrow"))
+                .anyMatch(d -> {
+                    String transform = d.getStyle().get("transform");
+                    return transform != null
+                            && transform.contains(degrees + "deg");
+                }),
                 "expected uc2-arrow transform to contain " + degrees + "deg");
     }
 }

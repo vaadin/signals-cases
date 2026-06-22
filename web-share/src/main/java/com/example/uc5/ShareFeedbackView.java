@@ -31,8 +31,8 @@ import com.vaadin.flow.signals.Signal;
  * inside {@link Page#share(String, String, String)}, but if the UI wants to
  * react — show a thank-you toast, or retry the share — the
  * {@link PendingJavaScriptResult} returned from {@code share()} is the right
- * handle. This view attaches {@code .then(ok, err)} and surfaces every
- * outcome in a small log.
+ * handle. This view attaches {@code .then(ok, err)} and surfaces every outcome
+ * in a small log.
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @Menu(order = 5, title = "UC5 — Completion feedback")
@@ -65,8 +65,7 @@ public class ShareFeedbackView extends VerticalLayout {
         appendLog("(no share invoked yet)");
 
         add(new H2("Simulate without a browser"));
-        Button fakeOk = new Button("Simulate success",
-                e -> handleSuccess());
+        Button fakeOk = new Button("Simulate success", e -> handleSuccess());
         Button fakeCancel = new Button("Simulate cancel",
                 e -> handleError("AbortError: Share canceled"));
         Button fakeFail = new Button("Simulate failure",

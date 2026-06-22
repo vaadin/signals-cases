@@ -23,11 +23,11 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * UC3 — "Rotate your device" overlay.
  * <p>
  * Some content is best viewed in a specific orientation — landscape for game
- * boards, portrait for vertical video feeds, etc. This view shows a stage
- * with content that is reactively covered by an overlay whenever the user is
- * holding the device the "wrong" way for the selected required orientation.
- * The overlay hides itself as soon as the orientation signal reports the
- * desired side, with no explicit refresh.
+ * boards, portrait for vertical video feeds, etc. This view shows a stage with
+ * content that is reactively covered by an overlay whenever the user is holding
+ * the device the "wrong" way for the selected required orientation. The overlay
+ * hides itself as soon as the orientation signal reports the desired side, with
+ * no explicit refresh.
  * <p>
  * On the UNSUPPORTED platform (no Screen Orientation API), the overlay is
  * always hidden — there is no reliable way to enforce a target orientation.
@@ -113,16 +113,16 @@ public class RotatePromptView extends VerticalLayout {
         overlay.bindClassName("hidden", mismatch.map(b -> !b));
         message.bindText(Signal.computed(
                 () -> "Please rotate to " + required.get() + " mode."));
-        statusBadge.bindText(Signal.computed(() -> describe(required.get(),
-                orientation.get().type())));
+        statusBadge.bindText(Signal.computed(
+                () -> describe(required.get(), orientation.get().type())));
         statusBadge.bindClassName("warn", mismatch);
-        statusBadge.bindClassName("error", orientation.map(
-                d -> d.type() == ScreenOrientation.UNSUPPORTED));
+        statusBadge.bindClassName("error", orientation
+                .map(d -> d.type() == ScreenOrientation.UNSUPPORTED));
     }
 
     /**
-     * UNKNOWN and UNSUPPORTED never block: UNKNOWN is a brief pre-bootstrap
-     * gap and UNSUPPORTED platforms cannot be expected to rotate at all.
+     * UNKNOWN and UNSUPPORTED never block: UNKNOWN is a brief pre-bootstrap gap
+     * and UNSUPPORTED platforms cannot be expected to rotate at all.
      */
     private static boolean isMismatch(Required required,
             ScreenOrientation type) {

@@ -21,9 +21,8 @@ class CrossTabBroadcastViewTest extends SpringBrowserlessTest {
     void viewRendersWithSendButtonAndBadge() {
         navigate(CrossTabBroadcastView.class);
 
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC7 — Cross-tab broadcast"
-                        .equals(h.getText())));
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
+                h -> "UC7 — Cross-tab broadcast".equals(h.getText())));
         assertNotNull(findInView(Button.class).id("send"));
         assertEquals("(none yet)", findInView(Span.class).id("last").getText());
     }

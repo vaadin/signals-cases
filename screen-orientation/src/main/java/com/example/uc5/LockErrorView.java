@@ -23,15 +23,15 @@ import com.vaadin.flow.router.Route;
  * UC5 — Lock error UX.
  * <p>
  * Demonstrates the three common error paths surfaced through
- * {@link Page#lockOrientation(ScreenOrientation,
- * com.vaadin.flow.function.SerializableRunnable,
- * com.vaadin.flow.function.SerializableConsumer)
- * Page#lockOrientation(...)}: <ul>
+ * {@link Page#lockOrientation(ScreenOrientation, com.vaadin.flow.function.SerializableRunnable, com.vaadin.flow.function.SerializableConsumer)
+ * Page#lockOrientation(...)}:
+ * <ul>
  * <li>{@code SecurityError} — locking without fullscreen on most desktops,
  * <li>{@code NotSupportedError} — browsers that don't implement the API,
- * <li>{@code AbortError} — a newer lock supersedes the previous one. </ul>
- * Each click is logged with the resolved {@link ScreenOrientationLockError}
- * (or a "success" line), giving a quick visual reference for what the new
+ * <li>{@code AbortError} — a newer lock supersedes the previous one.
+ * </ul>
+ * Each click is logged with the resolved {@link ScreenOrientationLockError} (or
+ * a "success" line), giving a quick visual reference for what the new
  * callback-based API surfaces.
  */
 @Route(value = "uc5", layout = MainLayout.class)
@@ -57,8 +57,7 @@ public class LockErrorView extends VerticalLayout {
                 "Lock without fullscreen (expect SecurityError)",
                 e -> attempt(ScreenOrientation.LANDSCAPE_PRIMARY));
         Button rapidLocks = new Button(
-                "Two locks in a row (expect AbortError on the first)",
-                e -> {
+                "Two locks in a row (expect AbortError on the first)", e -> {
                     attempt(ScreenOrientation.LANDSCAPE_PRIMARY);
                     attempt(ScreenOrientation.PORTRAIT_PRIMARY);
                 });
@@ -78,11 +77,9 @@ public class LockErrorView extends VerticalLayout {
 
     private void attempt(ScreenOrientation target) {
         getUI().ifPresent(ui -> ui.getPage().lockOrientation(target,
-                () -> addLog("ok",
-                        "✓ Locked to " + target.getClientValue()),
-                error -> addLog("err",
-                        "✗ " + target.getClientValue() + " — " + error.name()
-                                + ": " + error.message())));
+                () -> addLog("ok", "✓ Locked to " + target.getClientValue()),
+                error -> addLog("err", "✗ " + target.getClientValue() + " — "
+                        + error.name() + ": " + error.message())));
     }
 
     private void addLog(String cls, String text) {

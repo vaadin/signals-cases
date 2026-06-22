@@ -22,15 +22,16 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * <p>
  * A {@code DomEventTrigger} on the textarea's {@code input} event fires a
  * {@link SetSignalAction} that pushes the field's current value into a
- * server-side {@link ValueSignal}. The reactive char/word counts are bound
- * to the signal — they update on every keystroke without any Java handler
- * running per event.
+ * server-side {@link ValueSignal}. The reactive char/word counts are bound to
+ * the signal — they update on every keystroke without any Java handler running
+ * per event.
  * <p>
- * Contrast with {@link com.vaadin.flow.component.trigger.internal.CallbackAction}
- * (UC8, UC11): that routes through a {@code Consumer<T>} the application
- * supplies; {@code SetSignalAction} skips the consumer, hooking the typing
- * stream directly into the signal graph. Downstream UI updates flow from
- * signal effects.
+ * Contrast with
+ * {@link com.vaadin.flow.component.trigger.internal.CallbackAction} (UC8,
+ * UC11): that routes through a {@code Consumer<T>} the application supplies;
+ * {@code SetSignalAction} skips the consumer, hooking the typing stream
+ * directly into the signal graph. Downstream UI updates flow from signal
+ * effects.
  */
 @Route(value = "uc18", layout = MainLayout.class)
 @PageTitle("UC18 — Auto-save signal")
@@ -69,9 +70,9 @@ public class AutoSaveSignalView extends VerticalLayout {
             return count + " word" + (count == 1 ? "" : "s");
         }));
 
-        new DomEventTrigger(draft, "input").triggers(new SetSignalAction<>(text,
-                String.class,
-                new PropertyInput<>(draft, "value", String.class)));
+        new DomEventTrigger(draft, "input")
+                .triggers(new SetSignalAction<>(text, String.class,
+                        new PropertyInput<>(draft, "value", String.class)));
 
         HorizontalLayout counts = new HorizontalLayout(charCount, wordCount);
         counts.addClassName("counts");

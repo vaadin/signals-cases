@@ -21,16 +21,15 @@ import com.vaadin.flow.shared.Registration;
  * instead.
  *
  * <p>
- * Listens for {@code keydown} on {@code window} in capture phase — that's
- * the only reliable way to beat the browser's built-in shortcut handling
- * (e.g. {@code Ctrl+S} opens the Save Page dialog before any element-scoped
- * listener can see the event). The listener is installed when the host
- * element attaches and removed when it detaches, so the shortcut is "active
- * while the view is mounted" — not "active only when focus is in the host's
- * subtree".
+ * Listens for {@code keydown} on {@code window} in capture phase — that's the
+ * only reliable way to beat the browser's built-in shortcut handling (e.g.
+ * {@code Ctrl+S} opens the Save Page dialog before any element-scoped listener
+ * can see the event). The listener is installed when the host element attaches
+ * and removed when it detaches, so the shortcut is "active while the view is
+ * mounted" — not "active only when focus is in the host's subtree".
  * <p>
- * Filters by an exact modifier match (required modifiers must be pressed,
- * all others must NOT be pressed — so {@code Ctrl+S} doesn't also fire on
+ * Filters by an exact modifier match (required modifiers must be pressed, all
+ * others must NOT be pressed — so {@code Ctrl+S} doesn't also fire on
  * {@code Ctrl+Shift+S}, leaving that combo free to bind separately), matches
  * the key against both {@code event.key} and {@code event.code} so a single
  * binding handles {@link Key#KEY_S} regardless of which representation the
@@ -91,8 +90,8 @@ public class ShortcutTrigger extends Trigger {
             if (i > 0) {
                 allowed.append(',');
             }
-            allowed.append(JacksonUtils.getMapper()
-                    .valueToTree(keyNames.get(i)).toString());
+            allowed.append(JacksonUtils.getMapper().valueToTree(keyNames.get(i))
+                    .toString());
         }
         allowed.append("]");
 
@@ -107,8 +106,8 @@ public class ShortcutTrigger extends Trigger {
         js.append(modifiers.contains(KeyModifier.SHIFT) ? "!e.shiftKey"
                 : "e.shiftKey");
         js.append("||");
-        js.append(modifiers.contains(KeyModifier.ALT) ? "!e.altKey"
-                : "e.altKey");
+        js.append(
+                modifiers.contains(KeyModifier.ALT) ? "!e.altKey" : "e.altKey");
         js.append("||");
         js.append(modifiers.contains(KeyModifier.META) ? "!e.metaKey"
                 : "e.metaKey");

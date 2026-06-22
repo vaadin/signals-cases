@@ -79,8 +79,8 @@ class UseCase03ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Find the Width slider and change its value (default is 150)
-        IntegerSlider widthSlider = findInView(IntegerSlider.class).all().stream()
-                .filter(s -> "Width".equals(s.getLabel())).findFirst()
+        IntegerSlider widthSlider = findInView(IntegerSlider.class).all()
+                .stream().filter(s -> "Width".equals(s.getLabel())).findFirst()
                 .orElseThrow();
         widthSlider.setValue(200);
         runPendingSignalsTasks();

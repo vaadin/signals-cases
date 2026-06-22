@@ -18,15 +18,14 @@ import com.vaadin.flow.router.Route;
 /**
  * UC13 — Search field + server-loaded list, filtered client-side.
  * <p>
- * The full list comes from the server (loaded once at view construction).
- * A {@link DomEventTrigger} on the search field's {@code input} event fires
- * a {@link FilterListAction} that hides non-matching rows entirely in JS.
- * No server round-trip on each keystroke; the server only sees the data
- * once.
+ * The full list comes from the server (loaded once at view construction). A
+ * {@link DomEventTrigger} on the search field's {@code input} event fires a
+ * {@link FilterListAction} that hides non-matching rows entirely in JS. No
+ * server round-trip on each keystroke; the server only sees the data once.
  * <p>
- * Contrast with {@code SetSignalAction} (UC3) — there the keystrokes would
- * push to a signal and the server would react; here the goal is the
- * opposite, keep the server out of the loop.
+ * Contrast with {@code SetSignalAction} (UC3) — there the keystrokes would push
+ * to a signal and the server would react; here the goal is the opposite, keep
+ * the server out of the loop.
  */
 @Route(value = "uc13", layout = MainLayout.class)
 @PageTitle("UC13 — Client-side filter")
@@ -36,10 +35,10 @@ public class ClientFilterView extends VerticalLayout {
 
     private static final List<String> ITEMS = List.of("Apricot", "Banana",
             "Blueberry", "Cherry", "Cranberry", "Date", "Elderberry", "Fig",
-            "Grape", "Grapefruit", "Honeydew", "Kiwi", "Lemon", "Lime",
-            "Mango", "Nectarine", "Orange", "Papaya", "Peach", "Pear",
-            "Persimmon", "Pineapple", "Plum", "Pomegranate", "Quince",
-            "Raspberry", "Strawberry", "Tangerine", "Watermelon");
+            "Grape", "Grapefruit", "Honeydew", "Kiwi", "Lemon", "Lime", "Mango",
+            "Nectarine", "Orange", "Papaya", "Peach", "Pear", "Persimmon",
+            "Pineapple", "Plum", "Pomegranate", "Quince", "Raspberry",
+            "Strawberry", "Tangerine", "Watermelon");
 
     public ClientFilterView() {
         addClassName("uc13-view");

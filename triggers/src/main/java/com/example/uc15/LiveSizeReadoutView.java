@@ -18,9 +18,9 @@ import com.vaadin.flow.router.Route;
  * <p>
  * A {@link SizeTrigger} on the view fires whenever its size changes. Two
  * {@link SetPropertyAction}s wire the trigger's built-in
- * {@link SizeTrigger.EventData#width} and
- * {@link SizeTrigger.EventData#height} inputs straight into Spans'
- * {@code textContent} — no callback, no Java handler.
+ * {@link SizeTrigger.EventData#width} and {@link SizeTrigger.EventData#height}
+ * inputs straight into Spans' {@code textContent} — no callback, no Java
+ * handler.
  * <p>
  * Demonstrates the {@code SetPropertyAction(Component, String, Input)}
  * constructor: the value to assign is read at fire time from a typed input

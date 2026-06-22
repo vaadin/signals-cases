@@ -20,8 +20,9 @@ class CopyLinkFallbackViewTest extends SpringBrowserlessTest {
     void viewRendersHeading() {
         navigate(CopyLinkFallbackView.class);
 
-        assertTrue(findInView(H1.class).all().stream().anyMatch(
-                h -> "UC2 — Share with copy-link fallback".equals(h.getText())));
+        assertTrue(findInView(H1.class).all().stream()
+                .anyMatch(h -> "UC2 — Share with copy-link fallback"
+                        .equals(h.getText())));
     }
 
     @Test

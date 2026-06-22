@@ -28,8 +28,8 @@ class UseCase20ViewTest extends SpringBrowserlessTest {
         navigate(UseCase20View.class);
         runPendingSignalsTasks();
 
-        RadioButtonGroup<String> colorPicker = findInView(RadioButtonGroup.class)
-                .single();
+        RadioButtonGroup<String> colorPicker = findInView(
+                RadioButtonGroup.class).single();
         assertEquals("var(--aura-background-color)", colorPicker.getValue());
     }
 
@@ -38,8 +38,8 @@ class UseCase20ViewTest extends SpringBrowserlessTest {
     void selectingColorUpdatesValue() {
         navigate(UseCase20View.class);
 
-        RadioButtonGroup<String> colorPicker = findInView(RadioButtonGroup.class)
-                .single();
+        RadioButtonGroup<String> colorPicker = findInView(
+                RadioButtonGroup.class).single();
         test(colorPicker).selectItem("#ffd54f");
         runPendingSignalsTasks();
 

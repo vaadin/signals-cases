@@ -35,16 +35,17 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * UC5 — Kiosk: visitor sign-in with PIN-protected staff exit.
  * <p>
  * A realistic kiosk: the kiosk stage is fullscreened with
- * {@link com.vaadin.flow.component.Component#requestFullscreen() Component#requestFullscreen()},
- * so only the kiosk UI fills the viewport — the app's heading, navigation,
- * intro paragraph and activity log are naturally hidden by the fullscreen
- * wrapper, just like a dedicated terminal. Visitors sign in via a small
- * three-screen flow (landing → form → confirmation). A "Staff" button in the
- * kiosk header opens an inline PIN prompt; the correct PIN ({@value #STAFF_PIN})
- * calls {@link FullscreenSession#exit()} for an expected exit
- * ({@link FullscreenSessionState#EXITED_BY_CODE EXITED_BY_CODE}); pressing
- * Escape leaves unexpectedly ({@link FullscreenSessionState#EXITED_BY_USER
- * EXITED_BY_USER}) and surfaces a warning.
+ * {@link com.vaadin.flow.component.Component#requestFullscreen()
+ * Component#requestFullscreen()}, so only the kiosk UI fills the viewport — the
+ * app's heading, navigation, intro paragraph and activity log are naturally
+ * hidden by the fullscreen wrapper, just like a dedicated terminal. Visitors
+ * sign in via a small three-screen flow (landing → form → confirmation). A
+ * "Staff" button in the kiosk header opens an inline PIN prompt; the correct
+ * PIN ({@value #STAFF_PIN}) calls {@link FullscreenSession#exit()} for an
+ * expected exit ({@link FullscreenSessionState#EXITED_BY_CODE EXITED_BY_CODE});
+ * pressing Escape leaves unexpectedly
+ * ({@link FullscreenSessionState#EXITED_BY_USER EXITED_BY_USER}) and surfaces a
+ * warning.
  */
 @Route(value = "uc5", layout = MainLayout.class)
 @Menu(order = 5, title = "UC5 — Kiosk")
@@ -322,8 +323,9 @@ public class KioskExitDetectionView extends VerticalLayout {
                 unexpectedWarning.setText("Kiosk exited unexpectedly!");
             }
             case EXITED_BY_CODE -> appendLog("Exit (expected)", null);
-            case REJECTED -> appendLog("Request REJECTED: "
-                    + s.error().orElse("no error message"), "unexpected");
+            case REJECTED -> appendLog(
+                    "Request REJECTED: " + s.error().orElse("no error message"),
+                    "unexpected");
             case PENDING -> {
                 // initial state; nothing to log yet
             }

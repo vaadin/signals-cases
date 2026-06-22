@@ -70,8 +70,7 @@ class CustomMessageViewTest extends SpringBrowserlessTest {
 
         WebShareTestSupport.setSupport(WebShareSupport.SUPPORTED);
         runPendingSignalsTasks();
-        assertTrue(share.isEnabled(),
-                "should enable once SUPPORTED arrives");
+        assertTrue(share.isEnabled(), "should enable once SUPPORTED arrives");
 
         WebShareTestSupport.setSupport(WebShareSupport.UNSUPPORTED);
         runPendingSignalsTasks();

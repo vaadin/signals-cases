@@ -24,9 +24,10 @@ import com.vaadin.flow.signals.Signal;
  * Demonstrates that the fullscreen state is just a signal: no callback, no
  * imperative wiring. The dashboard below changes its column count and the
  * density-aside text purely through {@code bindClassName} / {@code bindText}
- * subscriptions to {@link com.vaadin.flow.component.page.Page#fullscreenSignal()},
- * with no observers in user code. The user clicks Present once; the layout
- * reformats automatically and reverts on exit.
+ * subscriptions to
+ * {@link com.vaadin.flow.component.page.Page#fullscreenSignal()}, with no
+ * observers in user code. The user clicks Present once; the layout reformats
+ * automatically and reverts on exit.
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @Menu(order = 4, title = "UC4 — Reactive layout")
@@ -66,10 +67,10 @@ public class ReactiveLayoutView extends VerticalLayout {
             dashboard.add(metricCard(metric));
         }
 
-        Button present = new Button("Present", e -> getUI()
-                .ifPresent(ui -> ui.getPage().requestFullscreen()));
-        Button exit = new Button("Exit", e -> getUI()
-                .ifPresent(ui -> ui.getPage().exitFullscreen()));
+        Button present = new Button("Present",
+                e -> getUI().ifPresent(ui -> ui.getPage().requestFullscreen()));
+        Button exit = new Button("Exit",
+                e -> getUI().ifPresent(ui -> ui.getPage().exitFullscreen()));
 
         add(new HorizontalLayout(present, exit, stateBadge, densityNote));
         add(dashboard);

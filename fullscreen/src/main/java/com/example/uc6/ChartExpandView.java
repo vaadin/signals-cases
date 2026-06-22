@@ -13,10 +13,10 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.ChartType;
-import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.ListSeries;
 import com.vaadin.flow.component.charts.model.PlotOptionsColumn;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -34,16 +34,16 @@ import com.vaadin.flow.signals.local.ValueSignal;
 /**
  * UC6 — Chart expand-to-fullscreen.
  * <p>
- * A dashboard with several {@link Chart} cards, each with its own Expand button.
- * Clicking Expand calls
+ * A dashboard with several {@link Chart} cards, each with its own Expand
+ * button. Clicking Expand calls
  * {@link com.vaadin.flow.component.Component#requestFullscreen()} on that card,
  * which returns a {@link FullscreenSession} whose
- * {@linkplain FullscreenSession#owner() owner} is that specific card. We
- * mirror that ownership into a small {@code activeOwner} signal so each card
- * binds the {@code expanded} CSS class only when it is the active one — even
- * though the wrapper hides the rest of the dashboard during fullscreen, this
- * keeps the binding semantically correct (and lets devtools/tests inspect
- * which card is active).
+ * {@linkplain FullscreenSession#owner() owner} is that specific card. We mirror
+ * that ownership into a small {@code activeOwner} signal so each card binds the
+ * {@code expanded} CSS class only when it is the active one — even though the
+ * wrapper hides the rest of the dashboard during fullscreen, this keeps the
+ * binding semantically correct (and lets devtools/tests inspect which card is
+ * active).
  * <p>
  * Highcharts animations are disabled on the column series so the chart neither
  * morphs on initial render nor on exit-fullscreen resize — the user only sees

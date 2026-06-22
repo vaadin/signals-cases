@@ -28,12 +28,12 @@ import com.vaadin.flow.signals.Signal;
  * stage itself. Component-level fullscreen is the right tool for a slideshow:
  * only the slide is shown, no app chrome, no view controls — that matches how
  * native presentation tools behave. Left/Right arrows still navigate via
- * {@code addClickShortcut} (those listen at the UI level so keydown events
- * keep reaching the server). Escape exits, so there is no need for an in-view
- * exit button.
+ * {@code addClickShortcut} (those listen at the UI level so keydown events keep
+ * reaching the server). Escape exits, so there is no need for an in-view exit
+ * button.
  * <p>
- * Page-level fullscreen — where the whole document is fullscreened, app
- * chrome included — is demonstrated separately in
+ * Page-level fullscreen — where the whole document is fullscreened, app chrome
+ * included — is demonstrated separately in
  * {@link com.example.uc7.AppFullscreenView UC7}.
  */
 @Route(value = "uc2", layout = MainLayout.class)
@@ -112,7 +112,8 @@ public class SlideshowView extends VerticalLayout {
         // FULLSCREEN: only the slide is visible (Component wrapper), the
         // badge is hidden — keep the idle text either way.
         return switch (state) {
-        case FULLSCREEN, NOT_FULLSCREEN -> "Press Present to start the slideshow";
+        case FULLSCREEN, NOT_FULLSCREEN ->
+            "Press Present to start the slideshow";
         case UNSUPPORTED -> "Fullscreen is not supported in this browser";
         case UNKNOWN -> "Detecting fullscreen support…";
         };

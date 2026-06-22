@@ -17,9 +17,9 @@ import com.vaadin.flow.router.RouterLink;
  * <p>
  * Demonstrates {@code UI.routerStateSignal()}: a read-only signal carrying the
  * current navigation target, location and route parameters. The breadcrumb in
- * {@link UseCase27Layout} is wired to that signal via {@code Signal.effect},
- * so it updates without an {@code AfterNavigationObserver} or manual seeding
- * on attach.
+ * {@link UseCase27Layout} is wired to that signal via {@code Signal.effect}, so
+ * it updates without an {@code AfterNavigationObserver} or manual seeding on
+ * attach.
  */
 @Route(value = "use-case-27", layout = UseCase27Layout.class)
 @PageTitle("Use Case 27: Router State Signal")

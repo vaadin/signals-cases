@@ -65,8 +65,8 @@ public class AdaptiveLayoutView extends VerticalLayout {
         container.bindClassName("stacked", landscape.map(b -> !b));
 
         modeBadge.bindText(orientation.map(AdaptiveLayoutView::label));
-        modeBadge.bindClassName("warn", orientation.map(
-                d -> d.type() == ScreenOrientation.UNKNOWN
+        modeBadge.bindClassName("warn",
+                orientation.map(d -> d.type() == ScreenOrientation.UNKNOWN
                         || d.type() == ScreenOrientation.UNSUPPORTED));
     }
 

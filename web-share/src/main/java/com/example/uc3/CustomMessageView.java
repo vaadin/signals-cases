@@ -82,8 +82,8 @@ public class CustomMessageView extends VerticalLayout {
         textField.addValueChangeListener(e -> updatePreview());
         urlField.addValueChangeListener(e -> updatePreview());
 
-        add(titleField, textField, urlField, new H2("Payload preview"),
-                preview, shareButton);
+        add(titleField, textField, urlField, new H2("Payload preview"), preview,
+                shareButton);
         updatePreview();
     }
 
@@ -106,8 +106,8 @@ public class CustomMessageView extends VerticalLayout {
                 return;
             }
             page.share(title, text, url);
-            Notification.show("Share invoked with the previewed payload",
-                    2000, Notification.Position.BOTTOM_START);
+            Notification.show("Share invoked with the previewed payload", 2000,
+                    Notification.Position.BOTTOM_START);
         });
     }
 

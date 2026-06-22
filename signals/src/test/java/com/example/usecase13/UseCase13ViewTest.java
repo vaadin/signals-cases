@@ -30,8 +30,8 @@ class UseCase13ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // The counter box should show "Currently Online" text
-        assertTrue(
-                findInView(H3.class).all().stream().anyMatch(h -> h.getText() != null
+        assertTrue(findInView(H3.class).all().stream()
+                .anyMatch(h -> h.getText() != null
                         && h.getText().contains("Currently Online")));
     }
 

@@ -24,20 +24,18 @@ import com.vaadin.flow.signals.local.ValueSignal;
 /**
  * UC3 — Copy a share link that the UI never renders.
  * <p>
- * The server keeps the full URL in a {@link ValueSignal} that is bound
- * to <em>nothing</em>: no Span, no hidden TextField, no DOM element.
- * Typing in the slug field updates the signal server-side via a normal
- * value-change listener. On click, {@link WriteToClipboardAction} reads
- * the signal at fire-time via {@link SignalInput} and writes
- * {@code text/plain} inside the original user gesture — pure
- * client-side, the value never crosses the DOM.
+ * The server keeps the full URL in a {@link ValueSignal} that is bound to
+ * <em>nothing</em>: no Span, no hidden TextField, no DOM element. Typing in the
+ * slug field updates the signal server-side via a normal value-change listener.
+ * On click, {@link WriteToClipboardAction} reads the signal at fire-time via
+ * {@link SignalInput} and writes {@code text/plain} inside the original user
+ * gesture — pure client-side, the value never crosses the DOM.
  * <p>
- * The framework analogue would have to either render the URL into a
- * hidden field just to read it back, or round-trip from the click to a
- * server-side method that calls {@code executeJs} for the clipboard —
- * and that follow-up no longer counts as a user gesture, so the browser
- * rejects the clipboard write. {@code SignalInput} skips both
- * problems.
+ * The framework analogue would have to either render the URL into a hidden
+ * field just to read it back, or round-trip from the click to a server-side
+ * method that calls {@code executeJs} for the clipboard — and that follow-up no
+ * longer counts as a user gesture, so the browser rejects the clipboard write.
+ * {@code SignalInput} skips both problems.
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("UC3 — Copy a hidden share link")
@@ -62,8 +60,7 @@ public class LiveSignalCounterView extends VerticalLayout {
         TextField slug = new TextField("Slug");
         slug.setId("slug");
         slug.setValueChangeMode(ValueChangeMode.EAGER);
-        slug.addValueChangeListener(
-                e -> shareLink.set(buildUrl(e.getValue())));
+        slug.addValueChangeListener(e -> shareLink.set(buildUrl(e.getValue())));
 
         Span confirmation = new Span("(no copy yet)");
         confirmation.setId("confirmation");
@@ -73,11 +70,10 @@ public class LiveSignalCounterView extends VerticalLayout {
         copy.setId("copy");
 
         new ClickTrigger(copy).triggers(new WriteToClipboardAction(
-                new SignalInput<>(copy, shareLink), null, copied -> confirmation
-                        .setText("Copied at "
-                                + LocalTime.now().withNano(0) + ": " + copied),
-                err -> confirmation
-                        .setText("Copy failed: " + err.message())));
+                new SignalInput<>(copy, shareLink), null,
+                copied -> confirmation.setText("Copied at "
+                        + LocalTime.now().withNano(0) + ": " + copied),
+                err -> confirmation.setText("Copy failed: " + err.message())));
 
         add(slug, new HorizontalLayout(copy, confirmation));
     }

@@ -24,15 +24,13 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * UC4 — Lock landscape for fullscreen video playback.
  * <p>
  * Classic media app pattern: when the user hits "Play", the player goes
- * fullscreen and the screen is locked to landscape. Closing the player
- * releases the lock. The lock request goes through
- * {@link com.vaadin.flow.component.page.Page#lockOrientation(ScreenOrientation,
- * com.vaadin.flow.function.SerializableRunnable,
- * com.vaadin.flow.function.SerializableConsumer)
+ * fullscreen and the screen is locked to landscape. Closing the player releases
+ * the lock. The lock request goes through
+ * {@link com.vaadin.flow.component.page.Page#lockOrientation(ScreenOrientation, com.vaadin.flow.function.SerializableRunnable, com.vaadin.flow.function.SerializableConsumer)
  * Page#lockOrientation(...)} so success and failure are surfaced reactively;
- * fullscreen is requested through {@link MissingAPI#requestFullscreen(
- * com.vaadin.flow.component.Component)} because Flow has no first-class
- * fullscreen API yet (see {@code API-GAPS.md}).
+ * fullscreen is requested through
+ * {@link MissingAPI#requestFullscreen( com.vaadin.flow.component.Component)}
+ * because Flow has no first-class fullscreen API yet (see {@code API-GAPS.md}).
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Lock landscape for video")
@@ -95,8 +93,8 @@ public class LockForVideoView extends VerticalLayout {
 
     private void startPlayback() {
         MissingAPI.requestFullscreen(stage);
-        getUI().ifPresent(ui -> ui.getPage().lockOrientation(
-                ScreenOrientation.LANDSCAPE_PRIMARY, () -> {
+        getUI().ifPresent(ui -> ui.getPage()
+                .lockOrientation(ScreenOrientation.LANDSCAPE_PRIMARY, () -> {
                     locked.set(true);
                     lockMessage.set("Locked to landscape");
                     lockBadgeMod.set("");

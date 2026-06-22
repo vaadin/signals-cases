@@ -26,7 +26,8 @@ class DetailedDataViewTest extends BrowserlessTest {
 
         navigate(DetailedDataView.class);
 
-        Button fetch = find(Button.class).withText("Read full position").single();
+        Button fetch = find(Button.class).withText("Read full position")
+                .single();
         test(fetch).click();
 
         assertTrue(find(Span.class).withTextContaining("51.507400°").exists(),
@@ -53,7 +54,8 @@ class DetailedDataViewTest extends BrowserlessTest {
 
         navigate(DetailedDataView.class);
 
-        Button fetch = find(Button.class).withText("Read full position").single();
+        Button fetch = find(Button.class).withText("Read full position")
+                .single();
         test(fetch).click();
 
         assertTrue(find(Span.class).withTextContaining("48.856600°").exists(),

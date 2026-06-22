@@ -16,15 +16,15 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 
 /**
- * UC7 — View the whole app fullscreen via {@link
- * com.vaadin.flow.component.page.Page#requestFullscreen() Page#requestFullscreen()}.
+ * UC7 — View the whole app fullscreen via
+ * {@link com.vaadin.flow.component.page.Page#requestFullscreen()
+ * Page#requestFullscreen()}.
  * <p>
- * With a MainLayout in place, page-level fullscreen really just means "hide
- * the browser's chrome." Nothing interesting reflows: the navigation drawer
- * toggle, the app title, the side nav and this view all stay exactly where
- * they were. The use case is kiosk-style installations and demoing the app
- * itself with no browser UI in the way — there's nothing more elaborate to
- * stage.
+ * With a MainLayout in place, page-level fullscreen really just means "hide the
+ * browser's chrome." Nothing interesting reflows: the navigation drawer toggle,
+ * the app title, the side nav and this view all stay exactly where they were.
+ * The use case is kiosk-style installations and demoing the app itself with no
+ * browser UI in the way — there's nothing more elaborate to stage.
  */
 @Route(value = "uc7", layout = MainLayout.class)
 @Menu(order = 7, title = "UC7 — View app fullscreen")

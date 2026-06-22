@@ -39,8 +39,7 @@ class ShareInviteLinkViewTest extends SpringBrowserlessTest {
         clickGenerate();
         String first = view.currentCode();
         assertNotNull(first);
-        assertEquals(8, first.length(),
-                "expected 8-char code, was: " + first);
+        assertEquals(8, first.length(), "expected 8-char code, was: " + first);
     }
 
     @Test

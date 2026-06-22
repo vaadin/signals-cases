@@ -28,8 +28,8 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * <p>
  * A simple HIIT-style interval timer alternating between <em>Work</em> and
  * <em>Rest</em> phases. While the timer is running the screen must not dim —
- * the user has their hands full and won't tap the screen for tens of seconds
- * at a time. The lock is coupled to a {@code running} {@link Signal} via
+ * the user has their hands full and won't tap the screen for tens of seconds at
+ * a time. The lock is coupled to a {@code running} {@link Signal} via
  * {@link Signal#effect(Object, Runnable)}, so the lock is requested whenever
  * the timer starts and released whenever the timer pauses or resets.
  */
@@ -81,9 +81,8 @@ public class WorkoutTimerView extends VerticalLayout {
 
         clockLabel.bindText(remaining.map(WorkoutTimerView::formatSeconds));
         phaseLabel.bindText(phase.map(p -> p.name()));
-        startPauseButton.bindText(running.map(r -> Boolean.TRUE.equals(r)
-                ? "Pause"
-                : "Start"));
+        startPauseButton.bindText(
+                running.map(r -> Boolean.TRUE.equals(r) ? "Pause" : "Start"));
 
         startPauseButton.addClickListener(
                 e -> running.set(!Boolean.TRUE.equals(running.peek())));
@@ -128,8 +127,8 @@ public class WorkoutTimerView extends VerticalLayout {
         if (tickTask != null && !tickTask.isCancelled()) {
             return;
         }
-        tickTask = taskScheduler.scheduleAtFixedRate(ui.accessLater(this::tick,
-                null), Duration.ofSeconds(1));
+        tickTask = taskScheduler.scheduleAtFixedRate(
+                ui.accessLater(this::tick, null), Duration.ofSeconds(1));
     }
 
     private void stopTicking() {

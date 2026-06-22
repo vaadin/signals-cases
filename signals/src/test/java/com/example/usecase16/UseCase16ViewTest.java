@@ -31,8 +31,8 @@ class UseCase16ViewTest extends SpringBrowserlessTest {
         navigate(UseCase16View.class);
         runPendingSignalsTasks();
 
-        assertTrue(
-                findInView(H3.class).all().stream().anyMatch(h -> h.getText() != null
+        assertTrue(findInView(H3.class).all().stream()
+                .anyMatch(h -> h.getText() != null
                         && h.getText().contains("10 articles")));
     }
 
@@ -46,8 +46,8 @@ class UseCase16ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Multiple articles mention "signal" in title or content
-        assertTrue(
-                findInView(H3.class).all().stream().anyMatch(h -> h.getText() != null
+        assertTrue(findInView(H3.class).all().stream()
+                .anyMatch(h -> h.getText() != null
                         && h.getText().contains("articles found")));
     }
 
@@ -62,8 +62,8 @@ class UseCase16ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // 4 Tutorial articles
-        assertTrue(
-                findInView(H3.class).all().stream().anyMatch(h -> h.getText() != null
+        assertTrue(findInView(H3.class).all().stream()
+                .anyMatch(h -> h.getText() != null
                         && h.getText().contains("4 articles")));
     }
 
@@ -81,8 +81,8 @@ class UseCase16ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Articles matching "signal" in Tutorial category
-        assertTrue(
-                findInView(H3.class).all().stream().anyMatch(h -> h.getText() != null
+        assertTrue(findInView(H3.class).all().stream()
+                .anyMatch(h -> h.getText() != null
                         && h.getText().contains("articles found")));
     }
 }

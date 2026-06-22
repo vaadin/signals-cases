@@ -19,20 +19,19 @@ import com.vaadin.flow.router.Route;
 /**
  * UC9 — Scroll a target into view on click.
  * <p>
- * Two parallel rows of buttons let you compare two ways to do the same
- * thing:
+ * Two parallel rows of buttons let you compare two ways to do the same thing:
  * <ul>
  * <li><b>Client row</b> wires each button through a
  * {@link ScrollIntoViewAction} on a {@link ClickTrigger}. The scroll fires
  * synchronously inside the click handler — no server round-trip.</li>
  * <li><b>Server row</b> uses a regular server-side {@code addClickListener}
- * that calls {@code Element#executeJs} to scroll. The click goes to the
- * server, the server emits JS back, then the scroll starts — with the
- * latency that brings.</li>
+ * that calls {@code Element#executeJs} to scroll. The click goes to the server,
+ * the server emits JS back, then the scroll starts — with the latency that
+ * brings.</li>
  * </ul>
- * On a fast local connection the difference is small; on a slow or
- * congested one (or with throttled DevTools network) the client-side path
- * stays smooth while the server-side path stutters.
+ * On a fast local connection the difference is small; on a slow or congested
+ * one (or with throttled DevTools network) the client-side path stays smooth
+ * while the server-side path stutters.
  */
 @Route(value = "uc9", layout = MainLayout.class)
 @PageTitle("UC9 — Scroll into view")

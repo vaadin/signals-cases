@@ -36,7 +36,8 @@ class FormFieldViewTest extends BrowserlessTest {
         assertTrue(submit.isEnabled(),
                 "Submit should be enabled after both description and good-accuracy location are set");
 
-        Span pinLabel = find(Span.class).withTextContaining("Pinned at").single();
+        Span pinLabel = find(Span.class).withTextContaining("Pinned at")
+                .single();
         assertTrue(pinLabel.getText().contains("51.50740"),
                 "Pin label should show latitude, was: " + pinLabel.getText());
 

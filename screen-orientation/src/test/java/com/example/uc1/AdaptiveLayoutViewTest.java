@@ -48,14 +48,16 @@ class AdaptiveLayoutViewTest extends SpringBrowserlessTest {
     }
 
     private boolean hasContainer() {
-        return findInView(Div.class).all().stream().anyMatch(d -> d.getClassNames()
-                .stream().anyMatch(c -> c.equals("uc1-container")));
+        return findInView(Div.class).all().stream()
+                .anyMatch(d -> d.getClassNames().stream()
+                        .anyMatch(c -> c.equals("uc1-container")));
     }
 
     private void assertContainerClass(String cls) {
-        assertTrue(findInView(Div.class).all().stream()
-                .filter(d -> d.getClassNames().contains("uc1-container"))
-                .anyMatch(d -> d.getClassNames().contains(cls)),
+        assertTrue(
+                findInView(Div.class).all().stream().filter(
+                        d -> d.getClassNames().contains("uc1-container"))
+                        .anyMatch(d -> d.getClassNames().contains(cls)),
                 "expected uc1-container to carry class " + cls);
     }
 

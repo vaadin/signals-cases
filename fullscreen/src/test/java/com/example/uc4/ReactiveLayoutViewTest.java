@@ -1,9 +1,9 @@
 package com.example.uc4;
 
+import com.example.FullscreenTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.example.FullscreenTestSupport;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.html.Div;
@@ -22,12 +22,11 @@ class ReactiveLayoutViewTest extends SpringBrowserlessTest {
     void viewRendersWithDashboardAndSixMetrics() {
         navigate(ReactiveLayoutView.class);
 
-        assertTrue(findInView(H1.class).all().stream().anyMatch(
-                h -> "UC4 — Reactive layout".equals(h.getText())));
+        assertTrue(findInView(H1.class).all().stream()
+                .anyMatch(h -> "UC4 — Reactive layout".equals(h.getText())));
 
         long metricCardCount = findInView(Div.class).all().stream()
-                .filter(d -> d.getClassNames().contains("metric-card"))
-                .count();
+                .filter(d -> d.getClassNames().contains("metric-card")).count();
         assertEquals(6, metricCardCount,
                 "expected six metric cards on the dashboard");
     }
@@ -37,7 +36,8 @@ class ReactiveLayoutViewTest extends SpringBrowserlessTest {
         navigate(ReactiveLayoutView.class);
         runPendingSignalsTasks();
 
-        FullscreenTestSupport.setFullscreenState(FullscreenState.NOT_FULLSCREEN);
+        FullscreenTestSupport
+                .setFullscreenState(FullscreenState.NOT_FULLSCREEN);
         runPendingSignalsTasks();
         assertDashboardHas("compact", true);
         assertDashboardHas("spacious", false);
@@ -65,7 +65,8 @@ class ReactiveLayoutViewTest extends SpringBrowserlessTest {
                         && "Density: spacious (3 columns)".equals(s.getText())),
                 "density aside should announce spacious layout");
 
-        FullscreenTestSupport.setFullscreenState(FullscreenState.NOT_FULLSCREEN);
+        FullscreenTestSupport
+                .setFullscreenState(FullscreenState.NOT_FULLSCREEN);
         runPendingSignalsTasks();
         assertTrue(findInView(Span.class).all().stream()
                 .anyMatch(s -> s.getClassNames().contains("density-aside")

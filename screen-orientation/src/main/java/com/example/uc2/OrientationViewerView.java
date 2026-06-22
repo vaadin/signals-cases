@@ -74,11 +74,10 @@ public class OrientationViewerView extends VerticalLayout {
 
         typeValue.bindText(orientation.map(d -> d.type().name()));
         angleValue.bindText(orientation.map(d -> d.angle() + "°"));
-        isLandscapeValue
-                .bindText(orientation.map(d -> Boolean.toString(d.type()
-                        .isLandscape())));
-        isPortraitValue.bindText(orientation
-                .map(d -> Boolean.toString(d.type().isPortrait())));
+        isLandscapeValue.bindText(
+                orientation.map(d -> Boolean.toString(d.type().isLandscape())));
+        isPortraitValue.bindText(
+                orientation.map(d -> Boolean.toString(d.type().isPortrait())));
 
         supportBadge.bindText(orientation.map(OrientationViewerView::support));
         supportBadge.bindClassName("warn",

@@ -1,5 +1,7 @@
 package com.example.uc8;
 
+import com.example.views.MainLayout;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.H1;
@@ -13,16 +15,14 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
-import com.example.views.MainLayout;
-
 /**
  * UC8 — Long-press to confirm a destructive action.
  * <p>
- * Press and hold the red button for 800ms. The custom
- * {@link LongPressTrigger} fires once the hold threshold elapses, runs a
- * {@link CallbackAction} that pretends to delete a row, and updates the
- * status badge. Releasing early cancels — and a regular short click is also
- * suppressed so accidental taps never delete anything.
+ * Press and hold the red button for 800ms. The custom {@link LongPressTrigger}
+ * fires once the hold threshold elapses, runs a {@link CallbackAction} that
+ * pretends to delete a row, and updates the status badge. Releasing early
+ * cancels — and a regular short click is also suppressed so accidental taps
+ * never delete anything.
  */
 @Route(value = "uc8", layout = MainLayout.class)
 @PageTitle("UC8 — Long-press to delete")

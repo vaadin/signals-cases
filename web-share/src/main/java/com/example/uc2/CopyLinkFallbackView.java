@@ -23,11 +23,11 @@ import com.vaadin.flow.signals.Signal;
  * UC2 — Share with copy-link fallback.
  * <p>
  * Showcases the reactive feature-detection pattern: a single slot in the page
- * holds either a "Share" button (when
- * {@link Page#shareSupportSignal()} is {@link WebShareSupport#SUPPORTED}) or a
- * "Copy link" button (when {@link WebShareSupport#UNSUPPORTED}), driven by a
- * {@link Signal#effect signal effect}. The swap happens automatically — no
- * page reload, no manual feature-detection callback.
+ * holds either a "Share" button (when {@link Page#shareSupportSignal()} is
+ * {@link WebShareSupport#SUPPORTED}) or a "Copy link" button (when
+ * {@link WebShareSupport#UNSUPPORTED}), driven by a {@link Signal#effect signal
+ * effect}. The swap happens automatically — no page reload, no manual
+ * feature-detection callback.
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @Menu(order = 2, title = "UC2 — Copy-link fallback")
@@ -72,8 +72,8 @@ public class CopyLinkFallbackView extends VerticalLayout {
             share.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
             share.addClickListener(e -> {
                 ui.getPage().share(DOC_TITLE, null, DOC_URL);
-                Notification.show("Share invoked",
-                        2000, Notification.Position.BOTTOM_START);
+                Notification.show("Share invoked", 2000,
+                        Notification.Position.BOTTOM_START);
             });
             actionSlot.add(share);
             hint.setText("Browser supports navigator.share — tap to open "

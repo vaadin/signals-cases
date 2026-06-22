@@ -9,8 +9,8 @@ import com.vaadin.flow.shared.Registration;
  * Custom {@link Trigger} that fires when the host has been pressed
  * (pointerdown) for at least {@code holdMs} milliseconds without being
  * released. Cancels on pointerup, pointercancel, or pointerleave. Suppresses
- * the synthetic click that follows so the wired actions don't also receive
- * a click event.
+ * the synthetic click that follows so the wired actions don't also receive a
+ * click event.
  * <p>
  * Demonstrates a Trigger that tracks a time-windowed gesture the browser
  * doesn't fire as a single event — composing pointer events with

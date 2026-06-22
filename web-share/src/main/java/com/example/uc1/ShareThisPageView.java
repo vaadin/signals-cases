@@ -26,8 +26,8 @@ import com.vaadin.flow.signals.Signal;
  * button reflects {@link Page#shareSupportSignal()} reactively: while the
  * signal is still {@link WebShareSupport#UNKNOWN} the button stays disabled
  * with a "Detecting…" label; once a real value arrives it either enables (on
- * {@link WebShareSupport#SUPPORTED}) or stays disabled with an explanation
- * (on {@link WebShareSupport#UNSUPPORTED}).
+ * {@link WebShareSupport#SUPPORTED}) or stays disabled with an explanation (on
+ * {@link WebShareSupport#UNSUPPORTED}).
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @Menu(order = 1, title = "UC1 — Share this page")
@@ -77,8 +77,7 @@ public class ShareThisPageView extends VerticalLayout {
             // expose navigator.share (Edge, Safari) the user still sees
             // something happen.
             Notification.show(
-                    "Share invoked: \"" + ARTICLE_TITLE + "\" → "
-                            + ARTICLE_URL,
+                    "Share invoked: \"" + ARTICLE_TITLE + "\" → " + ARTICLE_URL,
                     2500, Notification.Position.BOTTOM_START);
         });
     }

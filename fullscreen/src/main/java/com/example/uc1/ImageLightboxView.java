@@ -19,8 +19,8 @@ import com.vaadin.flow.signals.Signal;
 /**
  * UC1 — Image lightbox.
  * <p>
- * A grid of image thumbnails. Clicking one swaps it into the preview pane
- * below and immediately fullscreens that pane via
+ * A grid of image thumbnails. Clicking one swaps it into the preview pane below
+ * and immediately fullscreens that pane via
  * {@link com.vaadin.flow.component.Component#requestFullscreen()}. The browser
  * renders only the wrapped stage; pressing Escape returns to the gallery.
  */
@@ -71,8 +71,7 @@ public class ImageLightboxView extends VerticalLayout {
         }
         add(grid);
 
-        Paragraph note = new Paragraph(
-                "Current selection: ");
+        Paragraph note = new Paragraph("Current selection: ");
         note.add(selectedName);
         add(note);
 

@@ -111,7 +111,8 @@ public class DistractionFreeEditorView extends VerticalLayout {
         // invisible while fullscreen — keep the idle text instead of
         // flipping to a message no one sees.
         return switch (state) {
-        case FULLSCREEN, NOT_FULLSCREEN -> "Click Expand to write distraction-free";
+        case FULLSCREEN, NOT_FULLSCREEN ->
+            "Click Expand to write distraction-free";
         case UNSUPPORTED -> "Fullscreen is not supported in this browser";
         case UNKNOWN -> "Detecting fullscreen support…";
         };

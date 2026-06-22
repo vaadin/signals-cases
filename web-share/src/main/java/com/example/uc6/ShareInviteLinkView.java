@@ -28,12 +28,12 @@ import com.vaadin.flow.signals.Signal;
 /**
  * UC6 — Share a generated invite link.
  * <p>
- * Models the "invite a friend" flow: clicking <em>Generate invite</em>
- * produces a fresh short code (so the server can later resolve invitee
- * identities) and renders it as a join URL. The <em>Share invite</em> button
- * then hands that URL to {@link Page#share(String, String, String)}. A new
- * invite each click gives a clean cross-session trail and proves the demo is
- * not stuck on a single hard-coded URL.
+ * Models the "invite a friend" flow: clicking <em>Generate invite</em> produces
+ * a fresh short code (so the server can later resolve invitee identities) and
+ * renders it as a join URL. The <em>Share invite</em> button then hands that
+ * URL to {@link Page#share(String, String, String)}. A new invite each click
+ * gives a clean cross-session trail and proves the demo is not stuck on a
+ * single hard-coded URL.
  */
 @Route(value = "uc6", layout = MainLayout.class)
 @Menu(order = 6, title = "UC6 — Share invite link")
@@ -131,7 +131,8 @@ public class ShareInviteLinkView extends VerticalLayout {
     }
 
     // Package-private accessor for tests.
-    @Nullable String currentCode() {
+    @Nullable
+    String currentCode() {
         return currentCode;
     }
 }

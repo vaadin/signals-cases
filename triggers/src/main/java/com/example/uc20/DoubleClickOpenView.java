@@ -19,16 +19,15 @@ import com.vaadin.flow.router.Route;
 /**
  * UC20 — Double-click a row to open it in a new tab.
  * <p>
- * Each row in the list below is wired to a {@link DoubleClickTrigger}
- * paired with an {@link OpenInNewTabAction} carrying that row's URL. The
- * gesture context (the double-click) is preserved through to
- * {@code window.open}, so the popup blocker permits the new tab — the
- * call would be rejected if it ran on a server-driven push.
+ * Each row in the list below is wired to a {@link DoubleClickTrigger} paired
+ * with an {@link OpenInNewTabAction} carrying that row's URL. The gesture
+ * context (the double-click) is preserved through to {@code window.open}, so
+ * the popup blocker permits the new tab — the call would be rejected if it ran
+ * on a server-driven push.
  * <p>
- * The high-level {@code Anchor} component handles {@code target="_blank"}
- * on a click, but it can't easily attach to a {@code dblclick} (or to
- * any non-click gesture). The trigger API decouples "which gesture"
- * from "what to do".
+ * The high-level {@code Anchor} component handles {@code target="_blank"} on a
+ * click, but it can't easily attach to a {@code dblclick} (or to any non-click
+ * gesture). The trigger API decouples "which gesture" from "what to do".
  */
 @Route(value = "uc20", layout = MainLayout.class)
 @PageTitle("UC20 — Double-click → new tab")

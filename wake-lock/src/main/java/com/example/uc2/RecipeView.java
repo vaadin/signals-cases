@@ -25,10 +25,10 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * UC2 — Step-by-step recipe.
  * <p>
  * Hands-busy scenarios like cooking, lab protocols, sheet music, or assembly
- * instructions need the screen to stay on for as long as the user is looking
- * at the page. The view requests the wake lock in {@code onAttach} and
- * releases it in {@code onDetach}, so the lock lifetime matches the view
- * lifetime — no toggle for the user to forget.
+ * instructions need the screen to stay on for as long as the user is looking at
+ * the page. The view requests the wake lock in {@code onAttach} and releases it
+ * in {@code onDetach}, so the lock lifetime matches the view lifetime — no
+ * toggle for the user to forget.
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @Menu(order = 2, title = "UC2 — Recipe")
@@ -72,8 +72,8 @@ public class RecipeView extends VerticalLayout {
         }
         add(stepsContainer);
 
-        prevButton.addClickListener(e -> currentStep
-                .set(Math.max(0, currentStep.peek() - 1)));
+        prevButton.addClickListener(
+                e -> currentStep.set(Math.max(0, currentStep.peek() - 1)));
         nextButton.addClickListener(e -> currentStep
                 .set(Math.min(STEPS.size() - 1, currentStep.peek() + 1)));
         add(new HorizontalLayout(prevButton, nextButton));
