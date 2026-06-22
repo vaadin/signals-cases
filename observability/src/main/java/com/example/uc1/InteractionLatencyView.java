@@ -37,16 +37,24 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * UC1 — How responsive is each interaction?
  * <p>
  * Trigger interactions of different server cost, then watch where the time goes.
- * The numbers come straight from the {@code vaadin-micrometer} instrumentation,
- * read out of the application's {@link MeterRegistry}:
+ * The numbers come from Observability Kit's instrumentation, read out of the
+ * application's {@link MeterRegistry}:
  * <ul>
- * <li>{@code vaadin.request.duration} — server-side handling (the interceptor),</li>
- * <li>{@code vaadin.client.rpc.duration} — the round-trip the browser observed
- * (collected client-side, recorded into the same registry),</li>
+ * <li>{@code vaadin.request.duration} — total server-side request handling,</li>
+ * <li>{@code vaadin.rpc.duration} — the per-RPC invocation the framework now
+ * times server-side (Flow's RPC invocation listener),</li>
+ * <li>{@code vaadin.client.navigation.duration} and
+ * {@code vaadin.client.web_vitals.lcp}/{@code .fcp} — page-load signals the
+ * in-browser collector records into the same registry,</li>
  * <li>{@code uc1.interaction} — a per-action timer this view records itself,
- * because the framework can only tag a request as {@code rpc}, not by which
- * action triggered it (see {@code API-GAPS.md} #8).</li>
+ * because the framework tags an interaction only as {@code rpc}, not by which
+ * action triggered it (see {@code API-GAPS.md}).</li>
  * </ul>
+ * There is deliberately no client round-trip row: the browser collector does
+ * not emit a per-RPC duration ({@code vaadin.client.rpc.duration} is measured
+ * server-side only), so a single click's client/network share cannot be read —
+ * see the callout and {@code API-GAPS.md}.
+ * <p>
  * The readout is bound to a {@link ValueSignal}: a UI poll (and each click)
  * recomputes the snapshot and {@code set}s the signal, and a {@link Signal#effect}
  * repaints the grid. Polling is what lets the client samples — which the browser
@@ -57,8 +65,11 @@ import com.vaadin.flow.signals.local.ValueSignal;
 @Menu(order = 1, title = "UC1 — Interaction latency")
 public class InteractionLatencyView extends VerticalLayout {
 
-    private static final String SERVER = "vaadin.request.duration";
-    private static final String CLIENT = "vaadin.client.rpc.duration";
+    private static final String SERVER_REQUEST = "vaadin.request.duration";
+    private static final String SERVER_RPC = "vaadin.rpc.duration";
+    private static final String CLIENT_NAVIGATION = "vaadin.client.navigation.duration";
+    private static final String CLIENT_LCP = "vaadin.client.web_vitals.lcp";
+    private static final String CLIENT_FCP = "vaadin.client.web_vitals.fcp";
     private static final String ACTION = "uc1.interaction";
     private static final int POLL_MILLIS = 2000;
 
@@ -82,11 +93,13 @@ public class InteractionLatencyView extends VerticalLayout {
 
         add(new H1("UC1 — How responsive is each interaction?"));
         add(new Paragraph("Trigger interactions of different server cost, then "
-                + "watch where the time goes: server handling vs. the round-trip "
-                + "the browser actually observed. Numbers come from the "
-                + "vaadin-micrometer instrumentation via the application's "
-                + "MeterRegistry; the grid is bound to a signal and refreshes as "
-                + "you interact and on a short poll."));
+                + "watch where the server time goes: total request handling, the "
+                + "per-RPC invocation the framework now times, and a per-action "
+                + "timer this view keeps. The browser adds page-load signals — "
+                + "navigation timing and web vitals — recorded into the same "
+                + "MeterRegistry by Observability Kit's client collector. The grid "
+                + "is bound to a signal and refreshes as you interact and on a "
+                + "short poll."));
 
         add(new HorizontalLayout(
                 action("instant", () -> {
@@ -162,16 +175,14 @@ public class InteractionLatencyView extends VerticalLayout {
 
     private void recompute() {
         List<Row> rows = new ArrayList<>();
-        Row server = aggregate("Server handling — " + SERVER, SERVER);
-        Row client = aggregate("Client round-trip — " + CLIENT, CLIENT);
-        rows.add(server);
-        rows.add(client);
-
-        double network = (server.count() > 0 && client.count() > 0)
-                ? Math.max(0, client.meanMs() - server.meanMs())
-                : Double.NaN;
-        rows.add(new Row("Derived network ≈ client − server (aggregate)", 0,
-                network, Double.NaN));
+        rows.add(aggregate("Server handling — " + SERVER_REQUEST,
+                SERVER_REQUEST));
+        rows.add(aggregate("Server RPC invocation — " + SERVER_RPC,
+                SERVER_RPC));
+        rows.add(aggregate("Client navigation — " + CLIENT_NAVIGATION,
+                CLIENT_NAVIGATION));
+        rows.add(aggregate("Client LCP — " + CLIENT_LCP, CLIENT_LCP));
+        rows.add(aggregate("Client FCP — " + CLIENT_FCP, CLIENT_FCP));
 
         registry.find(ACTION).timers().stream()
                 .sorted(Comparator
@@ -202,16 +213,17 @@ public class InteractionLatencyView extends VerticalLayout {
 
     private static Details gapsCallout() {
         UnorderedList list = new UnorderedList(
-                new ListItem("Click-to-rendered: the client sample stops at the "
-                        + "XHR response — the DOM-apply/paint time is not "
-                        + "included (gap #2)."),
-                new ListItem("Per-interaction split: client and server numbers "
-                        + "are aggregates with no correlation id, so a single "
-                        + "slow click can't be attributed to client vs. network "
-                        + "vs. server (gap #3)."),
-                new ListItem("@Push updates: only XHR is instrumented "
-                        + "client-side, so server-pushed changes aren't timed "
-                        + "(gap #4)."));
+                new ListItem("No client round-trip: the browser collector emits "
+                        + "navigation timing, web vitals and errors, but no "
+                        + "per-RPC duration (vaadin.client.rpc.duration is "
+                        + "server-side only), so a single click's client/network "
+                        + "share can't be read (gap #2)."),
+                new ListItem("Per-interaction split: client and server samples "
+                        + "share no correlation id, so a slow click can't be "
+                        + "attributed to client vs. network vs. server (gap #3)."),
+                new ListItem("@Push updates: the client collector covers XHR "
+                        + "navigation, not server-pushed changes, so push isn't "
+                        + "timed client-side (gap #4)."));
         Details details = new Details(
                 "What this can't show yet (and why)", list);
         details.add(new Anchor(

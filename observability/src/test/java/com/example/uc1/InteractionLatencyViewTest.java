@@ -33,10 +33,11 @@ class InteractionLatencyViewTest extends SpringBrowserlessTest {
                     findInView(Button.class).withText(label).all().size(),
                     "action button should render: " + label);
         }
-        // The readout always has the server, client and derived-network rows.
+        // The fixed meter rows always render even with no samples yet: server
+        // request, server RPC, client navigation, client LCP, client FCP.
         Grid<Row> grid = findInView(Grid.class).single();
-        assertTrue(test(grid).size() >= 3,
-                "readout should have at least the three baseline rows");
+        assertTrue(test(grid).size() >= 5,
+                "readout should have at least the five baseline meter rows");
     }
 
     @Test
