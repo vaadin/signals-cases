@@ -50,8 +50,8 @@ public class AppFullscreenView extends VerticalLayout {
         stateBadge.addClassName("status-badge");
 
         Button enter = new Button("Enter fullscreen");
-        // Page fullscreen needs the click's user gesture, so bind it to the
-        // button's click trigger instead of calling it directly.
+        // Fullscreen needs the click's user gesture, so bind the request to the
+        // button's click trigger.
         Fullscreen.onClick(enter).enter();
         enter.addThemeVariants(ButtonVariant.PRIMARY);
         Button exit = new Button("Exit fullscreen", e -> Fullscreen.exit());

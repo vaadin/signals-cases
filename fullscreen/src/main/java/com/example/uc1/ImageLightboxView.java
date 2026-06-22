@@ -104,8 +104,8 @@ public class ImageLightboxView extends VerticalLayout {
         // as a CSS custom property so the rule lives in uc1.css.
         thumb.getStyle().set("--lightbox-thumb-bg", photo.gradient());
         thumb.addClickListener(e -> showPhoto(photo));
-        // The fullscreen request must ride the click's user gesture, so bind it
-        // to the thumbnail's click trigger rather than calling it imperatively.
+        // Fullscreen needs the click's user gesture, so bind the request to the
+        // thumbnail's click trigger.
         Fullscreen.onClick(thumb).enter(stage);
         return thumb;
     }

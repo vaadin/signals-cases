@@ -40,9 +40,9 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * terminal. Visitors sign in via a small three-screen flow (landing → form →
  * confirmation). A "Staff" button in the kiosk header opens an inline PIN
  * prompt; the correct PIN ({@value #STAFF_PIN}) calls {@link Fullscreen#exit()}
- * for an expected exit. The new API exposes only a single global
- * {@link Fullscreen#stateSignal() state signal}, so we tell expected exits
- * apart from Escape by setting an {@code expectingExit} flag right before the
+ * for an expected exit. The fullscreen API exposes a single global
+ * {@link Fullscreen#stateSignal() state signal}, so expected exits are told
+ * apart from Escape with an {@code expectingExit} flag set right before the
  * programmatic exit: a transition out of {@link FullscreenState#FULLSCREEN
  * FULLSCREEN} with the flag unset means the user pressed Escape, which surfaces
  * a warning.
@@ -101,8 +101,8 @@ public class KioskExitDetectionView extends VerticalLayout {
         pinField.getElement().setAttribute("autocomplete", "one-time-code");
     }
 
-    // The new fullscreen API exposes only the global state signal, so we track
-    // expected (staff-PIN) exits ourselves: set right before the programmatic
+    // The fullscreen API exposes only the global state signal, so expected
+    // (staff-PIN) exits are tracked here: set right before the programmatic
     // exit, read when the state signal leaves FULLSCREEN.
     private boolean expectingExit;
     private FullscreenState previousState = FullscreenState.UNKNOWN;
@@ -121,8 +121,8 @@ public class KioskExitDetectionView extends VerticalLayout {
             screenSignal.set(Screen.LANDING);
         });
         enter.addThemeVariants(ButtonVariant.PRIMARY);
-        // Component fullscreen needs the click's user gesture, so bind it to
-        // the Enter button's click trigger; a rejected request is logged.
+        // Fullscreen needs the click's user gesture, so bind the request to the
+        // Enter button's click trigger; a rejected request is logged.
         Fullscreen.onClick(enter).enter(stage, () -> {
         }, err -> appendLog("Request REJECTED: " + err.message(),
                 "unexpected"));
@@ -287,7 +287,7 @@ public class KioskExitDetectionView extends VerticalLayout {
             staffError.set("");
             // Mark this as an expected exit before requesting it, so the
             // state-signal effect classifies the FULLSCREEN → NOT_FULLSCREEN
-            // transition as EXITED_BY_CODE rather than an Escape press.
+            // transition as code-initiated rather than an Escape press.
             expectingExit = true;
             Fullscreen.exit();
         } else {
@@ -304,9 +304,8 @@ public class KioskExitDetectionView extends VerticalLayout {
         Signal<Boolean> isFullscreen = fs
                 .map(s -> s == FullscreenState.FULLSCREEN);
 
-        // Reconstruct entered / expected-exit / unexpected-exit transitions
-        // from the global state signal, since the API no longer hands back a
-        // per-request session with its own lifecycle states.
+        // Derive entered / expected-exit / unexpected-exit transitions from the
+        // global state signal.
         Signal.effect(this, () -> {
             FullscreenState state = fs.get();
             if (state == FullscreenState.FULLSCREEN

@@ -132,7 +132,7 @@ All users see real-time updates via Vaadin's automatic UI synchronization.
 
 ## Technical Stack
 
-- **Vaadin 25.1-SNAPSHOT** - Web framework with Signal API
+- **Vaadin 25.2-SNAPSHOT** - Web framework with Signal API
 - **Spring Boot 4.0.1** - Application framework
 - **Spring Security** - Authentication and authorization
 - **Java 25** - Language and platform

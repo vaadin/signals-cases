@@ -36,15 +36,14 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * A dashboard with several {@link Chart} cards, each with its own Expand
  * button. Clicking Expand fullscreens that card via
  * {@link Fullscreen#onClick(com.vaadin.flow.component.Component)
- * Fullscreen.onClick(expand).enter(card)}. The new API exposes only a single
- * global {@link Fullscreen#stateSignal() state signal} — there is no
- * per-request session/owner — so we remember which card was last expanded in a
- * small {@code activeOwner} signal (set on the button click, cleared when the
- * state signal leaves {@link FullscreenState#FULLSCREEN}). Each card binds the
- * {@code expanded} CSS class only when it is the active one — even though the
- * wrapper hides the rest of the dashboard during fullscreen, this keeps the
- * binding semantically correct (and lets devtools/tests inspect which card is
- * active).
+ * Fullscreen.onClick(expand).enter(card)}. The fullscreen API exposes a single
+ * global {@link Fullscreen#stateSignal() state signal}, so the card that was
+ * last expanded is remembered in a small {@code activeOwner} signal (set on the
+ * button click, cleared when the state signal leaves
+ * {@link FullscreenState#FULLSCREEN}). Each card binds the {@code expanded} CSS
+ * class only when it is the active one — even though the wrapper hides the rest
+ * of the dashboard during fullscreen, this keeps the binding semantically
+ * correct (and lets devtools/tests inspect which card is active).
  * <p>
  * Highcharts animations are disabled on the column series so the chart neither
  * morphs on initial render nor on exit-fullscreen resize — the user only sees
@@ -95,8 +94,7 @@ public class ChartExpandView extends VerticalLayout {
         stateBadge.bindClassName("unsupported",
                 fs.map(s -> s == FullscreenState.UNSUPPORTED));
 
-        // The global state signal is the only signal the API exposes, so we
-        // clear the active card whenever fullscreen ends — whether the user
+        // Clear the active card whenever fullscreen ends — whether the user
         // pressed Escape or the request was superseded.
         Signal.effect(this, () -> {
             if (fs.get() != FullscreenState.FULLSCREEN
@@ -120,8 +118,8 @@ public class ChartExpandView extends VerticalLayout {
         // Reflect the active card the moment the user clicks so the expanded
         // class appears immediately; the onAttach effect clears it on exit.
         expand.addClickListener(e -> activeOwner.set(Optional.of(card)));
-        // Component fullscreen needs the click's user gesture, so bind it to
-        // the Expand button's click trigger instead of calling it directly.
+        // Fullscreen needs the click's user gesture, so bind the request to the
+        // Expand button's click trigger.
         Fullscreen.onClick(expand).enter(card);
         expand.addThemeVariants(ButtonVariant.SMALL);
         HorizontalLayout header = new HorizontalLayout(heading, expand);

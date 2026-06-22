@@ -68,8 +68,8 @@ public class ReactiveLayoutView extends VerticalLayout {
         }
 
         Button present = new Button("Present");
-        // Page fullscreen needs the click's user gesture, so bind it to the
-        // Present button's click trigger instead of calling it directly.
+        // Fullscreen needs the click's user gesture, so bind the request to the
+        // Present button's click trigger.
         Fullscreen.onClick(present).enter();
         Button exit = new Button("Exit", e -> Fullscreen.exit());
 

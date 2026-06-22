@@ -87,8 +87,8 @@ public class SlideshowView extends VerticalLayout {
         next.addClickShortcut(Key.ARROW_RIGHT);
         Button present = new Button("Present");
         present.addThemeVariants(ButtonVariant.PRIMARY);
-        // Component fullscreen needs the click's user gesture, so bind it to
-        // the Present button's click trigger instead of calling it directly.
+        // Fullscreen needs the click's user gesture, so bind the request to the
+        // Present button's click trigger.
         Fullscreen.onClick(present).enter(stage);
         add(new HorizontalLayout(prev, next, present));
 

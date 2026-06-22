@@ -99,7 +99,7 @@ For production builds, use `./mvnw package`.
 
 ## Technical Stack
 
-- **Vaadin 25.2-SNAPSHOT** (Flow overridden to `25.3.paste-file-SNAPSHOT`)
+- **Vaadin 25.2-SNAPSHOT**
 - **Spring Boot 4.0.5**
 - **Java 25**
 - **Maven**

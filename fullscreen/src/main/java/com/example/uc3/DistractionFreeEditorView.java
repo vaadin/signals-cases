@@ -29,7 +29,7 @@ import com.vaadin.flow.signals.Signal;
  * intro, navigation drawer) is hidden by the wrapper, so the writer sees only
  * the editor, the word counter, and the Done button. Exit with Escape or by
  * clicking Done — which calls {@link Fullscreen#exit()}; exiting needs no user
- * gesture, so it stays a plain click listener.
+ * gesture, so it is a plain click listener.
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @Menu(order = 3, title = "UC3 — Distraction-free editor")
@@ -63,8 +63,8 @@ public class DistractionFreeEditorView extends VerticalLayout {
         editor.addValueChangeListener(e -> updateWordCount(e.getValue()));
 
         Button expand = new Button("Expand to fullscreen");
-        // Component fullscreen needs the click's user gesture, so bind it to
-        // the Expand button's click trigger instead of calling it directly.
+        // Fullscreen needs the click's user gesture, so bind the request to the
+        // Expand button's click trigger.
         Fullscreen.onClick(expand).enter(editorPane);
         wordCount.addClassName("editor-stats");
 
