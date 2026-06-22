@@ -21,9 +21,8 @@ class LongPressDeleteViewTest extends SpringBrowserlessTest {
     void viewRendersWithDeleteButtonAndStatus() {
         navigate(LongPressDeleteView.class);
 
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC8 — Long-press to delete"
-                        .equals(h.getText())));
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
+                h -> "UC8 — Long-press to delete".equals(h.getText())));
         assertNotNull(findInView(Button.class).id("delete"));
         assertEquals("0 rows deleted",
                 findInView(Span.class).id("status").getText());

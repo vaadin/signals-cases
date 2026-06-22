@@ -21,8 +21,8 @@ class SubmitAndDisableViewTest extends SpringBrowserlessTest {
     void viewRendersThreeTilesAndResetButton() {
         navigate(SubmitAndDisableView.class);
 
-        assertTrue(findInView(H1.class).all().stream().anyMatch(h ->
-                "UC2 — Click an image to dim its siblings"
+        assertTrue(findInView(H1.class).all().stream()
+                .anyMatch(h -> "UC2 — Click an image to dim its siblings"
                         .equals(h.getText())));
         assertNotNull(findInView(Image.class).id("a"));
         assertNotNull(findInView(Image.class).id("b"));

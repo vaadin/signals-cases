@@ -20,8 +20,9 @@ class CopyComponentValueViewTest extends SpringBrowserlessTest {
     void viewRendersHeadingFieldAndButton() {
         navigate(CopyComponentValueView.class);
 
-        assertTrue(findInView(H1.class).all().stream().anyMatch(h -> "UC2 — Copy the current value of a component"
-                .equals(h.getText())));
+        assertTrue(findInView(H1.class).all().stream()
+                .anyMatch(h -> "UC2 — Copy the current value of a component"
+                        .equals(h.getText())));
         assertTrue(findInView(TextField.class).all().stream()
                 .anyMatch(f -> "Share link".equals(f.getLabel())));
         assertTrue(findInView(Button.class).all().stream()

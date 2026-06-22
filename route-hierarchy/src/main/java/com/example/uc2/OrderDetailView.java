@@ -20,7 +20,7 @@ import com.vaadin.flow.router.RouteParent;
  * lets the route hierarchy place it under Orders. The leaf label is a dynamic
  * "Order #&lt;id&gt;" produced by {@link OrderTitleGenerator} via
  * {@code @DynamicPageTitle} — resolved instance-free from the {@code :orderId}
- * parameter (flow#24550).
+ * parameter.
  */
 @Route(value = "order-detail/:orderId", layout = MainLayout.class)
 @RouteParent(OrdersView.class)

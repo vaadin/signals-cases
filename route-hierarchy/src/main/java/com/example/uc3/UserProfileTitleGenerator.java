@@ -4,11 +4,10 @@ import com.vaadin.flow.router.PageTitleContext;
 import com.vaadin.flow.router.PageTitleGenerator;
 
 /**
- * Instance-free dynamic title for {@link UserProfileView}, introduced by
- * <a href="https://github.com/vaadin/flow/pull/24550">flow#24550</a>. It
- * resolves the person's name straight from the {@code :userId} route parameter,
- * so the breadcrumb leaf shows "Ada Lovelace" without the breadcrumb builder
- * ever instantiating the view — the gap UC3 used to demonstrate.
+ * Instance-free dynamic title for {@link UserProfileView}. It resolves the
+ * person's name straight from the {@code :userId} route parameter, so the
+ * breadcrumb leaf shows "Ada Lovelace" without the breadcrumb builder ever
+ * instantiating the view.
  */
 public class UserProfileTitleGenerator implements PageTitleGenerator {
 

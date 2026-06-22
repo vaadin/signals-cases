@@ -142,9 +142,12 @@ class UseCase09ViewTest extends SpringBrowserlessTest {
     @SuppressWarnings("unchecked")
     private void fillValidForm() {
         test(findInView(TextField.class).single()).setValue("johndoe");
-        test(findInView(EmailField.class).single()).setValue("john@example.com");
-        test(findInView(PasswordField.class).atIndex(1)).setValue("password123");
-        test(findInView(PasswordField.class).atIndex(2)).setValue("password123");
+        test(findInView(EmailField.class).single())
+                .setValue("john@example.com");
+        test(findInView(PasswordField.class).atIndex(1))
+                .setValue("password123");
+        test(findInView(PasswordField.class).atIndex(2))
+                .setValue("password123");
         ComboBox<AccountType> accountType = findInView(ComboBox.class).single();
         test(accountType).selectItem("PERSONAL");
         test(findInView(IntegerField.class).single()).setValue(25);

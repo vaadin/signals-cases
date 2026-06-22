@@ -20,10 +20,10 @@ import com.vaadin.flow.router.Route;
  * UC17 — Atomic multi-target reset.
  * <p>
  * A small form with three fields, plus a Reset button. The Reset button's
- * {@link ClickTrigger} wires three {@link SetPropertyAction}s — one per
- * field, each writing a literal default. All three fields update in the
- * same browser frame with no server round-trip and no callback; the server
- * sees the synced values when their change events fire.
+ * {@link ClickTrigger} wires three {@link SetPropertyAction}s — one per field,
+ * each writing a literal default. All three fields update in the same browser
+ * frame with no server round-trip and no callback; the server sees the synced
+ * values when their change events fire.
  * <p>
  * Demonstrates that one trigger can fan out to many independent targets
  * declaratively. No custom multi-target action is needed.

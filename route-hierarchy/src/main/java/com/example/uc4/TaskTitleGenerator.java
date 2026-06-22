@@ -6,8 +6,7 @@ import com.vaadin.flow.router.PageTitleGenerator;
 /**
  * Instance-free dynamic title for {@link TaskDetailView}: resolves the task
  * name from the {@code :taskId} route parameter, so the breadcrumb leaf is the
- * real task rather than a static "Task"
- * (<a href="https://github.com/vaadin/flow/pull/24550">flow#24550</a>).
+ * real task rather than a static "Task".
  */
 public class TaskTitleGenerator implements PageTitleGenerator {
 

@@ -20,8 +20,7 @@ import com.vaadin.flow.router.RouteParameters;
  * middle links must carry {@code :projectId} but not {@code :taskId}; the root
  * carries neither. {@code BreadcrumbBar} derives each subset from the
  * ancestor's own template. The leaf label is the dynamic task name, produced by
- * {@link TaskTitleGenerator} instance-free from the {@code :taskId}
- * (flow#24550).
+ * {@link TaskTitleGenerator} instance-free from the {@code :taskId}.
  */
 @Route(value = "uc4/:projectId/tasks/:taskId", layout = MainLayout.class)
 @DynamicPageTitle(TaskTitleGenerator.class)

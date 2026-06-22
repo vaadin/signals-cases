@@ -10,9 +10,10 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.ScreenOrientation;
-import com.vaadin.flow.component.page.ScreenOrientationData;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.screenorientation.ScreenOrientation;
+import com.vaadin.flow.component.screenorientation.ScreenOrientationData;
+import com.vaadin.flow.component.screenorientation.ScreenOrientationType;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -23,11 +24,11 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * UC3 — "Rotate your device" overlay.
  * <p>
  * Some content is best viewed in a specific orientation — landscape for game
- * boards, portrait for vertical video feeds, etc. This view shows a stage
- * with content that is reactively covered by an overlay whenever the user is
- * holding the device the "wrong" way for the selected required orientation.
- * The overlay hides itself as soon as the orientation signal reports the
- * desired side, with no explicit refresh.
+ * boards, portrait for vertical video feeds, etc. This view shows a stage with
+ * content that is reactively covered by an overlay whenever the user is holding
+ * the device the "wrong" way for the selected required orientation. The overlay
+ * hides itself as soon as the orientation signal reports the desired side, with
+ * no explicit refresh.
  * <p>
  * On the UNSUPPORTED platform (no Screen Orientation API), the overlay is
  * always hidden — there is no reliable way to enforce a target orientation.
@@ -104,8 +105,8 @@ public class RotatePromptView extends VerticalLayout {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        Signal<ScreenOrientationData> orientation = attachEvent.getUI()
-                .getPage().screenOrientationSignal();
+        Signal<ScreenOrientationData> orientation = ScreenOrientation
+                .orientationSignal(attachEvent.getUI());
 
         Signal<Boolean> mismatch = Signal.computed(
                 () -> isMismatch(required.get(), orientation.get().type()));
@@ -113,21 +114,21 @@ public class RotatePromptView extends VerticalLayout {
         overlay.bindClassName("hidden", mismatch.map(b -> !b));
         message.bindText(Signal.computed(
                 () -> "Please rotate to " + required.get() + " mode."));
-        statusBadge.bindText(Signal.computed(() -> describe(required.get(),
-                orientation.get().type())));
+        statusBadge.bindText(Signal.computed(
+                () -> describe(required.get(), orientation.get().type())));
         statusBadge.bindClassName("warn", mismatch);
-        statusBadge.bindClassName("error", orientation.map(
-                d -> d.type() == ScreenOrientation.UNSUPPORTED));
+        statusBadge.bindClassName("error", orientation
+                .map(d -> d.type() == ScreenOrientationType.UNSUPPORTED));
     }
 
     /**
-     * UNKNOWN and UNSUPPORTED never block: UNKNOWN is a brief pre-bootstrap
-     * gap and UNSUPPORTED platforms cannot be expected to rotate at all.
+     * UNKNOWN and UNSUPPORTED never block: UNKNOWN is a brief pre-bootstrap gap
+     * and UNSUPPORTED platforms cannot be expected to rotate at all.
      */
     private static boolean isMismatch(Required required,
-            ScreenOrientation type) {
-        if (type == ScreenOrientation.UNKNOWN
-                || type == ScreenOrientation.UNSUPPORTED) {
+            ScreenOrientationType type) {
+        if (type == ScreenOrientationType.UNKNOWN
+                || type == ScreenOrientationType.UNSUPPORTED) {
             return false;
         }
         return switch (required) {
@@ -136,7 +137,8 @@ public class RotatePromptView extends VerticalLayout {
         };
     }
 
-    private static String describe(Required required, ScreenOrientation type) {
+    private static String describe(Required required,
+            ScreenOrientationType type) {
         return switch (type) {
         case UNKNOWN -> "Waiting for orientation…";
         case UNSUPPORTED ->

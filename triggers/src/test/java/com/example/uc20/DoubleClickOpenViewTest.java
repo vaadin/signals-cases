@@ -19,9 +19,8 @@ class DoubleClickOpenViewTest extends SpringBrowserlessTest {
     void viewRendersListOfRows() {
         navigate(DoubleClickOpenView.class);
 
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC20 — Double-click → new tab"
-                        .equals(h.getText())));
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
+                h -> "UC20 — Double-click → new tab".equals(h.getText())));
         Div list = findInView(Div.class).id("list");
         assertNotNull(list);
         assertTrue(list.getChildren().count() >= 3,

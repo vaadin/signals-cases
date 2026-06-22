@@ -17,8 +17,8 @@ import com.vaadin.flow.router.Route;
 /**
  * UC16 — Live pointer tracker.
  * <p>
- * A panel listens for {@code pointermove}; two
- * {@link SetPropertyAction SetPropertyActions} wire the trigger's built-in
+ * A panel listens for {@code pointermove}; two {@link SetPropertyAction
+ * SetPropertyActions} wire the trigger's built-in
  * {@link MouseEventTrigger.EventData#clientX} and
  * {@link MouseEventTrigger.EventData#clientY} inputs into Spans' textContent.
  * The trigger fires many times per second; no server round-trip happens.
@@ -61,8 +61,8 @@ public class PointerTrackerView extends VerticalLayout {
                 new SetPropertyAction<>(yValue, "textContent",
                         MouseEventTrigger.EventData.clientY));
 
-        Span line = new Span(new Span("clientX:"), xValue,
-                new Span("clientY:"), yValue);
+        Span line = new Span(new Span("clientX:"), xValue, new Span("clientY:"),
+                yValue);
         line.addClassName("readout-line");
 
         add(panel, line);

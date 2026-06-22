@@ -20,8 +20,8 @@ import com.vaadin.flow.router.Route;
  * <p>
  * Clicking "Save" updates the visible badge and also fires an
  * {@link AnnounceAction} that writes into an aria-live region. Screen-reader
- * users hear "Saved" without focus moving from the button. The aria-live
- * region is visually hidden via the {@code sr-only} class.
+ * users hear "Saved" without focus moving from the button. The aria-live region
+ * is visually hidden via the {@code sr-only} class.
  */
 @Route(value = "uc12", layout = MainLayout.class)
 @PageTitle("UC12 — Accessibility announce")
@@ -50,11 +50,11 @@ public class AccessibleSaveView extends VerticalLayout {
 
         Button save = new Button("Save");
         save.setId("save");
-        save.addClickListener(e -> visibleBadge.setText("Saved at "
-                + java.time.LocalTime.now().withNano(0)));
+        save.addClickListener(e -> visibleBadge
+                .setText("Saved at " + java.time.LocalTime.now().withNano(0)));
 
-        new ClickTrigger(save).triggers(
-                new AnnounceAction(liveRegion, "Saved"));
+        new ClickTrigger(save)
+                .triggers(new AnnounceAction(liveRegion, "Saved"));
 
         add(new HorizontalLayout(save, visibleBadge));
         add(liveRegion);

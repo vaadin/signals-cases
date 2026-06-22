@@ -24,17 +24,17 @@ import com.vaadin.flow.server.streams.DownloadResponse;
 /**
  * UC21 — Keyboard shortcut triggers a server-handler download.
  * <p>
- * Press Ctrl/Cmd+Shift+D anywhere in the view. A {@link ShortcutTrigger}
- * fires a {@link DownloadAction} whose {@link DownloadHandler} produces a
- * CSV on the fly. The gesture context is preserved through the trigger
- * fire, so the browser permits the download — calling
- * {@code element.executeJs("location.href=…")} from a server push would
- * be blocked in many browsers.
+ * Press Ctrl/Cmd+Shift+D anywhere in the view. A {@link ShortcutTrigger} fires
+ * a {@link DownloadAction} whose {@link DownloadHandler} produces a CSV on the
+ * fly. The gesture context is preserved through the trigger fire, so the
+ * browser permits the download — calling
+ * {@code element.executeJs("location.href=…")} from a server push would be
+ * blocked in many browsers.
  * <p>
- * Vaadin's high-level {@code Anchor} (and the {@code Download} component
- * in the {@code download} module) wire downloads to click only. The
- * trigger API lets the same handler bind to any user-gesture trigger —
- * keyboard shortcut here, long-press or double-click elsewhere.
+ * Vaadin's high-level {@code Anchor} (and the {@code Download} component in the
+ * {@code download} module) wire downloads to click only. The trigger API lets
+ * the same handler bind to any user-gesture trigger — keyboard shortcut here,
+ * long-press or double-click elsewhere.
  */
 @Route(value = "uc21", layout = MainLayout.class)
 @PageTitle("UC21 — Shortcut download")

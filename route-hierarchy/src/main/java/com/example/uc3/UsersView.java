@@ -19,7 +19,7 @@ import com.vaadin.flow.router.RouterLink;
  * live view instance — yet the leaf crumb is still dynamic. The profile page
  * declares {@code @DynamicPageTitle(...)}; the breadcrumb resolves that
  * generator from the class and the {@code :userId} parameter, so the crumb
- * reads the person's name with no instance involved (flow#24550).
+ * reads the person's name with no instance involved.
  */
 @Route(value = "uc3", layout = MainLayout.class)
 @PageTitle("Users")

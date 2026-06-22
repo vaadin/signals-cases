@@ -1,9 +1,9 @@
 package com.example.uc4;
 
+import com.example.WakeLockTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.example.WakeLockTestSupport;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
@@ -21,9 +21,10 @@ class WorkoutTimerViewTest extends SpringBrowserlessTest {
         navigate(WorkoutTimerView.class);
         runPendingSignalsTasks();
 
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> h.getText() != null
-                        && h.getText().contains("Workout interval timer")),
+        assertTrue(
+                findInView(H1.class).all().stream()
+                        .anyMatch(h -> h.getText() != null && h.getText()
+                                .contains("Workout interval timer")),
                 "view should render heading");
         assertTrue(findInView(Button.class).withText("Start").all().size() == 1,
                 "Start button should render initially");
@@ -84,21 +85,24 @@ class WorkoutTimerViewTest extends SpringBrowserlessTest {
     }
 
     private void assertBadgeContains(String fragment) {
-        assertTrue(findInView(Span.class).all().stream()
-                .anyMatch(s -> s.getText() != null
-                        && s.getText().contains(fragment)),
+        assertTrue(
+                findInView(Span.class).all().stream()
+                        .anyMatch(s -> s.getText() != null
+                                && s.getText().contains(fragment)),
                 "expected status badge to contain \"" + fragment + "\"");
     }
 
     private void assertClockShows(String text) {
-        assertTrue(findInView(Span.class).all().stream()
-                .anyMatch(s -> text.equals(s.getText())),
+        assertTrue(
+                findInView(Span.class).all().stream()
+                        .anyMatch(s -> text.equals(s.getText())),
                 "expected clock to show \"" + text + "\"");
     }
 
     private void assertPhaseShows(String text) {
-        assertTrue(findInView(Span.class).all().stream()
-                .anyMatch(s -> text.equals(s.getText())),
+        assertTrue(
+                findInView(Span.class).all().stream()
+                        .anyMatch(s -> text.equals(s.getText())),
                 "expected phase label to show \"" + text + "\"");
     }
 }

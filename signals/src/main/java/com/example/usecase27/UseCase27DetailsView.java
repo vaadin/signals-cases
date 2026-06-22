@@ -14,8 +14,8 @@ import com.vaadin.flow.router.RouterLink;
 /**
  * Detail sub-view of {@link UseCase27View}. Demonstrates that
  * {@code UI.routerStateSignal()} fires for navigations to the same view class
- * with different {@code :id} route parameters — the parent layout's
- * breadcrumb updates each time.
+ * with different {@code :id} route parameters — the parent layout's breadcrumb
+ * updates each time.
  */
 @Route(value = "use-case-27/details/:id", layout = UseCase27Layout.class)
 @PageTitle("Use Case 27: Details")

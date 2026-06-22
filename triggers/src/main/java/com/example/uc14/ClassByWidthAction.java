@@ -10,11 +10,11 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.JsFunction;
 
 /**
- * Custom {@link Action} that toggles a CSS class on a target element based
- * on which width breakpoint the trigger's reported size falls into. Bound to
- * a {@link SizeTrigger} — the trigger emits a {@code {width, height}} event
- * each time the host resizes; this action reads {@code event.width} and
- * applies the breakpoint that includes it.
+ * Custom {@link Action} that toggles a CSS class on a target element based on
+ * which width breakpoint the trigger's reported size falls into. Bound to a
+ * {@link SizeTrigger} — the trigger emits a {@code {width, height}} event each
+ * time the host resizes; this action reads {@code event.width} and applies the
+ * breakpoint that includes it.
  * <p>
  * Demonstrates the headline "container queries for Flow" pattern from the
  * Responsive UI Helpers RFC implemented entirely in terms of triggers and
@@ -47,8 +47,7 @@ public class ClassByWidthAction extends Action {
             String narrowClass, String mediumClass, String wideClass) {
         this.target = Objects.requireNonNull(target).getElement();
         if (narrowMax >= wideMin) {
-            throw new IllegalArgumentException(
-                    "narrowMax must be < wideMin");
+            throw new IllegalArgumentException("narrowMax must be < wideMin");
         }
         this.narrowMax = narrowMax;
         this.wideMin = wideMin;
@@ -63,12 +62,13 @@ public class ClassByWidthAction extends Action {
             throw new IllegalArgumentException(
                     "ClassByWidthAction is only valid in a SizeTrigger handler");
         }
-        return JsFunction.of("""
-                const w = event.width;
-                const cls = w < $1 ? $3 : w >= $2 ? $5 : $4;
-                $0.classList.remove($3, $4, $5);
-                $0.classList.add(cls);""", target, narrowMax, wideMin,
-                narrowClass, mediumClass, wideClass)
+        return JsFunction
+                .of("""
+                        const w = event.width;
+                        const cls = w < $1 ? $3 : w >= $2 ? $5 : $4;
+                        $0.classList.remove($3, $4, $5);
+                        $0.classList.add(cls);""", target, narrowMax, wideMin,
+                        narrowClass, mediumClass, wideClass)
                 .withArguments("event");
     }
 }

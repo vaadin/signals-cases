@@ -23,18 +23,16 @@ import com.vaadin.flow.router.Route;
  * client-side.
  * <p>
  * One {@link ShortcutTrigger} fires two atomic actions in the original
- * user-gesture: {@link WriteToClipboardAction} reads the textarea's
- * current value via {@link PropertyInput} and calls
- * {@code navigator.clipboard.write}, and a {@link SetPropertyAction}
- * flips the status badge to "✓ Snapshot in clipboard". Both run before
- * the gesture's microtask queue drains; nothing round-trips to the
- * server.
+ * user-gesture: {@link WriteToClipboardAction} reads the textarea's current
+ * value via {@link PropertyInput} and calls {@code navigator.clipboard.write},
+ * and a {@link SetPropertyAction} flips the status badge to "✓ Snapshot in
+ * clipboard". Both run before the gesture's microtask queue drains; nothing
+ * round-trips to the server.
  * <p>
- * The high-level alternative is Vaadin's {@code @Shortcut}, which can
- * only invoke a server-side method — and the clipboard API rejects
- * writes that don't happen inside the original user gesture, so a
- * follow-up {@code executeJs} from the server doesn't get to write at
- * all.
+ * The high-level alternative is Vaadin's {@code @Shortcut}, which can only
+ * invoke a server-side method — and the clipboard API rejects writes that don't
+ * happen inside the original user gesture, so a follow-up {@code executeJs}
+ * from the server doesn't get to write at all.
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Ctrl+S snapshot to clipboard")
@@ -45,14 +43,13 @@ public class ShortcutSaveView extends VerticalLayout {
     public ShortcutSaveView() {
         addClassName("uc1-view");
         add(new H1("UC1 — Ctrl+S writes a snapshot to the clipboard"));
-        add(new Paragraph(
-                "Edit the notes and press Ctrl+S (or Cmd+S). One "
-                        + "ShortcutTrigger fires two pure client-side actions "
-                        + "atomically: WriteToClipboardAction copies the "
-                        + "current value, SetPropertyAction flips the badge. "
-                        + "preventDefault swallows the browser's Save Page "
-                        + "dialog. Nothing round-trips — paste anywhere to "
-                        + "confirm."));
+        add(new Paragraph("Edit the notes and press Ctrl+S (or Cmd+S). One "
+                + "ShortcutTrigger fires two pure client-side actions "
+                + "atomically: WriteToClipboardAction copies the "
+                + "current value, SetPropertyAction flips the badge. "
+                + "preventDefault swallows the browser's Save Page "
+                + "dialog. Nothing round-trips — paste anywhere to "
+                + "confirm."));
 
         TextArea notes = new TextArea("Notes");
         notes.setId("notes");
@@ -65,14 +62,14 @@ public class ShortcutSaveView extends VerticalLayout {
         status.setId("status");
         status.addClassName("status-badge");
 
-        new ShortcutTrigger(this, Key.KEY_S, KeyModifier.CONTROL).triggers(
-                new WriteToClipboardAction(
-                        new PropertyInput<>(notes, "value", String.class),
-                        null),
-                new SetPropertyAction<>(status, "textContent",
-                        "✓ Snapshot in clipboard"),
-                new SetPropertyAction<>(status, "className",
-                        "status-badge copied"));
+        new ShortcutTrigger(this, Key.KEY_S, KeyModifier.CONTROL)
+                .triggers(
+                        new WriteToClipboardAction(new PropertyInput<>(notes,
+                                "value", String.class), null),
+                        new SetPropertyAction<>(status, "textContent",
+                                "✓ Snapshot in clipboard"),
+                        new SetPropertyAction<>(status, "className",
+                                "status-badge copied"));
 
         add(notes, status);
     }

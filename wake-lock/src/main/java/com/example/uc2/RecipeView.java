@@ -15,7 +15,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.WakeLock;
+import com.vaadin.flow.component.wakelock.WakeLock;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
@@ -25,10 +25,10 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * UC2 — Step-by-step recipe.
  * <p>
  * Hands-busy scenarios like cooking, lab protocols, sheet music, or assembly
- * instructions need the screen to stay on for as long as the user is looking
- * at the page. The view requests the wake lock in {@code onAttach} and
- * releases it in {@code onDetach}, so the lock lifetime matches the view
- * lifetime — no toggle for the user to forget.
+ * instructions need the screen to stay on for as long as the user is looking at
+ * the page. The view requests the wake lock in {@code onAttach} and releases it
+ * in {@code onDetach}, so the lock lifetime matches the view lifetime — no
+ * toggle for the user to forget.
  */
 @Route(value = "uc2", layout = MainLayout.class)
 @Menu(order = 2, title = "UC2 — Recipe")
@@ -72,8 +72,8 @@ public class RecipeView extends VerticalLayout {
         }
         add(stepsContainer);
 
-        prevButton.addClickListener(e -> currentStep
-                .set(Math.max(0, currentStep.peek() - 1)));
+        prevButton.addClickListener(
+                e -> currentStep.set(Math.max(0, currentStep.peek() - 1)));
         nextButton.addClickListener(e -> currentStep
                 .set(Math.min(STEPS.size() - 1, currentStep.peek() + 1)));
         add(new HorizontalLayout(prevButton, nextButton));
@@ -82,20 +82,19 @@ public class RecipeView extends VerticalLayout {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        WakeLock wakeLock = attachEvent.getUI().getPage().getWakeLock();
-        Signal<Boolean> active = wakeLock.activeSignal();
+        Signal<Boolean> active = WakeLock.activeSignal();
 
         statusBadge.bindText(active.map(held -> Boolean.TRUE.equals(held)
                 ? "Holding — screen will stay on"
                 : "Released — waiting for browser"));
         statusBadge.bindClassName("active", active);
 
-        wakeLock.request();
+        WakeLock.request();
     }
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
-        detachEvent.getUI().getPage().getWakeLock().release();
+        WakeLock.release();
         super.onDetach(detachEvent);
     }
 }

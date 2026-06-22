@@ -1,16 +1,16 @@
 package com.example.uc6;
 
+import com.example.FullscreenTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.example.FullscreenTestSupport;
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.fullscreen.FullscreenState;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.page.FullscreenState;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -23,13 +23,11 @@ class ChartExpandViewTest extends SpringBrowserlessTest {
     void viewRendersWithThreeChartCardsAndExpandButtons() {
         navigate(ChartExpandView.class);
 
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC6 — Chart expand-to-fullscreen"
-                        .equals(h.getText())));
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
+                h -> "UC6 — Chart expand-to-fullscreen".equals(h.getText())));
 
         long chartCardCount = findInView(Div.class).all().stream()
-                .filter(d -> d.getClassNames().contains("chart-card"))
-                .count();
+                .filter(d -> d.getClassNames().contains("chart-card")).count();
         assertEquals(3, chartCardCount, "expected three chart cards");
 
         long expandButtons = findInView(Button.class).all().stream()
@@ -73,7 +71,8 @@ class ChartExpandViewTest extends SpringBrowserlessTest {
         // the open session as EXITED_BY_USER on the way back out.
         FullscreenTestSupport.setFullscreenState(FullscreenState.FULLSCREEN);
         runPendingSignalsTasks();
-        FullscreenTestSupport.setFullscreenState(FullscreenState.NOT_FULLSCREEN);
+        FullscreenTestSupport
+                .setFullscreenState(FullscreenState.NOT_FULLSCREEN);
         runPendingSignalsTasks();
 
         assertExpandedTitles();
@@ -90,8 +89,7 @@ class ChartExpandViewTest extends SpringBrowserlessTest {
                 .filter(d -> d.getClassNames().contains("chart-card"))
                 .toList()) {
             if (card.getClassNames().contains("expanded")) {
-                card.getChildren()
-                        .flatMap(c -> c.getChildren())
+                card.getChildren().flatMap(c -> c.getChildren())
                         .filter(c -> c instanceof Span)
                         .map(c -> ((Span) c).getText()).findFirst()
                         .ifPresent(actual::add);

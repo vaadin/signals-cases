@@ -36,24 +36,26 @@ public class IdleTrigger extends Trigger {
         // The handler is fired twice per idle cycle: once when the timer
         // elapses (idle=true) and once on the first activity after that
         // (idle=false). Initial state is "active"; we don't fire on install.
-        return getHost().addJsInitializer("""
-                const ms = $1;
-                const events = ['mousemove','mousedown','keydown','wheel','touchstart'];
-                let idle = false;
-                let timer = null;
-                const fire = (state) => $0(new CustomEvent('idle', {detail: {idle: state}}));
-                const goIdle = () => { idle = true; fire(true); };
-                const onActivity = () => {
-                    if (idle) { idle = false; fire(false); }
-                    if (timer) clearTimeout(timer);
-                    timer = setTimeout(goIdle, ms);
-                };
-                for (const e of events) window.addEventListener(e, onActivity, {passive: true});
-                onActivity();
-                return () => {
-                    if (timer) clearTimeout(timer);
-                    for (const e of events) window.removeEventListener(e, onActivity);
-                };""", action, inactivityMs);
+        return getHost().addJsInitializer(
+                """
+                        const ms = $1;
+                        const events = ['mousemove','mousedown','keydown','wheel','touchstart'];
+                        let idle = false;
+                        let timer = null;
+                        const fire = (state) => $0(new CustomEvent('idle', {detail: {idle: state}}));
+                        const goIdle = () => { idle = true; fire(true); };
+                        const onActivity = () => {
+                            if (idle) { idle = false; fire(false); }
+                            if (timer) clearTimeout(timer);
+                            timer = setTimeout(goIdle, ms);
+                        };
+                        for (const e of events) window.addEventListener(e, onActivity, {passive: true});
+                        onActivity();
+                        return () => {
+                            if (timer) clearTimeout(timer);
+                            for (const e of events) window.removeEventListener(e, onActivity);
+                        };""",
+                action, inactivityMs);
     }
 
     /** Inputs exposed by this trigger's handler scope. */
@@ -68,7 +70,7 @@ public class IdleTrigger extends Trigger {
          */
         public static final Action.Input<Boolean> idle = new Action.Input<>() {
             @Override
-            protected JsFunction toJs(Trigger trigger) {
+            public JsFunction toJs(Trigger trigger) {
                 if (!(trigger instanceof IdleTrigger)) {
                     throw new IllegalArgumentException(
                             "Input is scoped to IdleTrigger and cannot be used in a "

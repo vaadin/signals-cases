@@ -19,8 +19,8 @@ class JsTriggerViewTest extends SpringBrowserlessTest {
     void viewRendersTarget() {
         navigate(JsTriggerView.class);
 
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC4 — Double-click to copy".equals(h.getText())));
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
+                h -> "UC4 — Double-click to copy".equals(h.getText())));
         assertNotNull(findInView(Div.class).id("target"));
     }
 }

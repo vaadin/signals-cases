@@ -22,9 +22,8 @@ class AccessibleSaveViewTest extends SpringBrowserlessTest {
     void viewRendersWithLiveRegionAndSaveButton() {
         navigate(AccessibleSaveView.class);
 
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC12 — Accessibility announce"
-                        .equals(h.getText())));
+        assertTrue(findInView(H1.class).all().stream().anyMatch(
+                h -> "UC12 — Accessibility announce".equals(h.getText())));
         Div live = findInView(Div.class).id("live");
         assertNotNull(live);
         assertEquals("polite", live.getElement().getAttribute("aria-live"));

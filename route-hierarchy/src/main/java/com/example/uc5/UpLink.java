@@ -9,7 +9,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.router.RouteParameters;
-import com.vaadin.flow.router.RouteParentReference;
+import com.vaadin.flow.router.RouteReference;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.router.RouterState;
 import com.vaadin.flow.router.internal.RouteUtil;
@@ -51,10 +51,10 @@ public class UpLink extends Div {
         }
         RouteRegistry registry = VaadinService.getCurrent().getRouter()
                 .getRegistry();
-        Optional<RouteParentReference> parent = RouteUtil.getRouteParent(
-                registry, leafView.getClass(), state.routeParameters());
+        Optional<RouteReference> parent = RouteUtil.getRouteParent(registry,
+                leafView.getClass(), state.routeParameters());
         if (parent.isPresent()) {
-            RouteParentReference ref = parent.get();
+            RouteReference ref = parent.get();
             String label = "↑ Up to " + MenuRegistry
                     .getTitle(ref.navigationTarget(), ref.routeParameters());
             RouteParameters parameters = ref.routeParameters();

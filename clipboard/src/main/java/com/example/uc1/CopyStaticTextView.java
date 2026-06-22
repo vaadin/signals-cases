@@ -3,6 +3,7 @@ package com.example.uc1;
 import java.time.Duration;
 
 import com.example.views.MainLayout;
+
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.clipboard.Clipboard;
@@ -20,18 +21,17 @@ import com.vaadin.flow.router.Route;
  * UC1 — Copy static text on click, with in-button "Copied" feedback applied
  * from the server.
  * <p>
- * Wires the click via the public {@link Clipboard#onClick} API. The
- * server-side {@code onCopied} callback sets the button label to "Copied"
- * and adds a check icon; a one-second {@code setTimeout} on the client
- * dispatches a custom DOM event that a server-side listener uses to revert
- * the button. Keeps the demo working without {@code @Push} or a server-side
- * scheduled executor.
+ * Wires the click via the public {@link Clipboard#onClick} API. The server-side
+ * {@code onCopied} callback sets the button label to "Copied" and adds a check
+ * icon; a one-second {@code setTimeout} on the client dispatches a custom DOM
+ * event that a server-side listener uses to revert the button. Keeps the demo
+ * working without {@code @Push} or a server-side scheduled executor.
  * <p>
- * Trade-off vs the trigger-action approach: there is a round-trip delay
- * between the click and the visual feedback appearing, because the "Copied"
- * mutation only happens after the clipboard promise resolves and the
- * outcome reaches the server. The trigger-action approach instead ran the
- * visual flash synchronously inside the click handler.
+ * Trade-off vs the trigger-action approach: there is a round-trip delay between
+ * the click and the visual feedback appearing, because the "Copied" mutation
+ * only happens after the clipboard promise resolves and the outcome reaches the
+ * server. The trigger-action approach instead ran the visual flash
+ * synchronously inside the click handler.
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("UC1 — Copy static text on click")
@@ -56,17 +56,14 @@ public class CopyStaticTextView extends VerticalLayout {
 
         Button copyButton = new Button(DEFAULT_LABEL);
 
-        Clipboard.onClick(copyButton).writeText(LINK,
-                copied -> {
-                    copyButton.setText(FLASH_LABEL);
-                    copyButton.setIcon(VaadinIcon.CHECK.create());
-                    UI.getCurrentOrThrow().triggerAfter(Duration.ofSeconds(1), () -> {
-                        copyButton.setText(DEFAULT_LABEL);
-                        copyButton.setIcon(null);
-                    });
-                },
-                error -> Notification
-                        .show("Copy failed: " + error.message()));
+        Clipboard.onClick(copyButton).writeText(LINK, copied -> {
+            copyButton.setText(FLASH_LABEL);
+            copyButton.setIcon(VaadinIcon.CHECK.create());
+            UI.getCurrentOrThrow().triggerAfter(Duration.ofSeconds(1), () -> {
+                copyButton.setText(DEFAULT_LABEL);
+                copyButton.setIcon(null);
+            });
+        }, error -> Notification.show("Copy failed: " + error.message()));
 
         add(copyButton);
     }

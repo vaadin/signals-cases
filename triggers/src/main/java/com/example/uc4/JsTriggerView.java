@@ -18,12 +18,12 @@ import com.vaadin.flow.router.Route;
 /**
  * UC4 — Double-click to copy.
  * <p>
- * Demonstrates {@link DoubleClickTrigger} — one of the typed trigger
- * subclasses ({@code ClickTrigger}, {@code DoubleClickTrigger},
- * {@code MouseEventTrigger}, {@code DomEventTrigger}, …) that ship in the
- * framework. For events not covered by a built-in subclass, application code
- * can subclass {@code Trigger} directly and emit the listener-installing JS
- * — see {@code com.example.ShortcutTrigger} for an example.
+ * Demonstrates {@link DoubleClickTrigger} — one of the typed trigger subclasses
+ * ({@code ClickTrigger}, {@code DoubleClickTrigger}, {@code MouseEventTrigger},
+ * {@code DomEventTrigger}, …) that ship in the framework. For events not
+ * covered by a built-in subclass, application code can subclass {@code Trigger}
+ * directly and emit the listener-installing JS — see
+ * {@code com.example.ShortcutTrigger} for an example.
  */
 @Route(value = "uc4", layout = MainLayout.class)
 @PageTitle("UC4 — Double-click copy")

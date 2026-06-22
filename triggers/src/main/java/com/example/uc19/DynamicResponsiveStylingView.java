@@ -18,17 +18,17 @@ import com.vaadin.flow.router.Route;
 /**
  * UC19 — Dynamic responsive styling.
  * <p>
- * Three native HTML colour pickers let the user choose the background
- * colour to apply at narrow, medium, and wide breakpoints. One
+ * Three native HTML colour pickers let the user choose the background colour to
+ * apply at narrow, medium, and wide breakpoints. One
  * {@link ApplyResponsiveColorAction} is shared by four triggers:
  * <ul>
  * <li>a {@link SizeTrigger} on the view — fires on every resize</li>
  * <li>three {@link DomEventTrigger}s, one per picker, listening for
  * {@code input} — fires while the user drags the picker</li>
  * </ul>
- * The action reads the host's width and picks the matching picker's
- * current value, applying it as {@code style.backgroundColor}. Picking a
- * new colour shows up immediately even before the user closes the picker.
+ * The action reads the host's width and picks the matching picker's current
+ * value, applying it as {@code style.backgroundColor}. Picking a new colour
+ * shows up immediately even before the user closes the picker.
  * <p>
  * Pure CSS classes wouldn't reach this: the per-breakpoint values are
  * user-supplied, not preset in a stylesheet.
