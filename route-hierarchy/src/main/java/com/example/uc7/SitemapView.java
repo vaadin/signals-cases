@@ -10,10 +10,10 @@ import com.example.uc1.SubcategoryView;
 import com.example.uc2.OrdersView;
 import com.example.uc5.SessionsView;
 import com.example.uc6.TeamView;
-import com.example.views.BreadcrumbBar;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Paragraph;
@@ -53,7 +53,7 @@ public class SitemapView extends VerticalLayout {
             OrdersView.class);
 
     public SitemapView() {
-        add(new BreadcrumbBar());
+        add(new Breadcrumbs());
         add(new H1("Sitemap"));
         add(new Paragraph("Every node below was produced by calling "
                 + "getRouteHierarchy on a handful of leaf routes and merging "

@@ -1,8 +1,8 @@
 package com.example.uc5;
 
-import com.example.views.BreadcrumbBar;
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -25,7 +25,7 @@ import com.vaadin.flow.router.RouterLink;
 public class SettingsView extends VerticalLayout {
 
     public SettingsView() {
-        add(new BreadcrumbBar());
+        add(new Breadcrumbs());
         add(new H1("Settings"));
         add(new Paragraph(
                 "The \"↑ Up\" control below uses getRouteParent(...), which needs "

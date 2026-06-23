@@ -19,37 +19,6 @@
     letter-spacing: 0.05em;
 }
 
-/* Breadcrumb bar shared by all use cases (BreadcrumbBar). */
-.breadcrumb-bar {
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0;
-    padding: 0.4rem 0.75rem;
-    border-radius: 6px;
-    background: color-mix(in srgb, var(--aura-blue) 8%, transparent);
-    font-size: var(--aura-font-size-s);
-}
-
-.breadcrumb-bar a {
-    color: var(--aura-accent-text-color);
-    text-decoration: none;
-}
-
-.breadcrumb-bar a:hover {
-    text-decoration: underline;
-}
-
-.breadcrumb-current {
-    font-weight: 600;
-    color: var(--vaadin-text-color);
-}
-
-.breadcrumb-separator {
-    margin: 0 0.5rem;
-    color: var(--vaadin-text-color-secondary);
-    user-select: none;
-}
-
 /* Sitemap tree (UC7). */
 .sitemap-tree,
 .sitemap-tree ul {

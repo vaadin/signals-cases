@@ -1,8 +1,8 @@
 package com.example.uc1;
 
-import com.example.views.BreadcrumbBar;
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -16,15 +16,16 @@ import com.vaadin.flow.router.RouterLink;
  * <p>
  * The three views of this use case nest purely by URL: {@code uc1},
  * {@code uc1/electronics}, {@code uc1/electronics/laptops}. None of them carry
- * a {@code @RouteParent} annotation, so {@code getRouteHierarchy} discovers the
- * trail entirely through its URL-prefix fallback — it strips the last path
+ * a {@code @RouteParent} annotation, so the route hierarchy is discovered
+ * entirely through the URL-prefix fallback — each level strips the last path
  * segment and looks the shorter URL up in the route registry. This is the
  * zero-configuration case: lay your routes out hierarchically and the
  * breadcrumb just works.
  * <p>
- * The view does no breadcrumb plumbing: the {@link BreadcrumbBar} subscribes to
- * {@code UI.routerStateSignal()} from its own constructor and rebuilds itself
- * on every navigation.
+ * The view does no breadcrumb plumbing: a {@link Breadcrumbs} component in its
+ * default {@code ROUTER} mode subscribes to the router and rebuilds the trail
+ * from the route hierarchy on every navigation. The view just
+ * {@code add(new Breadcrumbs())}.
  */
 @Route(value = "uc1", layout = MainLayout.class)
 @PageTitle("Catalog")
@@ -32,7 +33,7 @@ import com.vaadin.flow.router.RouterLink;
 public class CatalogView extends VerticalLayout {
 
     public CatalogView() {
-        add(new BreadcrumbBar());
+        add(new Breadcrumbs());
         add(new H1("Catalog"));
         add(new Paragraph(
                 "This is the root of a three-level catalog. Each level lives at "

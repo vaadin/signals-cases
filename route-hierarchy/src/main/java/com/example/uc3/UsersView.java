@@ -1,8 +1,8 @@
 package com.example.uc3;
 
-import com.example.views.BreadcrumbBar;
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -27,7 +27,7 @@ import com.vaadin.flow.router.RouterLink;
 public class UsersView extends VerticalLayout {
 
     public UsersView() {
-        add(new BreadcrumbBar());
+        add(new Breadcrumbs());
         add(new H1("Users"));
         add(new Paragraph(
                 "Open a profile below. Its breadcrumb leaf is the person's "

@@ -1,8 +1,8 @@
 package com.example.uc4;
 
-import com.example.views.BreadcrumbBar;
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -28,7 +28,7 @@ import com.vaadin.flow.router.RouterLink;
 public class ProjectsView extends VerticalLayout {
 
     public ProjectsView() {
-        add(new BreadcrumbBar());
+        add(new Breadcrumbs());
         add(new H1("Projects"));
         add(new Paragraph(
                 "Open a project, then its tasks, then a single task. On the "
