@@ -1,8 +1,8 @@
 package com.example.uc3;
 
-import com.example.views.BreadcrumbBar;
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -30,7 +30,7 @@ public class UserProfileView extends VerticalLayout
     private final H1 heading = new H1();
 
     public UserProfileView() {
-        add(new BreadcrumbBar());
+        add(new Breadcrumbs());
         add(heading);
         add(new Paragraph(
                 "The breadcrumb leaf above matches this page's H1 — both are "

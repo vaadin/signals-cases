@@ -2,9 +2,9 @@ package com.example.uc4;
 
 import java.util.Map;
 
-import com.example.views.BreadcrumbBar;
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -31,7 +31,7 @@ public class TasksView extends VerticalLayout implements BeforeEnterObserver {
 
     public TasksView() {
         setPadding(false);
-        add(new BreadcrumbBar());
+        add(new Breadcrumbs());
         add(heading);
         add(new Paragraph("Each task link below opens a task page nested two "
                 + "levels under Projects. The breadcrumb there keeps both the "

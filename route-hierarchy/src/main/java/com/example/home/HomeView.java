@@ -20,15 +20,15 @@ public class HomeView extends BaseHomeView {
 
     public HomeView() {
         super("Route Hierarchy — use cases",
-                "Each card below builds a breadcrumb trail as a HorizontalLayout "
-                        + "of RouterLinks, driven by the Flow-core route-hierarchy "
-                        + "API: getRouteHierarchy(...) "
-                        + "/ getRouteParent(...) walk a view's ancestors via the "
-                        + "@RouteParent annotation first and URL-prefix matching as "
-                        + "the fallback, and instance-free PageTitleGenerators "
-                        + "label each crumb. The Breadcrumbs component itself is "
-                        + "separate — these views show what you can build "
-                        + "directly on top of the walker.");
+                "Each card below shows the Breadcrumbs component (new in 25.2) "
+                        + "rendering a trail in its default ROUTER mode: on every "
+                        + "navigation it walks the route hierarchy — @RouteParent "
+                        + "first, URL-prefix matching as the fallback — and labels "
+                        + "each crumb with the route's page title, including "
+                        + "instance-free PageTitleGenerators. The view just does "
+                        + "add(new Breadcrumbs()); there is no per-view plumbing. "
+                        + "UC5 and UC7 build other consumers — an up-link and a "
+                        + "sitemap — directly on the same route-hierarchy API.");
 
         Div cards = new Div();
         cards.addClassName("home-cards");

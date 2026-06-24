@@ -1,8 +1,8 @@
 package com.example.uc5;
 
-import com.example.views.BreadcrumbBar;
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -20,7 +20,7 @@ import com.vaadin.flow.router.Route;
 public class SessionsView extends VerticalLayout {
 
     public SessionsView() {
-        add(new BreadcrumbBar());
+        add(new Breadcrumbs());
         add(new H1("Active sessions"));
         add(new Paragraph("The \"↑ Up\" control resolves to Security — the "
                 + "immediate parent — even though the full breadcrumb above "

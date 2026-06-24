@@ -1,8 +1,8 @@
 package com.example.uc4;
 
-import com.example.views.BreadcrumbBar;
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -29,7 +29,7 @@ public class ProjectView extends VerticalLayout implements BeforeEnterObserver {
     private final RouterLink tasksLink = new RouterLink();
 
     public ProjectView() {
-        add(new BreadcrumbBar());
+        add(new Breadcrumbs());
         add(heading);
         add(new Paragraph(
                 "The Projects crumb above is a parameterless ancestor; this "

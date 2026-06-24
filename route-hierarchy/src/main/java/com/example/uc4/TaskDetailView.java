@@ -1,8 +1,8 @@
 package com.example.uc4;
 
-import com.example.views.BreadcrumbBar;
 import com.example.views.MainLayout;
 
+import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -18,8 +18,8 @@ import com.vaadin.flow.router.RouteParameters;
  * <p>
  * Walking up from here produces Projects › Project › Tasks › Task. The two
  * middle links must carry {@code :projectId} but not {@code :taskId}; the root
- * carries neither. {@code BreadcrumbBar} derives each subset from the
- * ancestor's own template. The leaf label is the dynamic task name, produced by
+ * carries neither. The {@link Breadcrumbs} component derives each subset from
+ * the ancestor's own template. The leaf label is the dynamic task name, produced by
  * {@link TaskTitleGenerator} instance-free from the {@code :taskId}.
  */
 @Route(value = "uc4/:projectId/tasks/:taskId", layout = MainLayout.class)
@@ -30,7 +30,7 @@ public class TaskDetailView extends VerticalLayout
     private final H1 heading = new H1();
 
     public TaskDetailView() {
-        add(new BreadcrumbBar());
+        add(new Breadcrumbs());
         add(heading);
         add(new Paragraph(
                 "Hover the Project and Tasks crumbs above: both hrefs include "
