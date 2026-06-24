@@ -46,7 +46,7 @@ class OverlaysFullscreenViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         @SuppressWarnings("unchecked")
-        Select<String> select = findInView(Select.class).all().getFirst();
+        Select<String> select = findInView(Select.class).single();
         select.setValue("Green");
         runPendingSignalsTasks();
 
