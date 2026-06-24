@@ -67,7 +67,7 @@ class UseCase19ViewTest extends SpringBrowserlessTest {
         navigate(UseCase19View.class);
         runPendingSignalsTasks();
 
-        Card card = findInView(Card.class).all().getFirst();
+        Card card = findInView(Card.class).first();
 
         // IDLE state should carry the state-idle class (rendered via CSS)
         assertTrue(card.getClassNames().contains("state-idle"),
@@ -88,7 +88,7 @@ class UseCase19ViewTest extends SpringBrowserlessTest {
         runPendingSignalsTasks();
 
         // Cards in LOADING state should carry the state-loading class
-        Card card = findInView(Card.class).all().getFirst();
+        Card card = findInView(Card.class).first();
         assertTrue(card.getClassNames().contains("state-loading"),
                 "LOADING card should have state-loading class but was: "
                         + card.getClassNames());

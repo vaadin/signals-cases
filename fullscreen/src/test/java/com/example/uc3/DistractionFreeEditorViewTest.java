@@ -60,7 +60,7 @@ class DistractionFreeEditorViewTest extends SpringBrowserlessTest {
         navigate(DistractionFreeEditorView.class);
         runPendingSignalsTasks();
 
-        TextArea editor = findInView(TextArea.class).all().getFirst();
+        TextArea editor = findInView(TextArea.class).single();
         test(editor).setValue("hello world this is fullscreen");
         runPendingSignalsTasks();
 
