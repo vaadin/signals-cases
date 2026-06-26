@@ -5,6 +5,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Pre;
 
@@ -24,5 +25,8 @@ class ShortcutDownloadViewTest extends SpringBrowserlessTest {
         Pre preview = findInView(Pre.class).first();
         assertNotNull(preview);
         assertTrue(preview.getText().contains("ada@example.com"));
+
+        assertTrue(findInView(Button.class).all().stream()
+                .anyMatch(b -> "Download CSV".equals(b.getText())));
     }
 }

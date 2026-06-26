@@ -8,12 +8,14 @@ import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.trigger.internal.ClickTrigger;
 import com.vaadin.flow.component.trigger.internal.DownloadAction;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -53,10 +55,11 @@ public class ShortcutDownloadView extends VerticalLayout {
         addClassName("uc21-view");
         add(new H1("UC21 — Shortcut download"));
         add(new Paragraph(
-                "Press Ctrl/Cmd+Shift+D anywhere in this view. The shortcut "
-                        + "fires a DownloadAction whose handler generates the "
-                        + "CSV preview below on the fly; the browser permits "
-                        + "the download because the keystroke is the user "
+                "Press Ctrl/Cmd+Shift+D anywhere in this view, or click the "
+                        + "Download CSV button. Either gesture fires a "
+                        + "DownloadAction whose handler generates the CSV "
+                        + "preview below on the fly; the browser permits the "
+                        + "download because the keystroke or click is the user "
                         + "gesture."));
 
         add(new H2("Preview"));
@@ -72,5 +75,11 @@ public class ShortcutDownloadView extends VerticalLayout {
 
         new ShortcutTrigger(this, Key.KEY_D, KeyModifier.CONTROL,
                 KeyModifier.SHIFT).triggers(new DownloadAction(handler));
+
+        // The same handler bound to a click gesture — the trigger API lets one
+        // handler back any user-gesture trigger, keyboard shortcut or button.
+        Button download = new Button("Download CSV");
+        new ClickTrigger(download).triggers(new DownloadAction(handler));
+        add(download);
     }
 }
