@@ -26,7 +26,7 @@ import com.vaadin.flow.server.streams.DownloadResponse;
 /**
  * UC21 — Keyboard shortcut triggers a server-handler download.
  * <p>
- * Press Ctrl/Cmd+Shift+D anywhere in the view. A {@link ShortcutTrigger} fires
+ * Press Ctrl+Shift+D anywhere in the view. A {@link ShortcutTrigger} fires
  * a {@link DownloadAction} whose {@link DownloadHandler} produces a CSV on the
  * fly. The gesture context is preserved through the trigger fire, so the
  * browser permits the download — calling
@@ -55,7 +55,7 @@ public class ShortcutDownloadView extends VerticalLayout {
         addClassName("uc21-view");
         add(new H1("UC21 — Shortcut download"));
         add(new Paragraph(
-                "Press Ctrl/Cmd+Shift+D anywhere in this view, or click the "
+                "Press Ctrl+Shift+D anywhere in this view, or click the "
                         + "Download CSV button. Either gesture fires a "
                         + "DownloadAction whose handler generates the CSV "
                         + "preview below on the fly; the browser permits the "
