@@ -29,6 +29,9 @@ import com.vaadin.flow.router.Route;
 @StyleSheet("uc6.css")
 public class CopyFromContextMenuView extends VerticalLayout {
 
+    static final String SECRET_TOKEN = "secret-token-9f8e7a6b";
+    final ContextMenu menu;
+
     public CopyFromContextMenuView() {
         addClassName("uc6-view");
         add(new H1("UC6 — Copy via a context-menu item"));
@@ -37,12 +40,12 @@ public class CopyFromContextMenuView extends VerticalLayout {
                         + "value\". The same Clipboard.onClick API works on a "
                         + "menu item — no JavaScript needed."));
 
-        String value = "secret-token-9f8e7a6b";
+        String value = SECRET_TOKEN;
 
         Pre target = new Pre(value);
         target.addClassName("copy-target");
 
-        ContextMenu menu = new ContextMenu(target);
+        menu = new ContextMenu(target);
         MenuItem copyItem = menu.addItem("Copy value");
         Clipboard.onClick(copyItem).writeText(value,
                 written -> Notification.show("Token copied"),

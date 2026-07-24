@@ -33,7 +33,11 @@
     <properties>
         <java.version>25</java.version>
         <vaadin.version>25.2-SNAPSHOT</vaadin.version>
-        <flow.version>25.2-SNAPSHOT</flow.version>
+        <!-- Flow bumped to 25.3-SNAPSHOT for the trigger/action simulation seam
+             used by browserless clipboard tests; platform stays 25.2 as no 25.3
+             platform build exists yet. The flow-bom import below pins all
+             flow-* transitives to 25.3. -->
+        <flow.version>25.3-SNAPSHOT</flow.version>
         <flow-components.version>25.2-SNAPSHOT</flow-components.version>
         <jspecify.version>1.0.0</jspecify.version>
         <spotless.plugin.version>3.1.0</spotless.plugin.version>
