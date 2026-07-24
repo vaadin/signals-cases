@@ -5,26 +5,30 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.clipboard.ClipboardSimulator;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @ViewPackages(classes = PasteSpreadsheetView.class)
 class PasteSpreadsheetViewTest extends SpringBrowserlessTest {
 
     @Test
-    void viewRendersHeadingSpreadsheetAndDropZone() {
+    void pastingHtmlTable_populatesGridFromOnPaste() {
         navigate(PasteSpreadsheetView.class);
+        Div dropZone = findInView(Div.class).withClassName("drop-zone").single();
 
-        assertTrue(findInView(H1.class).all().stream()
-                .anyMatch(h -> "UC5 — Paste a table from a spreadsheet"
-                        .equals(h.getText())));
-        assertTrue(findInView(Spreadsheet.class).all().size() >= 1);
-        assertTrue(findInView(Div.class).all().stream()
-                .anyMatch(d -> d.getClassNames().contains("drop-zone") && "0"
-                        .equals(d.getElement().getAttribute("tabindex"))));
+        // The drop zone reads the HTML branch of the clipboard (unambiguous for
+        // spreadsheet ranges). Seed a small table and paste it.
+        String tableHtml = "<table>"
+                + "<tr><th>Region</th><th>Q1</th></tr>"
+                + "<tr><td>North</td><td>100</td></tr>" + "</table>";
+        ClipboardSimulator.current().setHtml(tableHtml);
+
+        ClipboardSimulator.current().pasteInto(dropZone);
+
+        // onPaste parsed the table (header + 1 data row) and reported it.
+        assertEquals("Pasted 2 rows.", dropZone.getText());
     }
 }
