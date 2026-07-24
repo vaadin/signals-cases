@@ -32,13 +32,9 @@
 
     <properties>
         <java.version>25</java.version>
-        <vaadin.version>25.2-SNAPSHOT</vaadin.version>
-        <!-- Flow bumped to 25.3-SNAPSHOT for the trigger/action simulation seam
-             used by browserless clipboard tests; platform stays 25.2 as no 25.3
-             platform build exists yet. The flow-bom import below pins all
-             flow-* transitives to 25.3. -->
+        <vaadin.version>25.3-SNAPSHOT</vaadin.version>
         <flow.version>25.3-SNAPSHOT</flow.version>
-        <flow-components.version>25.2-SNAPSHOT</flow-components.version>
+        <flow-components.version>25.3-SNAPSHOT</flow-components.version>
         <jspecify.version>1.0.0</jspecify.version>
         <spotless.plugin.version>3.1.0</spotless.plugin.version>
         <nullability.plugin.version>0.4.0</nullability.plugin.version>
@@ -47,13 +43,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-bom</artifactId>
-                <version>${flow.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-components-bom</artifactId>
@@ -71,7 +60,7 @@
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>browserless-test-bom</artifactId>
-                <version>1.1-SNAPSHOT</version>
+                <version>1.2-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
