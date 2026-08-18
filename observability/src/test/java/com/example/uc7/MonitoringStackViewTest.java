@@ -122,6 +122,27 @@ class MonitoringStackViewTest extends SpringBrowserlessTest {
                 "vaadin.request.duration should publish histogram buckets");
     }
 
+    @Test
+    void publishesSloBoundariesAroundTheLatenciesThatMatter() {
+        // The default histogram spread puts most buckets in ranges a UI
+        // interaction never reaches, so a p95 gets read off one very wide
+        // bucket. These boundaries are what give the percentile panels useful
+        // resolution; a silent config regression would flatten them again.
+        registry.timer("vaadin.request.duration", "outcome", "success")
+                .record(java.time.Duration.ofMillis(120));
+        String exposition = registry.scrape();
+
+        for (String boundary : new String[] { "0.025", "0.05", "0.1", "0.25",
+                "0.5", "1.0", "2.0" }) {
+            assertTrue(
+                    exposition
+                            .contains("vaadin_request_duration_seconds_bucket")
+                            && exposition.contains("le=\"" + boundary + "\""),
+                    "request duration should publish an SLO bucket at le="
+                            + boundary);
+        }
+    }
+
     private long requestTimerCount() {
         return registry.find("vaadin.request.duration").timers().stream()
                 .mapToLong(t -> t.count()).sum();
