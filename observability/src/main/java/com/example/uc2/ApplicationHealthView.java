@@ -30,6 +30,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -74,9 +75,14 @@ import com.vaadin.flow.signals.local.ValueSignal;
  * <p>
  * Connection status is the one signal with no meter behind it (see
  * {@code API-GAPS.md} #5): the browser's {@code online}/{@code reconnecting}
- * state is never recorded server-side. What the badge shows instead is the
- * server's own evidence the channel is alive — UIDL/heartbeat requests keep
- * arriving — together with the configured push mode and transport.
+ * state is never recorded server-side. So instead of claiming to know it, the
+ * badge reports the only related thing the server can actually observe: the
+ * <em>cadence of this UI's own poll requests</em>. Before the first tick
+ * nothing is known and the badge stays neutral; while ticks arrive on schedule
+ * it is green; and on a tick that arrives late — the tab was suspended, or the
+ * channel dropped and reconnected — it turns red and names the gap. Every
+ * state is therefore derived, not hardcoded, and the push mode and transport
+ * come from the public {@link PushConfiguration}.
  * <p>
  * The view also carries a small database-health demo: a "load the product
  * catalog" button that triggers the classic N+1 join-table fetch (see
@@ -119,9 +125,23 @@ public class ApplicationHealthView extends VerticalLayout {
     public record Stat(String signal, String value, String source) {
     }
 
+    /**
+     * How current the readout is, derived from the observed refresh cadence —
+     * the closest thing to a connection state the server can see (there is no
+     * connection-state meter; see {@code API-GAPS.md} #5).
+     */
+    public enum Channel {
+        /** No cadence observed yet, so liveness is genuinely unknown. */
+        UNKNOWN,
+        /** The latest refresh arrived within the expected poll window. */
+        LIVE,
+        /** The latest refresh was late: updates had stopped arriving. */
+        RESUMED
+    }
+
     /** The whole readout at a point in time. */
-    public record Health(String connection, boolean live, List<Stat> stats) {
-        static final Health EMPTY = new Health("—", false, List.of());
+    public record Health(String connection, Channel channel, List<Stat> stats) {
+        static final Health EMPTY = new Health("—", Channel.UNKNOWN, List.of());
     }
 
     /**
@@ -159,6 +179,7 @@ public class ApplicationHealthView extends VerticalLayout {
     private final Grid<Stat> grid = new Grid<>();
     private final Div catalogResult = new Div();
     private int refreshes;
+    private long lastRefreshAt;
     private @Nullable Registration pollRegistration;
 
     public ApplicationHealthView(MeterRegistry registry,
@@ -195,13 +216,16 @@ public class ApplicationHealthView extends VerticalLayout {
         add(grid);
 
         // The primary signal-bound containers: re-run whenever the snapshot is
-        // set (on poll). The badge reflects connection liveness; the grid the
+        // set (on poll). The badge reflects the refresh cadence; the grid the
         // numeric readout.
         Signal.effect(status, () -> {
             Health h = health.get();
             status.setText(h.connection());
-            status.getElement().getThemeList().set("success", h.live());
-            status.getElement().getThemeList().set("error", !h.live());
+            // Neutral until a cadence is known, green while ticks arrive on
+            // time, red for a tick that arrives late.
+            ThemeList themes = status.getElement().getThemeList();
+            themes.set("success", h.channel() == Channel.LIVE);
+            themes.set("error", h.channel() == Channel.RESUMED);
         });
         Signal.effect(grid, () -> grid.setItems(health.get().stats()));
 
@@ -245,8 +269,13 @@ public class ApplicationHealthView extends VerticalLayout {
     /**
      * Asks the in-browser collector to flush its buffer immediately instead of
      * waiting for its 5 s periodic timer. {@code window.__vaadinMicrometer
-     * .flush()} is exposed by the kit's {@code VaadinMetricsClient.js} for
-     * exactly this. The flushed samples arrive in a follow-up request (the
+     * .flush()} is exposed by the kit's {@code VaadinMetricsClient.js} — but
+     * only as an internal: its own source comments it "for tests / dashboards
+     * (debug only)" and the {@code __} prefix says the same, so this button
+     * leans on something the kit does not promise to keep (see
+     * {@code API-GAPS.md} #9, which asks for a public flush). The call is
+     * guarded so it degrades to a no-op if the internal disappears. The flushed
+     * samples arrive in a follow-up request (the
      * collector's {@code recordSamples} callable, sent in the same UIDL message
      * as this script's return), so by the time the {@code then} callback fires
      * they are already in the registry and recompute() shows them. The 2 s poll
@@ -261,6 +290,10 @@ public class ApplicationHealthView extends VerticalLayout {
 
     private void recompute() {
         refreshes++;
+        long now = System.currentTimeMillis();
+        long gapMillis = lastRefreshAt == 0 ? 0 : now - lastRefreshAt;
+        Channel channel = channel(lastRefreshAt, now, POLL_MILLIS);
+        lastRefreshAt = now;
 
         List<Stat> stats = new ArrayList<>();
         stats.add(new Stat("Active users (sessions)",
@@ -290,26 +323,48 @@ public class ApplicationHealthView extends VerticalLayout {
         // the catalog button below fires its N+1 fan-out).
         stats.add(dbFetchStat());
 
-        health.set(new Health(connection(), true, stats));
+        health.set(new Health(connection(channel, gapMillis), channel, stats));
+    }
+
+    /**
+     * Derives the channel state from the observed refresh cadence: the view
+     * polls every {@code pollMillis}, so a tick within two poll intervals of
+     * the previous one means updates are flowing, and a later one means they
+     * had stopped in between. Pure and package-private so all three branches
+     * are exercised in tests without a clock or a browser.
+     */
+    static Channel channel(long previousRefreshAt, long now, int pollMillis) {
+        if (previousRefreshAt == 0) {
+            return Channel.UNKNOWN;
+        }
+        return now - previousRefreshAt > 2L * pollMillis ? Channel.RESUMED
+                : Channel.LIVE;
     }
 
     /**
      * The server's view of the connection. There is no connection-state meter
      * (API-GAPS.md #5: the browser's online/reconnecting state is never
-     * recorded server-side), so "live" here means the server is currently
-     * handling a request from this UI — i.e. the channel is demonstrably alive.
-     * The push mode and transport come from the public
-     * {@link PushConfiguration}.
+     * recorded server-side), so the text says only what the server can see —
+     * whether this UI's poll requests are still arriving on schedule — and
+     * never claims to know the browser is online. The push mode and transport
+     * come from the public {@link PushConfiguration}.
      */
-    private String connection() {
+    private String connection(Channel channel, long gapMillis) {
+        String state = switch (channel) {
+        case UNKNOWN -> "Waiting for the first live update";
+        case LIVE -> "Live — updates arriving every " + (POLL_MILLIS / 1000)
+                + " s";
+        case RESUMED -> String.format("Resumed after %.1f s without updates",
+                gapMillis / 1000d);
+        };
         UI ui = UI.getCurrent();
         String push = "push n/a";
         if (ui != null) {
             PushConfiguration pc = ui.getPushConfiguration();
             push = "push " + pc.getPushMode() + " over " + pc.getTransport();
         }
-        return "Connected — updates arriving every " + (POLL_MILLIS / 1000)
-                + " s (" + push + "); " + refreshes + " refreshes this session";
+        return state + " (" + push + "); " + refreshes
+                + " refreshes this session";
     }
 
     private Stat timing(String label, String meter) {
@@ -482,8 +537,8 @@ public class ApplicationHealthView extends VerticalLayout {
         UnorderedList list = new UnorderedList(
                 new ListItem("Connection state: the browser's "
                         + "online/reconnecting/offline state is never recorded "
-                        + "server-side, so the badge shows the server's own "
-                        + "evidence (requests keep arriving) rather than the "
+                        + "server-side, so the badge can only report the "
+                        + "cadence of this UI's own poll requests, not the "
                         + "client's connection store (gap #5)."),
                 new ListItem("@Push updates: server-pushed changes are not "
                         + "instrumented on the client, so push-delivered "
@@ -492,7 +547,16 @@ public class ApplicationHealthView extends VerticalLayout {
                 new ListItem("Per-UI footprint: we can count sessions and UIs, "
                         + "but not how much server memory each UI's state holds "
                         + "— the signal that actually predicts when to scale "
-                        + "(gap #6)."));
+                        + "(gap #6)."),
+                new ListItem("Flushing client samples: the \"flush now\" button "
+                        + "has to call window.__vaadinMicrometer.flush(), which "
+                        + "the kit documents as debug-only internal — there is "
+                        + "no public API to drain the client collector "
+                        + "(gap #9)."),
+                new ListItem("Per-interaction DB attribution: the kit's "
+                        + "vaadin.db.fetch.rows summary is cumulative, so "
+                        + "\"what did this click cost\" has to be computed by "
+                        + "bracketing the meter around the load (gap #10)."));
         Details details = new Details("What this can't show yet (and why)",
                 list);
         details.add(new Anchor(

@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.Collection;
 
 import com.example.home.HomeView;
+import com.example.uc2.ApplicationHealthView.Channel;
 import com.example.uc2.ApplicationHealthView.Stat;
 import com.example.uc2.ProductCatalogService.CatalogLoad;
 import io.micrometer.core.instrument.DistributionSummary;
@@ -24,8 +25,8 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @SpringBootTest
 @ViewPackages(classes = { ApplicationHealthView.class, HomeView.class })
@@ -47,10 +48,18 @@ class ApplicationHealthViewTest extends SpringBrowserlessTest {
                         .anyMatch(h -> h.getText().startsWith("UC2")),
                 "UC2 heading should render");
 
-        // The signal-bound status badge is populated by the effect.
+        // The signal-bound status badge is populated by the effect. Before any
+        // poll tick the cadence is unknown, so the badge must say so and carry
+        // neither the success nor the error theme — it never claims a
+        // connection state the server cannot see.
         Span status = findInView(Span.class).id("connection-status");
-        assertTrue(status.getText().startsWith("Connected"),
-                "connection status badge should report a live connection");
+        assertTrue(status.getText().startsWith("Waiting for the first"),
+                "badge should admit the cadence is unknown before the first poll: "
+                        + status.getText());
+        assertFalse(status.getElement().getThemeList().contains("success"),
+                "badge should not be green before any update has arrived");
+        assertFalse(status.getElement().getThemeList().contains("error"),
+                "badge should not be red before any update has arrived");
 
         // The readout always has a row per app signal, even with no traffic.
         Grid<Stat> grid = findInView(Grid.class).single();
@@ -86,7 +95,7 @@ class ApplicationHealthViewTest extends SpringBrowserlessTest {
 
         assertTrue(
                 findInView(Span.class).id("connection-status").getText()
-                        .startsWith("Connected"),
+                        .contains("refreshes this session"),
                 "view should still render after flushing client metrics");
     }
 
@@ -110,6 +119,35 @@ class ApplicationHealthViewTest extends SpringBrowserlessTest {
         String second = status.getText();
         assertTrue(!first.equals(second),
                 "a poll tick should refresh the live status badge");
+        // A tick that arrives on schedule is the one case where the badge may
+        // go green, and the effect must apply that theme.
+        assertTrue(second.startsWith("Live"),
+                "an on-time tick should report a live channel: " + second);
+        assertTrue(status.getElement().getThemeList().contains("success"),
+                "an on-time tick should turn the badge green");
+        assertFalse(status.getElement().getThemeList().contains("error"),
+                "an on-time tick should not flag the channel as interrupted");
+    }
+
+    @Test
+    void channelStateIsDerivedFromTheRefreshCadence() {
+        // The badge's three states come from this one pure function, so all of
+        // them are covered here rather than left as unreachable styling: no
+        // cadence yet, a tick within the poll window, and a late tick (the tab
+        // was suspended or the channel dropped and came back).
+        int poll = 2000;
+        assertEquals(Channel.UNKNOWN,
+                ApplicationHealthView.channel(0, 10_000, poll),
+                "before the first tick the channel state is unknown");
+        assertEquals(Channel.LIVE,
+                ApplicationHealthView.channel(10_000, 12_000, poll),
+                "a tick within the poll window means updates are flowing");
+        assertEquals(Channel.LIVE,
+                ApplicationHealthView.channel(10_000, 14_000, poll),
+                "a tick at twice the poll interval is still on time");
+        assertEquals(Channel.RESUMED,
+                ApplicationHealthView.channel(10_000, 25_000, poll),
+                "a late tick means updates had stopped arriving");
     }
 
     @Test
@@ -194,16 +232,17 @@ class ApplicationHealthViewTest extends SpringBrowserlessTest {
                 .single()).click();
         runPendingSignalsTasks();
 
-        // This assertion exercises the Observability Kit's database feature: it
-        // only applies when a kit build that records vaadin.db.fetch.rows is on
-        // the classpath (vaadin.observability.database=true). Otherwise the
-        // meter is absent and the demo degrades to a "not present" message, so
-        // skip rather than fail.
+        // The module pins a kit build with the database feature and sets
+        // vaadin.observability.database=true, so the meter must be there. This
+        // is asserted rather than assumed on purpose: if the kit ever stops
+        // recording vaadin.db.fetch.rows, UC2's headline claim is gone, and a
+        // skipped test would hide that behind a green CI run.
         Collection<DistributionSummary> summaries = registry
                 .find("vaadin.db.fetch.rows").summaries();
-        assumeTrue(!summaries.isEmpty(),
-                "requires the Observability Kit database feature "
-                        + "(vaadin.db.fetch.rows) on the classpath");
+        assertFalse(summaries.isEmpty(),
+                "the Observability Kit database feature should record "
+                        + "vaadin.db.fetch.rows (vaadin.observability.database"
+                        + "=true)");
 
         // With the meter present, the readout must flag the unbatched eager
         // join fetch as an N+1 (more result-set fetches than products).
