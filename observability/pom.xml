@@ -61,6 +61,15 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+        <!--
+          UC7 exports the Micrometer registry in Prometheus format. The registry
+          is what makes /actuator/prometheus exist; without it the kit's meters
+          stay in-process and no external stack can scrape them.
+        -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

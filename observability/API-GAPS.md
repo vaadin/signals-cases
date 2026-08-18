@@ -185,6 +185,40 @@ specific button. Manual per-listener instrumentation remains the general workaro
 component and event type (e.g. a resolver the app supplies), so interaction latency can be
 attributed by action without hand-wrapping every listener.
 
+## 9. Metric tags cannot express which component or view an interaction touched
+
+**Where it bites:** UC7 (the external dashboard), UC1, UC6.
+**Symptom:** the kit deliberately keeps high-cardinality attribution off meter
+tags: `vaadin.rpc.duration` carries `type` and `outcome`, `vaadin.errors` carries the
+exception type, and the invocation name and target component live only on spans (and,
+where a build has them, on interaction insights). That is the right call for
+cardinality, but it means an external dashboard can group latency and errors by RPC
+type, route or exception and *never* by component or view. "Which button is slow" is
+answerable from inside the app and in a tracing backend, but not in Grafana — which is
+where an operations team looks first.
+**Workaround used:** UC7's dashboard groups RPC latency by `type`; per-component
+questions are left to the in-app views.
+**Suggested API:** the cardinality-bounded resolver suggested in gap #8, applied to
+*meter* tags — e.g. an application-supplied mapping from component/event to a small set
+of logical action names — so a dashboard can group by action without unbounded series
+growth.
+
+## 10. Percentiles are silently unavailable unless buckets are enabled per timer
+
+**Where it bites:** UC7.
+**Symptom:** the kit's timers publish count/sum/max, but `histogram_quantile` needs
+`_bucket` series, which only appear when
+`management.metrics.distribution.percentiles-histogram.<meter>` is set for each meter.
+A p95 panel built on a kit timer therefore renders empty with no error anywhere — the
+metric exists, the buckets do not. Nothing in the kit or its documentation surfaces
+this, and the meter names have to be repeated in application configuration.
+**Workaround used:** UC7 enables buckets for `vaadin.request.duration`,
+`vaadin.rpc.duration` and `vaadin.session.lock.wait`, and its readout explicitly checks
+whether the bucket series exist.
+**Suggested API:** a kit-level switch (e.g. `vaadin.observability.percentiles=true`)
+that turns on histogram buckets for the kit's own latency meters, so percentile
+dashboards work without the application naming each meter.
+
 ## Test-simulator note
 
 Most client-side gaps are where the repo's browserless tests cannot exercise the JS
