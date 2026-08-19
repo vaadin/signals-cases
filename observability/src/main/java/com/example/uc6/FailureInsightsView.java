@@ -34,7 +34,6 @@ import com.vaadin.flow.server.ErrorHandler;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
-import com.vaadin.observability.micrometer.ObservabilityKit;
 import com.vaadin.observability.spring.boot.VaadinObservabilityEndpoint;
 
 /**
@@ -96,9 +95,10 @@ public class FailureInsightsView extends VerticalLayout {
 
     /**
      * The readout at a point in time: the flattened rows plus the endpoint
-     * payload verbatim. {@code active} is {@code false} when the kit registered
-     * no instrumentation — in development mode that happens without a license
-     * key, and then there is nothing to report.
+     * payload verbatim. {@code active} mirrors the payload's own
+     * {@code instrumentation} field: {@code false} means the kit registered no
+     * instrumentation, so there is nothing to report rather than nothing to
+     * find. In development mode that happens when no license key is present.
      */
     public record Snapshot(List<Row> rows, String json, boolean active) {
         static final Snapshot INACTIVE = new Snapshot(List.of(), "", false);
@@ -229,8 +229,11 @@ public class FailureInsightsView extends VerticalLayout {
                     count(evidence.get("occurrences")),
                     text(evidence.get("applicationFrame"))));
         }
+        // The endpoint states this itself now, so the view no longer has to
+        // reach into the kit's statics to tell "no failures" from "nothing was
+        // watching".
         snapshot.set(new Snapshot(rows, pretty(current),
-                ObservabilityKit.getRecentInteractions() != null));
+                "active".equals(current.get("instrumentation"))));
     }
 
     /**
@@ -323,6 +326,13 @@ public class FailureInsightsView extends VerticalLayout {
                         + "on meter tags: latency and error metrics are still "
                         + "tagged by RPC type and exception only, so a "
                         + "dashboard cannot group by component."),
+                new ListItem("The session id, exception message and stack "
+                        + "frames are opt-in: the payload is meant to travel, "
+                        + "so they are withheld unless "
+                        + "vaadin.observability.insights-details is set. This "
+                        + "demo enables it; with it off the session id is a "
+                        + "short hash and the payload says the message was "
+                        + "withheld rather than absent."),
                 new ListItem("Capture happens on the RPC invocation hook, "
                         + "which only fires for a real UIDL request. Browserless "
                         + "tests call listeners directly, so they cannot "

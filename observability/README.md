@@ -25,3 +25,11 @@ The kit's insights endpoint is exposed alongside the views:
 ```
 curl -s http://localhost:8080/actuator/vaadin/observability | jq
 ```
+
+The kit withholds the session id, the exception message and the stack frames
+unless `vaadin.observability.insights-details=true`, since that payload is meant
+to be forwarded — into issue trackers, AI agents and log pipelines. This module
+enables it so UC6 shows a complete insight; with it off the session id is a
+short hash and the payload states that the message was withheld rather than
+absent. A production application should leave it off until it has reviewed what
+those fields can contain.
