@@ -544,10 +544,13 @@ public class ApplicationHealthView extends VerticalLayout {
                         + "instrumented on the client, so push-delivered "
                         + "activity doesn't show up in the timing rows "
                         + "(gap #4)."),
-                new ListItem("Per-UI footprint: we can count sessions and UIs, "
-                        + "but not how much server memory each UI's state holds "
-                        + "— the signal that actually predicts when to scale "
-                        + "(gap #6)."),
+                new ListItem("Per-UI footprint: the rows above count "
+                        + "sessions and UIs, not how much server state each "
+                        + "one holds — the signal that actually predicts when "
+                        + "to scale. The kit measures it now, behind "
+                        + "vaadin.observability.ui-state=true, and UC3 is the "
+                        + "readout for it; what is still missing is the byte "
+                        + "cost, which the kit will not guess (gap #6)."),
                 new ListItem("Flushing client samples: the \"flush now\" button "
                         + "has to call window.__vaadinMicrometer.flush(), which "
                         + "the kit documents as debug-only internal — there is "
