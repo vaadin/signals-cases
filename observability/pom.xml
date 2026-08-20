@@ -62,6 +62,15 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         <!--
+          UC7 exports the Micrometer registry in Prometheus format. The registry
+          is what makes /actuator/prometheus exist; without it the kit's meters
+          stay in-process and no external stack can scrape them.
+        -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+        <!--
           UC2's join-table fetch demo needs a JPA layer and a database. H2 in
           memory is enough: the point is to make Hibernate's per-collection
           "1 row" fetches (the N+1) observable, not to ship a real datastore.
