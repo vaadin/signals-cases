@@ -121,7 +121,9 @@ push connection, not just navigations.
 
 ## 5. No connection-state metric, despite the client API existing
 
-**Where it bites:** UC5 (connection lost / reconnecting).
+**Where it bites:** UC5 (connection lost / reconnecting), UC2 (the health badge, which
+can therefore only report the cadence of its own poll requests, never the browser's
+connection state).
 **Symptom:** the kit collects client *errors* but not connection-state
 transitions. Yet `window.Vaadin.connectionState` already exposes
 `online`/`offline`, a `state` (`CONNECTED` / `CONNECTION_LOST` / `RECONNECTING`), and
@@ -137,7 +139,8 @@ client store already drives them.
 
 ## 6. No server-side UI-state-size / component-tree metric
 
-**Where it bites:** UC3 (capacity & scaling).
+**Where it bites:** UC3 (capacity & scaling), UC2 (the health readout counts sessions
+and UIs but cannot show what each one costs).
 **Symptom:** the kit reports session and UI *counts* (`vaadin.ui.active` etc.) and
 session-lock contention, but not how much state each UI holds — component-tree node
 count or per-session heap footprint. Because Flow keeps UI state in server memory,
@@ -207,12 +210,84 @@ a poor one for Java callers.
 summary, evidence and examples) alongside the JSON rendering, so in-app consumers get a
 compile-checked contract and JSON stays a serialization concern.
 
+## 10. Metric tags cannot express which component or view an interaction touched
+
+**Where it bites:** UC7 (the external dashboard), UC1, UC6.
+**Symptom:** the kit deliberately keeps high-cardinality attribution off meter
+tags: `vaadin.rpc.duration` carries `type` and `outcome`, `vaadin.errors` carries the
+exception type, and the invocation name and target component live only on spans (and,
+where a build has them, on interaction insights). That is the right call for
+cardinality, but it means an external dashboard can group latency and errors by RPC
+type, route or exception and *never* by component or view. "Which button is slow" is
+answerable from inside the app and in a tracing backend, but not in Grafana — which is
+where an operations team looks first.
+**Workaround used:** UC7's dashboard groups RPC latency by `type`; per-component
+questions are left to the in-app views.
+**Suggested API:** the cardinality-bounded resolver suggested in gap #8, applied to
+*meter* tags — e.g. an application-supplied mapping from component/event to a small set
+of logical action names — so a dashboard can group by action without unbounded series
+growth.
+
+## 11. Percentiles are silently unavailable unless buckets are enabled per timer
+
+**Where it bites:** UC7.
+**Symptom:** the kit's timers publish count/sum/max, but `histogram_quantile` needs
+`_bucket` series, which only appear when
+`management.metrics.distribution.percentiles-histogram.<meter>` is set for each meter.
+A p95 panel built on a kit timer therefore renders empty with no error anywhere — the
+metric exists, the buckets do not. Nothing in the kit or its documentation surfaces
+this, and the meter names have to be repeated in application configuration.
+**Workaround used:** UC7 enables buckets for `vaadin.request.duration`,
+`vaadin.rpc.duration` and `vaadin.session.lock.wait`, and its readout explicitly checks
+whether the bucket series exist.
+**Suggested API:** a kit-level switch (e.g. `vaadin.observability.percentiles=true`)
+that turns on histogram buckets for the kit's own latency meters, so percentile
+dashboards work without the application naming each meter.
+
+## 12. No public way to flush the in-browser collector
+
+**Where it bites:** UC2 (the "flush client metrics now" button); any view that wants to
+show client-collected numbers on demand.
+**Symptom:** `VaadinMetricsClient.js` buffers its samples and POSTs them on a ~5 s timer,
+so a view that reads `vaadin.client.*` right after load shows "no samples yet" for
+several seconds. The collector *can* be drained immediately — it exposes
+`window.__vaadinMicrometer.flush()` — but only as an internal: the kit's own source
+comments it `// Expose for tests / dashboards (debug only)`, and the `__` prefix says the
+same. There is no supported API, on either side, to say "send what you have now".
+**Workaround used:** UC2 calls `window.__vaadinMicrometer.flush()` from `executeJs`,
+guarded so it degrades to a no-op if the internal goes away. It works, and it is exactly
+the kind of dependency that should not be necessary.
+**Suggested API:** a public flush on the client collector (e.g.
+`window.Vaadin.observability.flush(): Promise<void>`) and/or a server-side counterpart on
+the `<vaadin-metrics-collector>` element, so application code can request a drain without
+reaching for a debug hook.
+
+## 13. Database meters are cumulative — no per-interaction attribution
+
+**Where it bites:** UC2 (the N+1 join-table demo).
+**Symptom:** with `vaadin.observability.database=true` the kit records every JDBC
+result-set fetch into the `vaadin.db.fetch.rows` `DistributionSummary` (and a
+`vaadin.db.query` span per query, nested under the request span). The summary is a
+rolling aggregate over the whole application, tagged by route but not by interaction, so
+there is no way to ask "how many fetches did *this click* cost" — which is the question
+an N+1 is diagnosed by. The spans carry that attribution, but only in the tracing
+backend; nothing on the meter side exposes it to application code.
+**Workaround used:** UC2 *brackets* the meter — it reads the fetch count and row total
+immediately before and after `loadCatalog()` and reports the delta (see
+`ApplicationHealthView#loadCatalog`). That is correct for a single-threaded click handler
+on one server, and quietly wrong under concurrent traffic, since another request's
+fetches land in the same summary in between.
+**Suggested API:** per-interaction DB attribution readable from application code — e.g. a
+scoped accessor for the fetches recorded during the current RPC invocation (the
+correlation id from gap #3 would carry it), or a per-request `vaadin.db.fetch.count`
+exposed alongside `vaadin.rpc.duration`.
+
 ## Test-simulator note
 
 Most client-side gaps are where the repo's browserless tests cannot exercise the JS
 collector. Server-side binders *are* testable browserlessly (drive `navigate(...)` +
 session/UI lifecycle and assert against a `SimpleMeterRegistry`), and the kit ships
-exactly such tests. Gaps that live purely in the browser (#1–#5, #7-client) have no
+exactly such tests. Gaps that live purely in the browser (#1–#5, #7-client, #11) have no
 browserless simulator and would need an end-to-end test or a documented manual check.
 
 **RPC-driven capture is also outside browserless reach.** Anything hooked on Flow's RPC
