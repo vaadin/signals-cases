@@ -121,7 +121,9 @@ push connection, not just navigations.
 
 ## 5. No connection-state metric, despite the client API existing
 
-**Where it bites:** UC5 (connection lost / reconnecting).
+**Where it bites:** UC5 (connection lost / reconnecting), UC2 (the health badge, which
+can therefore only report the cadence of its own poll requests, never the browser's
+connection state).
 **Symptom:** the kit collects client *errors* but not connection-state
 transitions. Yet `window.Vaadin.connectionState` already exposes
 `online`/`offline`, a `state` (`CONNECTED` / `CONNECTION_LOST` / `RECONNECTING`), and
@@ -137,7 +139,8 @@ client store already drives them.
 
 ## 6. No server-side UI-state-size / component-tree metric
 
-**Where it bites:** UC3 (capacity & scaling).
+**Where it bites:** UC3 (capacity & scaling), UC2 (the health readout counts sessions
+and UIs but cannot show what each one costs).
 **Symptom:** the kit reports session and UI *counts* (`vaadin.ui.active` etc.) and
 session-lock contention, but not how much state each UI holds — component-tree node
 count or per-session heap footprint. Because Flow keeps UI state in server memory,
@@ -219,10 +222,48 @@ whether the bucket series exist.
 that turns on histogram buckets for the kit's own latency meters, so percentile
 dashboards work without the application naming each meter.
 
+## 11. No public way to flush the in-browser collector
+
+**Where it bites:** UC2 (the "flush client metrics now" button); any view that wants to
+show client-collected numbers on demand.
+**Symptom:** `VaadinMetricsClient.js` buffers its samples and POSTs them on a ~5 s timer,
+so a view that reads `vaadin.client.*` right after load shows "no samples yet" for
+several seconds. The collector *can* be drained immediately — it exposes
+`window.__vaadinMicrometer.flush()` — but only as an internal: the kit's own source
+comments it `// Expose for tests / dashboards (debug only)`, and the `__` prefix says the
+same. There is no supported API, on either side, to say "send what you have now".
+**Workaround used:** UC2 calls `window.__vaadinMicrometer.flush()` from `executeJs`,
+guarded so it degrades to a no-op if the internal goes away. It works, and it is exactly
+the kind of dependency that should not be necessary.
+**Suggested API:** a public flush on the client collector (e.g.
+`window.Vaadin.observability.flush(): Promise<void>`) and/or a server-side counterpart on
+the `<vaadin-metrics-collector>` element, so application code can request a drain without
+reaching for a debug hook.
+
+## 12. Database meters are cumulative — no per-interaction attribution
+
+**Where it bites:** UC2 (the N+1 join-table demo).
+**Symptom:** with `vaadin.observability.database=true` the kit records every JDBC
+result-set fetch into the `vaadin.db.fetch.rows` `DistributionSummary` (and a
+`vaadin.db.query` span per query, nested under the request span). The summary is a
+rolling aggregate over the whole application, tagged by route but not by interaction, so
+there is no way to ask "how many fetches did *this click* cost" — which is the question
+an N+1 is diagnosed by. The spans carry that attribution, but only in the tracing
+backend; nothing on the meter side exposes it to application code.
+**Workaround used:** UC2 *brackets* the meter — it reads the fetch count and row total
+immediately before and after `loadCatalog()` and reports the delta (see
+`ApplicationHealthView#loadCatalog`). That is correct for a single-threaded click handler
+on one server, and quietly wrong under concurrent traffic, since another request's
+fetches land in the same summary in between.
+**Suggested API:** per-interaction DB attribution readable from application code — e.g. a
+scoped accessor for the fetches recorded during the current RPC invocation (the
+correlation id from gap #3 would carry it), or a per-request `vaadin.db.fetch.count`
+exposed alongside `vaadin.rpc.duration`.
+
 ## Test-simulator note
 
 Most client-side gaps are where the repo's browserless tests cannot exercise the JS
 collector. Server-side binders *are* testable browserlessly (drive `navigate(...)` +
 session/UI lifecycle and assert against a `SimpleMeterRegistry`), and the kit ships
-exactly such tests. Gaps that live purely in the browser (#1–#5, #7-client) have no
+exactly such tests. Gaps that live purely in the browser (#1–#5, #7-client, #11) have no
 browserless simulator and would need an end-to-end test or a documented manual check.
