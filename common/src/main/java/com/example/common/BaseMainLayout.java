@@ -1,5 +1,7 @@
 package com.example.common;
 
+import java.util.List;
+
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.html.Anchor;
@@ -46,21 +48,19 @@ public abstract class BaseMainLayout extends AppLayout
         addToDrawer(AppCatalog.createSelector(moduleId));
 
         SideNav nav = new SideNav();
-        MenuConfiguration.getMenuEntries().stream()
-                .filter(this::includeInMainNav).forEach(entry -> nav
-                        .addItem(new SideNavItem(entry.title(), entry.path())));
+        mainNavEntries().forEach(entry -> nav
+                .addItem(new SideNavItem(entry.title(), entry.path())));
         addToDrawer(nav);
     }
 
     /**
-     * Whether a menu entry is shown in the main side navigation. The default
-     * shows every entry; a module whose menu nests routes can override this to
-     * keep deeper entries out of the flat nav — {@code getMenuEntries()} is
-     * flat and says nothing about an entry's depth, so working that out needs
-     * the route hierarchy, which only the route-hierarchy module depends on.
+     * The menu entries listed in the main side navigation, in order. The
+     * default is the flat {@link MenuConfiguration#getMenuEntries()}; a module
+     * whose menu nests routes can override this to keep the deeper entries out
+     * of the flat nav.
      */
-    protected boolean includeInMainNav(MenuEntry entry) {
-        return true;
+    protected List<MenuEntry> mainNavEntries() {
+        return MenuConfiguration.getMenuEntries();
     }
 
     private static Element buildSourceCodeOverlay(Anchor link) {

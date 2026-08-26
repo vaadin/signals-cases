@@ -16,10 +16,12 @@ each crumb with the route's page title — including instance-free
 `BeforeEnterObserver`, no manual seeding.
 
 UC5, UC7 and UC8 are not breadcrumbs: they consume the same route-hierarchy API
-directly — `UpLink` calls `getRouteParent` for a single up-one-level control,
-`SitemapView` uses `getRouteHierarchy` as a graph-builder, and
-`HierarchicalMenuView` renders `MenuConfiguration.getMenuEntriesTree()` as a
-nested `SideNav`. The first two still reach for internal API; see
+directly — `UpLink` calls `RouteConfiguration.getRouteParent` for a single
+up-one-level control, `SitemapView` uses `getRouteHierarchy` as a
+graph-builder, and `HierarchicalMenuView` renders
+`MenuConfiguration.getMenuEntriesTree()` as a nested `SideNav`. Resolving the
+hierarchy is public API; resolving an ancestor's *title* still is not, so UC5
+and UC7 reach into `internal` for their labels — see
 [`API-GAPS.md`](API-GAPS.md).
 
 The hierarchical menu has not landed in the baseline Flow version yet, so this

@@ -23,12 +23,10 @@ import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouteReference;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.flow.router.internal.RouteUtil;
-import com.vaadin.flow.server.RouteRegistry;
-import com.vaadin.flow.server.VaadinService;
 
 /**
  * UC7 — Route-tree sitemap.
@@ -63,14 +61,13 @@ public class SitemapView extends VerticalLayout {
     }
 
     private static UnorderedList buildTree() {
-        RouteRegistry registry = VaadinService.getCurrent().getRouter()
-                .getRegistry();
+        RouteConfiguration routes = RouteConfiguration.forSessionScope();
         Set<Class<? extends Component>> roots = new LinkedHashSet<>();
         Map<Class<? extends Component>, Set<Class<? extends Component>>> children = new LinkedHashMap<>();
 
         for (Class<? extends Component> leaf : LEAVES) {
-            List<RouteReference> chain = RouteUtil.getRouteHierarchy(registry,
-                    leaf, RouteParameters.empty());
+            List<RouteReference> chain = routes.getRouteHierarchy(leaf,
+                    RouteParameters.empty());
             for (int i = 0; i < chain.size(); i++) {
                 Class<? extends Component> node = chain.get(i)
                         .navigationTarget();
