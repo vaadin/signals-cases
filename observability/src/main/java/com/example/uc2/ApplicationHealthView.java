@@ -552,11 +552,11 @@ public class ApplicationHealthView extends VerticalLayout {
                         + "has to call window.__vaadinMicrometer.flush(), which "
                         + "the kit documents as debug-only internal — there is "
                         + "no public API to drain the client collector "
-                        + "(gap #9)."),
+                        + "(gap #12)."),
                 new ListItem("Per-interaction DB attribution: the kit's "
                         + "vaadin.db.fetch.rows summary is cumulative, so "
                         + "\"what did this click cost\" has to be computed by "
-                        + "bracketing the meter around the load (gap #10)."));
+                        + "bracketing the meter around the load (gap #13)."));
         Details details = new Details("What this can't show yet (and why)",
                 list);
         details.add(new Anchor(

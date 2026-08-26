@@ -168,27 +168,49 @@ the client never sees a server duration.
 both sides (e.g. include it in the client hook's response event), so collectors need not
 re-measure or parse debug logs.
 
-## 8. Interaction granularity — improved, but still not per-action
+## 8. Interaction attribution — now on insights, still absent from metrics
 
 **Where it bites:** UC1 (which action is slow?), UC6 (errors by view/action).
-**Status: partially addressed by the kit.** Flow's RPC invocation listener
+**Status: largely addressed by the kit.** Flow's RPC invocation listener
 ([flow#24499](https://github.com/vaadin/flow/pull/24499)) lets the kit's `RpcMetricsBinder`
 time *individual* RPC invocations as `vaadin.rpc.duration`, tagged by `type` and
-`outcome` (`success`/`error`) — a real improvement over the prototype, where an
-interaction could only be tagged `poll` / `navigation` / `rpc` as a whole.
-**What still bites:** the binder deliberately omits the invocation *name* and *source
-node id* because they are high-cardinality, so latency and errors still can't be
-attributed to a specific component or event ("the Save button on OrdersView") — only to
-an RPC *type*. Server error counting (`vaadin.errors`) is tagged by exception type, not
-by route/view.
-**Workaround used:** UC1 keeps its own `uc1.interaction` timer, tagged by action name,
-because that per-action granularity is still the only way to attribute server cost to a
-specific button. Manual per-listener instrumentation remains the general workaround.
-**Suggested API:** an opt-in, cardinality-bounded way to tag RPC timing/errors by source
-component and event type (e.g. a resolver the app supplies), so interaction latency can be
-attributed by action without hand-wrapping every listener.
+`outcome` (`success`/`error`). The kit now also records the invocation *name* (the DOM
+event, e.g. `click`) and the *targeted component class* — as high-cardinality span
+attributes, and as fields of the interaction insights it captures for failed and
+over-budget interactions. UC6 reads those insights: each names the route, the component,
+the event and the first non-framework stack frame, so "the `click` on `Button` throws
+`IllegalStateException` at `FailureInsightsView.java:114`" is a groupable finding rather
+than something to reconstruct from a log.
+**What still bites:** the attribution lives on **spans and insights, not on meter tags**.
+`vaadin.rpc.duration` is still tagged only by `type` / `outcome`, and `vaadin.errors`
+only by exception type — deliberately, to bound cardinality. So a Prometheus/Grafana
+dashboard still cannot group latency or errors by component or view; only the in-process
+insights (or a tracing backend) carry that. A *business* action name ("save order", as
+opposed to the `click` that carried it) also remains the application's own to record.
+**Workaround used:** UC1 keeps its own `uc1.interaction` timer for per-action metric
+granularity; UC6 uses the insights for per-component attribution.
+**Suggested API:** an opt-in, cardinality-bounded resolver the application supplies (e.g.
+route plus a logical action name) that the kit may apply as *meter* tags, so dashboards
+can group by view/action without unbounded cardinality.
 
-## 9. Metric tags cannot express which component or view an interaction touched
+## 9. Insights are consumable in-process only as an untyped JSON map
+
+**Where it bites:** UC6.
+**Symptom:** the kit's interaction insights are shaped for the Actuator endpoint:
+`InsightsService.payload()` returns a `Map<String, Object>` of nested maps and lists. An
+application that wants to render insights in its own UI — as UC6 does, rather than have
+the app call its own HTTP endpoint — has to cast its way through that map
+(`(List<Map<String, Object>>) payload.get("insights")`, then
+`(Map<String, Object>) insight.get("evidence")`), with unchecked casts, string keys and
+no compile-time contract. The JSON shape is a good published contract for *agents*; it is
+a poor one for Java callers.
+**Workaround used:** UC6 flattens the map into a view-local `Row` record, with
+`@SuppressWarnings("unchecked")`.
+**Suggested API:** typed insight objects (e.g. `List<Insight>` exposing id, severity,
+summary, evidence and examples) alongside the JSON rendering, so in-app consumers get a
+compile-checked contract and JSON stays a serialization concern.
+
+## 10. Metric tags cannot express which component or view an interaction touched
 
 **Where it bites:** UC7 (the external dashboard), UC1, UC6.
 **Symptom:** the kit deliberately keeps high-cardinality attribution off meter
@@ -206,7 +228,7 @@ questions are left to the in-app views.
 of logical action names — so a dashboard can group by action without unbounded series
 growth.
 
-## 10. Percentiles are silently unavailable unless buckets are enabled per timer
+## 11. Percentiles are silently unavailable unless buckets are enabled per timer
 
 **Where it bites:** UC7.
 **Symptom:** the kit's timers publish count/sum/max, but `histogram_quantile` needs
@@ -222,7 +244,7 @@ whether the bucket series exist.
 that turns on histogram buckets for the kit's own latency meters, so percentile
 dashboards work without the application naming each meter.
 
-## 11. No public way to flush the in-browser collector
+## 12. No public way to flush the in-browser collector
 
 **Where it bites:** UC2 (the "flush client metrics now" button); any view that wants to
 show client-collected numbers on demand.
@@ -240,7 +262,7 @@ the kind of dependency that should not be necessary.
 the `<vaadin-metrics-collector>` element, so application code can request a drain without
 reaching for a debug hook.
 
-## 12. Database meters are cumulative — no per-interaction attribution
+## 13. Database meters are cumulative — no per-interaction attribution
 
 **Where it bites:** UC2 (the N+1 join-table demo).
 **Symptom:** with `vaadin.observability.database=true` the kit records every JDBC
@@ -267,3 +289,12 @@ collector. Server-side binders *are* testable browserlessly (drive `navigate(...
 session/UI lifecycle and assert against a `SimpleMeterRegistry`), and the kit ships
 exactly such tests. Gaps that live purely in the browser (#1–#5, #7-client, #11) have no
 browserless simulator and would need an end-to-end test or a documented manual check.
+
+**RPC-driven capture is also outside browserless reach.** Anything hooked on Flow's RPC
+invocation listener — `vaadin.rpc.duration`, and UC6's interaction insights — is observed
+only while handling a real UIDL request. A browserless `test(button).click()` invokes the
+component listener directly, bypassing `ServerRpcHandler`, so no invocation is reported
+and nothing is captured. UC6's test therefore covers rendering, wiring (the failing
+action must let its exception propagate) and lifecycle, while the capture itself needs a
+browser. A `SpringBrowserlessTest` hook to drive an invocation through the RPC pipeline
+would close this.
