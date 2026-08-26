@@ -138,16 +138,16 @@ public class FailureInsightsView extends VerticalLayout {
         // Colour-coded by the severity each action produces: red buttons yield
         // an "error" insight, the amber one a "warning", green none at all.
         add(new HorizontalLayout(
-                action("Fail now", ButtonVariant.LUMO_ERROR, () -> {
+                action("Fail now", ButtonVariant.ERROR, () -> {
                     throw new IllegalStateException(
                             "Report template 'summary' not found");
-                }), action("Fail differently", ButtonVariant.LUMO_ERROR, () -> {
+                }), action("Fail differently", ButtonVariant.ERROR, () -> {
                     throw new IllegalArgumentException(
                             "Customer id must not be blank");
                 }),
-                action("Slow call (1.5 s)", ButtonVariant.LUMO_WARNING,
+                action("Slow call (1.5 s)", ButtonVariant.WARNING,
                         () -> sleep(SLOW_MILLIS)),
-                action("Succeed", ButtonVariant.LUMO_SUCCESS,
+                action("Succeed", ButtonVariant.SUCCESS,
                         () -> Notification.show("Done"))));
 
         status.getStyle().set("font-style", "italic");
@@ -246,7 +246,7 @@ public class FailureInsightsView extends VerticalLayout {
             refreshWithThisResponse();
             work.run();
         });
-        button.addThemeVariants(variant, ButtonVariant.LUMO_PRIMARY);
+        button.addThemeVariants(variant, ButtonVariant.PRIMARY);
         return button;
     }
 
@@ -282,9 +282,9 @@ public class FailureInsightsView extends VerticalLayout {
         // DOM, and the panel would overflow onto what follows it.
         Div scroller = new Div(payload);
         scroller.getStyle().set("max-height", "55vh").set("overflow", "auto")
-                .set("background", "var(--lumo-contrast-5pct)")
-                .set("border-radius", "var(--lumo-border-radius-m)")
-                .set("padding", "var(--lumo-space-s)").set("width", "100%");
+                .set("background", "var(--vaadin-background-container)")
+                .set("border-radius", "var(--vaadin-radius-m)")
+                .set("padding", "var(--vaadin-padding-s)").set("width", "100%");
         Details details = new Details(
                 "Endpoint payload — GET /actuator/vaadin/observability",
                 scroller);
