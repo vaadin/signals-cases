@@ -10,6 +10,7 @@ repository, and the `HomeView` lists them via the auto-generated menu.
 | — | Home | Landing page and auto-generated index of the use cases. |
 | 1 | Interaction latency | Where an interaction's time goes: server request handling, the per-RPC server invocation (`vaadin.rpc.duration`), a per-action timer, and the browser's page-load signals (navigation timing, web vitals) — all read from the app's `MeterRegistry`. See [`API-GAPS.md`](API-GAPS.md). |
 | 2 | Application health | A live readout of the app's own signals (sessions, UIs, memory, timings, connection), plus a database-health demo: a button that loads a product catalog and surfaces the classic N+1 join-table fetch — N products cost N+1 single-row fetches — through the Observability Kit's own `vaadin.db.fetch.rows` meter (`vaadin.observability.database=true`). Adding `@BatchSize` to `Product.category` collapses it, exactly as in the bookstore-example. See [`API-GAPS.md`](API-GAPS.md). |
+| 3 | Capacity & scaling | How much state the server is holding for live users, and which signals actually predict needing another instance. Reads the kit's counts (`vaadin.sessions.active`, `vaadin.ui.active`, session creation rate and lifetime, session-lock contention) together with its UI-state gauges (`vaadin.ui.state.nodes`, `.nodes.max`, `.components`, `.views`, `vaadin.session.state.nodes.max`, `vaadin.session.uis.max`, `vaadin.ui.state.sample.age.max`), which the kit publishes once `vaadin.observability.ui-state=true` — this used to be [`API-GAPS.md`](API-GAPS.md) #6 and the view had to measure it itself. What remains local is the byte conversion: the kit counts nodes and will not guess what one weighs, so a probe measures it and the view reports whether the configured `ui-state-bytes-per-node` still holds. |
 | 6 | Failure insights | Failed and over-budget interactions as grouped insights naming the route, component, event and the offending line of application code — the same payload the kit serves at `/actuator/vaadin/observability` for an AI agent to act on. |
 | 7 | Monitoring stack | The same meters followed *outward*: exported at `/actuator/prometheus`, scraped by Prometheus, charted by Grafana. Checks each hop separately (exported series, scrape target health, the dashboard's own PromQL) so an empty panel can be told apart from a metric that was never exported. `compose.yaml` runs the stack locally. |
 
@@ -52,6 +53,15 @@ docker compose up -d
 
 - Prometheus <http://localhost:9090> — scrapes `/actuator/prometheus`
 - Grafana <http://localhost:3000> — anonymous admin, dashboard provisioned
+
+The dashboard's bottom rows chart the kit's UI-state gauges next to its
+counts, which is where the difference shows: state climbing while the session
+count is flat means capacity is going to what users have open, not to how many
+of them there are. `vaadin_ui_state_size_bytes` exists only because this module
+configures `vaadin.observability.ui-state-bytes-per-node`, and the last panel
+tracks `vaadin.ui.state.sample.age.max` — how stale the oldest per-UI
+measurement in the aggregate is, since a UI is measured on its own session's
+thread.
 
 Prometheus scrapes `host.docker.internal` on ports 8080 and 8082, so it finds
 the app on either; the unused one shows as a down target. Stop it with
