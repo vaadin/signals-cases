@@ -11,31 +11,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <properties>
-        <!--
-          Observability Kit (the Micrometer rewrite, 5.0-SNAPSHOT) builds on Flow
-          25.3-SNAPSHOT and relies on the SessionLockListener / RpcInvocationListener
-          SPIs (Flow PRs #24498 / #24499). Pin this module to the 25.3 line so the
-          Flow / components / vaadin artifacts align with the kit; the rest of the
-          repo stays on the baseline 25.2-SNAPSHOT.
-        -->
-        <flow.version>25.3-SNAPSHOT</flow.version>
-        <flow-components.version>25.3-SNAPSHOT</flow-components.version>
-        <vaadin.version>25.3-SNAPSHOT</vaadin.version>
-        <observability-kit.version>5.0-SNAPSHOT</observability-kit.version>
-        <!--
-          browserless-test has to follow the same Flow line. Its MockVaadin fires
-          the session-init / service-destroy listeners to simulate the lifecycle,
-          and Flow 25.3 (flow#25268) moved those off VaadinService's private
-          listener lists onto VaadinService#getEventBus() (VaadinServiceEventBus).
-          The 1.1 line still reads the removed fields reflectively, so every
-          browserless test here fails in setup with NoSuchFieldException:
-          sessionInitListeners; the 1.2 line is built against 25.3 and fires
-          through the event bus instead.
-        -->
-        <browserless-test.version>1.2-SNAPSHOT</browserless-test.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.example</groupId>
