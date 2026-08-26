@@ -67,7 +67,7 @@ public class ShareInviteLinkView extends VerticalLayout {
                 + "native share sheet, so the invitee can tap a one-off "
                 + "link in WhatsApp, mail, or AirDrop."));
 
-        generateButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        generateButton.addThemeVariants(ButtonVariant.PRIMARY);
         codeLabel.addClassName("invite-code");
         linkAnchor.setTarget("_blank");
         urlHolder.setVisible(false);

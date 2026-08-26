@@ -135,7 +135,7 @@ public class MUC06View extends VerticalLayout {
                     LocalDate.now());
             tasksSignal.insertLast(newTask);
         });
-        addButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        addButton.addThemeVariants(ButtonVariant.PRIMARY);
 
         // Info box
         Div infoBox = new Div();
@@ -188,8 +188,8 @@ public class MUC06View extends VerticalLayout {
 
         // Delete button
         Button deleteButton = new Button(new Icon(VaadinIcon.TRASH));
-        deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR,
-                ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_SMALL);
+        deleteButton.addThemeVariants(ButtonVariant.ERROR,
+                ButtonVariant.SMALL);
         deleteButton.setAriaLabel("Delete task");
         deleteButton.addClickListener(e -> tasksSignal.remove(taskSignal));
 

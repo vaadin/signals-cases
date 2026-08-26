@@ -50,7 +50,7 @@ public class ShareThisPageView extends VerticalLayout {
                 + "see the share sheet pop up — on desktop Firefox the "
                 + "button stays disabled and explains why."));
 
-        shareButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        shareButton.addThemeVariants(ButtonVariant.PRIMARY);
         statusBadge.addClassName("status-badge");
 
         HorizontalLayout row = new HorizontalLayout(shareButton, statusBadge);

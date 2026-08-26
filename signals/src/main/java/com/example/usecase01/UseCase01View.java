@@ -137,9 +137,9 @@ public class UseCase01View extends VerticalLayout {
                 }));
 
         // Bind theme variant
-        submitButton.bindThemeVariant(ButtonVariant.LUMO_SUCCESS,
+        submitButton.bindThemeVariant(ButtonVariant.SUCCESS,
                 submissionStateSignal.map(SubmissionState.SUCCESS::equals));
-        submitButton.bindThemeVariant(ButtonVariant.LUMO_PRIMARY, Signal.not(
+        submitButton.bindThemeVariant(ButtonVariant.PRIMARY, Signal.not(
                 submissionStateSignal.map(SubmissionState.SUCCESS::equals)));
 
         submitButton.addClickListener(e -> {
@@ -165,7 +165,7 @@ public class UseCase01View extends VerticalLayout {
                         Notification notification = Notification
                                 .show("Account created successfully!");
                         notification.addThemeVariants(
-                                NotificationVariant.LUMO_SUCCESS);
+                                NotificationVariant.SUCCESS);
                         notification.setDuration(3000);
                     });
 
