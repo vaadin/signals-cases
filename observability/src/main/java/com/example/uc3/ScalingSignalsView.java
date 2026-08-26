@@ -191,7 +191,7 @@ public class ScalingSignalsView extends VerticalLayout {
                 button("Reset added state", "reset-state",
                         ButtonVariant.TERTIARY, this::resetState),
                 button("Measure bytes per node", "measure-cost",
-                        ButtonVariant.LUMO_CONTRAST, this::measureCost)));
+                        ButtonVariant.PRIMARY, this::measureCost)));
 
         add(configSection());
         add(signalsSection());
