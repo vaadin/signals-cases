@@ -9,8 +9,12 @@ the real fix. The API:
   `Signal<ScreenOrientationData>`, where `ScreenOrientationData` is a record
   `(ScreenOrientationType type, int angle)`; `ScreenOrientationType` has
   `isLandscape()` / `isPortrait()`.
-- `ScreenOrientation.lock(ScreenOrientationType, onSuccess, onError)` and
-  `ScreenOrientation.unlock()` / `unlock(SerializableRunnable onComplete)`.
+- `ScreenOrientation.lock(ScreenOrientationType, onSuccess, onError)` — the
+  error carries a `ScreenOrientationLockError` (`ScreenOrientationLockErrorCode`
+  + debug info) — and `ScreenOrientation.unlock()` /
+  `unlock(SerializableRunnable onComplete)`.
+
+Last verified against Vaadin / Flow `25.3-SNAPSHOT` on 2026-08-26.
 
 ## No `ScreenOrientationSimulator` for tests
 
@@ -61,7 +65,7 @@ switch — usually as "treat like UNSUPPORTED" or "treat like portrait".
 fallback)` accessor that swaps `UNKNOWN` for an application-provided
 fallback before the value reaches consumers.
 
-## No way to feature-detect screen-orientation support from the server before bootstrap
+## Feature-detecting screen-orientation support — accessor landed, pre-bootstrap window did not
 
 **Where it bit us:** uc3 / `RotatePromptView`, uc4 / `LockForVideoView`.
 **Symptom:** To decide whether to show a "rotate your device" hint or a
@@ -69,9 +73,27 @@ fallback before the value reaches consumers.
 browser implement the Screen Orientation API?". You must wait for the
 signal to settle on `UNSUPPORTED` — distinct from `UNKNOWN` but still
 asynchronous.
-**Workaround used:** Treat `UNSUPPORTED` as feature-detect, but accept a
-brief window where the UI offers a control that will fail on click.
-**Suggested API:** Add `ExtendedClientDetails#supportsScreenOrientation()` (the
-bootstrap already carries enough information to fill it in synchronously).
-That mirrors how `ExtendedClientDetails` already exposes other
-"feature-detect" booleans.
+**Was suggested:** `ExtendedClientDetails#supportsScreenOrientation()`, filled in
+synchronously from the bootstrap.
+**Status: half of it shipped.** `ExtendedClientDetails#isScreenOrientationSupported()`
+exists since 25.2 and gives the synchronous boolean. But it is derived from the
+signal, not from the bootstrap payload:
+
+```java
+ScreenOrientationType type = ScreenOrientation.orientationSignal(ui).peek().type();
+return type != UNKNOWN && type != UNSUPPORTED;
+```
+
+so it returns `false` both when the browser has no Screen Orientation API *and*
+before the client handshake has seeded the signal — exactly the pre-bootstrap
+window the gap was about, and the same `UNKNOWN`-conflation described in the
+previous section. Reading it from `onAttach` on a first request would therefore
+hide the lock button on a device that does support locking.
+**Workaround used:** unchanged — the use cases keep binding to
+`orientationSignal()` and treat `UNSUPPORTED` as the feature-detect, so the UI
+corrects itself when the real value arrives. The new accessor is the right tool
+for a one-shot decision *after* the handshake, and both views would regress if
+they used it at attach time, so they don't.
+**Still suggested:** make the accessor tri-state (or seed it from the bootstrap
+parameters, which already carry the value) so "not known yet" is distinguishable
+from "not supported".

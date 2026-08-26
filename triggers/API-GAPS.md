@@ -2,11 +2,13 @@
 
 This module exercises the public-facing trigger API at
 `com.vaadin.flow.component.trigger.internal.*` in mainline
-`25.2-SNAPSHOT`. The classes there carry "For internal use only. May be
+`25.3-SNAPSHOT`. The classes there carry "For internal use only. May be
 renamed or removed in a future release." — using them is supported but
 the shapes are still evolving. This file records the points where the
 module hit a wall and what the workaround looks like, so the upstream
 PR has a feedback trail.
+
+Last verified against Vaadin / Flow `25.3-SNAPSHOT` on 2026-08-26.
 
 ## Status
 
@@ -15,8 +17,8 @@ PR has a feedback trail.
 | No public `ShortcutTrigger` | **Open** — local shim | UC1, UC2 |
 | No public `ClickAction` | **Open** — local shim | UC2 |
 | No generic `PreventDefaultAction` | **Open** — local shim | UC11 |
-| `Action.Input#toJs` not reachable outside `internal` | **Open** | UC13 |
-| `HandlerInput` not public | **Open** | UC5, UC7 |
+| `Action.Input#toJs` not reachable outside `internal` | **Resolved** in 25.2 — module updated | UC13 |
+| `HandlerInput` not public | **Resolved** in 25.2 — module updated | UC5, UC7 |
 | `PropertyInput` doesn't accept a raw `Element` | **Open** | — *(no current UC; see history note below)* |
 | Server-side feature detection | **Open** | — |
 | Public introspection of trigger wiring | **Open** | all tests |
@@ -71,42 +73,42 @@ trigger.
 the public surface or add a chainable builder method on `DomEventTrigger`
 mirroring `KeyboardEventTrigger.preventDefault()`.
 
-## `Action.Input#toJs` is package-private
+## ~~`Action.Input#toJs` is package-private~~ — resolved in 25.2
 
-**Where it bit us:** UC13 wanted a `FilterListAction` that took an
-`Action.Input<String>` as the query source — the natural shape mirroring
-`SetPropertyAction(target, name, source)`. But
-`Action.Input#toJs(Trigger)` has `protected` visibility, and the
-surrounding `Action` class lives in
-`com.vaadin.flow.component.trigger.internal`, so application code in any
-other package can't call it.
-**Symptom:** `source.toJs(trigger)` from a custom Action outside the
-`internal` package fails to compile with "toJs has protected access in
-Input".
-**Workaround used:** Drop the Input parameter entirely. UC13's
-`FilterListAction` is hard-wired to read its query from
-`event.target.value` and only works when bound to a `DomEventTrigger` on
-the relevant search field.
-**Suggested API:** Promote `Input#toJs` to `public` (it is already
-public by intent — every `Action` calls it). Or give Input a public
-render method that wraps `toJs` for external callers.
+**Was:** `Action.Input#toJs(Trigger)` was `protected` inside
+`com.vaadin.flow.component.trigger.internal`, so an `Action` written in
+application code could not call it, and UC13's `FilterListAction` had to
+drop the Input parameter and hard-wire itself to `event.target.value`
+(which only worked when bound to a `DomEventTrigger` on the search
+field).
+**Now:** `public abstract JsFunction toJs(Trigger trigger)` on
+`Action.Input`. `FilterListAction` has been rewritten to take an
+`Action.Input<String> query` and compose it with one
+`query.toJs(trigger)` call, exactly like the built-in
+`SetPropertyAction(target, name, source)`. `ClientFilterView` now passes
+`new PropertyInput<>(search, "value", String.class)`, so the action is no
+longer tied to a particular trigger shape.
 
-## `HandlerInput` is not public
+## ~~`HandlerInput` is not public~~ — resolved in 25.2
 
-**Where it bit us:** UC5 (`IdleTrigger`), UC7 (`BroadcastChannelTrigger`).
-Both expose event-scoped state through static `Action.Input` fields and
-would naturally use `HandlerInput<>("event.detail.idle",
-IdleTrigger.class)` — the exact pattern the built-in triggers use (see
-`SizeTrigger.EventData`, `MouseEventTrigger.EventData`).
-**Symptom:** `HandlerInput` is in the `internal` package and
-package-private. Custom Triggers in any other package fall back to
-declaring an anonymous `Action.Input<T>` per field with an inline
-trigger type check.
-**Workaround used:** Anonymous classes (see `IdleTrigger.EventData.idle`,
-`BroadcastChannelTrigger.EventData.data`). Each is ~10 lines instead of
-one.
-**Suggested API:** Make `HandlerInput` `public` so add-on triggers can
-reuse the canonical implementation.
+**Was:** `HandlerInput` was package-private, so custom triggers outside
+the framework package declared an anonymous `Action.Input<T>` per
+event property — ~10 lines each, with a hand-written trigger type check.
+**Now:** `public final class HandlerInput<T>` with a public
+`HandlerInput(String propertyName, Class<? extends Trigger> ownerClass)`
+constructor, and the scoping check comes with it. Both custom triggers
+use it:
+
+- `BroadcastChannelTrigger.EventData.data` is
+  `new HandlerInput<>("data", BroadcastChannelTrigger.class)`.
+- `IdleTrigger.EventData.idle` is
+  `new HandlerInput<>("idle", IdleTrigger.class)`. `HandlerInput` renders
+  `event[name]`, so it reads a *top-level* event property only; the
+  trigger's JS now fires a plain `{idle: state}` object instead of a
+  `CustomEvent` with a nested `detail.idle` — the same synthetic-event
+  shape the built-in `SizeTrigger` uses. A nested path
+  (`detail.idle`) still needs a hand-written `Action.Input`, which is a
+  fair restriction but worth knowing before reaching for it.
 
 ## `PropertyInput` doesn't accept a raw `Element`
 

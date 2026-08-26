@@ -8,7 +8,15 @@ sharing is bound to a click trigger via
 `share(content, onShared, onError)` form), the payload is built with
 `ShareContent.create().title(...).text(...).url(...)` (each accepting a String
 literal or a `HasValue` source for live binding), and support is read from the
-static `WebShare.supportSignal()` returning `Signal<WebShareSupport>`.
+static `WebShare.supportSignal()` returning `Signal<WebShareSupport>` (with a
+`supportSignal(UI)` overload for use off the UI thread).
+
+Last verified against Vaadin / Flow `25.3-SNAPSHOT` on 2026-08-26: all four
+gaps below are still open. `ShareContent` still builds only `title` / `text` /
+`url`, `WebShareBinding` still exposes only the two `share(...)` forms, no
+`WebShareSimulator` ships in `browserless-test-shared` (which still carries
+`GeolocationSimulator` alone), and `ExtendedClientDetails` — which grew an
+`isScreenOrientationSupported()` in 25.2 — has no Web Share counterpart.
 
 ## File sharing (Web Share Level 2)
 

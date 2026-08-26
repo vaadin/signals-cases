@@ -7,24 +7,50 @@ the `@RouteParent` annotation (with a dynamic `resolver()`),
 target paired with its `RouteParameters`), and instance-free dynamic titles via
 `@DynamicPageTitle` + `PageTitleGenerator` / `PageTitleContext`.
 
-## The resolution entry points are internal API
+Last verified against Vaadin / Flow `25.3-SNAPSHOT` on 2026-08-26.
 
-**Where it bites us:** `UpLink` (UC5), `SitemapView` (UC7).
-**Symptom:** the *building blocks* above are public, but the methods that
-actually *resolve* a hierarchy or a title are unsupported **internal** API:
+## ~~The resolution entry points are internal API~~ — resolved in 25.2
 
-- `com.vaadin.flow.router.internal.RouteUtil#getRouteHierarchy` / `getRouteParent`
-- `com.vaadin.flow.internal.menu.MenuRegistry#getTitle(Class, RouteParameters)`
+**Was:** the *building blocks* were public, but the methods that actually
+*resolve* a hierarchy or a title were unsupported **internal** API
+(`com.vaadin.flow.router.internal.RouteUtil#getRouteHierarchy` /
+`getRouteParent`, and `com.vaadin.flow.internal.menu.MenuRegistry#getTitle`),
+so `UpLink` (UC5) and `SitemapView` (UC7) — the two non-breadcrumb consumers —
+had to import `internal` to walk the hierarchy and resolve entry titles.
 
-The standard breadcrumb case is now covered: the `Breadcrumbs` component
-(`ROUTER` mode) consumes this internal API for us, so UC1–UC4 and UC6 just
-`add(new Breadcrumbs())` with no `internal` import. But any *other* consumer of
-the raw hierarchy still has to re-implement the walk and the title reflection,
-or import `internal`. The two non-breadcrumb use cases do the latter — `UpLink`
-calls `RouteUtil.getRouteParent` and `SitemapView` calls
-`RouteUtil.getRouteHierarchy` + `MenuRegistry.getTitle` directly, since a
-one-line wrapper around them would only obscure the dependency.
-**Suggested API:** promote them to a supported surface next to the public
-records, e.g. `RouteHierarchy.of(class, params) → List<RouteReference>` and
-`RouteHierarchy.titleOf(class, params)` (or fold the title onto the reference
-as `RouteReference#title()`).
+**Now:** both are on the supported surface (`@since 25.2`), shaped almost
+exactly as suggested:
+
+```java
+// com.vaadin.flow.router.RouteConfiguration
+Optional<RouteReference> getRouteParent(Class<? extends Component> target,
+        RouteParameters parameters);
+List<RouteReference> getRouteHierarchy(Class<? extends Component> target,
+        RouteParameters parameters);
+
+// com.vaadin.flow.router.Router
+Optional<String> resolvePageTitle(Class<? extends Component> target,
+        RouteParameters routeParameters);
+Optional<String> resolvePageTitle(Class<? extends Component> target,
+        RouteParameters routeParameters, QueryParameters queryParameters);
+```
+
+`MenuRegistry.getTitle` is now itself a thin wrapper over
+`Router#resolvePageTitle` that falls back to the class simple name, so the only
+thing a caller gives up by moving to the public method is that fallback — one
+`orElseGet(target::getSimpleName)`.
+
+Both use cases have been updated: `UpLink` calls
+`RouteConfiguration.forRegistry(router.getRegistry()).getRouteParent(...)` plus
+`router.resolvePageTitle(...)`, and `SitemapView` calls
+`getRouteHierarchy(...)` the same way — nothing in this module imports
+`com.vaadin.flow.router.internal` or `com.vaadin.flow.internal.menu` any more.
+
+The title is still resolved separately from the reference rather than folded
+onto `RouteReference#title()` as originally suggested — deliberately, it looks
+like, since resolving a title needs a `VaadinService` while a `RouteReference`
+is a plain record. Not a gap.
+
+## No open gaps
+
+Everything the seven use cases needed is reachable from supported API.

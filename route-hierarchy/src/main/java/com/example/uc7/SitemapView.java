@@ -19,15 +19,14 @@ import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouteReference;
+import com.vaadin.flow.router.Router;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.flow.router.internal.RouteUtil;
-import com.vaadin.flow.server.RouteRegistry;
 import com.vaadin.flow.server.VaadinService;
 
 /**
@@ -63,14 +62,14 @@ public class SitemapView extends VerticalLayout {
     }
 
     private static UnorderedList buildTree() {
-        RouteRegistry registry = VaadinService.getCurrent().getRouter()
-                .getRegistry();
+        RouteConfiguration routes = RouteConfiguration.forRegistry(
+                VaadinService.getCurrent().getRouter().getRegistry());
         Set<Class<? extends Component>> roots = new LinkedHashSet<>();
         Map<Class<? extends Component>, Set<Class<? extends Component>>> children = new LinkedHashMap<>();
 
         for (Class<? extends Component> leaf : LEAVES) {
-            List<RouteReference> chain = RouteUtil.getRouteHierarchy(registry,
-                    leaf, RouteParameters.empty());
+            List<RouteReference> chain = routes.getRouteHierarchy(leaf,
+                    RouteParameters.empty());
             for (int i = 0; i < chain.size(); i++) {
                 Class<? extends Component> node = chain.get(i)
                         .navigationTarget();
@@ -92,14 +91,16 @@ public class SitemapView extends VerticalLayout {
     private static UnorderedList renderLevel(
             Set<Class<? extends Component>> nodes,
             Map<Class<? extends Component>, Set<Class<? extends Component>>> children) {
+        Router router = VaadinService.getCurrent().getRouter();
         UnorderedList list = new UnorderedList();
         list.addClassName("sitemap-tree");
         for (Class<? extends Component> node : nodes) {
             ListItem item = new ListItem();
             item.addClassName("sitemap-node");
-            item.add(new RouterLink(
-                    MenuRegistry.getTitle(node, RouteParameters.empty()),
-                    node));
+            String title = router
+                    .resolvePageTitle(node, RouteParameters.empty())
+                    .orElseGet(node::getSimpleName);
+            item.add(new RouterLink(title, node));
             Set<Class<? extends Component>> kids = children.get(node);
             if (kids != null && !kids.isEmpty()) {
                 item.add(renderLevel(kids, children));

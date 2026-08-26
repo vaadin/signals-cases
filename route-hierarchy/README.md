@@ -16,9 +16,11 @@ each crumb with the route's page title — including instance-free
 `BeforeEnterObserver`, no manual seeding.
 
 UC5 and UC7 are not breadcrumbs: they consume the same route-hierarchy API
-directly — `UpLink` calls `getRouteParent` for a single up-one-level control,
-and `SitemapView` uses `getRouteHierarchy` as a graph-builder. Those still reach
-for internal API; see [`API-GAPS.md`](API-GAPS.md).
+directly — `UpLink` calls `RouteConfiguration#getRouteParent` for a single
+up-one-level control, and `SitemapView` uses `RouteConfiguration#getRouteHierarchy`
+as a graph-builder, both labelling entries with `Router#resolvePageTitle`. Those
+three methods used to be internal API and are public since 25.2; see
+[`API-GAPS.md`](API-GAPS.md).
 
 | # | View | What it shows |
 | - | ---- | ------------- |

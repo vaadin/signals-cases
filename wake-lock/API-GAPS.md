@@ -4,7 +4,13 @@ Friction points hit while building the four use cases on the static
 `com.vaadin.flow.component.wakelock.WakeLock` API: `request()` /
 `request(SerializableConsumer<WakeLockError>)` / `release()`,
 `activeSignal()` → `Signal<Boolean>`, and `availabilitySignal()` →
-`Signal<WakeLockAvailability>` (`SUPPORTED / UNSUPPORTED / UNKNOWN`).
+`Signal<WakeLockAvailability>` (`SUPPORTED / UNSUPPORTED / UNKNOWN`). Every
+one of those now also has an explicit-`UI` overload
+(`request(UI)`, `request(onError, UI)`, `release(UI)`, `activeSignal(UI)`,
+`availabilitySignal(UI)`) for use off the UI thread.
+
+Last verified against Vaadin / Flow `25.3-SNAPSHOT` on 2026-08-26: all five
+notes below still stand.
 
 Nothing is *blocked* by missing API surface. The notes below are places where
 the use cases needed a workaround or where the surface feels thinner than the
@@ -85,6 +91,9 @@ tab).
 facade is bound to (the UI element passed into `request(element)`),
 not module-wide. The event already carries `element` so the server
 side could distinguish them.
+**Re-checked 2026-08-26:** `WakeLock.js` in `flow-client 25.3-SNAPSHOT`
+still keeps `wanted`, `sentinel` and `visibilityListenerInstalled` as
+module-level variables.
 
 ## No "lock anything other than the screen"
 

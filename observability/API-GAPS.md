@@ -22,13 +22,19 @@ remains *missing or awkward even with the kit in place* — i.e. the things the
 demo can't do cleanly, and the Flow / kit API changes they argue for. A reusable
 shim, where one is possible, would live in `src/main/java/com/example/MissingAPI.java`.
 
+Last verified against Flow `25.3-SNAPSHOT` and Observability Kit `5.0-SNAPSHOT`
+(build 94) on 2026-08-26.
+
 Meters referenced below use the kit's `MeterNames` constants. The server records
 `vaadin.request.duration`, `vaadin.rpc.duration` (tagged `type` / `outcome`),
-`vaadin.navigation`, `vaadin.errors`, `vaadin.sessions.*`, `vaadin.session.lock.*`
-and `vaadin.ui.*`. The client collector records, into the *same* registry,
+`vaadin.navigation`, `vaadin.errors`, `vaadin.sessions.*`, `vaadin.session.lock.*`,
+`vaadin.ui.*`, `vaadin.resync` and — from Flow 25.3's data-provider query events —
+`vaadin.data.count.duration` and `vaadin.data.fetch.duration` / `.rows` /
+`.requested` (see gap #13). The client collector records, into the *same* registry,
 `vaadin.client.bootstrap.duration`, `vaadin.client.navigation.duration` (tagged
 `route` / `trigger`), `vaadin.client.web_vitals.lcp`, `vaadin.client.web_vitals.fcp`
-and the `vaadin.client.errors` counter.
+and the `vaadin.client.errors` counter, plus `vaadin.client.dropped` /
+`vaadin.client.throttled` for samples the ingest side rejects.
 
 **Reachability is not the problem.** The in-browser collector POSTs its samples
 back via the `<vaadin-metrics-collector>` `@ClientCallable`, and `ClientMetricsBinder`
@@ -254,6 +260,17 @@ a poor one for Java callers.
 summary, evidence and examples) alongside the JSON rendering, so in-app consumers get a
 compile-checked contract and JSON stays a serialization concern.
 
+**What is typed today:** the *raw captures* are, and they are reachable —
+`ObservabilityKit.getRecentInteractions().snapshot()` returns
+`List<CapturedInteraction>` and `getRecentQueries().snapshot()` returns
+`List<CapturedQuery>`, both public records (route, component, event, outcome,
+duration, exception, application frame, …). What has no typed form is the part
+UC6 actually renders: the *grouping* — severity, summary, occurrence count and
+evidence — which `InsightsService` computes in private methods and only ever
+returns as nested maps. So an application can either have types without the
+grouping, or the grouping without types; UC6 keeps the latter, since re-deriving
+"N users hitting the same broken button" is the value the kit adds.
+
 ## 10. Metric tags cannot express which component or view an interaction touched
 
 **Where it bites:** UC7 (the external dashboard), UC1, UC6.
@@ -325,6 +342,30 @@ fetches land in the same summary in between.
 scoped accessor for the fetches recorded during the current RPC invocation (the
 correlation id from gap #3 would carry it), or a per-request `vaadin.db.fetch.count`
 exposed alongside `vaadin.rpc.duration`.
+
+**Partly addressed one layer up (Flow 25.3 + kit build 94).** Flow now fires
+data-provider query events on the service event bus —
+`DataCountStartedEvent` / `…Ended` / `…Failed` and
+`DataFetchStartedEvent` / `…Ended` / `…Failed` in `com.vaadin.flow.server.data`,
+each carrying the `UI`, the resolved `Component`, `offset`, `limit`, `isFiltered()`
+and (on ended) `getRowsReturned()`. The kit consumes them behind
+`vaadin.observability.data=true` into `vaadin.data.count.duration` and
+`vaadin.data.fetch.duration` / `.rows` / `.requested`, and captures slow or failed
+queries as `CapturedQuery` insights carrying the route and the component.
+
+That answers "which component asked for how many rows, and got how many back" —
+including the over-fetch signal of `limit` versus `rowsReturned` — and, unlike the
+kit meters, the *events themselves are public API an application can listen to*, so
+an app can attribute data-provider queries to the interaction that caused them
+without bracketing anything.
+
+It does **not** close this gap for UC2. `vaadin.db.fetch.rows` is a JDBC
+result-set counter installed by the Spring starter's `RowCountingDataSource`, one
+layer below the data provider, and UC2's N+1 comes from an eager association loaded
+by a *service* call behind a button — not from a data-provider fetch, so no data
+event fires for it. `DatabaseFetchMetrics` remains package-private with no scoped
+accessor, so the bracket stays, and so does the request for per-interaction
+attribution at the JDBC layer.
 
 ## Test-simulator note
 

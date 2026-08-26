@@ -11,6 +11,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.trigger.internal.DomEventTrigger;
+import com.vaadin.flow.component.trigger.internal.PropertyInput;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -20,8 +21,10 @@ import com.vaadin.flow.router.Route;
  * <p>
  * The full list comes from the server (loaded once at view construction). A
  * {@link DomEventTrigger} on the search field's {@code input} event fires a
- * {@link FilterListAction} that hides non-matching rows entirely in JS. No
- * server round-trip on each keystroke; the server only sees the data once.
+ * {@link FilterListAction} that hides non-matching rows entirely in JS. The
+ * query is handed to the action as a {@link PropertyInput} on the field, so the
+ * action itself is not tied to any particular trigger. No server round-trip on
+ * each keystroke; the server only sees the data once.
  * <p>
  * Contrast with {@code SetSignalAction} (UC3) — there the keystrokes would push
  * to a signal and the server would react; here the goal is the opposite, keep
@@ -64,8 +67,8 @@ public class ClientFilterView extends VerticalLayout {
             list.add(row);
         }
 
-        new DomEventTrigger(search, "input")
-                .triggers(new FilterListAction(list));
+        new DomEventTrigger(search, "input").triggers(new FilterListAction(list,
+                new PropertyInput<>(search, "value", String.class)));
 
         add(search, list);
     }

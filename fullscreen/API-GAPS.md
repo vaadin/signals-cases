@@ -11,6 +11,11 @@ Rough edges hit while building the use cases on the
 - `Fullscreen.stateSignal()` exposes a single global `Signal<FullscreenState>`
   (`UNKNOWN`, `UNSUPPORTED`, `NOT_FULLSCREEN`, `FULLSCREEN`).
 
+Last verified against Vaadin / Flow `25.3-SNAPSHOT` on 2026-08-26: all three
+gaps below are still open, and the API surface is unchanged
+(`Fullscreen` + `FullscreenBinding` + `FullscreenState`, plus the
+`Fullscreen.setStateFromClient(UI, String)` test seam).
+
 ## `FullscreenState.UNSUPPORTED` conflates "unsupported" with "not permitted"
 
 **Where it bit us:** no specific UC — a latent gap that hits embedded
@@ -20,7 +25,10 @@ iframes (e.g. a Flow app inside a host page that didn't grant the
 permitted to enter fullscreen". The distinction matters for the message we
 show the user: "Your browser doesn't support fullscreen" vs "This page isn't
 allowed to enter fullscreen — check the iframe `allow` attribute".
-**Workaround used:** treat both as `UNSUPPORTED`.
+**Workaround used:** treat both as `UNSUPPORTED`. The conflation is now
+spelled out in the enum's own Javadoc ("either it does not support fullscreen,
+or the page is not permitted to enter it"), so it reads as deliberate rather
+than accidental — but the application still cannot tell the two apart.
 **Suggested API:** either a finer-grained `FullscreenState`
 (`UNSUPPORTED`, `PERMISSION_DENIED`) or an additional permission signal
 mirroring how the Permissions API exposes other capabilities. The observed
