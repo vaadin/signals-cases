@@ -510,7 +510,7 @@ public class UseCase17View extends VerticalLayout {
         resetButton.addThemeName("tertiary");
 
         Button addToCartButton = new Button("Add to Cart");
-        addToCartButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        addToCartButton.addThemeVariants(ButtonVariant.PRIMARY);
         addToCartButton.bindEnabled(canBuildSignal);
 
         Signal<String> cartButtonText = Signal.computed(() -> {

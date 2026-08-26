@@ -190,7 +190,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
 
         Button addTaskButton = new Button("Add New Task",
                 VaadinIcon.PLUS.create());
-        addTaskButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        addTaskButton.addThemeVariants(ButtonVariant.PRIMARY);
         addTaskButton.addClickListener(e -> openAddTaskDialog());
 
         taskPanel.add(title, gridContainer, addTaskButton);
@@ -269,7 +269,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
                 dialog.close();
             }
         });
-        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        saveButton.addThemeVariants(ButtonVariant.PRIMARY);
 
         Button cancelButton = new Button("Cancel", e -> dialog.close());
 
@@ -300,13 +300,13 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
             actions.setSpacing(true);
 
             Button editButton = new Button(VaadinIcon.EDIT.create());
-            editButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY,
-                    ButtonVariant.LUMO_SMALL);
+            editButton.addThemeVariants(ButtonVariant.TERTIARY,
+                    ButtonVariant.SMALL);
             editButton.addClickListener(e -> openEditDialog(task));
 
             Button deleteButton = new Button(VaadinIcon.TRASH.create());
-            deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR,
-                    ButtonVariant.LUMO_SMALL);
+            deleteButton.addThemeVariants(ButtonVariant.ERROR,
+                    ButtonVariant.SMALL);
             deleteButton.addClickListener(e -> {
                 tasksSignal.peek().stream()
                         .filter(sig -> sig.peek().equals(task)).findFirst()
@@ -317,8 +317,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
             return actions;
         }).setHeader("Actions").setFlexGrow(0).setAutoWidth(true);
 
-        grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES,
-                GridVariant.LUMO_COMPACT);
+        grid.addThemeVariants(GridVariant.ROW_STRIPES);
 
         Signal.effect(grid,
                 () -> grid.setItems(tasksSignal.getValues().toList()));
@@ -373,7 +372,7 @@ public abstract class AbstractTaskChatView extends VerticalLayout {
 
         // Changes are saved automatically via two-way binding
         Button closeButton = new Button("Close", e -> dialog.close());
-        closeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        closeButton.addThemeVariants(ButtonVariant.PRIMARY);
 
         dialog.add(formLayout);
         dialog.getFooter().add(closeButton);

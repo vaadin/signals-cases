@@ -174,7 +174,7 @@ public class UseCase23View extends Main {
 
         // Grid
         Grid<ValueSignal<ServiceHealth>> grid = new Grid<>();
-        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+        grid.addThemeVariants(GridVariant.NO_BORDER);
         grid.setAllRowsVisible(true);
 
         grid.addColumn(new ComponentRenderer<>(signal -> {

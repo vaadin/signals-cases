@@ -70,7 +70,7 @@ public class CustomMessageView extends VerticalLayout {
         urlField.setWidthFull();
 
         preview.addClassName("share-preview");
-        shareButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        shareButton.addThemeVariants(ButtonVariant.PRIMARY);
 
         titleField.setValueChangeMode(
                 com.vaadin.flow.data.value.ValueChangeMode.EAGER);

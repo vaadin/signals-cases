@@ -146,8 +146,8 @@ public class MonitoringStackView extends VerticalLayout {
         add(summary);
 
         add(new HorizontalLayout(
-                button("Refresh", ButtonVariant.LUMO_PRIMARY, e -> refresh()),
-                button("Generate traffic", ButtonVariant.LUMO_SUCCESS,
+                button("Refresh", ButtonVariant.PRIMARY, e -> refresh()),
+                button("Generate traffic", ButtonVariant.SUCCESS,
                         e -> generateTraffic()),
                 link("Prometheus targets", PROMETHEUS + "/targets"),
                 link("Prometheus graph", PROMETHEUS + "/graph"),

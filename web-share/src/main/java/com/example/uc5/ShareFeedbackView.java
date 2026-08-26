@@ -54,7 +54,7 @@ public class ShareFeedbackView extends VerticalLayout {
                 + "On desktop you can fake either branch with the buttons in "
                 + "the next section."));
 
-        shareButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        shareButton.addThemeVariants(ButtonVariant.PRIMARY);
 
         add(shareButton, new H2("Outcome log"));
 

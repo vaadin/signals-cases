@@ -176,7 +176,7 @@ public class MainLayout extends AppLayout {
                     null, null);
             getUI().ifPresent(ui -> ui.getPage().setLocation("/login"));
         });
-        logoutButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        logoutButton.addThemeVariants(ButtonVariant.TERTIARY);
 
         addToNavbar(toggle, title, activeUsersDisplay, nicknameField,
                 localeSelector, userDisplay, logoutButton);

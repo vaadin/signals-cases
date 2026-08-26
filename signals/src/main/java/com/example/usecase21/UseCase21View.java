@@ -118,7 +118,7 @@ public class UseCase21View extends VerticalLayout {
 
         // Buttons
         Button submitButton = new Button();
-        submitButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        submitButton.addThemeVariants(ButtonVariant.PRIMARY);
         submitButton.bindText(translate("uc21.sampleForm.submitButton"));
 
         Button cancelButton = new Button();

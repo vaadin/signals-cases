@@ -84,7 +84,7 @@ public class UseCase14View extends VerticalLayout {
 
         Button loadButton = new Button("Generate Analytics Report",
                 event -> loadReport());
-        loadButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        loadButton.addThemeVariants(ButtonVariant.PRIMARY);
 
         // Disable load button while loading
         Signal<Boolean> isLoadingSignal = stateSignal

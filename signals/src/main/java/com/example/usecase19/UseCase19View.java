@@ -79,7 +79,7 @@ public class UseCase19View extends VerticalLayout {
 
         Button loadButton = new Button("Load All Items",
                 event -> loadAllItems());
-        loadButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        loadButton.addThemeVariants(ButtonVariant.PRIMARY);
 
         Checkbox errorCheckbox = new Checkbox("Simulate Random Errors");
         errorCheckbox.bindValue(simulateErrorsSignal,
@@ -286,7 +286,7 @@ public class UseCase19View extends VerticalLayout {
 
         Button retryButton = new Button("Retry",
                 event -> retryItem(itemSignal));
-        retryButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        retryButton.addThemeVariants(ButtonVariant.PRIMARY);
 
         errorContent.add(errorHeader, errorMessage, retryButton);
         Signal<Boolean> isErrorSignal = itemSignal

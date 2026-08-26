@@ -93,8 +93,7 @@ public class ShareListItemsView extends VerticalLayout {
         text.add(title, summary);
 
         Button share = new Button(VaadinIcon.SHARE.create());
-        share.addThemeVariants(ButtonVariant.LUMO_TERTIARY,
-                ButtonVariant.LUMO_ICON);
+        share.addThemeVariants(ButtonVariant.TERTIARY);
         share.getElement().setAttribute("aria-label",
                 "Share \"" + article.title() + "\"");
         share.setEnabled(false);

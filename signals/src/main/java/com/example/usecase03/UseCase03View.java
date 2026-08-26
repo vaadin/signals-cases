@@ -6,7 +6,6 @@ import com.example.MissingAPI;
 import com.example.views.MainLayout;
 
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.Div;
@@ -130,7 +129,6 @@ public class UseCase03View extends VerticalLayout {
 
         // Reset button
         Button resetButton = new Button("Reset to Defaults", e -> resetAll());
-        resetButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
         resetButton.setWidthFull();
 
         panel.add(tabsheet, resetButton);

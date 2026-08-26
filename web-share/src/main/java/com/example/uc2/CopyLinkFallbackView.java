@@ -70,7 +70,7 @@ public class CopyLinkFallbackView extends VerticalLayout {
         switch (state) {
         case SUPPORTED -> {
             Button share = new Button("Share", VaadinIcon.SHARE.create());
-            share.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            share.addThemeVariants(ButtonVariant.PRIMARY);
             // A fresh button is created on each SUPPORTED render, so binding
             // here binds exactly once per button instance.
             WebShare.onClick(share).share(
@@ -85,7 +85,7 @@ public class CopyLinkFallbackView extends VerticalLayout {
         }
         case UNSUPPORTED -> {
             Button copy = new Button("Copy link", VaadinIcon.LINK.create());
-            copy.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            copy.addThemeVariants(ButtonVariant.PRIMARY);
             copy.addClickListener(e -> copyLinkToClipboard(ui));
             actionSlot.add(copy);
             hint.setText("Browser does not expose navigator.share — "

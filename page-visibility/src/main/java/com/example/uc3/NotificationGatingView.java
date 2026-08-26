@@ -67,7 +67,7 @@ public class NotificationGatingView extends VerticalLayout {
                 + "notification via Web Push otherwise."));
 
         Button subscribe = new Button("Enable browser notifications");
-        subscribe.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        subscribe.addThemeVariants(ButtonVariant.PRIMARY);
         subscribe.addClickListener(e -> subscribe(UI.getCurrent()));
 
         Button unsubscribe = new Button("Disable",
