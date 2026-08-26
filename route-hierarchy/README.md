@@ -25,9 +25,15 @@ resolves a title without instantiating the view (UC8 gets its labels from
 `MenuEntry.title()`). No view here imports `internal`; see
 [`API-GAPS.md`](API-GAPS.md).
 
-The hierarchical menu has not landed in the baseline Flow version yet, so this
-module pins `flow.version` to `25.3.hierarchical-menu-SNAPSHOT` (see
-[`pom.xml`](pom.xml)).
+UC9 is where the two hierarchies come apart: `@Menu(parent = ...)` regroups an
+entry in the menu tree only, leaving the route — and therefore the breadcrumb —
+untouched. Use `@RouteParent` when a page really does live under another page,
+and `@Menu(parent = ...)` when only the navigation menu should group it that
+way.
+
+The hierarchical menu and `@Menu(parent = ...)` have not landed in the baseline
+Flow version yet, so this module pins `flow.version` to
+`25.3.hierarchical-menu-SNAPSHOT` (see [`pom.xml`](pom.xml)).
 
 | # | View | What it shows |
 | - | ---- | ------------- |
@@ -39,6 +45,7 @@ module pins `flow.version` to `25.3.hierarchical-menu-SNAPSHOT` (see
 | UC6 | Layout-wide auto breadcrumbs | One `Breadcrumbs` component in a parent layout, shared by every child view; in `ROUTER` mode it rebuilds on every navigation with no `AfterNavigationObserver` and no manual seeding. |
 | UC7 | Route-tree sitemap | `getRouteHierarchy` used as a graph-builder: leaf routes from across the demo are expanded and merged into a nested sitemap tree. |
 | UC8 | Hierarchical menu | `MenuConfiguration.getMenuEntriesTree()` renders the same `@Menu` set the flat drawer shows, nested by route hierarchy via `MenuEntry.children()`. |
+| UC9 | Menu-only nesting | `@Menu(parent = ...)` nests a top-level route (`/forecast`) under Reports in the menu tree while its route hierarchy — and its breadcrumb — leave it at the top level. |
 
 ## Run
 
