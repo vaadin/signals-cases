@@ -287,7 +287,7 @@ public class ScalingSignalsView extends VerticalLayout {
             verdict.setText(current.verdict());
             ThemeList themes = verdict.getElement().getThemeList();
             themes.set("success", current.pressure() == Pressure.COMFORTABLE);
-            themes.set("contrast", current.pressure() == Pressure.WATCH);
+            themes.set("warning", current.pressure() == Pressure.WATCH);
             themes.set("error", current.pressure() == Pressure.TIGHT);
         });
         Signal.effect(signals, () -> signals.setItems(capacity.get().rows()));
