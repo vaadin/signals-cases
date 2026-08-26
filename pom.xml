@@ -32,13 +32,13 @@
 
     <properties>
         <java.version>25</java.version>
-        <vaadin.version>25.2-SNAPSHOT</vaadin.version>
-        <flow.version>25.2-SNAPSHOT</flow.version>
-        <flow-components.version>25.2-SNAPSHOT</flow-components.version>
-        <jspecify.version>1.0.0</jspecify.version>
-        <spotless.plugin.version>3.1.0</spotless.plugin.version>
+        <vaadin.version>25.3-SNAPSHOT</vaadin.version>
+        <flow.version>25.3-SNAPSHOT</flow.version>
+        <flow-components.version>25.3-SNAPSHOT</flow-components.version>
+        <jspecify.version>1.0.1</jspecify.version>
+        <spotless.plugin.version>3.10.0</spotless.plugin.version>
         <nullability.plugin.version>0.4.0</nullability.plugin.version>
-        <spring-ai.version>2.0.0</spring-ai.version>
+        <spring-ai.version>2.0.1</spring-ai.version>
     </properties>
 
     <dependencyManagement>
@@ -61,13 +61,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-bom</artifactId>
                 <version>${vaadin.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>browserless-test-bom</artifactId>
-                <version>1.1-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
