@@ -35,12 +35,8 @@
         <vaadin.version>25.3-SNAPSHOT</vaadin.version>
         <flow.version>25.3-SNAPSHOT</flow.version>
         <flow-components.version>25.3-SNAPSHOT</flow-components.version>
-        <!--
-          The browserless-test line tracks the Flow line: 1.1-SNAPSHOT is built
-          against Flow 25.2, 1.2-SNAPSHOT against 25.3. A module that overrides
-          flow.version has to override this too (see observability/pom.xml).
-        -->
         <browserless-test.version>1.2-SNAPSHOT</browserless-test.version>
+        <observability-kit.version>5.0-SNAPSHOT</observability-kit.version>
         <jspecify.version>1.0.1</jspecify.version>
         <spotless.plugin.version>3.10.0</spotless.plugin.version>
         <nullability.plugin.version>0.4.0</nullability.plugin.version>
