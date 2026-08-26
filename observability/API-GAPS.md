@@ -137,20 +137,64 @@ a candidate for `MissingAPI`.
 box (e.g. a `vaadin.client.connection` gauge/counter tagged by state), since the
 client store already drives them.
 
-## 6. No server-side UI-state-size / component-tree metric
+## 6. UI-state size — **resolved in the kit**, with bytes left to the application
 
-**Where it bites:** UC3 (capacity & scaling), UC2 (the health readout counts sessions
-and UIs but cannot show what each one costs).
-**Symptom:** the kit reports session and UI *counts* (`vaadin.ui.active` etc.) and
-session-lock contention, but not how much state each UI holds — component-tree node
-count or per-session heap footprint. Because Flow keeps UI state in server memory,
-*size* (not just count) is the signal that predicts when a server-driven app must
-scale, and it is missing.
-**Workaround used (possible):** walk the UI's element tree from the server
-(`UI.getElement()` / state node tree) to approximate a node count — a `MissingAPI`
-candidate, though heap footprint is not derivable this way.
-**Suggested API:** a binder for per-UI state size (node count, and ideally an estimated
-retained size), bounded for cardinality.
+**Where it bit:** UC3 (capacity & scaling), UC2 (the health readout counted sessions
+and UIs but could not show what each one costs).
+**Status: closed.** The kit now measures per-UI state size and publishes the
+aggregate, behind an opt-in switch:
+
+```properties
+vaadin.observability.ui-state=true
+```
+
+`UiStateSampler` walks a UI's state tree, `UiStateMetricsBinder` has every UI report
+itself (at UI init, after each navigation, and on RPC completion throttled by
+`ui-state-sample-interval`) because a tree may only be read under its own session
+lock, and the gauges are `vaadin.ui.state.nodes`, `vaadin.ui.state.nodes.max`,
+`vaadin.ui.state.components`, `vaadin.ui.state.views`,
+`vaadin.session.state.nodes.max`, `vaadin.session.uis.max` and
+`vaadin.ui.state.sample.age.max` — aggregates only, never per-session series, for the
+same cardinality reason as #8/#9. UC3 previously carried its own sampler, registry and
+`uc3.*` gauges; all of that is deleted and the view now just reads the registry like
+every other use case in this module.
+
+Two findings from the original consumer-side implementation stand, and the kit's
+version reflects both: the accurate count has to come from
+`com.vaadin.flow.internal.StateNode` (`visitNodeTree`) rather than an
+`Element.getChildren()` walk, because virtual children are unreachable that way and in
+Flow 25 the route target is itself attached as a virtual child — a public walk of a
+live UI finds **2 nodes and no view at all** where the state tree finds **109**; and
+bytes are not derivable from a tree walk at all.
+
+**What the kit still leaves to the application:**
+
+1. **Bytes are configured, not measured.** `vaadin.ui.state.size` is published only
+   once the app sets `vaadin.observability.ui-state-bytes-per-node`. Refusing to guess
+   is the right call, but the number then has to be produced out of band — the kit's
+   README describes the method (settle the heap, retain a batch of representative
+   views, read `MemoryMXBean`) and UC3 implements it as `HeapCostProbe`, reporting
+   whether the configured value still holds. Nothing reconciles the two, so a
+   configured constant cannot notice that the views got heavier. Worse, *nodes* is a
+   lossy unit for this: a component's data is not in the node count, so a `Grid` with a
+   hundred rows is a handful of nodes carrying most of the weight, and bytes-per-node
+   comes out several times higher for a data-bound view than for a form. One global
+   constant can only approximate a mixed application. A per-UI retained-size estimate
+   from the kit, or a documented calibration helper, would close this properly.
+2. **Aggregates only, so no in-app breakdown.** "Which user is holding all that
+   state?" cannot be answered from application code: the binder knows per-UI figures
+   but keeps `tracked` private, and rightly does not tag meters per session. A
+   read-only per-session accessor would make an in-app breakdown possible without
+   touching meter cardinality. UC3 used to render exactly that table and had to drop it.
+3. **No way to request a measurement.** Sampling happens on the kit's schedule, so a
+   view that wants to show what *this* tab costs right now has to wait for the next
+   interaction — and because the RPC hook fires when an invocation *ends*, a click that
+   changes the tree is reflected only on the following refresh. UC3's "grow this view's
+   state" button demonstrates the lag rather than hiding it.
+4. **Off by default, and stale by design.** The feature costs a tree walk per sampled
+   interaction, so it is opt-in; and an idle user contributes their state as of their
+   last interaction. `vaadin.ui.state.sample.age.max` makes that staleness visible,
+   which is the right answer, but consumers have to remember to read it.
 
 ## 7. Server request timing is already computed and transported — but unusable
 
@@ -298,3 +342,15 @@ and nothing is captured. UC6's test therefore covers rendering, wiring (the fail
 action must let its exception propagate) and lifecycle, while the capture itself needs a
 browser. A `SpringBrowserlessTest` hook to drive an invocation through the RPC pipeline
 would close this.
+
+Two specifics for the UI-state binder (#6), learned writing UC3's tests. Its UI-init and
+after-navigation hooks do fire browserlessly, so `navigate(...)` after growing a tree is
+enough to see `vaadin.ui.state.nodes` move; its RPC hook does not, because a browserless
+click invokes the listener directly rather than through an RPC round trip, so the "state
+grows on the next interaction" path has no browserless simulator. And the binder is
+created by the service init listener while its gauges are registered against the shared
+`MeterRegistry`: re-initialising the Vaadin environment inside one Spring context leaves
+the first binder's gauges serving a service that no longer has any UIs, reporting zero.
+A fresh context per test method (`@DirtiesContext`) is what keeps registry and binder in
+step. This is a test-harness artefact — a production service is created once — but it is
+invisible until a gauge silently reads zero.

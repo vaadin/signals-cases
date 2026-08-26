@@ -23,6 +23,17 @@
         <flow-components.version>25.3-SNAPSHOT</flow-components.version>
         <vaadin.version>25.3-SNAPSHOT</vaadin.version>
         <observability-kit.version>5.0-SNAPSHOT</observability-kit.version>
+        <!--
+          browserless-test has to follow the same Flow line. Its MockVaadin fires
+          the session-init / service-destroy listeners to simulate the lifecycle,
+          and Flow 25.3 (flow#25268) moved those off VaadinService's private
+          listener lists onto VaadinService#getEventBus() (VaadinServiceEventBus).
+          The 1.1 line still reads the removed fields reflectively, so every
+          browserless test here fails in setup with NoSuchFieldException:
+          sessionInitListeners; the 1.2 line is built against 25.3 and fires
+          through the event bus instead.
+        -->
+        <browserless-test.version>1.2-SNAPSHOT</browserless-test.version>
     </properties>
 
     <dependencies>
