@@ -183,13 +183,13 @@ public class ScalingSignalsView extends VerticalLayout {
         add(verdict);
 
         add(new HorizontalLayout(
-                button("Refresh", "refresh", ButtonVariant.LUMO_PRIMARY,
+                button("Refresh", "refresh", ButtonVariant.PRIMARY,
                         this::recompute),
                 button("Grow this view's state (+" + GROWTH_STEP
-                        + " components)", "grow-state",
-                        ButtonVariant.LUMO_SUCCESS, this::growState),
+                        + " components)", "grow-state", ButtonVariant.SUCCESS,
+                        this::growState),
                 button("Reset added state", "reset-state",
-                        ButtonVariant.LUMO_TERTIARY, this::resetState),
+                        ButtonVariant.TERTIARY, this::resetState),
                 button("Measure bytes per node", "measure-cost",
                         ButtonVariant.LUMO_CONTRAST, this::measureCost)));
 
