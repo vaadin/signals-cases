@@ -19,9 +19,10 @@ UC5, UC7 and UC8 are not breadcrumbs: they consume the same route-hierarchy API
 directly — `UpLink` calls `RouteConfiguration.getRouteParent` for a single
 up-one-level control, `SitemapView` uses `getRouteHierarchy` as a
 graph-builder, and `HierarchicalMenuView` renders
-`MenuConfiguration.getMenuEntriesTree()` as a nested `SideNav`. Resolving the
-hierarchy is public API; resolving an ancestor's *title* still is not, so UC5
-and UC7 reach into `internal` for their labels — see
+`MenuConfiguration.getMenuEntriesTree()` as a nested `SideNav`. UC5 and UC7
+label their crumbs with `Router.resolvePageTitle(class, parameters)`, which
+resolves a title without instantiating the view (UC8 gets its labels from
+`MenuEntry.title()`). No view here imports `internal`; see
 [`API-GAPS.md`](API-GAPS.md).
 
 The hierarchical menu has not landed in the baseline Flow version yet, so this

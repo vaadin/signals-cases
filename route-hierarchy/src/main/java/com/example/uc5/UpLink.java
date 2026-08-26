@@ -7,12 +7,12 @@ import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouteReference;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.router.RouterState;
+import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.signals.Signal;
 
 /**
@@ -51,8 +51,10 @@ public class UpLink extends Div {
                 .getRouteParent(leafView.getClass(), state.routeParameters());
         if (parent.isPresent()) {
             RouteReference ref = parent.get();
-            String label = "↑ Up to " + MenuRegistry
-                    .getTitle(ref.navigationTarget(), ref.routeParameters());
+            String label = "↑ Up to " + VaadinService.getCurrent().getRouter()
+                    .resolvePageTitle(ref.navigationTarget(),
+                            ref.routeParameters())
+                    .orElseGet(ref.navigationTarget()::getSimpleName);
             RouteParameters parameters = ref.routeParameters();
             RouterLink link = parameters.getParameterNames().isEmpty()
                     ? new RouterLink(label, ref.navigationTarget())

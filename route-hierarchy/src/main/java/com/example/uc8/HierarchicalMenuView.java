@@ -26,8 +26,8 @@ import com.vaadin.flow.server.menu.MenuEntry;
  * param-free nested use cases — Catalog › Electronics › Laptops, Settings ›
  * Security › Active sessions, Dashboard › Team — show their structure here.
  * <p>
- * Unlike the breadcrumb's walker ({@code RouteUtil.getRouteHierarchy}, still
- * internal), {@code getMenuEntriesTree()} is public, supported API in
+ * Like the breadcrumb's walker ({@code RouteConfiguration.getRouteHierarchy}),
+ * {@code getMenuEntriesTree()} is public, supported API — here in
  * {@code com.vaadin.flow.server.menu}.
  */
 @Route(value = "uc8", layout = MainLayout.class)

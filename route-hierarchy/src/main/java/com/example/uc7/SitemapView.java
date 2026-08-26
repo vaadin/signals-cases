@@ -19,7 +19,6 @@ import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.internal.menu.MenuRegistry;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -27,6 +26,7 @@ import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouteReference;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.server.VaadinService;
 
 /**
  * UC7 — Route-tree sitemap.
@@ -95,7 +95,9 @@ public class SitemapView extends VerticalLayout {
             ListItem item = new ListItem();
             item.addClassName("sitemap-node");
             item.add(new RouterLink(
-                    MenuRegistry.getTitle(node, RouteParameters.empty()),
+                    VaadinService.getCurrent().getRouter()
+                            .resolvePageTitle(node, RouteParameters.empty())
+                            .orElseGet(node::getSimpleName),
                     node));
             Set<Class<? extends Component>> kids = children.get(node);
             if (kids != null && !kids.isEmpty()) {
