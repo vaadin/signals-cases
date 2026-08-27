@@ -3,18 +3,18 @@
   "license": "UNLICENSED",
   "type": "module",
   "dependencies": {
-    "@vaadin/aura": "25.3.0-alpha13",
+    "@vaadin/aura": "25.3.0-alpha14",
     "@vaadin/common-frontend": "0.0.24",
     "@vaadin/react-components": "25.3.0-alpha12",
     "@vaadin/react-components-pro": "25.3.0-alpha12",
     "@vaadin/vaadin-development-mode-detector": "2.0.7",
-    "@vaadin/vaadin-lumo-styles": "25.3.0-alpha13",
-    "@vaadin/vaadin-themable-mixin": "25.3.0-alpha13",
+    "@vaadin/vaadin-lumo-styles": "25.3.0-alpha14",
+    "@vaadin/vaadin-themable-mixin": "25.3.0-alpha14",
     "@vaadin/vaadin-usage-statistics": "2.1.3",
     "date-fns": "4.4.0",
     "lit": "3.3.3",
-    "ol": "10.6.1",
-    "proj4": "2.17.0",
+    "ol": "10.10.0",
+    "proj4": "2.21.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-router": "8.3.0"
@@ -43,18 +43,18 @@
   },
   "vaadin": {
     "dependencies": {
-      "@vaadin/aura": "25.3.0-alpha13",
+      "@vaadin/aura": "25.3.0-alpha14",
       "@vaadin/common-frontend": "0.0.24",
       "@vaadin/react-components": "25.3.0-alpha12",
       "@vaadin/react-components-pro": "25.3.0-alpha12",
       "@vaadin/vaadin-development-mode-detector": "2.0.7",
-      "@vaadin/vaadin-lumo-styles": "25.3.0-alpha13",
-      "@vaadin/vaadin-themable-mixin": "25.3.0-alpha13",
+      "@vaadin/vaadin-lumo-styles": "25.3.0-alpha14",
+      "@vaadin/vaadin-themable-mixin": "25.3.0-alpha14",
       "@vaadin/vaadin-usage-statistics": "2.1.3",
       "date-fns": "4.4.0",
       "lit": "3.3.3",
-      "ol": "10.6.1",
-      "proj4": "2.17.0",
+      "ol": "10.10.0",
+      "proj4": "2.21.0",
       "react": "19.2.8",
       "react-dom": "19.2.8",
       "react-router": "8.3.0"
@@ -81,7 +81,7 @@
       "vite": "8.2.2",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "fa365895663d89f10ea359b3a72a5a5dcfcf2858e1d730db7e7bc0c5108c7d3c"
+    "hash": "940603a46fb6d9c15b04c711aaebed5c5cefa7e4ee2afea3531acee04d2f0e13"
   },
   "overrides": {
     "@vaadin/a11y-base": "25.3.0-alpha12",
