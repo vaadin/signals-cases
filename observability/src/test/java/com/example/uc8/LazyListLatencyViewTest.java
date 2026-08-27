@@ -138,11 +138,18 @@ class LazyListLatencyViewTest extends SpringBrowserlessTest {
         assertEquals("50 items over 1 fetches",
                 value("vaadin.data.fetch.rows", "route=uc8"));
         // The unfiltered rows are still shown, so that the app-wide cost is
-        // not hidden, but kept apart from the combo box's own.
-        assertEquals("mean 9000 ms, max 9000 ms",
-                value("vaadin.data.count.duration", "filtered=false"));
-        assertEquals("mean 9000 ms, max 9000 ms",
-                value("vaadin.data.fetch.duration", "filtered=false"));
+        // not hidden, but kept apart from the combo box's own. Other views'
+        // in-memory grids in this shared Spring context record here too,
+        // which is exactly the leak the row exists to show, so only the
+        // distinctive maximum is asserted rather than the mean.
+        assertTrue(
+                value("vaadin.data.count.duration", "filtered=false")
+                        .endsWith("max 9000 ms"),
+                "the unfiltered count row must include the foreign 9 s");
+        assertTrue(
+                value("vaadin.data.fetch.duration", "filtered=false")
+                        .endsWith("max 9000 ms"),
+                "the unfiltered fetch row must include the foreign 9 s");
     }
 
     private Timer timer(String name, String filtered) {
