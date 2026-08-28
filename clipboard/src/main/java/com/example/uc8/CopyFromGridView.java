@@ -90,6 +90,13 @@ public class CopyFromGridView extends VerticalLayout {
             VaadinIcon.COPY.create());
     final GridContextMenu<Customer> contextMenu = grid.addContextMenu();
 
+    // The clipboard writes are bound to these Spans, not to the GridMenuItems
+    // that hold them — see configureContextMenu(). Their labels are retargeted
+    // at the row the user right-clicked.
+    final Span copyEmailAction = menuAction("Copy email");
+    final Span copyPhoneAction = menuAction("Copy phone");
+    final Span copyRowAction = menuAction("Copy row");
+
     public CopyFromGridView() {
         setSizeFull();
         add(new H1("UC8 — Copy from a data grid"));
@@ -131,20 +138,17 @@ public class CopyFromGridView extends VerticalLayout {
         // implement ClickNotifier, so Clipboard.onClick(item) does not even
         // compile. The Span is stretched to fill the item so that clicking
         // anywhere on the row of the menu hits it. See API-GAPS.md.
-        Span copyEmail = menuAction("Copy email");
-        Span copyPhone = menuAction("Copy phone");
-        Span copyRow = menuAction("Copy row");
-        contextMenu.addItem(copyEmail);
-        contextMenu.addItem(copyPhone);
-        contextMenu.addItem(copyRow);
+        contextMenu.addItem(copyEmailAction);
+        contextMenu.addItem(copyPhoneAction);
+        contextMenu.addItem(copyRowAction);
 
-        Clipboard.onClick(copyEmail).writeText(emailSlot,
+        Clipboard.onClick(copyEmailAction).writeText(emailSlot,
                 copied -> Notification.show("Copied " + copied),
                 error -> Notification.show("Copy failed: " + error.message()));
-        Clipboard.onClick(copyPhone).writeText(phoneSlot,
+        Clipboard.onClick(copyPhoneAction).writeText(phoneSlot,
                 copied -> Notification.show("Copied " + copied),
                 error -> Notification.show("Copy failed: " + error.message()));
-        Clipboard.onClick(copyRow).writeText(rowSlot,
+        Clipboard.onClick(copyRowAction).writeText(rowSlot,
                 copied -> Notification.show("Copied row"),
                 error -> Notification.show("Copy failed: " + error.message()));
 
@@ -157,9 +161,9 @@ public class CopyFromGridView extends VerticalLayout {
                 return false;
             }
             stageRow(customer);
-            copyEmail.setText("Copy email — " + customer.email());
-            copyPhone.setText("Copy phone — " + customer.phone());
-            copyRow.setText("Copy row — " + customer.name());
+            copyEmailAction.setText("Copy email — " + customer.email());
+            copyPhoneAction.setText("Copy phone — " + customer.phone());
+            copyRowAction.setText("Copy row — " + customer.name());
             return true;
         });
     }
@@ -181,11 +185,17 @@ public class CopyFromGridView extends VerticalLayout {
                 event -> stageSelection(event.getAllSelectedItems()));
     }
 
-    /** Stages the values the context menu can copy for the given row. */
+    /**
+     * Stages the values the context menu can copy for the given row. "Copy row"
+     * gets the row's own values only — no header line, so pasting one row into
+     * a text field or a single spreadsheet row does what the user asked for.
+     * The header is only worth carrying when several rows are copied at once,
+     * which is what {@link #stageSelection} does.
+     */
     private void stageRow(Customer customer) {
         emailSlot.setValue(customer.email());
         phoneSlot.setValue(customer.phone());
-        rowSlot.setValue(toTsv(List.of(customer)));
+        rowSlot.setValue(toTsvRow(customer));
     }
 
     /**
@@ -205,10 +215,13 @@ public class CopyFromGridView extends VerticalLayout {
     }
 
     private static String toTsv(List<Customer> rows) {
-        return rows.stream()
-                .map(c -> String.join("\t", c.name(), c.company(), c.email(),
-                        c.phone()))
+        return rows.stream().map(CopyFromGridView::toTsvRow)
                 .collect(Collectors.joining("\n", HEADER_ROW + "\n", ""));
+    }
+
+    private static String toTsvRow(Customer customer) {
+        return String.join("\t", customer.name(), customer.company(),
+                customer.email(), customer.phone());
     }
 
     /**

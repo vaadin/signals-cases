@@ -42,11 +42,19 @@ class CopyFromGridViewTest extends SpringBrowserlessTest {
 
         assertEquals(target.email(), view.emailSlot.getValue());
         assertEquals(target.phone(), view.phoneSlot.getValue());
+        // A single row is copied without the header line.
         assertEquals(
-                "Name\tCompany\tEmail\tPhone\n"
-                        + String.join("\t", target.name(), target.company(),
-                                target.email(), target.phone()),
+                String.join("\t", target.name(), target.company(),
+                        target.email(), target.phone()),
                 view.rowSlot.getValue());
+        // The labels are the only thing telling the user which row they are
+        // about to copy.
+        assertEquals("Copy email — " + target.email(),
+                view.copyEmailAction.getText());
+        assertEquals("Copy phone — " + target.phone(),
+                view.copyPhoneAction.getText());
+        assertEquals("Copy row — " + target.name(),
+                view.copyRowAction.getText());
     }
 
     @Test

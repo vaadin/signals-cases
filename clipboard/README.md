@@ -89,10 +89,11 @@ component, which can be any `Component` that implements `ClickNotifier`
    500-row `Grid` without creating a copy button per row. The copy
    actions are a single `GridContextMenu` plus one toolbar button, so
    the number of clipboard bindings is constant; each is bound to an
-   off-screen `Input` used as a client-side staging slot that the
-   server fills from the menu's dynamic content handler and the grid's
-   selection listener. Everything awkward about that is written up in
-   [API-GAPS.md](API-GAPS.md).
+   off-screen `<span>`-based staging slot that the server fills from the
+   menu's dynamic content handler and the grid's selection listener.
+   (Not an `Input` — an `<input>`'s value sanitisation strips the
+   newlines out of a multi-row copy.) Everything awkward about that is
+   written up in [API-GAPS.md](API-GAPS.md).
 
 The remaining PRD item (availability signal) is omitted because the
 underlying API is still not part of this Flow branch — see
