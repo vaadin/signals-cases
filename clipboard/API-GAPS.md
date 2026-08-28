@@ -42,6 +42,17 @@ server-side `Signal` into a client-side property and reads it when the trigger
 fires, which is exactly what is needed. It is simply not reachable from the
 public clipboard API.
 
+This is also a regression against what the community had already settled on.
+The reusable helper the forum thread converged on
+([post 8](https://vaadin.com/forum/t/clipboard-copy/164697/8)) is
+`CopyToClipboard(Supplier<String> text)` — a copy icon whose value is resolved
+at click time — and it is used as
+`new CopyToClipboard(() -> textField.getValue())`. That helper is unsafe for
+other reasons (the `executeJs` it wraps runs after a server round trip, so the
+user gesture is gone), but its *ergonomics* are the ones a grid needs, and they
+are what the new API dropped: it can bind a value, but not a way to compute
+one.
+
 **Workaround used:** an off-screen value-holder component per copy action,
 used purely as a client-side staging slot, plus a server-side hook that fills
 the slot before the user is able to click:
@@ -93,6 +104,12 @@ ClipboardContent.text(Signal<String> value);
 // Clipboard.onClick(copyEmail).writeText(email);
 // grid.addContextMenu().setDynamicContentHandler(c -> { email.set(c.email()); return true; });
 ```
+
+A `SerializableSupplier<String>` overload would read even closer to the
+thread's `CopyToClipboard(Supplier<String>)`, but it cannot work on its own:
+the supplier would have to be invoked on the server, and the gesture is gone by
+then. A signal is the version of that idea that survives the gesture
+constraint, because its value is already on the client when the click happens.
 
 ## `GridMenuItem` is not a `ClickNotifier`, so a grid context menu cannot be a trigger
 
