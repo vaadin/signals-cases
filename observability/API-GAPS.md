@@ -19,16 +19,20 @@ out of the box.
 The kit is good and covers most of the use cases in
 [#277](https://github.com/vaadin/use-cases/issues/277). The gaps below are what
 remains *missing or awkward even with the kit in place* — i.e. the things the
-demo can't do cleanly, and the Flow / kit API changes they argue for. A reusable
-shim, where one is possible, would live in `src/main/java/com/example/MissingAPI.java`.
+demo can't do cleanly, and the Flow / kit API changes they argue for. Where a shim
+is possible it lives with the use case that needs it, next to the view — what remains
+of gap #5's is `uc5/ClientErrorReporter.java`, written to be liftable into the kit as
+it stands.
 
 Meters referenced below use the kit's `MeterNames` constants. The server records
 `vaadin.request.duration`, `vaadin.rpc.duration` (tagged `type` / `outcome`),
 `vaadin.navigation`, `vaadin.errors`, `vaadin.sessions.*`, `vaadin.session.lock.*`
 and `vaadin.ui.*`. The client collector records, into the *same* registry,
 `vaadin.client.bootstrap.duration`, `vaadin.client.navigation.duration` (tagged
-`route` / `trigger`), `vaadin.client.web_vitals.lcp`, `vaadin.client.web_vitals.fcp`
-and the `vaadin.client.errors` counter.
+`route` / `trigger`), `vaadin.client.web_vitals.lcp`, `vaadin.client.web_vitals.fcp`,
+the `vaadin.client.errors` counter, and — since it began subscribing to Flow's
+connection-state store — `vaadin.client.connection` and
+`vaadin.client.connection.downtime` (both tagged `state`).
 
 **Reachability is not the problem.** The in-browser collector POSTs its samples
 back via the `<vaadin-metrics-collector>` `@ClientCallable`, and `ClientMetricsBinder`
@@ -119,24 +123,65 @@ samples. For push-heavy apps the client view of responsiveness is blind.
 **Suggested API:** the client hook (#1) should be transport-agnostic, covering the
 push connection, not just navigations.
 
-## 5. No connection-state metric, despite the client API existing
+## 5. Connection state — **resolved in the kit**, error detail still a bare count
 
-**Where it bites:** UC5 (connection lost / reconnecting), UC2 (the health badge, which
-can therefore only report the cadence of its own poll requests, never the browser's
+**Where it bit:** UC5 (connection lost / reconnecting), UC2 (the health badge, which
+could therefore only report the cadence of its own poll requests, never the browser's
 connection state).
-**Symptom:** the kit collects client *errors* but not connection-state
-transitions. Yet `window.Vaadin.connectionState` already exposes
-`online`/`offline`, a `state` (`CONNECTED` / `CONNECTION_LOST` / `RECONNECTING`), and
-`addStateChangeListener(...)`. The information is one listener away but is neither
-collected by the kit nor surfaced as a meter.
-**Workaround used (possible):** an app-level shim that subscribes to
-`window.Vaadin.connectionState.addStateChangeListener` and reports transitions to the
-server via a `@ClientCallable`, recorded as a `vaadin.client.connection.state` meter —
-a candidate for `MissingAPI`.
-**Suggested API:** have the collector record connection-state transitions out of the
-box (e.g. a `vaadin.client.connection` gauge/counter tagged by state), since the
-client store already drives them.
+**Status: the connection half is closed.** The kit's in-browser collector now subscribes
+to `window.Vaadin.connectionState` and publishes two meters, on by default with the rest
+of `vaadin.observability.client`:
 
+- `vaadin.client.connection` — a counter of transitions, tagged `state` with the state
+  entered, bounded to `connected` / `connection-lost` / `reconnecting` / `_unknown`;
+- `vaadin.client.connection.downtime` — a timer of how long a browser stayed unable to
+  reach the server, tagged `state` with the state it was spent in.
+
+UC5 previously carried a shim of its own for exactly this. It is deleted, and the view
+now just reads the registry like every other use case in this module. Four findings from
+that consumer-side implementation stand, and the kit's version reflects all four:
+`loading` is not a connection state and has to be ignored in both directions, or the
+counter counts one transition per interaction; a report needs the connection it is about,
+so samples must be buffered and flushed on recovery with the age measured on the
+browser's clock; a polling view probes the connection on every tick and shortens the very
+outages it displays, so a readout must refresh from the report rather than from a
+schedule; and instrumentation attached to a view watches only that view. The kit's
+implementation goes further than the shim did on two counts — it persists the buffer to
+`sessionStorage` so a reload mid-outage does not lose it, and it splits downtime per
+state rather than per outage, which is the better call: Flow enters `reconnecting` on the
+first failed request and `connection-lost` only after exhausting retries, so a short
+outage that recovers while still retrying would otherwise not be measured at all.
+
+**What the kit still leaves to the application:**
+
+1. **A browser error is a count, and nothing else.** `vaadin.client.errors` is tagged
+   `uncaught` or `promise`; the message, the script and the stack are dropped in the
+   collector, and `ClientMetricNames.ALLOWED` would reject them anyway. "Errors went up
+   by four" is a smoke alarm, not a diagnosis. UC5 therefore still carries
+   `uc5/ClientErrorReporter.java`, which listens to the same two global events alongside
+   the collector and keeps what it discards. The detail must not travel as meter tags —
+   free-form browser text would make the counter's cardinality unbounded — so the natural
+   home is the kit's own insight machinery, which already groups by fingerprint with an
+   occurrence count, hashes the session id, truncates messages and filters framework
+   frames. A failed script in a browser is the same kind of finding as a failed
+   interaction on the server.
+2. **The client buffer is not extensible.** The collector's buffering, `sessionStorage`
+   persistence, priority ordering and client-measured `ageMs` are exactly what any
+   application-side reporter needs, and none of it is reachable: `recordSamples` takes
+   the kit's own sample names. So UC5's reporter sends immediately and lets Flow's
+   pending-message queue deliver the call if the connection is down — which works, but it
+   cannot say how long the report waited. Rebuilding the buffer app-side would be a third
+   implementation of it.
+3. **Whole-outage length is the application's arithmetic.** Splitting the timer per state
+   is right, but an SLO wants the outage end to end, which is the sum of the two tags.
+   UC5's readout does that addition; a documented recording rule or a derived meter would
+   save every consumer from rediscovering that either tag alone under-reports.
+
+**Suggested API:** keep browser-error detail alongside the count, as an insight rather
+than a tag; and expose the collector's buffer to application code (e.g. a public
+`window.Vaadin.observability.report(name, tags, detail)` that rides the same
+buffer-and-flush path), so an application that needs a signal the kit does not collect
+does not have to rebuild the transport to get it.
 ## 6. UI-state size — **resolved in the kit**, with bytes left to the application
 
 **Where it bit:** UC3 (capacity & scaling), UC2 (the health readout counted sessions
@@ -333,6 +378,19 @@ collector. Server-side binders *are* testable browserlessly (drive `navigate(...
 session/UI lifecycle and assert against a `SimpleMeterRegistry`), and the kit ships
 exactly such tests. Gaps that live purely in the browser (#1–#5, #7-client, #11) have no
 browserless simulator and would need an end-to-end test or a documented manual check.
+
+**A `@ClientCallable` splits the difference**, which is how UC5 is covered. The error
+reporter's listeners are JS and need a browser, but the server half they call is reached
+by handing `reportErrors` the payload a browser would send. That is worth doing wherever
+a client-side feature reports back through a callable: the payload contract is testable
+even when the code that produces it is not.
+
+**A kit-side meter is testable without either.** Now that the connection meters are the
+collector's, UC5's tests record into `vaadin.client.connection.downtime` exactly as the
+collector would and assert what the view makes of it — which is how the per-state-versus
+-whole-outage arithmetic is covered browserlessly. The collector's own half, its
+subscription to `window.Vaadin.connectionState` and its buffering across an outage, is
+covered by the kit's `ClientProblemsIT`, which drives the same store from a real browser.
 
 **RPC-driven capture is also outside browserless reach.** Anything hooked on Flow's RPC
 invocation listener — `vaadin.rpc.duration`, and UC6's interaction insights — is observed
