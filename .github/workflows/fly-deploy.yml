@@ -90,6 +90,6 @@ jobs:
             proKey=${{ secrets.VAADIN_PRO_KEY }}
           cache-from: type=gha,scope=${{ matrix.module }}
           cache-to: type=gha,mode=max,scope=${{ matrix.module }}
-      - run: flyctl deploy --image registry.fly.io/${{ steps.app.outputs.name }}:${{ github.sha }} --config ${{ matrix.module }}/fly.toml
+      - run: flyctl deploy --image registry.fly.io/${{ steps.app.outputs.name }}:${{ github.sha }} --config ${{ matrix.module }}/fly.toml --ha=false
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
