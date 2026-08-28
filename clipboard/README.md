@@ -3,9 +3,8 @@
 This module contains a collection of Vaadin Flow views demonstrating the
 browser Clipboard API exposed via `com.vaadin.flow.component.clipboard.Clipboard`.
 
-- **Detecting clipboard availability** (HTTPS context, restrictive
-  iframe, denied permission). No `availabilityHintSignal()` or
-  `ClipboardAvailability` type exists in this build.
+Rough edges found while building the views — including the ones that
+shaped UC8 — are collected in [API-GAPS.md](API-GAPS.md).
 
 The original tracking issue is
 [vaadin/platform#8759](https://github.com/vaadin/platform/issues/8759);
@@ -84,10 +83,20 @@ component, which can be any `Component` that implements `ClickNotifier`
    pasted file is uploaded via Flow's standard upload mechanism;
    `onStart` / `onFile` / `onComplete` give the application
    paste-aware lifecycle hooks for progress reporting.
+8. **UC8 — Copy from a data grid** — the use case from the
+   [forum thread](https://vaadin.com/forum/t/clipboard-copy/164697/11):
+   copy a cell value, a whole row, or the current selection out of a
+   500-row `Grid` without creating a copy button per row. The copy
+   actions are a single `GridContextMenu` plus one toolbar button, so
+   the number of clipboard bindings is constant; each is bound to an
+   off-screen `Input` used as a client-side staging slot that the
+   server fills from the menu's dynamic content handler and the grid's
+   selection listener. Everything awkward about that is written up in
+   [API-GAPS.md](API-GAPS.md).
 
 The remaining PRD item (availability signal) is omitted because the
-underlying API is still not part of this Flow branch — see the note at
-the top of this file.
+underlying API is still not part of this Flow branch — see
+[API-GAPS.md](API-GAPS.md).
 
 ## Running the Application
 
