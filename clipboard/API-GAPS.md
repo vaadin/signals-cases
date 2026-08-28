@@ -18,79 +18,93 @@ The API is a small static facade:
 - `Clipboard.onPaste(component, listener)` and
   `Clipboard.onFilePaste(component, handler)` observe browser paste events.
 
-The gaps below were all found while building **UC8 — Copy from a data grid**
-(`uc8/CopyFromGridView.java`), the use case from the
-[forum thread](https://vaadin.com/forum/t/clipboard-copy/164697/11): a table
-with a copy affordance next to the cell values, without "instantiating
-millions of components and instances of the clipboard helper".
+The gaps below were found while building **UC8 — a copy button in every grid
+row** (`uc8/CopyFromGridView.java`), the use case from the
+[forum thread](https://vaadin.com/forum/t/clipboard-copy/164697/11): "a button
+next to the value (for example addresses) inside a table to copy the value",
+asked with the worry of "instantiating million of components and instances of
+the clipboard helper".
+
+The good news first: the use case **works, and works simply**. A
+`ComponentRenderer` column that does
+`Clipboard.onClick(button).writeText(customer.email())` per row is the entire
+implementation, and the grid only ever materialises the rows it renders —
+measured in a browser, the 500-row demo holds ten copy buttons, and scrolling
+to row 400 leaves it at ten, with the recycled rows' buttons copying their own
+values. So the answer to the thread's worry is "the components are bounded by
+the viewport". Everything below is about the cost of the *binding* that comes
+with each of those buttons.
+
+## No column-level or renderer-level binding — one trigger per rendered row
+
+**Where it bit us:** uc8 / CopyFromGridView.java — the forum question itself
+**Symptom:** the clipboard binding is per component instance. A copy button in
+every row therefore means, per rendered row: a `Button`, a `ClickTrigger`, an
+`addJsInitializer` registration, and a client-side listener — all torn down and
+rebuilt every time the row scrolls out of the buffer and back. The value being
+copied is the same shape for every row (one column's value for one item), yet
+there is no way to say that once for the column. The scroll churn is the part
+that has no answer today: the binding is re-created per row per scroll, where
+one binding for the whole column would do.
+
+`LitRenderer` — the tool that exists precisely to avoid per-row components —
+cannot help here. Its `withFunction(...)` callbacks are server round trips, so
+by the time the server sees the click the browser's transient activation is
+gone and `navigator.clipboard.write*` rejects. Client-side trigger actions and
+lightweight renderers are simply disjoint today.
+
+**Workaround used:** none needed for correctness — UC8 accepts the per-row
+binding. The demo documents the cost rather than hiding it.
+**Suggested API:** a way to attach a client-side trigger action to a renderer
+template, so one binding serves the whole column and the value comes from the
+row's own client-side data:
+
+```java
+// The action is rendered into the LitRenderer template and fires on the
+// client; the item's serialised properties are the value source.
+LitRenderer.<Customer> of("<span>${item.email}</span>"
+                + "<button @click=${copy}>Copy</button>")
+        .withProperty("email", Customer::email)
+        .withClientAction("copy", Clipboard.write().text("email"));
+```
 
 ## No dynamic value source — the copied value must be known before the click
 
-**Where it bit us:** uc8 / CopyFromGridView.java (all four copy actions)
+**Where it bit us:** uc8 / CopyFromGridView.java — the alternatives to a
+per-row button
 **Symptom:** `Clipboard.onClick(...)` has to be given the value at binding
 time. The two sources are a `String` literal and the `value` property of a
-`HasValue<?, String>` component. Neither can express "copy whatever row the
-user just right-clicked" or "copy the current grid selection", which is the
-normal shape of a copy action in a data-heavy application: the value is only
-known server-side, after the user has picked a target, and re-binding on every
-change is not an option because each `writeText` call adds another wiring
-(`Trigger.triggers` appends, it does not replace).
-
-Note that the underlying trigger machinery already supports this — the
-internal `com.vaadin.flow.component.trigger.internal.SignalInput` mirrors a
-server-side `Signal` into a client-side property and reads it when the trigger
-fires, which is exactly what is needed. It is simply not reachable from the
-public clipboard API.
+`HasValue<?, String>` component. The per-row button gets away with a literal
+only because the renderer re-runs for every row; anything that reuses *one*
+affordance across rows — a single toolbar "copy selected" button, a grid
+context menu, a copy shortcut — needs the value chosen at click time and has
+nowhere to put it. Re-binding on each change is not an option either: each
+`writeText` call adds another wiring (`Trigger.triggers` appends, it does not
+replace).
 
 This is also a regression against what the community had already settled on.
 The reusable helper the forum thread converged on
 ([post 8](https://vaadin.com/forum/t/clipboard-copy/164697/8)) is
 `CopyToClipboard(Supplier<String> text)` — a copy icon whose value is resolved
-at click time — and it is used as
-`new CopyToClipboard(() -> textField.getValue())`. That helper is unsafe for
-other reasons (the `executeJs` it wraps runs after a server round trip, so the
-user gesture is gone), but its *ergonomics* are the ones a grid needs, and they
-are what the new API dropped: it can bind a value, but not a way to compute
-one.
+at click time — used as `new CopyToClipboard(() -> textField.getValue())`. That
+helper is unsafe for other reasons (the `executeJs` it wraps runs after a
+server round trip, so the gesture is gone), but its *ergonomics* are the ones a
+grid wants, and they are what the new API dropped: it can bind a value, but not
+a way to compute one.
 
-**Workaround used:** an off-screen value-holder component per copy action,
-used purely as a client-side staging slot, plus a server-side hook that fills
-the slot before the user is able to click:
+The trigger machinery already supports it internally — the internal
+`com.vaadin.flow.component.trigger.internal.SignalInput` mirrors a server-side
+`Signal` into a client-side property and reads it when the trigger fires. It is
+simply not reachable from the public clipboard API.
 
-```java
-StagingSlot emailSlot = new StagingSlot();  // never shown to the user
-Clipboard.onClick(copyEmail).writeText(emailSlot, onCopied, onError);
-
-grid.addContextMenu().setDynamicContentHandler(customer -> {
-    emailSlot.setValue(customer.email()); // reaches the client before the
-    return true;                          // menu opens
-});
-```
-
-Three sharp edges in that workaround, all of them found the hard way:
-
-- **The obvious slot component corrupts the value.** The natural choice is
-  `com.vaadin.flow.component.html.Input` — it is the lightest
-  `Component & HasValue<?, String>` in the platform. It also silently breaks
-  every multi-line copy: the HTML value sanitisation algorithm strips CR and
-  LF from an `<input>`'s value, so "copy this row" and "copy the selected
-  rows" put a single run-together line on the clipboard. Nothing warns you;
-  the copy succeeds and `onCopied` reports the mangled string. UC8 therefore
-  declares a five-line `AbstractSinglePropertyField` over a `<span>`, whose
-  `value` is a plain JS property with no sanitisation. Having to invent a fake
-  field component to satisfy the API's only dynamic value source is the gap in
-  a nutshell.
-- **The slot must not be hidden with `setVisible(false)`.** Flow does not push
-  property updates to invisible elements, so the staged value would arrive
-  only when the component became visible again and the copy would silently
-  write a stale value. It has to stay "visible" and be hidden with CSS
-  instead.
-- **It only works where something guarantees a server round trip *before* the
-  click** — `GridContextMenu.setDynamicContentHandler` and a selection
-  listener do; a plain hover or a keyboard-driven flow may not.
-
-**Suggested API:** a signal-backed (or supplier-backed) value source on every
-write, mirroring the existing `HasValue` overloads:
+**Workaround used:** UC8 sidesteps it by binding a literal per row. The
+workaround for the shared-affordance case is an off-screen component with a
+`value` property, filled server-side before the click can happen — with the
+trap that the obvious choice, `com.vaadin.flow.component.html.Input`, silently
+strips CR/LF from its value (HTML value sanitisation), mangling any multi-line
+copy.
+**Suggested API:** a signal-backed value source on every write, mirroring the
+existing `HasValue` overloads:
 
 ```java
 // The signal is mirrored to the client on every change; the write reads the
@@ -99,139 +113,38 @@ ClipboardBinding.writeText(Signal<String> value);
 ClipboardBinding.writeText(Signal<String> value, SerializableConsumer<String> onCopied,
         SerializableConsumer<PromiseAction.Error> onError);
 ClipboardContent.text(Signal<String> value);
-// e.g.
-// ValueSignal<String> email = new ValueSignal<>("");
-// Clipboard.onClick(copyEmail).writeText(email);
-// grid.addContextMenu().setDynamicContentHandler(c -> { email.set(c.email()); return true; });
 ```
 
-A `SerializableSupplier<String>` overload would read even closer to the
-thread's `CopyToClipboard(Supplier<String>)`, but it cannot work on its own:
-the supplier would have to be invoked on the server, and the gesture is gone by
-then. A signal is the version of that idea that survives the gesture
-constraint, because its value is already on the client when the click happens.
+A plain `SerializableSupplier<String>` overload would read closer to the
+thread's helper, but it cannot work on its own: the supplier would have to run
+on the server, and the gesture is gone by then. A signal is the version of that
+idea that survives the gesture constraint, because its value is already on the
+client when the click happens.
 
-## `GridMenuItem` is not a `ClickNotifier`, so a grid context menu cannot be a trigger
+## `GridMenuItem` is not a `ClickNotifier`
 
-**Where it bit us:** uc8 / CopyFromGridView.java
+**Where it bit us:** uc8 / CopyFromGridView.java — hit while trying a grid
+context menu as the per-row affordance, before settling on the button the
+forum thread actually asked for
 **Symptom:** `Clipboard.onClick` requires `T extends Component &
-ClickNotifier<?>`. `ContextMenu`'s `MenuItem` implements `ClickNotifier` (which
-is what UC6 relies on), but `GridContextMenu`'s `GridMenuItem` — the item type
-of *the* context menu you use with a `Grid` — does not; it only extends
-`MenuItemBase`. So the most natural per-row copy affordance in a grid does not
-compile:
+ClickNotifier<?>`. `ContextMenu`'s `MenuItem` implements `ClickNotifier` (UC6
+relies on it), but `GridContextMenu`'s `GridMenuItem` does not — it only
+extends `MenuItemBase`. So the natural per-row copy affordance for a grid does
+not compile:
 
 ```java
 GridMenuItem<Customer> copyEmail = grid.addContextMenu().addItem("Copy email");
-Clipboard.onClick(copyEmail).writeText(emailSlot); // does not compile
+Clipboard.onClick(copyEmail).writeText(email); // does not compile
 ```
 
-**Workaround used:** wrap the item's label in a `Span` (an `HtmlContainer`, so
-a `ClickNotifier`), bind the clipboard action to the `Span`, and stretch it
-with CSS to cover the whole menu item so that clicks anywhere on the item hit
-it:
-
-```java
-Span copyEmail = new Span("Copy email");
-copyEmail.addClassName("menu-action"); // display: block; width: 100%
-grid.addContextMenu().addItem(copyEmail);
-Clipboard.onClick(copyEmail).writeText(emailSlot, onCopied, onError);
-```
-
-**Suggested API:** make `GridMenuItem` implement `ClickNotifier<GridMenuItem<T>>`
-for parity with `MenuItem` (a `vaadin-grid-flow` change, not a clipboard one).
-Failing that, `Clipboard.onClick` could accept any `Component` and install the
-DOM `click` listener directly rather than going through `ClickNotifier`.
-
-## No `copy` / `cut` event counterpart to `onPaste` — Ctrl+C cannot be served
-
-**Where it bit us:** uc8 / CopyFromGridView.java
-**Symptom:** reading the clipboard is event-driven (`Clipboard.onPaste`), but
-writing is click-driven only. The browser fires a `copy` event on Ctrl/Cmd+C
-that a page can answer with `event.clipboardData.setData(...)`; that is how
-every spreadsheet-like web UI implements "select rows, press Ctrl+C". Flow
-exposes no equivalent, and the server-side route (`Shortcuts.addShortcutListener`
-or a `KeyNotifier`) is useless here because the gesture is gone by the time the
-server sees the key press. In a grid this is the single most expected copy
-interaction, and it is the one interaction that needs *no* extra components at
-all — so its absence is what forces the context-menu/toolbar design in the
-first place.
-
-**Workaround used:** none — UC8 has no Ctrl+C support. Copying is only
-available through the context menu and the toolbar button.
-
-**Suggested API:**
-
-```java
-// Symmetric with onPaste: the handler runs on the server when the browser
-// fires `copy`/`cut` on the component, and what it returns is what gets put
-// on the clipboard.
-Registration Clipboard.onCopy(Component component,
-        SerializableFunction<CopyEvent, ClipboardContent> handler);
-Registration Clipboard.onCut(Component component,
-        SerializableFunction<CopyEvent, ClipboardContent> handler);
-// e.g. Clipboard.onCopy(grid, event -> ClipboardContent.create()
-//         .text(toTsv(grid.getSelectedItems()))
-//         .html(toHtmlTable(grid.getSelectedItems())));
-```
-
-(Serving the event from the server means the round trip has to happen inside
-the browser's `copy` handler — so this most likely needs the value to be
-staged the same way the signal-backed source above stages it, i.e. the two
-suggestions compose: `Clipboard.onCopy(grid).write(contentSignal)`.)
-
-## `writeHtml` / `ClipboardContent.html` take a literal only
-
-**Where it bit us:** uc8 / CopyFromGridView.java ("Copy selected rows")
-**Symptom:** `ClipboardContent.text` has both a literal and a
-`HasValue`-component overload, but `html` (and `writeHtml`) only takes a
-literal `String`. There is therefore no way at all to put *dynamic* rich
-content on the clipboard — not even with the staging-slot workaround, because
-there is nothing to stage into. Copying a grid selection as an HTML `<table>`
-alongside the plain-text TSV is the standard way to make a paste into Excel,
-Word or Google Docs keep its structure (and it is the exact inverse of UC5,
-which parses that HTML on the way in), but it can only be done for a fixed
-value known at binding time.
-
-**Workaround used:** UC8 copies the selection as tab-separated text only.
-Spreadsheets still split it into cells; rich-text targets get a single blob of
-tab-separated text.
-
-**Suggested API:** the same value sources as `text`, on every format:
-
-```java
-ClipboardContent.html(Signal<String> value);
-ClipboardContent.html(C source); // C extends Component & HasValue<?, String>
-ClipboardBinding.writeHtml(Signal<String> value, onCopied, onError);
-```
-
-## No per-row / per-cell binding for renderers
-
-**Where it bit us:** uc8 / CopyFromGridView.java — the original forum question
-**Symptom:** the affordance users actually ask for is a copy icon *in the
-row*. Today that means a `ComponentRenderer` column creating a `Button` and a
-`Clipboard.onClick(...)` binding per rendered row — one component, one trigger
-and one client-side listener each, re-created as the user scrolls, which is
-what the forum thread was worried about. The cheap alternative, `LitRenderer`,
-cannot help: its `withFunction(...)` callbacks are server round trips, so the
-user gesture is gone before the write could run.
-
-**Workaround used:** no per-row affordance at all. UC8 puts the copy actions
-in a single context menu and a single toolbar button, so the binding count is
-constant in the number of rows.
-
-**Suggested API:** a way to attach a client-side trigger action to a renderer
-template, so one binding serves every row and the copied value comes from the
-row's own client-side data:
-
-```java
-// The action is rendered into the LitRenderer template and fires on the
-// client, with the item's serialised properties available as the value
-// source.
-LitRenderer.<Customer> of("<button @click=${copy}>Copy</button>")
-        .withProperty("email", Customer::email)
-        .withClientAction("copy", Clipboard.write().text("email"));
-```
+**Workaround used:** none in the final view. While exploring, wrapping the
+item's label in a `Span` (an `HtmlContainer`, so a `ClickNotifier`) and
+stretching it over the item with CSS does work.
+**Suggested API:** make `GridMenuItem` implement
+`ClickNotifier<GridMenuItem<T>>` for parity with `MenuItem` — a
+`vaadin-grid-flow` change rather than a clipboard one. Failing that,
+`Clipboard.onClick` could accept any `Component` and attach the DOM `click`
+listener directly instead of going through `ClickNotifier`.
 
 ## Clipboard writes cannot be asserted in browserless tests
 
@@ -240,22 +153,18 @@ LitRenderer.<Customer> of("<button @click=${copy}>Copy</button>")
 (`Clipboard.onClick(button).writeText(...)`), so nothing about it is
 observable from a browserless test: there is no way to fire the trigger, no
 way to inspect what a component's bindings would write, and no fake clipboard
-to assert against. Tests can only check the surrounding server-side state —
-in UC8's case, the values staged into the slots. A regression that unbound a
-copy action entirely, or bound it to the wrong slot, would not be caught.
-
-**Workaround used:** `CopyFromGridViewTest` asserts the staged values and
-drives the dynamic content handler directly
-(`contextMenu.getDynamicContentHandler().test(customer)`), which is the
-server-side half of the interaction.
-
+to assert against. `CopyFromGridViewTest` can check that every row renders its
+own value and its own copy button, but not that the button is bound to that
+value — a regression that bound every row to the first row's email would pass.
+**Workaround used:** assert the rendered cell contents, and verify the actual
+copy by driving the running app in a real browser.
 **Suggested API:** a browserless simulator, e.g.
 
 ```java
 // In browserless-test or a flow-server test-fixtures jar.
 ClipboardSimulator clipboard = ClipboardSimulator.install();
 test(copyButton).click();
-assertEquals("ada.lovelace@acme.example", clipboard.lastWrittenText());
+assertEquals("ada.lovelace1@northwind.example", clipboard.lastWrittenText());
 ```
 
 ## Detecting clipboard availability
@@ -266,9 +175,10 @@ assertEquals("ada.lovelace@acme.example", clipboard.lastWrittenText());
 `clipboard-write` permission) before offering a copy affordance. No
 `availabilityHintSignal()` or `ClipboardAvailability` type exists in this
 build; the only signal is an `onError` callback firing after the user has
-already clicked.
-**Workaround used:** none — the copy affordances are always offered, and a
-failure is reported through `onError`.
+already clicked. In a grid this is per-row noise: 30 copy buttons that all
+look enabled and all fail the same way.
+**Workaround used:** none — the copy buttons are always offered, and a failure
+is reported through `onError`.
 **Suggested API:** a support/permission signal mirroring
 `WebShare.supportSignal()` and `Fullscreen.stateSignal()`:
 

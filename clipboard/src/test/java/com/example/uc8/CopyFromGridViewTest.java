@@ -1,17 +1,17 @@
 package com.example.uc8;
 
-import java.util.Set;
-
 import com.example.uc8.CopyFromGridView.Customer;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.browserless.ViewPackages;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Span;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -19,84 +19,40 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class CopyFromGridViewTest extends SpringBrowserlessTest {
 
     @Test
-    void viewRendersHeadingGridAndDisabledCopyButton() {
+    void viewRendersHeadingAndGrid() {
         CopyFromGridView view = navigate(CopyFromGridView.class);
 
-        assertTrue(findInView(H1.class).all().stream().anyMatch(
-                h -> "UC8 — Copy from a data grid".equals(h.getText())));
-        assertEquals(500, test(view.grid).size());
-        assertEquals("Name", test(view.grid).getHeaderCell(0));
-        // Nothing selected yet, so there is nothing to copy.
-        assertFalse(view.copySelection.isEnabled());
-        assertEquals("", view.selectionSlot.getValue());
+        assertTrue(findInView(H1.class).all().stream()
+                .anyMatch(h -> "UC8 — A copy button in every grid row"
+                        .equals(h.getText())));
+        assertEquals(CopyFromGridView.ROW_COUNT, test(view.grid).size());
+        assertEquals("Email", test(view.grid).getHeaderCell(2));
     }
 
     @Test
-    void contextMenuStagesTheValuesOfTheTargetRow() {
+    void everyRowRendersItsOwnValueAndCopyButton() {
         CopyFromGridView view = navigate(CopyFromGridView.class);
 
-        Customer target = test(view.grid).getRow(3);
-        // What the browser does on right-click: the server decides whether to
-        // open the menu, and stages the row's values while doing so.
-        assertTrue(view.contextMenu.getDynamicContentHandler().test(target));
-
-        assertEquals(target.email(), view.emailSlot.getValue());
-        assertEquals(target.phone(), view.phoneSlot.getValue());
-        // A single row is copied without the header line.
-        assertEquals(
-                String.join("\t", target.name(), target.company(),
-                        target.email(), target.phone()),
-                view.rowSlot.getValue());
-        // The labels are the only thing telling the user which row they are
-        // about to copy.
-        assertEquals("Copy email — " + target.email(),
-                view.copyEmailAction.getText());
-        assertEquals("Copy phone — " + target.phone(),
-                view.copyPhoneAction.getText());
-        assertEquals("Copy row — " + target.name(),
-                view.copyRowAction.getText());
+        // Two rows far apart: each cell must carry its own row's value, since
+        // the copy button binds that value as a literal at render time.
+        assertCopyCell(view, 0);
+        assertCopyCell(view, 42);
     }
 
-    @Test
-    void rightClickOutsideRowsDoesNotOpenTheMenu() {
-        CopyFromGridView view = navigate(CopyFromGridView.class);
+    private void assertCopyCell(CopyFromGridView view, int row) {
+        Customer customer = test(view.grid).getRow(row);
+        Component cell = test(view.grid).getCellComponent(row, 2);
 
-        assertFalse(view.contextMenu.getDynamicContentHandler().test(null));
-    }
-
-    @Test
-    void selectionIsStagedAsTsvInGridOrder() {
-        CopyFromGridView view = navigate(CopyFromGridView.class);
-
-        Customer first = test(view.grid).getRow(0);
-        Customer second = test(view.grid).getRow(1);
-        // Selected in reverse order — the copied table must still follow the
-        // order the rows appear in, not the selection set's iteration order.
-        view.grid.asMultiSelect().setValue(Set.of(second, first));
-
-        assertEquals(
-                "Name\tCompany\tEmail\tPhone\n"
-                        + String.join("\t", first.name(), first.company(),
-                                first.email(), first.phone())
-                        + "\n"
-                        + String.join("\t", second.name(), second.company(),
-                                second.email(), second.phone()),
-                view.selectionSlot.getValue());
-        assertTrue(view.copySelection.isEnabled());
-        assertEquals("Copy 2 selected rows", view.copySelection.getText());
-    }
-
-    @Test
-    void clearingTheSelectionDisablesTheCopyButton() {
-        CopyFromGridView view = navigate(CopyFromGridView.class);
-
-        test(view.grid).select(0);
-        assertTrue(view.copySelection.isEnabled());
-
-        view.grid.deselectAll();
-
-        assertFalse(view.copySelection.isEnabled());
-        assertEquals("", view.selectionSlot.getValue());
-        assertEquals("Copy selected rows", view.copySelection.getText());
+        assertTrue(
+                cell.getChildren()
+                        .anyMatch(child -> child instanceof Span span
+                                && customer.email().equals(span.getText())),
+                "row " + row + " should show its email");
+        assertTrue(
+                cell.getChildren()
+                        .anyMatch(child -> child instanceof Button button
+                                && ("Copy " + customer.email()).equals(
+                                        button.getAriaLabel().orElse(null))),
+                "row " + row + " should have a copy button for its own email");
     }
 }

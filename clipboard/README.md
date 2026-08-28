@@ -83,17 +83,16 @@ component, which can be any `Component` that implements `ClickNotifier`
    pasted file is uploaded via Flow's standard upload mechanism;
    `onStart` / `onFile` / `onComplete` give the application
    paste-aware lifecycle hooks for progress reporting.
-8. **UC8 — Copy from a data grid** — the use case from the
+8. **UC8 — A copy button in every grid row** — the use case from the
    [forum thread](https://vaadin.com/forum/t/clipboard-copy/164697/11):
-   copy a cell value, a whole row, or the current selection out of a
-   500-row `Grid` without creating a copy button per row. The copy
-   actions are a single `GridContextMenu` plus one toolbar button, so
-   the number of clipboard bindings is constant; each is bound to an
-   off-screen `<span>`-based staging slot that the server fills from the
-   menu's dynamic content handler and the grid's selection listener.
-   (Not an `Input` — an `<input>`'s value sanitisation strips the
-   newlines out of a multi-row copy.) Everything awkward about that is
-   written up in [API-GAPS.md](API-GAPS.md).
+   a copy button next to the value it copies, in every row of a 500-row
+   `Grid`. A `ComponentRenderer` builds the cell and each row's button
+   binds its own value as a literal —
+   `Clipboard.onClick(button).writeText(customer.email())`. The grid
+   only materialises the rows it renders, so the buttons follow the
+   viewport rather than the row count; what does scale with scrolling is
+   one clipboard binding per rendered row, which is the cost written up
+   in [API-GAPS.md](API-GAPS.md).
 
 The remaining PRD item (availability signal) is omitted because the
 underlying API is still not part of this Flow branch — see
