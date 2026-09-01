@@ -374,9 +374,8 @@ public class ConnectionInsightsView extends VerticalLayout {
                 "The client gave up waiting and asked for the whole UI state "
                         + "again"));
         stats.add(new Stat("Client samples refused",
-                counter(MeterNames.CLIENT_DROPPED, null, null) + " dropped, "
-                        + counter(MeterNames.CLIENT_THROTTLED, null, null)
-                        + " throttled",
+                counter(MeterNames.CLIENT_DROPPED) + " dropped, "
+                        + counter(MeterNames.CLIENT_THROTTLED) + " throttled",
                 MeterNames.CLIENT_DROPPED + " / " + MeterNames.CLIENT_THROTTLED,
                 "One outage flushes as one batch, which can outrun the "
                         + "per-session rate limit; the kit sends connection "
@@ -421,13 +420,20 @@ public class ConnectionInsightsView extends VerticalLayout {
     }
 
     /**
-     * Sums a counter across its series, optionally narrowed to one tag. A meter
-     * that was never registered reads as a dash rather than 0: "nothing has
-     * happened" and "nothing is watching" are different answers.
+     * Sums a counter across all of its series. A meter that was never
+     * registered reads as a dash rather than 0: "nothing has happened" and
+     * "nothing is watching" are different answers.
      */
+    private String counter(String meter) {
+        return format(registry.find(meter).counters());
+    }
+
+    /** The same sum, narrowed to one tag. */
     private String counter(String meter, String tagKey, String tagValue) {
-        Collection<Counter> counters = (tagKey == null ? registry.find(meter)
-                : registry.find(meter).tag(tagKey, tagValue)).counters();
+        return format(registry.find(meter).tag(tagKey, tagValue).counters());
+    }
+
+    private static String format(Collection<Counter> counters) {
         return counters.isEmpty() ? "—"
                 : Long.toString(Math.round(counterTotal(counters)));
     }
