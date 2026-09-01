@@ -5,6 +5,16 @@ tracing, metrics, structured logging of UI interactions, …). Each concrete use
 case is a sibling `ucN` view, mirroring the layout of the other modules in this
 repository, and the `HomeView` lists them via the auto-generated menu.
 
+Use cases are chapters of one fictional application — the back office of
+**Acme Supply Co.**, a wholesale hardware supplier. Each view opens with a
+window showing the Acme screen its story happens on, and its route is named
+after that screen (`orders`, not `uc8`), because the kit tags meters by the
+primary route template and the telemetry should read like a real
+application's. The numbered route stays available as a `@RouteAlias`, so
+`/uc8` keeps working without ever appearing in the telemetry. Shared Acme
+building blocks (the window chrome, the product catalog) live in
+`com.example.acme`.
+
 | # | View | What it shows |
 | - | ---- | ------------- |
 | — | Home | Landing page and auto-generated index of the use cases. |
@@ -13,7 +23,7 @@ repository, and the `HomeView` lists them via the auto-generated menu.
 | 3 | Capacity & scaling | How much state the server is holding for live users, and which signals actually predict needing another instance. Reads the kit's counts (`vaadin.sessions.active`, `vaadin.ui.active`, session creation rate and lifetime, session-lock contention) together with its UI-state gauges (`vaadin.ui.state.nodes`, `.nodes.max`, `.components`, `.views`, `vaadin.session.state.nodes.max`, `vaadin.session.uis.max`, `vaadin.ui.state.sample.age.max`), which the kit publishes once `vaadin.observability.ui-state=true` — this used to be [`API-GAPS.md`](API-GAPS.md) #6 and the view had to measure it itself. What remains local is the byte conversion: the kit counts nodes and will not guess what one weighs, so a probe measures it and the view reports whether the configured `ui-state-bytes-per-node` still holds. |
 | 6 | Failure insights | Failed and over-budget interactions as grouped insights naming the route, component, event and the offending line of application code — the same payload the kit serves at `/actuator/vaadin/observability` for an AI agent to act on. |
 | 7 | Monitoring stack | The same meters followed *outward*: exported at `/actuator/prometheus`, scraped by Prometheus, charted by Grafana. Checks each hop separately (exported series, scrape target health, the dashboard's own PromQL) so an empty panel can be told apart from a metric that was never exported. `compose.yaml` runs the stack locally. |
-| 8 | Lazy list latency | Why a lazy `ComboBox` feels slow, and where the time actually goes. Typing a filter makes the component ask its data provider for a count of matches and for one page of items, and both run *after* the RPC invocation that triggered them has returned, so `vaadin.rpc.duration` for the keystroke stays in the microseconds however slow the backend is. Reads the kit's data query meters instead, by their tags: `vaadin.data.count.duration` and `vaadin.data.fetch.duration` split by `filtered` (the timers carry no route tag, and `filtered=true` is what separates a combo box searching typed text from any component loading a whole data set), and `vaadin.data.fetch.requested` next to `vaadin.data.fetch.rows` scoped to `route=uc8`, so over-fetching and short pages show as a gap between the two. The meter table is a plain HTML table, not a `Grid`, because the kit instruments in-memory data providers too and a `Grid` would record on this route while displaying it. The backend delay per query is adjustable. |
+| 8 | Slow product search | "The product search is slow — how do I find out why?" The view opens with just the story: a window showing Acme's order desk (a lazy product `ComboBox` over the catalog, with the simulated backend latency as a demo rig attached to the window) and the instruction to take an order. The first catalog search reveals the investigation below, at the moment the wait has just been felt, and the readout keeps updating as the order grows — no refresh button: **2)** the interaction timers look innocent, because the data provider queries run *after* the RPC invocation that triggered them has returned; **3)** the kit's verdict — the insights endpoint's `slow-data-query` findings, grouped by (route, component, kind), which is what pinpoints the culprit in an application with a hundred views and a thousand lazy components; **4)** the raw meters as fleet-wide aggregates (`vaadin.data.count/fetch.duration` split by `filtered`, `vaadin.data.fetch.requested/rows` scoped to `route=orders`), the same numbers UC7's dashboard charts. Both tables are plain HTML tables, not `Grid`s, because the kit instruments in-memory data providers too and a `Grid` would record on this route while displaying it. |
 
 ## Run
 
