@@ -351,6 +351,10 @@ class LazyListLatencyViewTest extends SpringBrowserlessTest {
     }
 
     private static String cell(NativeTableRow row, int index) {
-        return row.getDataCell(index).orElseThrow().getText();
+        // The meter, tag and value cells render their content as styled child
+        // spans, so the cell's own text is empty and the text has to be read
+        // from the whole subtree.
+        return row.getDataCell(index).orElseThrow().getElement()
+                .getTextRecursively();
     }
 }
