@@ -1,17 +1,19 @@
 package com.example.uc5;
 
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import com.example.uc5.ClientErrorLog.BrowserError;
 import com.example.views.MainLayout;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
+import org.jspecify.annotations.Nullable;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -34,6 +36,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.signals.Signal;
 import com.vaadin.flow.signals.local.ValueSignal;
 import com.vaadin.observability.micrometer.MeterNames;
+import com.vaadin.observability.spring.boot.VaadinObservabilityEndpoint;
 
 /**
  * UC5 — Notice connection and client-side problems.
@@ -75,22 +78,35 @@ import com.vaadin.observability.micrometer.MeterNames;
  * which matters here because the reports of one outage all arrive in a single
  * flush and can outrun the per-session rate limit.
  * <p>
- * What the kit still does not collect is the <em>detail</em> of a browser
- * error: {@link MeterNames#CLIENT_ERRORS} is a count tagged {@code uncaught} or
- * {@code promise}, and the message, script and stack are dropped where they are
- * collected. {@link ClientErrorReporter} keeps them, and the section below the
- * meters is what a count cannot tell you. That is the remaining half of
- * {@code API-GAPS.md} #5.
+ * The <em>detail</em> of a browser error is the kit's too, as of its client
+ * error insights. {@link MeterNames#CLIENT_ERRORS} still only counts, tagged
+ * {@code uncaught} or {@code promise} — a message would be one time series per
+ * distinct message — so what identifies an error is retained as an insight
+ * beside the failed server interactions UC6 renders, and served from the same
+ * endpoint. This view reads the {@code client-error} insights out of that
+ * payload, through the injected {@link VaadinObservabilityEndpoint} bean, and
+ * gets for free everything an application-side listener had to do without:
+ * grouping by route, kind, source and frame with an occurrence count; a
+ * location parsed out of the stack line and validated as a location rather than
+ * trusted; and {@code maxBufferedMs}, the offline time a report waited before
+ * it could be delivered.
+ * <p>
+ * Two of those fields are gated. A browser error can quote anything the page
+ * was working with, and a page can name a function anything, so the message and
+ * the function name travel only when
+ * {@code vaadin.observability.insights-details} is on — and for a browser error
+ * that setting governs <em>collection</em>, not just retention: with it off the
+ * browser never gathers them. This module turns it on for UC6, so they are
+ * present here; the payload says which case it is rather than leaving a null.
  * <p>
  * <b>Why this view does not poll.</b> A poll is a UIDL request, so a polling
  * view probes the connection on every tick: the loading round trip itself is
  * ignored by the collector, but a poll that gets through ends the outage as far
  * as the browser is concerned, and a polling tab therefore reports shorter
  * downtime than a passive one on the same network. The kit's own README says as
- * much. So the readout refreshes from the report instead — an error report is
- * an RPC and repaints this view from inside it — and the refresh button is for
- * problems reported by <em>other</em> tabs, which this one has no way to be
- * told about.
+ * much. Nothing pushes the other way either — the collector's ingest raises no
+ * event an application can subscribe to — so the readout is refreshed by hand,
+ * which is also what keeps it from probing the connection it is measuring.
  *
  * @see <a href=
  *      "https://github.com/vaadin/use-cases/blob/main/observability/API-GAPS.md">API-GAPS.md</a>
@@ -150,29 +166,66 @@ public class ConnectionInsightsView extends VerticalLayout {
     private static final DateTimeFormatter TIME = DateTimeFormatter
             .ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault());
 
+    /** The endpoint's selector, i.e. {@code /actuator/vaadin/observability}. */
+    private static final String SECTION = "observability";
+
+    /** The insight type this view reads; the payload carries others. */
+    private static final String CLIENT_ERROR = "client-error";
+
     /** One row of the meter readout. */
     public record Stat(String signal, String value, String meter,
             String reads) {
     }
 
+    /**
+     * One {@code client-error} insight, flattened for display.
+     *
+     * @param where
+     *            the location the kit parsed out of the first stack frame, or
+     *            the script the browser named, or nothing — it publishes these
+     *            only when what the browser said is actually a location
+     * @param message
+     *            the message, or the payload's own sentence saying why there is
+     *            none: not collected, or collected and the browser had none
+     * @param maxBufferedMillis
+     *            the longest any occurrence in this group waited for its
+     *            browser to reach the server. Non-zero means at least one of
+     *            them could not be delivered when it was raised
+     */
+    public record ErrorInsight(String route, String kind, String where,
+            String message, String function, long occurrences,
+            long maxBufferedMillis, String lastSeen) {
+    }
+
     /** The whole readout at a point in time. */
     public record Readout(String status, boolean degraded, List<Stat> meters,
-            List<BrowserError> errors) {
+            List<ErrorInsight> errors, String insights) {
         static final Readout EMPTY = new Readout("", false, List.of(),
-                List.of());
+                List.of(), "");
     }
 
     private final transient MeterRegistry registry;
-    private final transient ClientErrorLog log;
+    private final transient VaadinObservabilityEndpoint endpoint;
     private final ValueSignal<Readout> readout = new ValueSignal<>(
             Readout.EMPTY);
     private final Span status = new Span();
+    private final Span insightsStatus = new Span();
     private final Grid<Stat> meters = new Grid<>();
-    private final Grid<BrowserError> errors = new Grid<>();
+    private final Grid<ErrorInsight> errors = new Grid<>();
 
-    public ConnectionInsightsView(MeterRegistry registry, ClientErrorLog log) {
+    /**
+     * @param registry
+     *            the application's registry, which the kit's binders — the
+     *            in-browser collector's included — publish into
+     * @param endpoint
+     *            the kit's insights endpoint bean, so the errors below are the
+     *            very same records {@code GET /actuator/vaadin/observability}
+     *            serves
+     */
+    public ConnectionInsightsView(MeterRegistry registry,
+            VaadinObservabilityEndpoint endpoint) {
         this.registry = registry;
-        this.log = log;
+        this.endpoint = endpoint;
 
         add(new H1("UC5 — Notice connection and client-side problems"));
         add(new Paragraph("A user's browser loses the server and gets it back; "
@@ -200,26 +253,44 @@ public class ConnectionInsightsView extends VerticalLayout {
         meters.addThemeName("wrap-cell-content");
         add(new H2("What the kit records"), meters);
 
-        errors.addColumn(e -> TIME.format(e.recordedAt())).setHeader("Recorded")
+        errors.addColumn(ErrorInsight::lastSeen).setHeader("Last seen")
                 .setAutoWidth(true);
-        errors.addColumn(BrowserError::client).setHeader("Browser")
+        errors.addColumn(ErrorInsight::route).setHeader("Route")
                 .setAutoWidth(true);
-        errors.addColumn(BrowserError::kind).setHeader("Kind")
+        errors.addColumn(ErrorInsight::kind).setHeader("Kind")
                 .setAutoWidth(true);
-        errors.addColumn(BrowserError::message).setHeader("Message")
+        errors.addColumn(ErrorInsight::message).setHeader("Message")
                 .setFlexGrow(2);
-        errors.addColumn(BrowserError::where).setHeader("Where").setFlexGrow(2);
+        // The location and the name are separate fields on purpose: the name
+        // is a string the page chose, so it is gated with the message, while
+        // the location is published whenever it is one.
+        errors.addColumn(ErrorInsight::where).setHeader("Where").setFlexGrow(2);
+        errors.addColumn(ErrorInsight::function).setHeader("In function")
+                .setAutoWidth(true);
+        errors.addColumn(ErrorInsight::occurrences).setHeader("Occurrences")
+                .setAutoWidth(true);
+        errors.addColumn(ConnectionInsightsView::held)
+                .setHeader("Report held offline").setAutoWidth(true);
         errors.setAllRowsVisible(true);
         errors.setId("error-detail");
         errors.addThemeName("wrap-cell-content");
-        add(new H2("What the count can't tell you"), errors);
-        add(new Paragraph("The rows above count browser errors and keep "
-                + "nothing else. These are the same errors with the message, "
-                + "script and first stack frame the collector drops where it "
-                + "collects them — kept by this view's own listener, because "
-                + "the kit's ingest takes its own sample names and a message "
-                + "could not travel as a meter tag anyway. This is the half of "
-                + "gap #5 that is still open."));
+        add(new H2("The errors themselves, as insights"), errors);
+
+        insightsStatus.setId("insights-status");
+        insightsStatus.getStyle().set("font-style", "italic");
+        add(insightsStatus);
+        add(new Paragraph("The counter above says how many browser errors "
+                + "happened. These rows say which ones, grouped by route, kind "
+                + "and location with an occurrence count — the same records "
+                + "GET /actuator/vaadin/observability serves, read here from "
+                + "the endpoint bean rather than over HTTP. The location is "
+                + "parsed out of the stack line the browser wrote and kept "
+                + "only when it is actually a location: a cross-origin script "
+                + "reports no filename, a rejection has none at all, and the "
+                + "page's own URL is not where the code is, so those are "
+                + "dropped rather than substituted. \"Report held offline\" is "
+                + "the giveaway that an error could not be told to the server "
+                + "when it was raised."));
 
         // The primary signal-bound containers: badge and both grids repaint
         // from one snapshot, so the meters and the detail cannot disagree.
@@ -230,13 +301,12 @@ public class ConnectionInsightsView extends VerticalLayout {
             themes.set("error", current.degraded());
         });
         Signal.effect(meters, () -> meters.setItems(readout.get().meters()));
-        Signal.effect(errors, () -> errors.setItems(readout.get().errors()));
+        Signal.effect(errors, () -> {
+            errors.setItems(readout.get().errors());
+            insightsStatus.setText(readout.get().insights());
+        });
 
         add(callout());
-
-        // Only the error detail is the application's now; the connection
-        // meters arrive through the kit's own collector, on every UI.
-        add(new ClientErrorReporter(log, this::recompute));
 
         recompute();
     }
@@ -263,11 +333,11 @@ public class ConnectionInsightsView extends VerticalLayout {
         reconnect.setId("simulate-reconnecting");
 
         Button error = new Button("Throw an uncaught browser error",
-                event -> run(THROW, "UC5: rendering the sales chart failed"));
+                event -> raise(THROW, "UC5: rendering the sales chart failed"));
         error.setId("throw-error");
 
         Button rejection = new Button("Reject a promise",
-                event -> run(REJECT, "UC5: fetching /api/quotes failed"));
+                event -> raise(REJECT, "UC5: fetching /api/quotes failed"));
         rejection.setId("reject-promise");
 
         Button refresh = new Button("Refresh", event -> {
@@ -277,14 +347,8 @@ public class ConnectionInsightsView extends VerticalLayout {
         });
         refresh.setId("refresh");
 
-        Button clear = new Button("Clear error log", event -> {
-            log.clear();
-            recompute();
-        });
-        clear.setId("clear-log");
-
         HorizontalLayout actions = new HorizontalLayout(lose, reconnect, error,
-                rejection, refresh, clear);
+                rejection, refresh);
         actions.setWrap(true);
         return actions;
     }
@@ -295,19 +359,98 @@ public class ConnectionInsightsView extends VerticalLayout {
         Notification.show(message);
     }
 
-    private void run(String script, String message) {
-        getUI().ifPresent(ui -> ui.getPage().executeJs(script, message));
+    /**
+     * Raises a browser error, then drains the collector so the insight it
+     * produced is on screen before the click is over.
+     * <p>
+     * The drain has to be a <em>second</em> round trip. The error is thrown
+     * from a timeout, so it has not happened yet when this script returns; by
+     * the time the flush script arrives from the server it has, and the
+     * {@code recordSamples} that flush queues is handled before this second
+     * call's own return value — the ordering UC2's flush button relies on. If
+     * it ever does not hold, the refresh button is the backstop.
+     */
+    private void raise(String script, String message) {
+        getUI().ifPresent(ui -> ui.getPage().executeJs(script, message)
+                .then(thrown -> ui.getPage().executeJs(FLUSH)
+                        .then(flushed -> recompute())));
+        Notification.show(message);
     }
 
     /**
-     * Rebuilds the snapshot. Called from the click handlers and from the error
-     * reporter's {@code @ClientCallable}, both of which run on this UI's
-     * thread, so the signal write is safe.
+     * Rebuilds the snapshot from the registry and the endpoint payload. Called
+     * from the click handlers, on this UI's thread, so the signal write is
+     * safe.
      */
     void recompute() {
-        List<BrowserError> recent = log.recent();
-        List<Stat> stats = stats();
-        readout.set(new Readout(statusOf(), degraded(), stats, recent));
+        Map<String, Object> payload = endpoint.section(SECTION);
+        if (payload == null) {
+            payload = Map.of();
+        }
+        List<ErrorInsight> insights = errorInsights(payload);
+        readout.set(new Readout(statusOf(), degraded(), stats(), insights,
+                insightsStatusOf(payload, insights)));
+    }
+
+    /**
+     * Picks the {@code client-error} insights out of the payload. The endpoint
+     * carries the other kinds too — failed and slow interactions, data provider
+     * queries — which is UC6's readout, not this one.
+     */
+    private static List<ErrorInsight> errorInsights(
+            Map<String, Object> payload) {
+        List<ErrorInsight> rows = new ArrayList<>();
+        for (Map<String, Object> insight : insightsOf(payload)) {
+            if (!CLIENT_ERROR.equals(insight.get("type"))) {
+                continue;
+            }
+            Map<String, Object> evidence = evidenceOf(insight);
+            rows.add(new ErrorInsight(text(evidence.get("route")),
+                    text(evidence.get("kind")), where(evidence),
+                    message(evidence), text(evidence.get("function")),
+                    number(evidence.get("occurrences")),
+                    number(evidence.get("maxBufferedMs")),
+                    time(evidence.get("lastSeen"))));
+        }
+        return rows;
+    }
+
+    /**
+     * The location, preferring the frame the kit parsed out of the stack over
+     * the script the browser named. Either may be absent: both are published
+     * only when what the browser reported is actually a location.
+     */
+    private static String where(Map<String, Object> evidence) {
+        Object frame = evidence.get("frame");
+        return frame != null ? frame.toString() : text(evidence.get("source"));
+    }
+
+    /**
+     * The message, or the payload's own explanation of why there is none. The
+     * kit says which case it is rather than leaving the field null, so a reader
+     * can tell "not collected" from "the browser reported none".
+     */
+    private static String message(Map<String, Object> evidence) {
+        Object message = evidence.get("message");
+        return message != null ? message.toString()
+                : text(evidence.get("detail"));
+    }
+
+    private String insightsStatusOf(Map<String, Object> payload,
+            List<ErrorInsight> insights) {
+        if (!"active".equals(payload.get("instrumentation"))) {
+            return "Observability Kit registered no instrumentation, so there "
+                    + "is nothing to report. In development mode this means no "
+                    + "license key was found.";
+        }
+        if (insights.isEmpty()) {
+            return "No browser errors reported yet. They arrive on the "
+                    + "collector's next flush, or with the one that follows a "
+                    + "recovery.";
+        }
+        return insights.size() + " grouped insight(s). At most 20 travel in "
+                + "one payload, most-reported first, because two parts of the "
+                + "grouping key are the browser's to choose.";
     }
 
     private List<Stat> stats() {
@@ -353,13 +496,14 @@ public class ConnectionInsightsView extends VerticalLayout {
                         + "either tag alone"));
         stats.add(new Stat("Uncaught browser errors",
                 counter(MeterNames.CLIENT_ERRORS, MeterNames.TAG_KIND,
-                        "uncaught"),
-                tagged(MeterNames.CLIENT_ERRORS, "uncaught"),
-                "A count, and nothing else — see the detail below"));
+                        MeterNames.KIND_UNCAUGHT),
+                tagged(MeterNames.CLIENT_ERRORS, MeterNames.KIND_UNCAUGHT),
+                "How many; which ones is the insight table below, since a "
+                        + "message cannot be a tag"));
         stats.add(new Stat("Unhandled promise rejections",
                 counter(MeterNames.CLIENT_ERRORS, MeterNames.TAG_KIND,
-                        "promise"),
-                tagged(MeterNames.CLIENT_ERRORS, "promise"),
+                        MeterNames.KIND_PROMISE),
+                tagged(MeterNames.CLIENT_ERRORS, MeterNames.KIND_PROMISE),
                 "The other half of the same counter"));
         stats.add(new Stat("Messages the client re-sent, having had no answer",
                 counter(MeterNames.RESYNC, MeterNames.TAG_TYPE,
@@ -481,39 +625,96 @@ public class ConnectionInsightsView extends VerticalLayout {
         return timer == null ? 0 : timer.totalTime(TimeUnit.SECONDS);
     }
 
+    /** How long the worst occurrence in a group waited to be deliverable. */
+    private static String held(ErrorInsight insight) {
+        return insight.maxBufferedMillis() == 0 ? "—"
+                : "%.1f s".formatted(insight.maxBufferedMillis() / 1000d);
+    }
+
+    // ---------- reading the endpoint payload ----------
+    //
+    // The payload is shaped for the endpoint, so an in-app consumer casts its
+    // way through nested maps and string keys with no compile-time contract
+    // (API-GAPS.md #9). UC6 does the same for the interaction insights.
+
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> insightsOf(
+            Map<String, Object> payload) {
+        return payload.get("insights") instanceof List<?> list
+                ? (List<Map<String, Object>>) list
+                : List.of();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> evidenceOf(Map<String, Object> insight) {
+        return insight.get("evidence") instanceof Map<?, ?> map
+                ? (Map<String, Object>) map
+                : Map.of();
+    }
+
+    private static String text(@Nullable Object value) {
+        return value == null ? "—" : value.toString();
+    }
+
+    private static long number(@Nullable Object value) {
+        return value instanceof Number number ? number.longValue() : 0;
+    }
+
+    /**
+     * The payload's timestamps are ISO instants of when the server received a
+     * report — which can lag the error by a whole outage, so the column is
+     * headed "last seen" rather than "happened".
+     */
+    private static String time(@Nullable Object value) {
+        if (value == null) {
+            return "—";
+        }
+        try {
+            return TIME.format(Instant.parse(value.toString()));
+        } catch (RuntimeException notAnInstant) {
+            return value.toString();
+        }
+    }
+
     private static Details callout() {
         UnorderedList list = new UnorderedList(new ListItem(
-                "Browser errors are counted, not described. The message, "
-                        + "script and stack are dropped where they are "
-                        + "collected, and the ingest allowlist would reject "
-                        + "them anyway, so the detail table above is this "
-                        + "view's own listener — the open half of gap #5."),
-                new ListItem("That listener also cannot say how long a report "
-                        + "waited. The collector buffers its samples through "
-                        + "an outage, into sessionStorage, and stamps each "
-                        + "with a client-measured age; application data cannot "
-                        + "go through that pipeline, so an error reported "
-                        + "during an outage arrives whenever Flow's message "
-                        + "queue delivers it, undated."),
-                new ListItem("Nor does it group. The kit's insight buffer "
-                        + "already folds repeats into one entry with an "
-                        + "occurrence count, hashes the session id and "
-                        + "truncates messages; a hundred tabs hitting the same "
-                        + "broken chart give a hundred rows here."),
+                "Nothing here is measured by this application any more. The "
+                        + "view had a shim for the connection state and then a "
+                        + "listener for the error detail; the collector does "
+                        + "both, on every UI rather than only on this route, "
+                        + "so both are deleted (gap #5)."),
+                new ListItem("The insights are an untyped JSON map in process. "
+                        + "The payload is a good published contract for an "
+                        + "agent; for a Java caller it means unchecked casts "
+                        + "and string keys, which is what the bottom of this "
+                        + "class does (gap #9)."),
+                new ListItem("Client samples arrive with no event to listen "
+                        + "for. The collector's ingest raises nothing an "
+                        + "application can subscribe to, so a live readout has "
+                        + "to poll — which this view must not do, since a poll "
+                        + "shortens the outages it reports — or be refreshed by "
+                        + "hand, which is why there is a button."),
+                new ListItem("Draining the collector still needs a debug "
+                        + "internal: the refresh and error buttons call "
+                        + "window.__vaadinMicrometer.flush(), which the kit "
+                        + "documents as debug-only (gap #12)."),
                 new ListItem("Downtime under-reports by construction: a "
                         + "browser that never comes back reports nothing, and "
                         + "an outage spanning a reload keeps its count but "
                         + "loses its clock. Read the counts for how often, the "
                         + "timer only for how long the observed ones lasted."),
-                new ListItem("Instrumentation attached to a view watches only "
-                        + "that view. The kit's collector is attached to every "
-                        + "UI; this view's error listener is added by UC5, so "
-                        + "navigating away stops it."),
+                new ListItem("A non-zero \"report held offline\" says a report "
+                        + "could not be delivered when it was raised — not "
+                        + "that the error happened during an outage. A report "
+                        + "taken while the browser was still connected accrues "
+                        + "an outage that starts before the next flush."),
                 new ListItem("Push transport is still not instrumented on the "
                         + "client, so an app using @Push has no client-side "
                         + "view of its own delivery (gap #4)."));
         Details details = new Details("What this can't show yet (and why)",
                 list);
+        details.add(new Anchor("/actuator/vaadin/observability",
+                "GET /actuator/vaadin/observability"));
         details.add(new Anchor(
                 "https://github.com/vaadin/use-cases/blob/main/observability/API-GAPS.md",
                 "See API-GAPS.md"));
