@@ -11,9 +11,14 @@ window showing the Acme screen its story happens on, and its route is named
 after that screen (`orders`, not `uc8`), because the kit tags meters by the
 primary route template and the telemetry should read like a real
 application's. The numbered route stays available as a `@RouteAlias`, so
-`/uc8` keeps working without ever appearing in the telemetry. Shared Acme
-building blocks (the window chrome, the product catalog) live in
-`com.example.acme`.
+`/uc8` keeps working without ever appearing in the telemetry. The shared
+building blocks live in `com.example.acme`: `AppWindow` (the window chrome),
+`DemoRig` (the knobs that fake the story's problem, visibly not part of the
+app), `Investigation` (the "What Observability Kit sees" readout — hidden
+until the view reveals it, collapsible steps, refresh scheduling instead of a
+refresh button), `InsightCard` and `MeterTable` (the readout's building
+blocks), `Telemetry` and `Insights` (formatting and payload helpers), and
+`AcmeCatalog` (the product catalog).
 
 | # | View | What it shows |
 | - | ---- | ------------- |

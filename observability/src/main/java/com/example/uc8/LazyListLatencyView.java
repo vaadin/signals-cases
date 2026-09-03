@@ -4,29 +4,27 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
-
-import org.jspecify.annotations.Nullable;
 
 import com.example.acme.AcmeCatalog;
 import com.example.acme.AppWindow;
+import com.example.acme.DemoRig;
+import com.example.acme.InsightCard;
+import com.example.acme.Insights;
+import com.example.acme.Investigation;
+import com.example.acme.MeterTable;
+import com.example.acme.Telemetry;
 import com.example.views.MainLayout;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.NativeTable;
-import com.vaadin.flow.component.html.NativeTableBody;
 import com.vaadin.flow.component.html.NativeTableCell;
 import com.vaadin.flow.component.html.NativeTableHeaderCell;
 import com.vaadin.flow.component.html.NativeTableRow;
@@ -51,11 +49,10 @@ import com.vaadin.observability.spring.boot.VaadinObservabilityEndpoint;
  * The view opens with just the story: an {@link AppWindow} showing the screen
  * Acme's clerks take phone orders on — a lazy {@link ComboBox} over the
  * product catalog, backed by a deliberately slow data provider (the latency
- * knob is part of the demo rig attached to the window, not of the
- * observability readout). The investigation below stays hidden until the
- * catalog is first queried, so it appears at the moment the reader has just
- * felt the wait it explains — and its steps are collapsible {@link Details},
- * the first one open, so the reader takes them one at a time.
+ * knob sits in the {@link DemoRig}, not among the observability readouts). The
+ * {@link Investigation} below stays hidden until the catalog is first
+ * queried, so it appears at the moment the reader has just felt the wait it
+ * explains, as collapsible steps taken one at a time.
  * <p>
  * Typing a filter makes the component ask its provider twice: once for the
  * count of matches, once for the visible page. Both queries run
@@ -69,12 +66,6 @@ import com.vaadin.observability.spring.boot.VaadinObservabilityEndpoint;
  * is what scales to an application with a hundred views and a thousand lazy
  * components — and <b>4)</b> the raw data query meters as the fleet-wide
  * aggregates UC7's dashboard charts.
- * <p>
- * There is no refresh button: the readout recomputes on every round-trip that
- * touches the catalog and after every order line. The kit records a query as
- * it ends — after this view's provider has returned — so the finding for the
- * very first keystroke can lag one round-trip; the natural next interaction
- * (picking the product) brings it in.
  * <p>
  * <b>Scoping.</b> The kit instruments every {@code DataCommunicator},
  * in-memory ones included, and the duration timers carry no route tag, so an
@@ -123,20 +114,18 @@ public class LazyListLatencyView extends VerticalLayout {
     private static final String TAG_FILTERED = "filtered";
     private static final String TAG_ROUTE = "route";
 
-    /** Durations in the insight summaries, e.g. "1214 ms" or "1,214 ms". */
-    private static final Pattern TIMING = Pattern.compile("\\d[\\d,]* ms");
-
     private final transient MeterRegistry registry;
     private final transient VaadinObservabilityEndpoint endpoint;
-    private final Div investigation = new Div();
-    private final NativeTable meters = new NativeTable();
-    private final NativeTableBody meterRows = meters.getBody();
+    private final Investigation investigation = new Investigation(
+            "Noticed the wait? Every search costs the catalog two queries at "
+                    + "the demo rig's latency. Open the steps — the readout "
+                    + "updates as you keep ordering.");
+    private final MeterTable meters = new MeterTable("Queries");
     private final NativeTable orderLines = new NativeTable();
     private final Paragraph innocentTimers = new Paragraph();
     private final Div verdict = new Div();
     private final IntegerField delay = new IntegerField(
             "Latency per query (ms)");
-    private boolean refreshScheduled;
 
     public LazyListLatencyView(MeterRegistry registry,
             VaadinObservabilityEndpoint endpoint) {
@@ -157,10 +146,10 @@ public class LazyListLatencyView extends VerticalLayout {
                         + "order. Notice how long each search takes."));
 
         add(buildOrderDesk());
-        add(buildSimulationRig());
+        add(buildDemoRig());
         add(buildInvestigation());
 
-        refreshReadout();
+        investigation.refreshNow();
     }
 
     // ---------- the Acme order desk and its demo rig ----------
@@ -202,7 +191,7 @@ public class LazyListLatencyView extends VerticalLayout {
                             new NativeTableCell(qty.toString())));
             product.clear();
             quantity.setValue(1);
-            scheduleRefresh();
+            investigation.refreshSoon();
         });
 
         orderLines.setId("order-lines");
@@ -219,12 +208,8 @@ public class LazyListLatencyView extends VerticalLayout {
                 orderLines);
     }
 
-    /**
-     * The stage rigging: the knob that fakes Acme's slow catalog backend. It
-     * hangs off the window because it belongs to the demo scenario — it is
-     * neither a feature of the Acme app nor of the observability readout.
-     */
-    private Div buildSimulationRig() {
+    /** The knob that fakes Acme's slow catalog backend. */
+    private DemoRig buildDemoRig() {
         delay.setValue(DEFAULT_DELAY_MS);
         delay.setWidth("14em");
         delay.setStepButtonsVisible(true);
@@ -232,101 +217,54 @@ public class LazyListLatencyView extends VerticalLayout {
         delay.setMax(5_000);
         delay.setId("backend-delay");
 
-        Span caption = new Span("Demo rig — not part of the app");
-        caption.addClassName("app-window-rig-caption");
-
-        Div rig = new Div(caption, delay);
-        rig.addClassName("app-window-rig");
+        DemoRig rig = new DemoRig(delay);
         rig.setId("simulation-rig");
         return rig;
     }
 
     // ---------- the investigation, revealed by the first catalog query ------
 
-    private Div buildInvestigation() {
+    private Investigation buildInvestigation() {
         investigation.setId("investigation");
-        investigation.setVisible(false);
-        investigation.setWidthFull();
-
-        H2 lens = new H2("What Observability Kit sees");
-        lens.addClassName("lens-divider");
-        lens.setWidthFull();
-        investigation.add(lens);
-        investigation.add(new Paragraph(
-                "Noticed the wait? Every search costs the catalog two "
-                        + "queries at the demo rig's latency. Open the steps "
-                        + "— the readout updates as you keep ordering."));
+        investigation.onRefresh(this::refreshReadout);
 
         innocentTimers.setId("innocent-timers");
-        investigation.add(step("2 — The usual suspects look innocent", true,
-                innocentTimers));
+        investigation.step("2 — The usual suspects look innocent", true,
+                innocentTimers);
 
         verdict.setId("verdict");
         verdict.setWidthFull();
-        investigation.add(step("3 — The kit's verdict", false, new Paragraph(
+        investigation.step("3 — The kit's verdict", false, new Paragraph(
                 "The insights endpoint reports every data query over the UX "
                         + "budget, grouped by route, component and query kind "
                         + "— in an app with a hundred views, this is what "
                         + "names the culprit."),
-                verdict));
+                verdict);
 
         Paragraph metersLead = new Paragraph();
         metersLead.add(new Span(
                 "The same queries as fleet-wide aggregates — what UC7's "
-                        + "Prometheus and Grafana chart. Timers split by "));
-        metersLead.add(chip(TAG_FILTERED));
-        metersLead.add(new Span("; summaries scoped to "));
-        metersLead.add(chip(TAG_ROUTE + "=" + ROUTE));
-        metersLead.add(new Span("."));
-        investigation.add(step("4 — The raw meters, fleet-wide", false,
-                metersLead, buildMeterTable()));
+                        + "Prometheus and Grafana chart. Timers split by "),
+                Telemetry.chip(TAG_FILTERED), new Span("; summaries scoped to "),
+                Telemetry.chip(TAG_ROUTE + "=" + ROUTE), new Span("."));
+        meters.setId("meter-table");
+        investigation.step("4 — The raw meters, fleet-wide", false,
+                metersLead, meters);
 
         return investigation;
-    }
-
-    private static Details step(String title, boolean opened,
-            Component... content) {
-        Details step = new Details(title, content);
-        step.setOpened(opened);
-        step.addClassName("investigation-step");
-        return step;
-    }
-
-    /**
-     * Reveals the investigation and keeps it current. Called from the catalog
-     * provider, so the steps appear in the very response whose slowness they
-     * explain. The immediate refresh shows what the kit has recorded so far;
-     * the scheduled one catches what it records about the query that is
-     * running right now, which ends only after this provider has returned.
-     */
-    private void onCatalogQuery() {
-        investigation.setVisible(true);
-        refreshReadout();
-        scheduleRefresh();
-    }
-
-    private void scheduleRefresh() {
-        if (refreshScheduled) {
-            return;
-        }
-        refreshScheduled = true;
-        getUI().ifPresent(ui -> ui.beforeClientResponse(this, context -> {
-            refreshScheduled = false;
-            refreshReadout();
-        }));
     }
 
     // ---------- the deliberately slow provider ----------
 
     private Stream<String> fetch(Query<String, String> query) {
-        onCatalogQuery();
+        investigation.reveal();
         sleep();
         return matches(query.getFilter().orElse("")).stream()
                 .skip(query.getOffset()).limit(query.getLimit());
     }
 
     private int count(Query<String, String> query) {
-        onCatalogQuery();
+        investigation.reveal();
         sleep();
         return matches(query.getFilter().orElse("")).size();
     }
@@ -380,10 +318,11 @@ public class LazyListLatencyView extends VerticalLayout {
                             + "above."));
             return;
         }
-        innocentTimers.add(chip(RPC_DURATION), new Span(
+        innocentTimers.add(Telemetry.chip(RPC_DURATION), new Span(
                 " — what each click and keystroke costs the server: mean "),
-                timing("%.1f ms".formatted(totalMs / count)),
-                new Span(", max "), timing("%.1f ms".formatted(maxMs)),
+                Telemetry.timing("%.1f ms".formatted(totalMs / count)),
+                new Span(", max "),
+                Telemetry.timing("%.1f ms".formatted(maxMs)),
                 new Span(" over %d invocations. Nothing here explains the "
                         .formatted(count)
                         + "wait: the catalog queries run after the invocation "
@@ -397,15 +336,15 @@ public class LazyListLatencyView extends VerticalLayout {
      */
     private void refreshVerdict() {
         verdict.removeAll();
-        List<Map<String, Object>> findings = insightsOf(
-                endpoint.section(INSIGHTS_SECTION)).stream()
+        List<Map<String, Object>> findings = Insights
+                .of(endpoint.section(INSIGHTS_SECTION)).stream()
                 .filter(insight -> {
                     Object type = insight.get("type");
                     return "slow-data-query".equals(type)
                             || "data-query-error".equals(type);
                 })
                 .filter(insight -> ROUTE
-                        .equals(evidenceOf(insight).get("route")))
+                        .equals(Insights.evidenceOf(insight).get("route")))
                 .toList();
         if (findings.isEmpty()) {
             Paragraph empty = new Paragraph(
@@ -416,71 +355,22 @@ public class LazyListLatencyView extends VerticalLayout {
             verdict.add(empty);
             return;
         }
-        findings.forEach(insight -> verdict.add(verdictCard(insight)));
+        findings.forEach(insight -> {
+            Map<String, Object> evidence = Insights.evidenceOf(insight);
+            verdict.add(new InsightCard(insight, List.of(
+                    TAG_ROUTE + "=" + Insights.text(evidence.get("route")),
+                    Insights.simpleName(
+                            Insights.text(evidence.get("component"))),
+                    Insights.text(evidence.get("queryKind")) + " query",
+                    TAG_FILTERED + "="
+                            + Insights.text(evidence.get("filtered")),
+                    Insights.text(evidence.get("occurrences")) + "×")));
+        });
     }
 
-    private Div verdictCard(Map<String, Object> insight) {
-        Map<String, Object> evidence = evidenceOf(insight);
-        String severity = text(insight.get("severity"));
-
-        Span badge = new Span(severity);
-        badge.addClassNames("verdict-severity", accentOf(severity));
-
-        Paragraph summary = highlightTimings(text(insight.get("summary")));
-        summary.addClassName("verdict-summary");
-
-        Div chips = new Div(chip(TAG_ROUTE + "=" + text(evidence.get("route"))),
-                chip(simpleName(text(evidence.get("component")))),
-                chip(text(evidence.get("queryKind")) + " query"),
-                chip(TAG_FILTERED + "=" + text(evidence.get("filtered"))),
-                chip(text(evidence.get("occurrences")) + "×"));
-        chips.addClassName("verdict-evidence");
-
-        Div card = new Div(badge, summary, chips);
-        card.addClassNames("verdict-card", accentOf(severity));
-        return card;
-    }
-
-    /** Maps an insight severity onto Aura's accent utility classes. */
-    private static String accentOf(String severity) {
-        return switch (severity) {
-        case "error" -> "v-error";
-        case "warning" -> "v-warning";
-        default -> "v-info";
-        };
-    }
-
-    /** Wraps every duration in the sentence in a {@code .timing} span. */
-    private static Paragraph highlightTimings(String sentence) {
-        Paragraph paragraph = new Paragraph();
-        Matcher matcher = TIMING.matcher(sentence);
-        int consumed = 0;
-        while (matcher.find()) {
-            paragraph.add(new Span(sentence.substring(consumed,
-                    matcher.start())), timing(matcher.group()));
-            consumed = matcher.end();
-        }
-        paragraph.add(new Span(sentence.substring(consumed)));
-        return paragraph;
-    }
-
-    // ---------- step 4: reading the meters ----------
-
-    private NativeTable buildMeterTable() {
-        NativeTableRow header = meters.getHead().addRow();
-        for (String title : List.of("Meter", "Tags", "Queries", "Value",
-                "What it tells you")) {
-            header.add(new NativeTableHeaderCell(title));
-        }
-        meters.setId("meter-table");
-        meters.addClassName("meter-table");
-        meters.setWidthFull();
-        return meters;
-    }
-
+    /** Step 4: the same queries as meters, read by their tags. */
     private void refreshMeters() {
-        meterRows.removeAllRows();
-        List.of(timerRow(COUNT_DURATION, true,
+        meters.setRows(List.of(timerRow(COUNT_DURATION, true,
                 "How long counting the matches for the typed text takes"),
                 timerRow(COUNT_DURATION, false,
                         "Counts without a filter: components loading a whole "
@@ -496,11 +386,11 @@ public class LazyListLatencyView extends VerticalLayout {
                 summaryRow(FETCH_ROWS,
                         "Items the provider returned; a persistent gap "
                                 + "against the row above means over-fetching "
-                                + "or short pages"))
-                .forEach(row -> meterRows.add(row.render()));
+                                + "or short pages")));
     }
 
-    private Row timerRow(String name, boolean filtered, String reads) {
+    private MeterTable.Row timerRow(String name, boolean filtered,
+            String reads) {
         long count = 0;
         double totalMs = 0;
         double maxMs = 0;
@@ -512,11 +402,11 @@ public class LazyListLatencyView extends VerticalLayout {
         }
         String value = count == 0 ? ""
                 : "mean %.0f ms, max %.0f ms".formatted(totalMs / count, maxMs);
-        return new Row(name, TAG_FILTERED + "=" + filtered, count, value,
-                reads);
+        return new MeterTable.Row(name, TAG_FILTERED + "=" + filtered, count,
+                value, reads);
     }
 
-    private Row summaryRow(String name, String reads) {
+    private MeterTable.Row summaryRow(String name, String reads) {
         long count = 0;
         double total = 0;
         for (DistributionSummary summary : registry.find(name)
@@ -526,69 +416,7 @@ public class LazyListLatencyView extends VerticalLayout {
         }
         String value = count == 0 ? ""
                 : "%.0f items over %d fetches".formatted(total, count);
-        return new Row(name, TAG_ROUTE + "=" + ROUTE, count, value, reads);
-    }
-
-    // ---------- shared formatting ----------
-
-    private static Span chip(String value) {
-        Span chip = new Span(value);
-        chip.addClassName("metric");
-        return chip;
-    }
-
-    private static Span timing(String value) {
-        Span span = new Span(value);
-        span.addClassName("timing");
-        return span;
-    }
-
-    // ---------- payload plumbing, mirroring UC6 ----------
-
-    @SuppressWarnings("unchecked")
-    private static List<Map<String, Object>> insightsOf(
-            Map<String, Object> payload) {
-        return payload != null
-                && payload.get("insights") instanceof List<?> list
-                        ? (List<Map<String, Object>>) list
-                        : List.of();
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Map<String, Object> evidenceOf(
-            Map<String, Object> insight) {
-        return insight.get("evidence") instanceof Map<?, ?> map
-                ? (Map<String, Object>) map
-                : Map.of();
-    }
-
-    private static String text(@Nullable Object value) {
-        return value == null ? "—" : value.toString();
-    }
-
-    private static String simpleName(String type) {
-        int dot = type.lastIndexOf('.');
-        return dot < 0 ? type : type.substring(dot + 1);
-    }
-
-    /** One row of the meter table. */
-    private record Row(String meter, String tags, long count, String value,
-            String reads) {
-
-        NativeTableRow render() {
-            NativeTableCell meterCell = new NativeTableCell();
-            meterCell.add(chip(meter));
-            NativeTableCell tagsCell = new NativeTableCell();
-            tagsCell.add(chip(tags));
-            NativeTableCell valueCell = new NativeTableCell();
-            if (value.isEmpty()) {
-                valueCell.setText("—");
-            } else {
-                valueCell.add(timing(value));
-            }
-            return new NativeTableRow(meterCell, tagsCell,
-                    new NativeTableCell(Long.toString(count)), valueCell,
-                    new NativeTableCell(reads));
-        }
+        return new MeterTable.Row(name, TAG_ROUTE + "=" + ROUTE, count, value,
+                reads);
     }
 }
