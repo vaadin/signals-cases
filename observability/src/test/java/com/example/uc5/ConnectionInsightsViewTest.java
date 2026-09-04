@@ -53,8 +53,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ViewPackages(classes = { ConnectionInsightsView.class, HomeView.class })
 // A fresh context per test, so the shared MeterRegistry and the kit's insight
 // buffers start empty and a count can be asserted exactly rather than as a
-// delta.
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+// delta. Dirtied before each method rather than after: the first method would
+// otherwise inherit a context an earlier @SpringBootTest class has already
+// recorded into, and only the context this class is given can be relied on to
+// be empty — the one it leaves behind is the next class's business.
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ConnectionInsightsViewTest extends SpringBrowserlessTest {
 
     @Autowired
