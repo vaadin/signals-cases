@@ -99,11 +99,17 @@ public class Investigation extends Div {
         if (refreshScheduled) {
             return;
         }
-        refreshScheduled = true;
-        getUI().ifPresent(ui -> ui.beforeClientResponse(this, context -> {
-            refreshScheduled = false;
-            refresher.run();
-        }));
+        // The flag is armed only once a callback exists to clear it. Armed
+        // before the ifPresent, a call while detached would leave it set with
+        // nothing scheduled, and every later refresh would return early
+        // forever.
+        getUI().ifPresent(ui -> {
+            refreshScheduled = true;
+            ui.beforeClientResponse(this, context -> {
+                refreshScheduled = false;
+                refresher.run();
+            });
+        });
     }
 
     /** Recomputes the readout immediately. */

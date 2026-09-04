@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
@@ -71,6 +72,34 @@ class InvestigationTest {
         assertTrue(investigation.isVisible());
         assertEquals(2, refreshes.get(),
                 "every reveal refreshes, since each marks a new interaction");
+    }
+
+    @Test
+    void aRefreshRequestedWhileDetachedDoesNotWedgeTheScheduler() {
+        // Review finding on #326: arming the coalescing flag before checking
+        // for a UI left it set forever when there was none, and every later
+        // refreshSoon() returned early.
+        Investigation investigation = new Investigation("lead");
+        AtomicInteger refreshes = new AtomicInteger();
+        investigation.onRefresh(refreshes::incrementAndGet);
+
+        investigation.refreshSoon(); // detached: nothing to schedule on
+        investigation.refreshSoon();
+
+        UI ui = new UI();
+        ui.add(investigation);
+        investigation.refreshSoon();
+        investigation.refreshSoon(); // coalesced with the one above
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+
+        assertEquals(1, refreshes.get(),
+                "one deferred refresh must run once attached, not zero "
+                        + "(wedged) and not two (uncoalesced)");
+
+        investigation.refreshSoon();
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        assertEquals(2, refreshes.get(),
+                "the scheduler re-arms after each response");
     }
 
     @Test
