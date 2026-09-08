@@ -2,11 +2,8 @@ package com.example.acme;
 
 import java.util.List;
 
-import com.vaadin.flow.component.html.NativeTable;
-import com.vaadin.flow.component.html.NativeTableBody;
-import com.vaadin.flow.component.html.NativeTableCell;
-import com.vaadin.flow.component.html.NativeTableHeaderCell;
-import com.vaadin.flow.component.html.NativeTableRow;
+import com.vaadin.flow.component.html.Table;
+import com.vaadin.flow.component.html.TableRow;
 
 /**
  * The raw-meters table at the end of an investigation: one row per meter the
@@ -18,7 +15,7 @@ import com.vaadin.flow.component.html.NativeTableRow;
  * {@code Grid} showing the meters would record data queries on the very route
  * whose meters it displays.
  */
-public class MeterTable extends NativeTable {
+public class MeterTable extends Table {
 
     /**
      * One row.
@@ -28,7 +25,8 @@ public class MeterTable extends NativeTable {
      * @param tags
      *            the tags the meter is read by, e.g. {@code filtered=true}
      * @param count
-     *            how many recordings the reading aggregates
+     *            how many recordings the reading aggregates, or {@code -1}
+     *            when that has no meaning (a gauge)
      * @param value
      *            the formatted value, empty when there are no recordings
      * @param reads
@@ -38,8 +36,6 @@ public class MeterTable extends NativeTable {
             String reads) {
     }
 
-    private final NativeTableBody rows = getBody();
-
     /**
      * @param countHeader
      *            the header of the count column, naming what is counted:
@@ -48,32 +44,26 @@ public class MeterTable extends NativeTable {
     public MeterTable(String countHeader) {
         addClassName("meter-table");
         setWidthFull();
-        NativeTableRow header = getHead().addRow();
-        for (String title : List.of("Meter", "Tags", countHeader, "Value",
-                "What it tells you")) {
-            header.add(new NativeTableHeaderCell(title));
-        }
+        addHeaderRow("Meter", "Tags", countHeader, "Value",
+                "What it tells you");
     }
 
     /** Replaces the rows. */
     public void setRows(List<Row> newRows) {
-        rows.removeAllRows();
-        newRows.forEach(row -> rows.add(render(row)));
+        List.copyOf(getBody().getRows()).forEach(TableRow::removeFromParent);
+        newRows.forEach(this::render);
     }
 
-    private static NativeTableRow render(Row row) {
-        NativeTableCell meter = new NativeTableCell();
-        meter.add(Telemetry.chip(row.meter()));
-        NativeTableCell tags = new NativeTableCell();
-        tags.add(Telemetry.chip(row.tags()));
-        NativeTableCell value = new NativeTableCell();
+    private void render(Row row) {
+        TableRow tr = getBody().addRow();
+        tr.addDataCell(Telemetry.chip(row.meter()));
+        tr.addDataCell(Telemetry.chip(row.tags()));
+        tr.addDataCell(row.count() < 0 ? "—" : Long.toString(row.count()));
         if (row.value().isEmpty()) {
-            value.setText("—");
+            tr.addDataCell("—");
         } else {
-            value.add(Telemetry.timing(row.value()));
+            tr.addDataCell(Telemetry.timing(row.value()));
         }
-        return new NativeTableRow(meter, tags,
-                new NativeTableCell(Long.toString(row.count())), value,
-                new NativeTableCell(row.reads()));
+        tr.addDataCell(row.reads());
     }
 }

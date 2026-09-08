@@ -21,8 +21,8 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.NativeTable;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Table;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -68,7 +68,7 @@ class FailureInsightsViewTest extends SpringBrowserlessTest {
                         + "is one click away");
         assertNotNull(findInView(Button.class).withText("Process return")
                 .single());
-        assertNotNull(findInView(NativeTable.class).id("returns-log"));
+        assertNotNull(findInView(Table.class).id("returns-log"));
         assertNotNull(findInView(Div.class).id("simulation-rig"),
                 "the bank lookup latency is demo rigging, not a kit readout");
         assertFalse(investigationOf(view).isVisible(),
@@ -95,10 +95,10 @@ class FailureInsightsViewTest extends SpringBrowserlessTest {
 
         processReturn();
 
-        NativeTable log = findInView(NativeTable.class).id("returns-log");
-        assertEquals(1, log.getBody().getRows().size());
-        assertEquals("AC-10482", log.getBody().getRows().get(0).getDataCell(0)
-                .orElseThrow().getText());
+        Table log = findInView(Table.class).id("returns-log");
+        assertEquals(1, log.getBodyRows().size());
+        assertEquals("AC-10482",
+                log.getBodyRows().get(0).getDataCells().get(0).getText());
         assertFalse(investigationOf(view).isVisible(),
                 "nothing went wrong, so there is nothing to investigate yet");
     }
@@ -116,8 +116,8 @@ class FailureInsightsViewTest extends SpringBrowserlessTest {
         assertTrue(investigationOf(view).isVisible(),
                 "the reveal happens before the work, so it survives the "
                         + "failure and lands in the same response");
-        assertEquals(1, findInView(NativeTable.class).id("returns-log")
-                .getBody().getRows().size(),
+        assertEquals(1, findInView(Table.class).id("returns-log")
+                .getBodyRows().size(),
                 "a failed return is not registered — only the empty-state "
                         + "row remains");
     }
@@ -142,8 +142,8 @@ class FailureInsightsViewTest extends SpringBrowserlessTest {
 
         assertTrue(investigationOf(view).isVisible(),
                 "a hang is a problem the clerk feels, so it reveals too");
-        assertEquals(1, findInView(NativeTable.class).id("returns-log")
-                .getBody().getRows().size(), "slow, but registered");
+        assertEquals(1, findInView(Table.class).id("returns-log")
+                .getBodyRows().size(), "slow, but registered");
     }
 
     @Test
