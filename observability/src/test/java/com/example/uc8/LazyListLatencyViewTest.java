@@ -23,9 +23,9 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.NativeTable;
-import com.vaadin.flow.component.html.NativeTableRow;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Table;
+import com.vaadin.flow.component.html.TableRow;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouteConfiguration;
@@ -60,7 +60,7 @@ class LazyListLatencyViewTest extends SpringBrowserlessTest {
                 "the lazy product search is the subject of the use case");
         assertNotNull(findInView(TextField.class).first(),
                 "the prefilled customer is part of the order desk scene");
-        assertNotNull(findInView(NativeTable.class).id("order-lines"));
+        assertNotNull(findInView(Table.class).id("order-lines"));
         assertNotNull(findInView(Div.class).id("simulation-rig"),
                 "the latency knob is demo rigging, attached to the window "
                         + "rather than listed among the kit's own readouts");
@@ -123,7 +123,7 @@ class LazyListLatencyViewTest extends SpringBrowserlessTest {
         openAllSteps();
         assertNotNull(findInView(Div.class).id("verdict"),
                 "step 3 hosts the insights endpoint's findings");
-        assertNotNull(findInView(NativeTable.class).id("meter-table"),
+        assertNotNull(findInView(Table.class).id("meter-table"),
                 "step 4 keeps the raw meters as the drill-down");
     }
 
@@ -156,13 +156,12 @@ class LazyListLatencyViewTest extends SpringBrowserlessTest {
         test(findInView(Button.class).withText("Add to order").single())
                 .click();
 
-        NativeTable orderLines = findInView(NativeTable.class)
-                .id("order-lines");
-        List<NativeTableRow> lines = orderLines.getBody().getRows();
+        Table orderLines = findInView(Table.class).id("order-lines");
+        List<TableRow> lines = orderLines.getBodyRows();
         assertEquals(1, lines.size());
         assertEquals("Brass hex bolt M8 × 40",
-                lines.get(0).getDataCell(0).orElseThrow().getText());
-        assertEquals("3", lines.get(0).getDataCell(1).orElseThrow().getText());
+                lines.get(0).getDataCells().get(0).getText());
+        assertEquals("3", lines.get(0).getDataCells().get(1).getText());
         assertNull(product.getValue(),
                 "the search clears so the clerk can type the next product");
     }
@@ -220,7 +219,7 @@ class LazyListLatencyViewTest extends SpringBrowserlessTest {
         searchTheCatalog();
         openAllSteps();
 
-        List<NativeTableRow> rows = rows();
+        List<TableRow> rows = rows();
         assertFalse(rows.isEmpty());
         assertTrue(
                 rows.stream().filter(row -> "0".equals(cell(row, QUERIES)))
@@ -331,9 +330,8 @@ class LazyListLatencyViewTest extends SpringBrowserlessTest {
                 .register(registry);
     }
 
-    private List<NativeTableRow> rows() {
-        return findInView(NativeTable.class).id("meter-table").getBody()
-                .getRows();
+    private List<TableRow> rows() {
+        return findInView(Table.class).id("meter-table").getBodyRows();
     }
 
     private List<String> column(int index) {
@@ -349,11 +347,11 @@ class LazyListLatencyViewTest extends SpringBrowserlessTest {
                         "no row for " + meter + " " + tags));
     }
 
-    private static String cell(NativeTableRow row, int index) {
+    private static String cell(TableRow row, int index) {
         // The meter, tag and value cells render their content as styled child
         // spans, so the cell's own text is empty and the text has to be read
         // from the whole subtree.
-        return row.getDataCell(index).orElseThrow().getElement()
+        return row.getDataCells().get(index).getElement()
                 .getTextRecursively();
     }
 }
