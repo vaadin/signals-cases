@@ -23,6 +23,7 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.NativeTable;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -213,16 +214,25 @@ class FailureInsightsViewTest extends SpringBrowserlessTest {
     }
 
     @Test
-    void doesNotPollAndRestoresTheSessionErrorHandler() {
+    void doesNotPollAndLeavesTheSessionErrorHandlerAlone() {
         ErrorHandler original = VaadinSession.getCurrent().getErrorHandler();
 
         navigate(FailureInsightsView.class);
         assertEquals(-1, UI.getCurrent().getPollInterval(),
                 "the readout refreshes per interaction, so it must not poll");
+        assertSame(original, VaadinSession.getCurrent().getErrorHandler(),
+                "the view shows its notification from the handler itself; it "
+                        + "installs nothing on the session, so there is "
+                        + "nothing to restore or leak");
+        selectReason(FailureInsightsView.REASON_DEFECTIVE);
+        assertThrows(IllegalStateException.class, this::processReturn);
+        assertTrue($(Notification.class).all().stream()
+                .anyMatch(Notification::isOpened),
+                "the clerk sees a notification even though the exception "
+                        + "propagates");
 
         navigate(HomeView.class);
-        assertSame(original, VaadinSession.getCurrent().getErrorHandler(),
-                "the session error handler should be restored on detach");
+        assertSame(original, VaadinSession.getCurrent().getErrorHandler());
     }
 
     @Test

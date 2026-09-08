@@ -28,9 +28,9 @@
     "@rolldown/plugin-babel": "0.2.3",
     "@rollup/plugin-replace": "6.0.3",
     "@rollup/pluginutils": "5.4.0",
-    "@types/node": "26.4.0",
+    "@types/node": "26.4.1",
     "@types/react": "19.2.18",
-    "@types/react-dom": "19.2.5",
+    "@types/react-dom": "19.2.7",
     "@vitejs/plugin-react": "6.1.1",
     "magic-string": "1.2.3",
     "rollup-plugin-brotli": "3.1.0",
@@ -68,9 +68,9 @@
       "@rolldown/plugin-babel": "0.2.3",
       "@rollup/plugin-replace": "6.0.3",
       "@rollup/pluginutils": "5.4.0",
-      "@types/node": "26.4.0",
+      "@types/node": "26.4.1",
       "@types/react": "19.2.18",
-      "@types/react-dom": "19.2.5",
+      "@types/react-dom": "19.2.7",
       "@vitejs/plugin-react": "6.1.1",
       "magic-string": "1.2.3",
       "rollup-plugin-brotli": "3.1.0",
@@ -81,7 +81,7 @@
       "vite": "8.2.2",
       "vite-plugin-checker": "0.14.5"
     },
-    "hash": "73a843065f1b4a59410ff234ca7c19c25bc27381e86b6b69ff41f695221333a6"
+    "hash": "ae70bc405f819b5aba39713600e7b22f91384e0092737409a70b338d18914883"
   },
   "overrides": {
     "@vaadin/a11y-base": "25.3.0-beta1",

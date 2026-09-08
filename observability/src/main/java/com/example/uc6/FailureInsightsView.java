@@ -17,9 +17,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import org.jspecify.annotations.Nullable;
 import tools.jackson.databind.ObjectMapper;
 
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Anchor;
@@ -45,8 +42,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
-import com.vaadin.flow.server.ErrorHandler;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.observability.spring.boot.VaadinObservabilityEndpoint;
 
 /**
@@ -72,13 +67,17 @@ import com.vaadin.observability.spring.boot.VaadinObservabilityEndpoint;
  * line.
  * <p>
  * The handler deliberately lets its exception propagate: the kit records a
- * failed interaction only when the invocation actually fails, so catching it
- * would erase the very thing this use case demonstrates. A session
- * {@link ErrorHandler} installed while the view is attached turns the failure
- * into the notification a real application would show. And the investigation
- * is revealed <em>before</em> the work runs — a failing listener never reaches
- * its own last line, and the kit records the failure after the listener body,
- * which is what {@link Investigation#reveal()}'s deferred refresh is for.
+ * failed interaction only when the invocation actually fails, so swallowing it
+ * would erase the very thing this use case demonstrates. It shows the clerk's
+ * notification on its way out — the state change survives the rethrow and is
+ * written with the response — and leaves the session's error handler alone, so
+ * the default handler still writes the failure to the server log and nothing
+ * has to be installed or restored (the kit re-wraps the session handler on
+ * every RPC, which makes an install/restore dance unreliable). The
+ * investigation is revealed <em>before</em> the work runs — a failing listener
+ * never reaches its own last line, and the kit records the failure after the
+ * listener body, which is what {@link Investigation#reveal()}'s deferred
+ * refresh is for.
  *
  * @see <a href=
  *      "https://github.com/vaadin/use-cases/blob/main/observability/API-GAPS.md">API-GAPS.md</a>
@@ -130,7 +129,6 @@ public class FailureInsightsView extends VerticalLayout {
     private final Pre payload = new Pre();
     private final IntegerField bankDelay = new IntegerField(
             "Bank lookup delay (ms)");
-    private @Nullable ErrorHandler previousErrorHandler;
 
     /**
      * @param endpoint
@@ -214,13 +212,24 @@ public class FailureInsightsView extends VerticalLayout {
                 investigation.refreshSoon();
             }
 
-            if (order.isEmpty()) {
-                throw new IllegalArgumentException(
-                        "Order number must not be blank");
-            }
-            if (REASON_DEFECTIVE.equals(why)) {
-                throw new IllegalStateException(
-                        "Inspection template 'defective' not found");
+            try {
+                if (order.isEmpty()) {
+                    throw new IllegalArgumentException(
+                            "Order number must not be blank");
+                }
+                if (REASON_DEFECTIVE.equals(why)) {
+                    throw new IllegalStateException(
+                            "Inspection template 'defective' not found");
+                }
+            } catch (RuntimeException failure) {
+                // What the clerk sees: no more than a real app would tell them.
+                // Shown here and rethrown, so the kit still records a failed
+                // interaction and the default handler still logs it.
+                Notification notification = Notification.show(
+                        "Something went wrong. The return was not processed.");
+                notification.setPosition(Notification.Position.MIDDLE);
+                notification.addThemeVariants(NotificationVariant.ERROR);
+                throw failure;
             }
             if (REFUND_BANK_TRANSFER.equals(how)) {
                 lookUpBankAccount();
@@ -290,20 +299,23 @@ public class FailureInsightsView extends VerticalLayout {
         verdict.setWidthFull();
         investigation.step("3 — The kit's verdict", false, new Paragraph(
                 "The insights endpoint records every failed or over-budget "
-                        + "interaction with its route, component, event and "
-                        + "the first application stack frame, and groups "
-                        + "repeats — one finding however many clerks hit it."),
+                        + "interaction with its route, component and event. A "
+                        + "failure also names the first application stack "
+                        + "frame; a slow interaction names how long it took "
+                        + "against the budget. Repeats group into one finding, "
+                        + "however many clerks hit it."),
                 verdict);
 
         payload.addClassName("payload");
         Div scroller = new Div(payload);
         scroller.addClassName("payload-scroller");
         Paragraph payloadLead = new Paragraph();
-        payloadLead.add(new Span("The same findings as JSON from "),
+        payloadLead.add(new Span("The whole payload of "),
                 new Anchor("/actuator/vaadin/observability",
                         "GET /actuator/vaadin/observability"),
-                new Span(" — the contract an AI coding agent reads to jump "
-                        + "straight to the offending line."));
+                new Span(", this route's findings among those of every other "
+                        + "route — the contract an AI coding agent reads to "
+                        + "jump straight to the offending line."));
         investigation.step("4 — The payload an agent reads", false,
                 payloadLead, scroller);
 
@@ -360,6 +372,16 @@ public class FailureInsightsView extends VerticalLayout {
      */
     private void refreshVerdict(@Nullable Map<String, Object> current) {
         verdict.removeAll();
+        if (!Insights.isActive(current)) {
+            Paragraph inactive = new Paragraph(
+                    "Nothing was watching: the kit registered no "
+                            + "instrumentation, so there is nothing to report "
+                            + "rather than nothing to find. In development mode "
+                            + "this means no license key was found.");
+            inactive.addClassName("verdict-empty");
+            verdict.add(inactive);
+            return;
+        }
         List<Map<String, Object>> findings = Insights.of(current).stream()
                 .filter(insight -> {
                     Object type = insight.get("type");
@@ -381,8 +403,17 @@ public class FailureInsightsView extends VerticalLayout {
         }
         findings.forEach(insight -> {
             Map<String, Object> evidence = Insights.evidenceOf(insight);
-            Object frame = evidence.get("applicationFrame");
             Object exception = evidence.get("exception");
+            // A failure carries the frame the kit attributes it to; a slow
+            // interaction carries no frame, so its detail is the timing.
+            String detail = evidence.get("applicationFrame") != null
+                    ? "at " + evidence.get("applicationFrame")
+                    : evidence.get("medianDurationMs") != null
+                            ? "median %s ms, worst %s ms, budget %s ms"
+                                    .formatted(evidence.get("medianDurationMs"),
+                                            evidence.get("maxDurationMs"),
+                                            evidence.get("thresholdMs"))
+                            : null;
             List<String> chips = new ArrayList<>(List.of(
                     TAG_ROUTE + "=" + Insights.text(evidence.get("route")),
                     Insights.simpleName(
@@ -392,8 +423,7 @@ public class FailureInsightsView extends VerticalLayout {
                 chips.add(Insights.simpleName(exception.toString()));
             }
             chips.add(Insights.text(evidence.get("occurrences")) + "×");
-            verdict.add(new InsightCard(insight,
-                    frame == null ? null : "at " + frame, chips));
+            verdict.add(new InsightCard(insight, detail, chips));
         });
     }
 
@@ -409,38 +439,5 @@ public class FailureInsightsView extends VerticalLayout {
         } catch (RuntimeException e) {
             payload.setText("// could not serialize the payload: " + e);
         }
-    }
-
-    // ---------- what the clerk sees when it breaks ----------
-
-    @Override
-    protected void onAttach(AttachEvent event) {
-        super.onAttach(event);
-        UI ui = event.getUI();
-
-        // Surface failures the way an application would, without swallowing
-        // them: the exception has already propagated through Flow (and been
-        // recorded by the kit) by the time the handler runs.
-        VaadinSession session = ui.getSession();
-        if (session != null) {
-            previousErrorHandler = session.getErrorHandler();
-            session.setErrorHandler(errorEvent -> ui.access(() -> {
-                Notification notification = Notification.show(
-                        "Something went wrong. The return was not processed.");
-                notification.setPosition(Notification.Position.MIDDLE);
-                notification.addThemeVariants(NotificationVariant.ERROR);
-            }));
-        }
-    }
-
-    @Override
-    protected void onDetach(DetachEvent event) {
-        UI ui = event.getUI();
-        VaadinSession session = ui.getSession();
-        if (session != null && previousErrorHandler != null) {
-            session.setErrorHandler(previousErrorHandler);
-            previousErrorHandler = null;
-        }
-        super.onDetach(event);
     }
 }

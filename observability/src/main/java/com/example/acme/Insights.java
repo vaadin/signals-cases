@@ -28,6 +28,17 @@ public final class Insights {
                         : List.of();
     }
 
+    /**
+     * Whether the kit had instrumentation registered when the payload was
+     * produced. {@code false} means "nothing was watching" — in development
+     * mode, typically no license key — which is a different answer from "no
+     * findings", and a reader must be told which one they are looking at.
+     */
+    public static boolean isActive(@Nullable Map<String, Object> payload) {
+        return payload != null
+                && "active".equals(payload.get("instrumentation"));
+    }
+
     /** An insight's evidence map; empty when it has none. */
     @SuppressWarnings("unchecked")
     public static Map<String, Object> evidenceOf(Map<String, Object> insight) {
