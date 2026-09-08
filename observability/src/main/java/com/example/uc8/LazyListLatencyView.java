@@ -81,8 +81,8 @@ import com.vaadin.observability.spring.boot.VaadinObservabilityEndpoint;
  */
 @Route(value = LazyListLatencyView.ROUTE, layout = MainLayout.class)
 @RouteAlias(value = "uc8", layout = MainLayout.class)
-@PageTitle("UC8 — Slow product search")
-@Menu(order = 8, title = "UC8 — Slow product search")
+@PageTitle("UC8 — Data query insights")
+@Menu(order = 8, title = "UC8 — Data query insights")
 public class LazyListLatencyView extends VerticalLayout {
 
     /**
