@@ -17,9 +17,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import org.jspecify.annotations.Nullable;
 import tools.jackson.databind.ObjectMapper;
 
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Anchor;
@@ -45,8 +42,6 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
-import com.vaadin.flow.server.ErrorHandler;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.observability.spring.boot.VaadinObservabilityEndpoint;
 
 /**
@@ -72,13 +67,17 @@ import com.vaadin.observability.spring.boot.VaadinObservabilityEndpoint;
  * line.
  * <p>
  * The handler deliberately lets its exception propagate: the kit records a
- * failed interaction only when the invocation actually fails, so catching it
- * would erase the very thing this use case demonstrates. A session
- * {@link ErrorHandler} installed while the view is attached turns the failure
- * into the notification a real application would show. And the investigation
- * is revealed <em>before</em> the work runs — a failing listener never reaches
- * its own last line, and the kit records the failure after the listener body,
- * which is what {@link Investigation#reveal()}'s deferred refresh is for.
+ * failed interaction only when the invocation actually fails, so swallowing it
+ * would erase the very thing this use case demonstrates. It shows the clerk's
+ * notification on its way out — the state change survives the rethrow and is
+ * written with the response — and leaves the session's error handler alone, so
+ * the default handler still writes the failure to the server log and nothing
+ * has to be installed or restored (the kit re-wraps the session handler on
+ * every RPC, which makes an install/restore dance unreliable). The
+ * investigation is revealed <em>before</em> the work runs — a failing listener
+ * never reaches its own last line, and the kit records the failure after the
+ * listener body, which is what {@link Investigation#reveal()}'s deferred
+ * refresh is for.
  *
  * @see <a href=
  *      "https://github.com/vaadin/use-cases/blob/main/observability/API-GAPS.md">API-GAPS.md</a>
@@ -130,8 +129,6 @@ public class FailureInsightsView extends VerticalLayout {
     private final Pre payload = new Pre();
     private final IntegerField bankDelay = new IntegerField(
             "Bank lookup delay (ms)");
-    private @Nullable ErrorHandler previousErrorHandler;
-    private @Nullable ErrorHandler installedErrorHandler;
 
     /**
      * @param endpoint
@@ -215,13 +212,24 @@ public class FailureInsightsView extends VerticalLayout {
                 investigation.refreshSoon();
             }
 
-            if (order.isEmpty()) {
-                throw new IllegalArgumentException(
-                        "Order number must not be blank");
-            }
-            if (REASON_DEFECTIVE.equals(why)) {
-                throw new IllegalStateException(
-                        "Inspection template 'defective' not found");
+            try {
+                if (order.isEmpty()) {
+                    throw new IllegalArgumentException(
+                            "Order number must not be blank");
+                }
+                if (REASON_DEFECTIVE.equals(why)) {
+                    throw new IllegalStateException(
+                            "Inspection template 'defective' not found");
+                }
+            } catch (RuntimeException failure) {
+                // What the clerk sees: no more than a real app would tell them.
+                // Shown here and rethrown, so the kit still records a failed
+                // interaction and the default handler still logs it.
+                Notification notification = Notification.show(
+                        "Something went wrong. The return was not processed.");
+                notification.setPosition(Notification.Position.MIDDLE);
+                notification.addThemeVariants(NotificationVariant.ERROR);
+                throw failure;
             }
             if (REFUND_BANK_TRANSFER.equals(how)) {
                 lookUpBankAccount();
@@ -431,53 +439,5 @@ public class FailureInsightsView extends VerticalLayout {
         } catch (RuntimeException e) {
             payload.setText("// could not serialize the payload: " + e);
         }
-    }
-
-    // ---------- what the clerk sees when it breaks ----------
-
-    @Override
-    protected void onAttach(AttachEvent event) {
-        super.onAttach(event);
-        UI ui = event.getUI();
-
-        // Surface failures the way an application would, without swallowing
-        // them: the exception has already propagated through Flow (and been
-        // recorded by the kit) by the time the handler runs.
-        VaadinSession session = ui.getSession();
-        if (session != null) {
-            ErrorHandler previous = session.getErrorHandler();
-            previousErrorHandler = previous;
-            // Delegate first: the default handler is what writes the failure
-            // to the server log, and step 2 says the log knows about it.
-            installedErrorHandler = errorEvent -> {
-                if (previous != null) {
-                    previous.error(errorEvent);
-                }
-                ui.access(() -> {
-                    Notification notification = Notification.show(
-                            "Something went wrong. The return was not "
-                                    + "processed.");
-                    notification.setPosition(Notification.Position.MIDDLE);
-                    notification.addThemeVariants(NotificationVariant.ERROR);
-                });
-            };
-            session.setErrorHandler(installedErrorHandler);
-        }
-    }
-
-    @Override
-    protected void onDetach(DetachEvent event) {
-        UI ui = event.getUI();
-        VaadinSession session = ui.getSession();
-        // Two tabs on this route interleave: restore only if the handler in
-        // place is still the one this view installed, otherwise the other
-        // tab's handler (or the one it restored) is left alone.
-        if (session != null && installedErrorHandler != null
-                && session.getErrorHandler() == installedErrorHandler) {
-            session.setErrorHandler(previousErrorHandler);
-        }
-        installedErrorHandler = null;
-        previousErrorHandler = null;
-        super.onDetach(event);
     }
 }
