@@ -131,6 +131,7 @@ public class FailureInsightsView extends VerticalLayout {
     private final IntegerField bankDelay = new IntegerField(
             "Bank lookup delay (ms)");
     private @Nullable ErrorHandler previousErrorHandler;
+    private @Nullable ErrorHandler installedErrorHandler;
 
     /**
      * @param endpoint
@@ -290,20 +291,23 @@ public class FailureInsightsView extends VerticalLayout {
         verdict.setWidthFull();
         investigation.step("3 — The kit's verdict", false, new Paragraph(
                 "The insights endpoint records every failed or over-budget "
-                        + "interaction with its route, component, event and "
-                        + "the first application stack frame, and groups "
-                        + "repeats — one finding however many clerks hit it."),
+                        + "interaction with its route, component and event. A "
+                        + "failure also names the first application stack "
+                        + "frame; a slow interaction names how long it took "
+                        + "against the budget. Repeats group into one finding, "
+                        + "however many clerks hit it."),
                 verdict);
 
         payload.addClassName("payload");
         Div scroller = new Div(payload);
         scroller.addClassName("payload-scroller");
         Paragraph payloadLead = new Paragraph();
-        payloadLead.add(new Span("The same findings as JSON from "),
+        payloadLead.add(new Span("The whole payload of "),
                 new Anchor("/actuator/vaadin/observability",
                         "GET /actuator/vaadin/observability"),
-                new Span(" — the contract an AI coding agent reads to jump "
-                        + "straight to the offending line."));
+                new Span(", this route's findings among those of every other "
+                        + "route — the contract an AI coding agent reads to "
+                        + "jump straight to the offending line."));
         investigation.step("4 — The payload an agent reads", false,
                 payloadLead, scroller);
 
@@ -360,6 +364,16 @@ public class FailureInsightsView extends VerticalLayout {
      */
     private void refreshVerdict(@Nullable Map<String, Object> current) {
         verdict.removeAll();
+        if (!Insights.isActive(current)) {
+            Paragraph inactive = new Paragraph(
+                    "Nothing was watching: the kit registered no "
+                            + "instrumentation, so there is nothing to report "
+                            + "rather than nothing to find. In development mode "
+                            + "this means no license key was found.");
+            inactive.addClassName("verdict-empty");
+            verdict.add(inactive);
+            return;
+        }
         List<Map<String, Object>> findings = Insights.of(current).stream()
                 .filter(insight -> {
                     Object type = insight.get("type");
@@ -381,8 +395,17 @@ public class FailureInsightsView extends VerticalLayout {
         }
         findings.forEach(insight -> {
             Map<String, Object> evidence = Insights.evidenceOf(insight);
-            Object frame = evidence.get("applicationFrame");
             Object exception = evidence.get("exception");
+            // A failure carries the frame the kit attributes it to; a slow
+            // interaction carries no frame, so its detail is the timing.
+            String detail = evidence.get("applicationFrame") != null
+                    ? "at " + evidence.get("applicationFrame")
+                    : evidence.get("medianDurationMs") != null
+                            ? "median %s ms, worst %s ms, budget %s ms"
+                                    .formatted(evidence.get("medianDurationMs"),
+                                            evidence.get("maxDurationMs"),
+                                            evidence.get("thresholdMs"))
+                            : null;
             List<String> chips = new ArrayList<>(List.of(
                     TAG_ROUTE + "=" + Insights.text(evidence.get("route")),
                     Insights.simpleName(
@@ -392,8 +415,7 @@ public class FailureInsightsView extends VerticalLayout {
                 chips.add(Insights.simpleName(exception.toString()));
             }
             chips.add(Insights.text(evidence.get("occurrences")) + "×");
-            verdict.add(new InsightCard(insight,
-                    frame == null ? null : "at " + frame, chips));
+            verdict.add(new InsightCard(insight, detail, chips));
         });
     }
 
@@ -423,13 +445,23 @@ public class FailureInsightsView extends VerticalLayout {
         // recorded by the kit) by the time the handler runs.
         VaadinSession session = ui.getSession();
         if (session != null) {
-            previousErrorHandler = session.getErrorHandler();
-            session.setErrorHandler(errorEvent -> ui.access(() -> {
-                Notification notification = Notification.show(
-                        "Something went wrong. The return was not processed.");
-                notification.setPosition(Notification.Position.MIDDLE);
-                notification.addThemeVariants(NotificationVariant.ERROR);
-            }));
+            ErrorHandler previous = session.getErrorHandler();
+            previousErrorHandler = previous;
+            // Delegate first: the default handler is what writes the failure
+            // to the server log, and step 2 says the log knows about it.
+            installedErrorHandler = errorEvent -> {
+                if (previous != null) {
+                    previous.error(errorEvent);
+                }
+                ui.access(() -> {
+                    Notification notification = Notification.show(
+                            "Something went wrong. The return was not "
+                                    + "processed.");
+                    notification.setPosition(Notification.Position.MIDDLE);
+                    notification.addThemeVariants(NotificationVariant.ERROR);
+                });
+            };
+            session.setErrorHandler(installedErrorHandler);
         }
     }
 
@@ -437,10 +469,15 @@ public class FailureInsightsView extends VerticalLayout {
     protected void onDetach(DetachEvent event) {
         UI ui = event.getUI();
         VaadinSession session = ui.getSession();
-        if (session != null && previousErrorHandler != null) {
+        // Two tabs on this route interleave: restore only if the handler in
+        // place is still the one this view installed, otherwise the other
+        // tab's handler (or the one it restored) is left alone.
+        if (session != null && installedErrorHandler != null
+                && session.getErrorHandler() == installedErrorHandler) {
             session.setErrorHandler(previousErrorHandler);
-            previousErrorHandler = null;
         }
+        installedErrorHandler = null;
+        previousErrorHandler = null;
         super.onDetach(event);
     }
 }

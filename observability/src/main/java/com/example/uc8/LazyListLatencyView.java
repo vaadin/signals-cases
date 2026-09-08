@@ -336,8 +336,8 @@ public class LazyListLatencyView extends VerticalLayout {
      */
     private void refreshVerdict() {
         verdict.removeAll();
-        List<Map<String, Object>> findings = Insights
-                .of(endpoint.section(INSIGHTS_SECTION)).stream()
+        Map<String, Object> current = endpoint.section(INSIGHTS_SECTION);
+        List<Map<String, Object>> findings = Insights.of(current).stream()
                 .filter(insight -> {
                     Object type = insight.get("type");
                     return "slow-data-query".equals(type)
@@ -346,6 +346,16 @@ public class LazyListLatencyView extends VerticalLayout {
                 .filter(insight -> ROUTE
                         .equals(Insights.evidenceOf(insight).get("route")))
                 .toList();
+        if (!Insights.isActive(current)) {
+            Paragraph inactive = new Paragraph(
+                    "Nothing was watching: the kit registered no "
+                            + "instrumentation, so there is nothing to report "
+                            + "rather than nothing to find. In development mode "
+                            + "this means no license key was found.");
+            inactive.addClassName("verdict-empty");
+            verdict.add(inactive);
+            return;
+        }
         if (findings.isEmpty()) {
             Paragraph empty = new Paragraph(
                     "No findings yet — the kit reports a data query once it "
