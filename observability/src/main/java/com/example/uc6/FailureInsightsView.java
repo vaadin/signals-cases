@@ -23,11 +23,9 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.NativeTable;
-import com.vaadin.flow.component.html.NativeTableCell;
-import com.vaadin.flow.component.html.NativeTableHeaderCell;
-import com.vaadin.flow.component.html.NativeTableRow;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Table;
+import com.vaadin.flow.component.html.TableRow;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
@@ -123,7 +121,7 @@ public class FailureInsightsView extends VerticalLayout {
             "Saw \"something went wrong\"? That is all the clerk saw, too. "
                     + "Here is how you get from that to the line of code — "
                     + "the readout updates with every return.");
-    private final NativeTable returnsLog = new NativeTable();
+    private final Table returnsLog = new Table();
     private final Paragraph errorCounter = new Paragraph();
     private final Div verdict = new Div();
     private final Pre payload = new Pre();
@@ -191,10 +189,8 @@ public class FailureInsightsView extends VerticalLayout {
         refund.setWidth("12em");
         refund.setId("refund-method");
 
-        NativeTableCell noReturnsCell = new NativeTableCell(
-                "No returns processed yet.");
-        noReturnsCell.getElement().setAttribute("colspan", "3");
-        NativeTableRow noReturns = new NativeTableRow(noReturnsCell);
+        TableRow noReturns = new TableRow();
+        noReturns.addDataCell("No returns processed yet.").setColspan(3);
         noReturns.addClassName("order-empty");
 
         Button process = new Button("Process return", event -> {
@@ -236,10 +232,7 @@ public class FailureInsightsView extends VerticalLayout {
             }
 
             noReturns.removeFromParent();
-            returnsLog.getBody()
-                    .add(new NativeTableRow(new NativeTableCell(order),
-                            new NativeTableCell(why),
-                            new NativeTableCell(how)));
+            returnsLog.addRow(order, why, how);
             Notification.show("Return registered for " + order);
         });
         process.addThemeVariants(ButtonVariant.PRIMARY);
@@ -247,11 +240,8 @@ public class FailureInsightsView extends VerticalLayout {
         returnsLog.setId("returns-log");
         returnsLog.addClassName("order-lines");
         returnsLog.setWidthFull();
-        NativeTableRow header = returnsLog.getHead().addRow();
-        header.add(new NativeTableHeaderCell("Order"));
-        header.add(new NativeTableHeaderCell("Reason"));
-        header.add(new NativeTableHeaderCell("Refund"));
-        returnsLog.getBody().add(noReturns);
+        returnsLog.addHeaderRow("Order", "Reason", "Refund");
+        returnsLog.addRows(noReturns);
 
         return new AppWindow("Acme Supply — Returns Desk", ROUTE,
                 new HorizontalLayout(Alignment.END, orderNumber, reason,

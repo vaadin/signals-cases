@@ -24,11 +24,9 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.NativeTable;
-import com.vaadin.flow.component.html.NativeTableCell;
-import com.vaadin.flow.component.html.NativeTableHeaderCell;
-import com.vaadin.flow.component.html.NativeTableRow;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Table;
+import com.vaadin.flow.component.html.TableRow;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -81,8 +79,8 @@ import com.vaadin.observability.spring.boot.VaadinObservabilityEndpoint;
  */
 @Route(value = LazyListLatencyView.ROUTE, layout = MainLayout.class)
 @RouteAlias(value = "uc8", layout = MainLayout.class)
-@PageTitle("UC8 — Slow product search")
-@Menu(order = 8, title = "UC8 — Slow product search")
+@PageTitle("UC8 — Data query insights")
+@Menu(order = 8, title = "UC8 — Data query insights")
 public class LazyListLatencyView extends VerticalLayout {
 
     /**
@@ -121,7 +119,7 @@ public class LazyListLatencyView extends VerticalLayout {
                     + "the demo rig's latency. Open the steps — the readout "
                     + "updates as you keep ordering.");
     private final MeterTable meters = new MeterTable("Queries");
-    private final NativeTable orderLines = new NativeTable();
+    private final Table orderLines = new Table();
     private final Paragraph innocentTimers = new Paragraph();
     private final Div verdict = new Div();
     private final IntegerField delay = new IntegerField(
@@ -173,10 +171,9 @@ public class LazyListLatencyView extends VerticalLayout {
         quantity.setWidth("6em");
         quantity.setId("order-quantity");
 
-        NativeTableCell noLinesCell = new NativeTableCell(
-                "No lines yet — search a product above.");
-        noLinesCell.getElement().setAttribute("colspan", "2");
-        NativeTableRow noLines = new NativeTableRow(noLinesCell);
+        TableRow noLines = new TableRow();
+        noLines.addDataCell("No lines yet — search a product above.")
+                .setColspan(2);
         noLines.addClassName("order-empty");
 
         Button addLine = new Button("Add to order", event -> {
@@ -186,9 +183,7 @@ public class LazyListLatencyView extends VerticalLayout {
                 return;
             }
             noLines.removeFromParent();
-            orderLines.getBody()
-                    .add(new NativeTableRow(new NativeTableCell(selected),
-                            new NativeTableCell(qty.toString())));
+            orderLines.addRow(selected, qty.toString());
             product.clear();
             quantity.setValue(1);
             investigation.refreshSoon();
@@ -197,10 +192,8 @@ public class LazyListLatencyView extends VerticalLayout {
         orderLines.setId("order-lines");
         orderLines.addClassNames("order-lines", "order-lines-numeric");
         orderLines.setWidthFull();
-        NativeTableRow header = orderLines.getHead().addRow();
-        header.add(new NativeTableHeaderCell("Product"));
-        header.add(new NativeTableHeaderCell("Qty"));
-        orderLines.getBody().add(noLines);
+        orderLines.addHeaderRow("Product", "Qty");
+        orderLines.addRows(noLines);
 
         return new AppWindow("Acme Supply — Order Desk", ROUTE, customer,
                 new HorizontalLayout(Alignment.END, product, quantity,

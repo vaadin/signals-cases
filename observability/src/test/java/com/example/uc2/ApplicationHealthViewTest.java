@@ -25,9 +25,9 @@ import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.NativeTable;
-import com.vaadin.flow.component.html.NativeTableRow;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Table;
+import com.vaadin.flow.component.html.TableRow;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.RouteConfiguration;
 
@@ -54,7 +54,7 @@ class ApplicationHealthViewTest extends SpringBrowserlessTest {
         assertNotNull(findInView(AppWindow.class).first(),
                 "the Acme inventory page is what makes the readout a story");
         assertNotNull(findInView(Button.class).id("load-catalog"));
-        assertNotNull(findInView(NativeTable.class).id("catalog"));
+        assertNotNull(findInView(Table.class).id("catalog"));
         assertNotNull(findInView(Checkbox.class).id("join-fetch"),
                 "the fix is a demo-rig switch, not a kit readout");
         assertNotNull(findInView(Button.class).id("flush-client"),
@@ -84,8 +84,8 @@ class ApplicationHealthViewTest extends SpringBrowserlessTest {
 
         loadCatalog();
 
-        NativeTable table = findInView(NativeTable.class).id("catalog");
-        assertTrue(table.getBody().getRows().size() > 1,
+        Table table = findInView(Table.class).id("catalog");
+        assertTrue(table.getBodyRows().size() > 1,
                 "the inventory page lists the products it fetched");
         assertTrue(table.getElement().getTextRecursively().contains("bolt"),
                 "Acme sells fasteners, not programming books");
@@ -134,8 +134,8 @@ class ApplicationHealthViewTest extends SpringBrowserlessTest {
                 "the eager, unbatched join fetch must be flagged as N+1: "
                         + text);
 
-        List<NativeTableRow> history = findInView(NativeTable.class)
-                .id("load-history").getBody().getRows();
+        List<TableRow> history = findInView(Table.class)
+                .id("load-history").getBodyRows();
         assertEquals(1, history.size());
         assertTrue(cell(history.get(0), 0).contains("eager, unbatched"));
         assertTrue(Long.parseLong(cell(history.get(0), 2)) > Long
@@ -151,10 +151,10 @@ class ApplicationHealthViewTest extends SpringBrowserlessTest {
         loadCatalog();
         openAllSteps();
 
-        List<NativeTableRow> history = findInView(NativeTable.class)
-                .id("load-history").getBody().getRows();
+        List<TableRow> history = findInView(Table.class)
+                .id("load-history").getBodyRows();
         assertEquals(2, history.size(), "both loads are kept for the before/after");
-        NativeTableRow fixed = history.get(1);
+        TableRow fixed = history.get(1);
         assertTrue(cell(fixed, 0).contains("join fetch"));
         assertTrue(Long.parseLong(cell(fixed, 2)) <= 2,
                 "with the join fetch the categories come along in the product "
@@ -180,15 +180,15 @@ class ApplicationHealthViewTest extends SpringBrowserlessTest {
         navigate(ApplicationHealthView.class);
         loadCatalog();
 
-        NativeTableRow requests = findInView(NativeTable.class)
-                .id("vital-signs").getBody().getRows().stream()
+        TableRow requests = findInView(Table.class)
+                .id("vital-signs").getBodyRows().stream()
                 .filter(row -> "vaadin.request.duration"
                         .equals(cell(row, 0)))
                 .findFirst().orElseThrow();
         assertFalse("—".equals(cell(requests, 3)),
                 "an interaction recorded in the first session should be "
                         + "visible in the second");
-        assertTrue(findInView(NativeTable.class).id("vital-signs").getBody()
+        assertTrue(findInView(Table.class).id("vital-signs").getBody()
                 .getRows().stream().anyMatch(row -> "vaadin.db.fetch.rows"
                         .equals(cell(row, 0))),
                 "the kit's database meter is one of the vital signs");
@@ -282,8 +282,8 @@ class ApplicationHealthViewTest extends SpringBrowserlessTest {
                 .forEach(step -> step.setOpened(true));
     }
 
-    private static String cell(NativeTableRow row, int index) {
-        return row.getDataCell(index).orElseThrow().getElement()
+    private static String cell(TableRow row, int index) {
+        return row.getDataCells().get(index).getElement()
                 .getTextRecursively();
     }
 

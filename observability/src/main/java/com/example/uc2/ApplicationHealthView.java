@@ -29,11 +29,9 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.NativeTable;
-import com.vaadin.flow.component.html.NativeTableCell;
-import com.vaadin.flow.component.html.NativeTableHeaderCell;
-import com.vaadin.flow.component.html.NativeTableRow;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Table;
+import com.vaadin.flow.component.html.TableRow;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -156,14 +154,14 @@ public class ApplicationHealthView extends VerticalLayout {
             "Felt the hiccup? Here is what the app was doing. This readout is "
                     + "live: it refreshes every " + (POLL_MILLIS / 1000)
                     + " s on its own.");
-    private final NativeTable catalogTable = new NativeTable();
+    private final Table catalogTable = new Table();
     private final Span catalogSummary = new Span();
     private final Checkbox joinFetch = new Checkbox(
             "Fetch categories with the products (join fetch) — the fix");
     private final Span status = new Span();
     private final MeterTable vitals = new MeterTable("Samples");
     private final Paragraph catalogResult = new Paragraph();
-    private final NativeTable loadHistory = new NativeTable();
+    private final Table loadHistory = new Table();
     private final List<Load> loads = new ArrayList<>();
     private int refreshes;
     private long lastRefreshAt;
@@ -208,15 +206,12 @@ public class ApplicationHealthView extends VerticalLayout {
         catalogTable.setId("catalog");
         catalogTable.addClassName("order-lines");
         catalogTable.setWidthFull();
-        NativeTableRow header = catalogTable.getHead().addRow();
-        header.add(new NativeTableHeaderCell("Product"));
-        header.add(new NativeTableHeaderCell("Categories"));
-        NativeTableCell empty = new NativeTableCell(
-                "Refresh to fetch the catalog from the database.");
-        empty.getElement().setAttribute("colspan", "2");
-        NativeTableRow emptyRow = new NativeTableRow(empty);
+        catalogTable.addHeaderRow("Product", "Categories");
+        TableRow emptyRow = new TableRow();
+        emptyRow.addDataCell("Refresh to fetch the catalog from the database.")
+                .setColspan(2);
         emptyRow.addClassName("order-empty");
-        catalogTable.getBody().add(emptyRow);
+        catalogTable.addRows(emptyRow);
 
         return new AppWindow("Acme Supply — Inventory", ROUTE,
                 new HorizontalLayout(Alignment.CENTER, refresh,
@@ -262,11 +257,10 @@ public class ApplicationHealthView extends VerticalLayout {
                 after.count() - before.count(),
                 Math.round(after.rows() - before.rows()), after.present()));
 
-        catalogTable.getBody().removeAllRows();
+        List.copyOf(catalogTable.getBodyRows())
+                .forEach(TableRow::removeFromParent);
         for (Line line : load.lines()) {
-            catalogTable.getBody()
-                    .add(new NativeTableRow(new NativeTableCell(line.name()),
-                            new NativeTableCell(line.categories())));
+            catalogTable.addRow(line.name(), line.categories());
         }
         catalogSummary.setText("%d products in %d category links"
                 .formatted(load.products(), load.categories()));
@@ -297,10 +291,7 @@ public class ApplicationHealthView extends VerticalLayout {
         loadHistory.setId("load-history");
         loadHistory.addClassName("order-lines");
         loadHistory.setWidthFull();
-        NativeTableRow header = loadHistory.getHead().addRow();
-        for (String title : List.of("Load", "Products", "Fetches", "Rows")) {
-            header.add(new NativeTableHeaderCell(title));
-        }
+        loadHistory.addHeaderRow("Load", "Products", "Fetches", "Rows");
         Paragraph fixLead = new Paragraph();
         fixLead.add(new Span(
                 "Flip the demo rig's join-fetch switch and refresh the catalog "
@@ -479,29 +470,25 @@ public class ApplicationHealthView extends VerticalLayout {
 
     /** Step 4: every load so far, for the before/after. */
     private void refreshLoadHistory() {
-        loadHistory.getBody().removeAllRows();
+        List.copyOf(loadHistory.getBodyRows())
+                .forEach(TableRow::removeFromParent);
         if (loads.isEmpty()) {
-            NativeTableCell empty = new NativeTableCell(
-                    "No loads yet.");
-            empty.getElement().setAttribute("colspan", "4");
-            NativeTableRow row = new NativeTableRow(empty);
+            TableRow row = new TableRow();
+            row.addDataCell("No loads yet.").setColspan(4);
             row.addClassName("order-empty");
-            loadHistory.getBody().add(row);
+            loadHistory.addRows(row);
             return;
         }
         int number = 1;
         for (Load load : loads) {
-            NativeTableCell mode = new NativeTableCell();
-            mode.add(new Span("#" + number++ + " "), Telemetry.chip(
+            TableRow row = loadHistory.addRow();
+            row.addDataCell(new Span("#" + number++ + " "), Telemetry.chip(
                     load.joinFetch() ? "join fetch" : "eager, unbatched"));
-            NativeTableCell fetches = new NativeTableCell();
-            fetches.add(Telemetry.timing(
+            row.addDataCell(Integer.toString(load.products()));
+            row.addDataCell(Telemetry.timing(
                     load.monitored() ? Long.toString(load.fetches()) : "—"));
-            loadHistory.getBody().add(new NativeTableRow(mode,
-                    new NativeTableCell(Integer.toString(load.products())),
-                    fetches, new NativeTableCell(
-                            load.monitored() ? Long.toString(load.rows())
-                                    : "—")));
+            row.addDataCell(
+                    load.monitored() ? Long.toString(load.rows()) : "—");
         }
     }
 
